@@ -34,9 +34,14 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
         where('companyId', '==', userData.companyId || '')
       );
     } else {
+      if (!userData.branchIds || userData.branchIds.length === 0) {
+        setPanels([]);
+        setLoading(false);
+        return;
+      }
       q = query(
         collection(db, 'panels'),
-        where('branchId', 'in', userData.branchIds && userData.branchIds.length > 0 ? userData.branchIds : [''])
+        where('branchId', 'in', userData.branchIds)
       );
     }
 
