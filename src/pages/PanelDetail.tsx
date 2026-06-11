@@ -4,6 +4,7 @@ import { usePanel } from '../hooks/usePanels';
 import { useCommandStatus } from '../hooks/useCommands';
 import { PanelService } from '../api/PanelService';
 import { useAuth } from '../contexts/AuthContext';
+import { DEFAULT_PANEL_COMMANDS } from '../config/panelDefaults';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -138,6 +139,8 @@ export function PanelDetail() {
     groupId: panel.groupId || ''
   };
 
+  const panelCommands = normalizedPanel.allowedCommands.length > 0 ? normalizedPanel.allowedCommands : DEFAULT_PANEL_COMMANDS;
+
   const isOnline = normalizedPanel.mqttConnected;
   const hasAlarm = normalizedPanel.alarm;
   const activeZones = normalizedPanel.zones.filter(Boolean).length;
@@ -198,7 +201,7 @@ export function PanelDetail() {
             </div>
             <div className="surface-muted rounded-lg px-4 py-3">
               <p className="text-xs text-slate-500">Commands</p>
-              <p className="mt-1 text-xl font-semibold text-amber-200">{normalizedPanel.allowedCommands.length}</p>
+              <p className="mt-1 text-xl font-semibold text-amber-200">{panelCommands.length}</p>
             </div>
           </div>
         </div>
@@ -309,7 +312,7 @@ export function PanelDetail() {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {normalizedPanel.allowedCommands.length > 0 ? normalizedPanel.allowedCommands.map((command) => (
+              {panelCommands.map((command) => (
                 <button
                   key={command}
                   onClick={() => handleSendCommand(command)}
@@ -334,11 +337,7 @@ export function PanelDetail() {
                     </div>
                   )}
                 </button>
-              )) : (
-                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-400 xl:col-span-4">
-                  No commands are configured for this panel.
-                </div>
-              )}
+              ))}
             </div>
           </section>
 

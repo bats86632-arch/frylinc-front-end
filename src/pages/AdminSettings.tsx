@@ -7,6 +7,7 @@ import { GroupService } from '../api/GroupService';
 import { ApiKeyService, ApiKeyRecord } from '../api/ApiKeyService';
 import { PanelService } from '../api/PanelService';
 import { Panel, User, Role, Group } from '../types';
+import { DEFAULT_PANEL_COMMANDS, normalizeAllowedCommands } from '../config/panelDefaults';
 import {
   AlertCircle,
   CheckCircle,
@@ -18,7 +19,8 @@ import {
   Users,
   KeyRound,
   Layers3,
-  XCircle
+  XCircle,
+  Trash2
 } from 'lucide-react';
 
 const panelSchema = z.object({
@@ -100,6 +102,7 @@ export function AdminSettings() {
   const [userFormLoading, setUserFormLoading] = useState(false);
   const [groupFormLoading, setGroupFormLoading] = useState(false);
   const [apiKeyFormLoading, setApiKeyFormLoading] = useState(false);
+  const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -109,7 +112,10 @@ export function AdminSettings() {
     reset,
     formState: { errors }
   } = useForm<PanelFormData>({
-    resolver: zodResolver(panelSchema)
+    resolver: zodResolver(panelSchema),
+    defaultValues: {
+      allowedCommands: DEFAULT_PANEL_COMMANDS.join(', ')
+    }
   });
 
   const {
@@ -179,6 +185,26 @@ export function AdminSettings() {
     try {
       const data = await PanelService.getPanels();
       setPanels(data);
+
+      const panelsMissingCommands = data.filter((panel) => !Array.isArray(panel.allowedCommands) || panel.allowedCommands.length === 0);
+      if (panelsMissingCommands.length > 0 && !syncingPanelDefaults) {
+        setSyncingPanelDefaults(true);
+        try {
+          await Promise.all(
+            panelsMissingCommands.map((panel) =>
+              PanelService.updatePanel(panel.serial, {
+                allowedCommands: [...DEFAULT_PANEL_COMMANDS]
+              })
+            )
+          );
+          const refreshedPanels = await PanelService.getPanels();
+          setPanels(refreshedPanels);
+          setSuccess(`Applied default controls to ${panelsMissingCommands.length} panel${panelsMissingCommands.length === 1 ? '' : 's'}`);
+          setTimeout(() => setSuccess(null), 3000);
+        } finally {
+          setSyncingPanelDefaults(false);
+        }
+      }
     } catch (err) {
       console.error('Failed to load panels:', err);
     } finally {
@@ -223,7 +249,7 @@ export function AdminSettings() {
         name: data.name,
         groupId: data.groupId?.trim() || undefined,
         description: data.description?.trim() || undefined,
-        allowedCommands
+        allowedCommands: normalizeAllowedCommands(allowedCommands)
       });
       setGroupFormOpen(false);
       resetGroup();
@@ -285,7 +311,7 @@ export function AdminSettings() {
         zoneCount: data.zoneCount,
         groupId: data.groupId,
         ipAddress: data.ipAddress?.trim() || undefined,
-        allowedCommands
+        allowedCommands: normalizeAllowedCommands(allowedCommands)
       });
       setPanelFormOpen(false);
       reset();
@@ -295,6 +321,64 @@ export function AdminSettings() {
       setError(getApiErrorMessage(err, 'Failed to create panel'));
     } finally {
       setPanelFormLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (uid: string) => {
+    if (!window.confirm('Delete this user? Their account will be disabled.')) return;
+
+    setError(null);
+    try {
+      await UserService.deleteUser(uid);
+      await loadUsers();
+      setSuccess('User deleted successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to delete user'));
+    }
+  };
+
+  const handleDeleteApiKey = async (keyId: string) => {
+    if (!window.confirm('Revoke this API key?')) return;
+
+    setError(null);
+    try {
+      await ApiKeyService.deleteApiKey(keyId);
+      await loadApiKeys();
+      setSuccess('API key revoked successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to revoke API key'));
+    }
+  };
+
+  const handleDeleteGroup = async (groupId: string) => {
+    if (!window.confirm('Delete this group? Panels using it may lose access controls.')) return;
+
+    setError(null);
+    try {
+      await GroupService.deleteGroup(groupId);
+      await loadGroups();
+      await loadPanels();
+      await loadUsers();
+      setSuccess('Group deleted successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to delete group'));
+    }
+  };
+
+  const handleDeletePanel = async (serial: string) => {
+    if (!window.confirm('Delete this panel? This will disable the panel record.')) return;
+
+    setError(null);
+    try {
+      await PanelService.deletePanel(serial);
+      await loadPanels();
+      setSuccess('Panel deleted successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to delete panel'));
     }
   };
 
@@ -485,8 +569,19 @@ export function AdminSettings() {
                 <div className="space-y-3">
                   {groups.map((group) => (
                     <div key={group.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                      <p className="font-semibold text-white">{group.name}</p>
-                      <p className="mt-1 text-xs text-slate-500">{group.id}</p>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-white">{group.name}</p>
+                          <p className="mt-1 text-xs text-slate-500">{group.id}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteGroup(group.id)}
+                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
+                        >
+                          <Trash2 className="mr-1 inline h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -511,8 +606,19 @@ export function AdminSettings() {
                 <div className="space-y-3">
                   {apiKeys.map((key) => (
                     <div key={key.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                      <p className="font-semibold text-white">{key.label || 'Untitled key'}</p>
-                      <p className="mt-1 text-xs text-slate-500">{key.email || key.userId || 'Unknown owner'}</p>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-white">{key.label || 'Untitled key'}</p>
+                          <p className="mt-1 text-xs text-slate-500">{key.email || key.userId || 'Unknown owner'}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteApiKey(key.id)}
+                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
+                        >
+                          <Trash2 className="mr-1 inline h-4 w-4" />
+                          Revoke
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -584,22 +690,30 @@ export function AdminSettings() {
                         </span>
                       </td>
                       <td className="px-4 py-4 text-right">
-                        {editingUser === user.uid ? (
+                        <div className="flex items-center justify-end gap-2">
+                          {editingUser === user.uid ? (
+                            <button
+                              onClick={() => setEditingUser(null)}
+                              className="rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+                            >
+                              Cancel
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setEditingUser(user.uid)}
+                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                              <span>Edit Role</span>
+                            </button>
+                          )}
                           <button
-                            onClick={() => setEditingUser(null)}
-                            className="rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+                            onClick={() => handleDeleteUser(user.uid)}
+                            className="rounded-lg px-3 py-2 text-sm text-red-200 transition-colors hover:bg-red-500/10"
                           >
-                            Cancel
+                            Delete
                           </button>
-                        ) : (
-                          <button
-                            onClick={() => setEditingUser(user.uid)}
-                            className="ml-auto flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                            <span>Edit Role</span>
-                          </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -651,11 +765,21 @@ export function AdminSettings() {
                         <p className="font-semibold text-white">{panel.name}</p>
                         <p className="mt-1 font-mono text-xs text-slate-500">{panel.serial}</p>
                       </div>
-                      <span className={`rounded-full border px-2 py-1 text-xs ${panel.mqttConnected ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-slate-400/20 bg-slate-500/10 text-slate-300'}`}>{panel.mqttConnected ? 'Online' : 'Offline'}</span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`rounded-full border px-2 py-1 text-xs ${panel.mqttConnected ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-slate-400/20 bg-slate-500/10 text-slate-300'}`}>{panel.mqttConnected ? 'Online' : 'Offline'}</span>
+                        <button
+                          onClick={() => handleDeletePanel(panel.serial)}
+                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
+                        >
+                          <Trash2 className="mr-1 inline h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
                     </div>
                     <div className="mt-3 text-sm text-slate-400">
                       <p>{panel.zoneCount} zones</p>
                       <p>{panel.groupId || 'No group'}</p>
+                      <p className="mt-2 text-xs text-slate-500">{panel.allowedCommands?.length || DEFAULT_PANEL_COMMANDS.length} commands configured</p>
                     </div>
                   </div>
                 ))}
@@ -776,9 +900,10 @@ export function AdminSettings() {
                     <input
                       {...register('allowedCommands')}
                       className="control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500"
-                      placeholder="ARM, ZONE OFF, MOB=01=..."
+                      placeholder={DEFAULT_PANEL_COMMANDS.join(', ')}
                       disabled={panelFormLoading}
                     />
+                    <p className="mt-1 text-xs text-slate-500">Default commands are used if this field is left empty.</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-4">

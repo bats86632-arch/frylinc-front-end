@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Bell,
@@ -12,6 +12,7 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { usePanels } from '../hooks/usePanels';
 import { Role } from '../types';
 
 const navigation: Array<{
@@ -37,9 +38,11 @@ const navigation: Array<{
 export function MainDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const [displayNameDraft, setDisplayNameDraft] = useState('');
   const [savingDisplayName, setSavingDisplayName] = useState(false);
   const { userData, logout, hasRole, saveDisplayName } = useAuth();
+  const { panels } = usePanels();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -60,6 +63,18 @@ export function MainDashboardLayout() {
   const roleLabel = userData?.role?.replace(/_/g, ' ') || 'Operator';
   const needsDisplayName = !userData?.displayName || userData.displayName === 'User';
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
+  const notifications = useMemo(
+    () =>
+      panels
+        .filter((panel) => panel.alarm)
+        .map((panel) => ({
+          id: panel.serial,
+          title: panel.name,
+          message: `Alarm active on ${panel.serial}`
+        })),
+    [panels]
+  );
+  const notificationCount = notifications.length;
 
   const handleLogout = async () => {
     await logout();
@@ -175,12 +190,50 @@ export function MainDashboardLayout() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border border-[#070b10] bg-red-500 px-1 text-[10px] font-bold text-white">
-                3
-              </span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setNotificationOpen((value) => !value)}
+                className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                aria-label="Notifications"
+                aria-expanded={notificationOpen}
+                aria-haspopup="menu"
+              >
+                <Bell className="h-5 w-5" />
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border border-[#070b10] bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {notificationCount}
+                </span>
+              </button>
+
+              {notificationOpen && (
+                <div className="surface-panel absolute right-0 z-50 mt-3 w-80 rounded-lg p-3 shadow-2xl shadow-black/40">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">Notifications</p>
+                      <p className="mt-1 text-xs text-slate-500">Live panel alerts</p>
+                    </div>
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-slate-300">
+                      {notificationCount}
+                    </span>
+                  </div>
+
+                  {notificationCount === 0 ? (
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-center">
+                      <p className="text-sm font-medium text-white">Nothing new here</p>
+                      <p className="mt-1 text-xs text-slate-500">You’ll see active alarms here when panels report them.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 pt-3">
+                      {notifications.map((notification) => (
+                        <div key={notification.id} className="rounded-lg border border-red-300/20 bg-red-500/10 p-3">
+                          <p className="text-sm font-semibold text-red-100">{notification.title}</p>
+                          <p className="mt-1 text-xs text-red-100/75">{notification.message}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             <div className="relative">
               <button
