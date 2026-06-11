@@ -236,19 +236,11 @@ export function Dashboard() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm sm:flex sm:items-center">
+          <div className="flex items-center text-sm">
             <div className="surface-muted rounded-lg px-4 py-3">
-              <p className="text-xs text-slate-500">Filtered</p>
+              <p className="text-xs text-slate-500">Total Panels</p>
               <p className="mt-1 font-semibold text-white">
-                {filteredPanels.length} panels
-              </p>
-            </div>
-            <div className="surface-muted rounded-lg px-4 py-3">
-              <p className="text-xs text-slate-500">Alarm load</p>
-              <p
-                className={`mt-1 font-semibold ${stats.alarms > 0 ? "text-red-200" : "text-emerald-200"}`}
-              >
-                {stats.alarms} active
+                {stats.total} panels
               </p>
             </div>
           </div>

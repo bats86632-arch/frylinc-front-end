@@ -9,6 +9,7 @@ import {
   Menu,
   Settings,
   ShieldCheck,
+  User as UserIcon,
   X,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -33,15 +34,19 @@ const navigation: Array<{
     icon: Settings,
     roles: ["super_admin", "head_office", "system_integrator"],
   },
+  {
+    name: "Profile",
+    href: "/profile",
+    icon: UserIcon,
+    roles: ["super_admin", "head_office", "system_integrator", "end_user"],
+  },
 ];
 
 export function MainDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [displayNameDraft, setDisplayNameDraft] = useState("");
-  const [savingDisplayName, setSavingDisplayName] = useState(false);
-  const { userData, logout, hasRole, saveDisplayName } = useAuth();
+  const { userData, logout, hasRole } = useAuth();
   const { panels } = usePanels();
   const location = useLocation();
   const navigate = useNavigate();
@@ -52,24 +57,24 @@ export function MainDashboardLayout() {
         location.pathname === "/" || location.pathname.startsWith("/panel")
       );
     }
-
     return location.pathname === path;
   };
 
   const pageTitle =
     location.pathname === "/admin"
       ? "Admin Settings"
-      : location.pathname.startsWith("/panel")
-        ? "Panel Details"
-        : "Fire Alarm Panels";
+      : location.pathname === "/profile"
+        ? "Your Profile"
+        : location.pathname.startsWith("/panel")
+          ? "Panel Details"
+          : "Fire Alarm Panels";
 
   const roleLabel =
     userData?.role
       ?.split("_")
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ") || "End User";
-  const needsDisplayName =
-    !userData?.displayName || userData.displayName === "User";
+
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
   const notifications = useMemo(
     () =>
@@ -87,19 +92,6 @@ export function MainDashboardLayout() {
   const handleLogout = async () => {
     await logout();
     navigate("/login");
-  };
-
-  const handleSaveDisplayName = async () => {
-    const nextValue = displayNameDraft.trim();
-    if (!nextValue) return;
-
-    setSavingDisplayName(true);
-    try {
-      await saveDisplayName(nextValue);
-      setDisplayNameDraft("");
-    } finally {
-      setSavingDisplayName(false);
-    }
   };
 
   return (
@@ -175,20 +167,6 @@ export function MainDashboardLayout() {
             );
           })}
         </nav>
-
-        {/* Secure session card — emerald tint for "safe" visual feel */}
-        <div className="m-3 rounded-lg border border-emerald-400/15 bg-emerald-400/[0.03] p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm text-slate-300">
-            <ShieldCheck className="h-4 w-4 text-emerald-300" />
-            <span>Secure session</span>
-          </div>
-          <div className="flex items-center justify-between border-t border-white/10 pt-3">
-            <span className="text-xs text-slate-500">Role</span>
-            <span className="text-xs font-semibold capitalize text-slate-200">
-              {roleLabel}
-            </span>
-          </div>
-        </div>
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
@@ -338,34 +316,6 @@ export function MainDashboardLayout() {
         </header>
 
         <main className="min-h-[calc(100vh-5rem)] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-          {/* Display name banner — more visible amber border + subtle glow */}
-          {needsDisplayName && (
-            <div className="mb-5 rounded-lg border border-amber-400/30 bg-amber-400/10 p-4 shadow-[0_2px_12px_rgba(245,158,11,0.08)]">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-amber-100">
-                    Add your display name
-                  </p>
-                  <p className="mt-1 text-sm text-amber-100/70">
-                    This will be shown in the top right of the dashboard.
-                  </p>
-                </div>
-                <input
-                  value={displayNameDraft}
-                  onChange={(e) => setDisplayNameDraft(e.target.value)}
-                  placeholder="Your name"
-                  className="control-field rounded-lg px-4 py-2.5 text-sm text-white sm:w-80"
-                />
-                <button
-                  onClick={handleSaveDisplayName}
-                  disabled={savingDisplayName}
-                  className="btn-primary rounded-lg px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
-                >
-                  {savingDisplayName ? "Saving..." : "Save name"}
-                </button>
-              </div>
-            </div>
-          )}
           <Outlet />
         </main>
       </div>

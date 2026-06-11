@@ -96,6 +96,7 @@ textarea {
         box-shadow:
             0 12px 40px 0 rgba(0, 0, 0, 0.5),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
     }
 
     .surface-muted {
@@ -105,11 +106,18 @@ textarea {
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-radius: 12px;
-        transition: background 0.3s ease;
+        transition: 
+            background 0.3s ease,
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
     }
 
     .surface-muted:hover {
         background: rgba(15, 23, 42, 0.55);
+        transform: translateY(-1px);
+        box-shadow: 
+            0 8px 24px 0 rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     /* Glassmorphism alarm card — red tint, red border, glow, pulsing left rail */

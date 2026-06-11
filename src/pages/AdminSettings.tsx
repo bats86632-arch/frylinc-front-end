@@ -44,8 +44,18 @@ const userSchema = z.object({
   branchIds: z.string().optional(),
 });
 
+const editUserSchema = z.object({
+  email: z.string().email("Valid email is required"),
+  password: z.string().optional(),
+  displayName: z.string().min(1, "Display name is required"),
+  role: z.enum(["super_admin", "head_office", "system_integrator", "end_user"]),
+  companyId: z.string().optional(),
+  branchIds: z.string().optional(),
+});
+
 type PanelFormData = z.infer<typeof panelSchema>;
 type UserFormData = z.infer<typeof userSchema>;
+type EditUserFormData = z.infer<typeof editUserSchema>;
 
 const roleLabels: Record<Role, string> = {
   super_admin: "Super Admin",
@@ -78,11 +88,12 @@ export function AdminSettings() {
   const [panels, setPanels] = useState<Panel[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [panelsLoading, setPanelsLoading] = useState(true);
-  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [editingUserData, setEditingUserData] = useState<User | null>(null);
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
   const [userFormLoading, setUserFormLoading] = useState(false);
+  const [editUserFormLoading, setEditUserFormLoading] = useState(false);
   const [groupFormLoading, setGroupFormLoading] = useState(false);
   const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,6 +121,14 @@ export function AdminSettings() {
     reset: resetUser,
     formState: { errors: userErrors },
   } = useForm<UserFormData>({ resolver: zodResolver(userSchema) });
+
+  const {
+    register: registerEditUser,
+    handleSubmit: handleSubmitEditUser,
+    reset: resetEditUser,
+    setValue: setEditUserValue,
+    formState: { errors: editUserErrors },
+  } = useForm<EditUserFormData>({ resolver: zodResolver(editUserSchema) });
 
   useEffect(() => {
     loadUsers();
@@ -194,6 +213,47 @@ export function AdminSettings() {
     } finally {
       setUserFormLoading(false);
     }
+  };
+
+  const handleEditUser = async (data: EditUserFormData) => {
+    if (!editingUserData) return;
+    setEditUserFormLoading(true);
+    setError(null);
+    try {
+      const branchIds = data.branchIds
+        ? data.branchIds
+            .split(",")
+            .map((id) => id.trim())
+            .filter(Boolean)
+        : [];
+      await UserService.updateUser(editingUserData.uid, {
+        displayName: data.displayName,
+        email: data.email,
+        password: data.password || undefined,
+        role: data.role,
+        companyId: data.companyId,
+        branchIds,
+      });
+      setEditingUserData(null);
+      resetEditUser();
+      await loadUsers();
+      setSuccess("User updated successfully");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to update user"));
+    } finally {
+      setEditUserFormLoading(false);
+    }
+  };
+
+  const openEditUser = (user: User) => {
+    setEditingUserData(user);
+    setEditUserValue("displayName", user.displayName || "");
+    setEditUserValue("email", user.email || "");
+    setEditUserValue("role", user.role);
+    setEditUserValue("companyId", user.companyId || "");
+    setEditUserValue("branchIds", user.branchIds?.join(", ") || "");
+    setEditUserValue("password", "");
   };
 
   const handleCreatePanel = async (data: PanelFormData) => {
@@ -522,29 +582,12 @@ export function AdminSettings() {
                       {user.email}
                     </td>
                     <td className="px-4 py-4">
-                      {editingUser === user.uid ? (
-                        <select
-                          defaultValue={user.role}
-                          onChange={(e) =>
-                            handleRoleChange(user.uid, e.target.value as Role)
-                          }
-                          className="control-field rounded-lg px-3 py-2 text-sm"
-                        >
-                          <option value="super_admin">Super Admin</option>
-                          <option value="head_office">Head Office</option>
-                          <option value="system_integrator">
-                            System Integrator
-                          </option>
-                          <option value="end_user">End User</option>
-                        </select>
-                      ) : (
-                        <span
-                          title={roleLabels[user.role]}
-                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${roleColors[user.role]}`}
-                        >
-                          {roleLabels[user.role]}
-                        </span>
-                      )}
+                      <span
+                        title={roleLabels[user.role]}
+                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${roleColors[user.role]}`}
+                      >
+                        {roleLabels[user.role]}
+                      </span>
                     </td>
                     <td className="px-4 py-4">
                       <span className="text-sm text-slate-400">
@@ -553,22 +596,13 @@ export function AdminSettings() {
                     </td>
                     <td className="px-4 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {editingUser === user.uid ? (
-                          <button
-                            onClick={() => setEditingUser(null)}
-                            className="rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
-                          >
-                            Cancel
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => setEditingUser(user.uid)}
-                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                            <span>Edit Role</span>
-                          </button>
-                        )}
+                        <button
+                          onClick={() => openEditUser(user)}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                          <span>Edit</span>
+                        </button>
                         <button
                           onClick={() => handleDeleteUser(user.uid)}
                           className="rounded-lg px-3 py-2 text-sm text-red-200 transition-colors hover:bg-red-500/10"
@@ -584,6 +618,151 @@ export function AdminSettings() {
           </div>
         )}
       </div>
+
+      {/* Edit User modal overlay */}
+      {editingUserData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            onClick={() => setEditingUserData(null)}
+          />
+          <div className="surface-panel relative w-full max-w-lg rounded-lg border-t-4 border-t-amber-400 p-6 shadow-2xl">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-semibold text-white">Edit User</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Update user profile and permissions
+                </p>
+              </div>
+              <button
+                onClick={() => setEditingUserData(null)}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+                type="button"
+                aria-label="Close edit form"
+              >
+                <XCircle className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={handleSubmitEditUser(handleEditUser)}
+              className="space-y-4"
+            >
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-300">
+                  Display Name
+                </label>
+                <input
+                  {...registerEditUser("displayName")}
+                  placeholder="Full name"
+                  className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                  disabled={editUserFormLoading}
+                />
+                {editUserErrors.displayName && (
+                  <p className="mt-1 text-sm text-red-300">
+                    {editUserErrors.displayName.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-300">
+                    Email
+                  </label>
+                  <input
+                    {...registerEditUser("email")}
+                    placeholder="user@example.com"
+                    className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                    disabled={editUserFormLoading}
+                  />
+                  {editUserErrors.email && (
+                    <p className="mt-1 text-sm text-red-300">
+                      {editUserErrors.email.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-300">
+                    New Password
+                  </label>
+                  <input
+                    {...registerEditUser("password")}
+                    type="password"
+                    placeholder="Leave blank to keep current"
+                    className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                    disabled={editUserFormLoading}
+                  />
+                  {editUserErrors.password && (
+                    <p className="mt-1 text-sm text-red-300">
+                      {editUserErrors.password.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-300">
+                    Role
+                  </label>
+                  <select
+                    {...registerEditUser("role")}
+                    className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                    disabled={editUserFormLoading}
+                  >
+                    <option value="end_user">End User</option>
+                    <option value="system_integrator">System Integrator</option>
+                    <option value="head_office">Head Office</option>
+                    <option value="super_admin">Super Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-300">
+                    Company ID
+                  </label>
+                  <input
+                    {...registerEditUser("companyId")}
+                    placeholder="Optional"
+                    className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                    disabled={editUserFormLoading}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-300">
+                  Branch IDs
+                </label>
+                <input
+                  {...registerEditUser("branchIds")}
+                  placeholder="Comma separated"
+                  className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                  disabled={editUserFormLoading}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setEditingUserData(null)}
+                  className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold"
+                  disabled={editUserFormLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editUserFormLoading}
+                  className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                >
+                  {editUserFormLoading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ── Panel Provisioning ──────────────────────────────────────────── */}
       <div className="mt-10 space-y-4 border-t border-white/10 pt-10">
