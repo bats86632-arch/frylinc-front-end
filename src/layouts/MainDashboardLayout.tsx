@@ -31,7 +31,7 @@ const navigation: Array<{
     name: 'Admin Settings',
     href: '/admin',
     icon: Settings,
-    roles: ['super_admin', 'head_office']
+    roles: ['super_admin', 'head_office', 'system_integrator']
   }
 ];
 

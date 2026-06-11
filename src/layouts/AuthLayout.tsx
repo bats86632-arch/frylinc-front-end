@@ -14,7 +14,7 @@ export function AuthLayout() {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/40 to-transparent" />
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-[minmax(0,1fr)_520px]">
-        <section className="hidden h-screen flex-col justify-between overflow-hidden border-r border-white/10 px-10 py-9 lg:flex xl:px-14">
+        <section className="hidden h-screen flex-col justify-start gap-y-12 overflow-y-auto border-r border-white/10 px-10 py-9 lg:flex xl:px-14 xl:gap-y-16">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/40">
               <Flame className="h-6 w-6 text-white" />
@@ -26,7 +26,7 @@ export function AuthLayout() {
           </div>
 
           <div className="max-w-2xl">
-            <h1 className="max-w-xl text-4xl font-semibold leading-[1.08] text-white xl:text-5xl">
+            <h1 className="max-w-xl text-3xl font-semibold leading-[1.1] text-white xl:text-4xl">
               High-trust monitoring for every connected fire panel.
             </h1>
             <p className="mt-6 max-w-lg text-[13px] leading-6 text-slate-400 xl:text-[15px] xl:leading-7">

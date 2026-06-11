@@ -9,7 +9,7 @@ interface PanelCardProps {
 
 export function PanelCard({ panel, viewMode = 'grid' }: PanelCardProps) {
   const hasAlarm = panel.alarm;
-  const isOnline = panel.mqttConnected;
+  const isOnline = panel.manuallyMarkedOffline !== true;
   const alarmZones = panel.zones.filter(Boolean).length;
   const visibleZones = Math.min(panel.zoneCount, 64);
 

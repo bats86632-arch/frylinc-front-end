@@ -53,6 +53,7 @@ export function PanelDetail() {
   const [commandLoading, setCommandLoading] = useState<string | null>(null);
   const [commandId, setCommandId] = useState<string | null>(null);
   const [commandError, setCommandError] = useState<string | null>(null);
+  const [togglingOffline, setTogglingOffline] = useState(false);
 
   const { commandLog } = useCommandStatus(serial!, commandId);
 
@@ -83,6 +84,21 @@ export function PanelDetail() {
       setCommandId(null);
     }
   }, [commandLog]);
+
+  const handleToggleOffline = async () => {
+    if (!serial) return;
+    setTogglingOffline(true);
+    setCommandError(null);
+    try {
+      await PanelService.updatePanel(serial, {
+        manuallyMarkedOffline: !normalizedPanel.manuallyMarkedOffline
+      });
+    } catch (err: unknown) {
+      setCommandError(getApiErrorMessage(err, 'Failed to update panel status'));
+    } finally {
+      setTogglingOffline(false);
+    }
+  };
 
   const handleSendCommand = async (command: string) => {
     if (!serial) return;
@@ -141,7 +157,7 @@ export function PanelDetail() {
 
   const panelCommands = normalizedPanel.allowedCommands.length > 0 ? normalizedPanel.allowedCommands : DEFAULT_PANEL_COMMANDS;
 
-  const isOnline = normalizedPanel.mqttConnected;
+  const isOnline = normalizedPanel.manuallyMarkedOffline !== true;
   const hasAlarm = normalizedPanel.alarm;
   const activeZones = normalizedPanel.zones.filter(Boolean).length;
   const visibleZones = Math.min(normalizedPanel.zoneCount || 0, 64);
@@ -178,6 +194,15 @@ export function PanelDetail() {
                   {isOnline ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
+                {canControl && (
+                  <button
+                    onClick={handleToggleOffline}
+                    disabled={togglingOffline}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-semibold text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {togglingOffline ? 'Updating...' : `Mark ${isOnline ? 'Offline' : 'Online'}`}
+                  </button>
+                )}
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400">

@@ -114,7 +114,11 @@ export function AdminSettings() {
   } = useForm<PanelFormData>({
     resolver: zodResolver(panelSchema),
     defaultValues: {
-      allowedCommands: DEFAULT_PANEL_COMMANDS.join(', ')
+      serial: '219111',
+      name: 'Fyrlinc Panel 219111',
+      zoneCount: 8,
+      groupId: 'group-building-a',
+      ipAddress: '72.167.225.142'
     }
   });
 
@@ -242,14 +246,11 @@ export function AdminSettings() {
     setGroupFormLoading(true);
     setError(null);
     try {
-      const allowedCommands = data.allowedCommands
-        ? data.allowedCommands.split(',').map((command) => command.trim()).filter(Boolean)
-        : [];
       await GroupService.createGroup({
         name: data.name,
         groupId: data.groupId?.trim() || undefined,
         description: data.description?.trim() || undefined,
-        allowedCommands: normalizeAllowedCommands(allowedCommands)
+        allowedCommands: normalizeAllowedCommands(undefined)
       });
       setGroupFormOpen(false);
       resetGroup();
@@ -301,17 +302,13 @@ export function AdminSettings() {
     setPanelFormLoading(true);
     setError(null);
     try {
-      const allowedCommands = data.allowedCommands
-        ? data.allowedCommands.split(',').map((command) => command.trim()).filter(Boolean)
-        : [];
-
       await PanelService.createPanel({
         serial: data.serial,
         name: data.name,
         zoneCount: data.zoneCount,
         groupId: data.groupId,
         ipAddress: data.ipAddress?.trim() || undefined,
-        allowedCommands: normalizeAllowedCommands(allowedCommands)
+        allowedCommands: normalizeAllowedCommands(undefined)
       });
       setPanelFormOpen(false);
       reset();
@@ -463,10 +460,6 @@ export function AdminSettings() {
               <Layers3 className="mr-2 inline h-4 w-4" />
               Add Group
             </button>
-            <button onClick={() => setApiKeyFormOpen(true)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">
-              <KeyRound className="mr-2 inline h-4 w-4" />
-              Add API Key
-            </button>
           </div>
 
           {userFormOpen && (
@@ -513,7 +506,6 @@ export function AdminSettings() {
                 </div>
                 <input {...registerGroup('groupId')} placeholder="Optional group ID" className="control-field rounded-lg px-4 py-2.5 text-sm" />
                 <textarea {...registerGroup('description')} placeholder="Description" className="control-field min-h-24 rounded-lg px-4 py-2.5 text-sm md:col-span-2" />
-                <input {...registerGroup('allowedCommands')} placeholder="ARM, ZONE OFF, MOB=01=..." className="control-field rounded-lg px-4 py-2.5 text-sm md:col-span-2" />
                 <div className="md:col-span-2 flex gap-2">
                   <button type="submit" disabled={groupFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
                     {groupFormLoading ? 'Creating...' : 'Create Group'}
@@ -891,19 +883,6 @@ export function AdminSettings() {
                       placeholder="Optional"
                       disabled={panelFormLoading}
                     />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                      Allowed Commands
-                    </label>
-                    <input
-                      {...register('allowedCommands')}
-                      className="control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500"
-                      placeholder={DEFAULT_PANEL_COMMANDS.join(', ')}
-                      disabled={panelFormLoading}
-                    />
-                    <p className="mt-1 text-xs text-slate-500">Default commands are used if this field is left empty.</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-4">

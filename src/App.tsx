@@ -31,7 +31,7 @@ function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute allowedRoles={['super_admin', 'head_office']}>
+                <ProtectedRoute allowedRoles={['super_admin', 'head_office', 'system_integrator']}>
                   <AdminSettings />
                 </ProtectedRoute>
               }
