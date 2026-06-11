@@ -52,7 +52,6 @@ export function PanelDetail() {
   const [activeTab, setActiveTab] = useState<Tab>("zones");
   const [events, setEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
-  const [togglingOffline, setTogglingOffline] = useState(false);
   const [contactNumbers, setContactNumbers] = useState<Record<string, string>>(
     {},
   );
@@ -137,22 +136,6 @@ export function PanelDetail() {
       setCommandError(getApiErrorMessage(err, `Failed to sync slot ${slot}`));
     } finally {
       setSyncingSlot(null);
-    }
-  };
-
-  const handleToggleOffline = async () => {
-    if (!serial) return;
-    setTogglingOffline(true);
-    try {
-      await PanelService.updatePanel(serial, {
-        manuallyMarkedOffline: !panel?.manuallyMarkedOffline,
-      });
-    } catch (err: unknown) {
-      setCommandError(
-        getApiErrorMessage(err, "Failed to toggle offline state"),
-      );
-    } finally {
-      setTogglingOffline(false);
     }
   };
 
@@ -262,18 +245,6 @@ export function PanelDetail() {
                     <WifiOff className="h-4 w-4" />
                     Disabled (Offline)
                   </span>
-                )}
-
-                {canControl && (
-                  <button
-                    onClick={handleToggleOffline}
-                    disabled={togglingOffline}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-3 py-1 text-xs font-semibold text-slate-300 transition-all duration-200 ease-smooth hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {togglingOffline
-                      ? "Updating..."
-                      : `Mark ${isOffline ? "Online" : "Offline"}`}
-                  </button>
                 )}
               </div>
 
