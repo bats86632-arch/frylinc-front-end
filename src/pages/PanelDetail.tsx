@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { usePanel } from '../hooks/usePanels';
+import { useCallback, useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { usePanel } from "../hooks/usePanels";
 
-import { PanelService } from '../api/PanelService';
-import { useAuth } from '../contexts/AuthContext';
-import { DEFAULT_PANEL_COMMANDS } from '../config/panelDefaults';
+import { PanelService } from "../api/PanelService";
+import { useAuth } from "../contexts/AuthContext";
+import { DEFAULT_PANEL_COMMANDS } from "../config/panelDefaults";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -16,24 +16,26 @@ import {
   RefreshCw,
   Settings,
   Phone,
-  Save
-} from 'lucide-react';
-import { formatDateTime } from '../utils/formatters';
-import { Event } from '../types';
+  Save,
+  WifiOff,
+} from "lucide-react";
+import { formatDateTime } from "../utils/formatters";
+import { Event } from "../types";
 
-type Tab = 'zones' | 'controls' | 'history' | 'contacts';
+type Tab = "zones" | "controls" | "history" | "contacts";
 
 const tabs: Array<{ id: Tab; label: string; icon: typeof Settings }> = [
-  { id: 'zones', label: 'Zone Status', icon: Settings },
-  { id: 'controls', label: 'Controls', icon: Play },
-  { id: 'history', label: 'Event History', icon: History },
-  { id: 'contacts', label: 'Contact Numbers', icon: Phone }
+  { id: "zones", label: "Zone Status", icon: Settings },
+  { id: "controls", label: "Controls", icon: Play },
+  { id: "history", label: "Event History", icon: History },
+  { id: "contacts", label: "Contact Numbers", icon: Phone },
 ];
 
 function getApiErrorMessage(error: unknown, fallback: string) {
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const response = (error as { response?: { data?: { message?: unknown } } }).response;
-    if (typeof response?.data?.message === 'string') {
+  if (typeof error === "object" && error !== null && "response" in error) {
+    const response = (error as { response?: { data?: { message?: unknown } } })
+      .response;
+    if (typeof response?.data?.message === "string") {
       return response.data.message;
     }
   }
@@ -47,11 +49,13 @@ export function PanelDetail() {
   const { panel, loading, error } = usePanel(serial!);
   const { hasRole } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<Tab>('zones');
+  const [activeTab, setActiveTab] = useState<Tab>("zones");
   const [events, setEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [togglingOffline, setTogglingOffline] = useState(false);
-  const [contactNumbers, setContactNumbers] = useState<Record<string, string>>({});
+  const [contactNumbers, setContactNumbers] = useState<Record<string, string>>(
+    {},
+  );
   const [syncingSlot, setSyncingSlot] = useState<string | null>(null);
   const [syncSuccessSlot, setSyncSuccessSlot] = useState<string | null>(null);
   const [commandLoading, setCommandLoading] = useState<string | null>(null);
@@ -64,7 +68,11 @@ export function PanelDetail() {
     }
   }, [panel]);
 
-  const canControl = hasRole(['super_admin', 'head_office', 'system_integrator']);
+  const canControl = hasRole([
+    "super_admin",
+    "head_office",
+    "system_integrator",
+  ]);
 
   const loadEvents = useCallback(async () => {
     if (!serial) return;
@@ -73,14 +81,14 @@ export function PanelDetail() {
       const data = await PanelService.getEvents(serial);
       setEvents(data);
     } catch (err) {
-      console.error('Failed to load events:', err);
+      console.error("Failed to load events:", err);
     } finally {
       setEventsLoading(false);
     }
   }, [serial]);
 
   useEffect(() => {
-    if (activeTab === 'history' && serial) {
+    if (activeTab === "history" && serial) {
       loadEvents();
     }
   }, [activeTab, loadEvents, serial]);
@@ -97,7 +105,7 @@ export function PanelDetail() {
       setCommandSuccess(command);
       setTimeout(() => setCommandSuccess(null), 3000);
     } catch (err: unknown) {
-      setCommandError(getApiErrorMessage(err, 'Failed to send command'));
+      setCommandError(getApiErrorMessage(err, "Failed to send command"));
     } finally {
       setCommandLoading(null);
     }
@@ -105,24 +113,24 @@ export function PanelDetail() {
 
   const handleSyncContact = async (slot: string) => {
     if (!serial) return;
-    
+
     setCommandError(null);
     setSyncingSlot(slot);
-    
+
     try {
-      const number = contactNumbers[slot] || '';
-      
+      const number = contactNumbers[slot] || "";
+
       // Update in Firestore
       await PanelService.updatePanel(serial, {
         contactNumbers: {
           ...(panel?.contactNumbers || {}),
-          [slot]: number
-        }
+          [slot]: number,
+        },
       });
-      
+
       // Send to panel
       await PanelService.sendCommand(serial, `MOB=${slot}=${number}`);
-      
+
       setSyncSuccessSlot(slot);
       setTimeout(() => setSyncSuccessSlot(null), 3000);
     } catch (err: unknown) {
@@ -137,10 +145,12 @@ export function PanelDetail() {
     setTogglingOffline(true);
     try {
       await PanelService.updatePanel(serial, {
-        manuallyMarkedOffline: !panel?.manuallyMarkedOffline
+        manuallyMarkedOffline: !panel?.manuallyMarkedOffline,
       });
     } catch (err: unknown) {
-      setCommandError(getApiErrorMessage(err, 'Failed to toggle offline state'));
+      setCommandError(
+        getApiErrorMessage(err, "Failed to toggle offline state"),
+      );
     } finally {
       setTogglingOffline(false);
     }
@@ -148,10 +158,19 @@ export function PanelDetail() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="surface-panel rounded-lg px-8 py-7 text-center">
-          <RefreshCw className="mx-auto mb-4 h-8 w-8 animate-spin text-amber-300" />
-          <p className="text-sm font-medium text-slate-300">Loading panel details...</p>
+      <div className="space-y-6">
+        {/* Header skeleton */}
+        <div className="h-32 animate-pulse rounded-lg bg-white/[0.04]" />
+        {/* Tab bar skeleton */}
+        <div className="h-12 animate-pulse rounded-lg bg-white/[0.04]" />
+        {/* Zone grid skeleton */}
+        <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="aspect-square animate-pulse rounded-lg bg-white/[0.04]"
+            />
+          ))}
         </div>
       </div>
     );
@@ -169,7 +188,7 @@ export function PanelDetail() {
             The panel with serial "{serial}" could not be found.
           </p>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="btn-primary mt-5 rounded-lg px-4 py-2.5 text-sm font-semibold"
           >
             Go to Dashboard
@@ -182,11 +201,16 @@ export function PanelDetail() {
   const normalizedPanel = {
     ...panel,
     zones: Array.isArray(panel.zones) ? panel.zones : [],
-    allowedCommands: Array.isArray(panel.allowedCommands) ? panel.allowedCommands : [],
-    groupId: panel.groupId || ''
+    allowedCommands: Array.isArray(panel.allowedCommands)
+      ? panel.allowedCommands
+      : [],
+    groupId: panel.groupId || "",
   };
 
-  const panelCommands = normalizedPanel.allowedCommands.length > 0 ? normalizedPanel.allowedCommands : DEFAULT_PANEL_COMMANDS;
+  const panelCommands =
+    normalizedPanel.allowedCommands.length > 0
+      ? normalizedPanel.allowedCommands
+      : DEFAULT_PANEL_COMMANDS;
 
   const isOffline = normalizedPanel.manuallyMarkedOffline === true;
   const hasAlarm = normalizedPanel.alarm;
@@ -195,7 +219,17 @@ export function PanelDetail() {
 
   return (
     <div className="space-y-6">
-      <section className="surface-panel rounded-lg p-5">
+      {/* Header card — glows red when alarm is active */}
+      <section
+        className={`surface-panel relative overflow-hidden rounded-lg p-5 transition-shadow duration-500 ${
+          hasAlarm ? "shadow-[0_0_40px_rgba(239,68,68,0.1)]" : ""
+        }`}
+      >
+        {/* Red left-rail accent */}
+        {hasAlarm && (
+          <div className="absolute left-0 top-0 h-full w-1 rounded-bl-lg rounded-tl-lg bg-red-500" />
+        )}
+
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 gap-4">
             <Link
@@ -208,66 +242,87 @@ export function PanelDetail() {
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="truncate text-3xl font-semibold leading-tight text-white">{normalizedPanel.name}</h1>
+                <h1 className="truncate text-3xl font-semibold leading-tight text-white">
+                  {normalizedPanel.name}
+                </h1>
+
                 {hasAlarm && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-100">
+                  <span className="inline-flex animate-pulse-shadow items-center gap-1.5 rounded-full border border-red-300/30 bg-red-500/10 px-4 py-1.5 text-sm font-bold text-red-100">
                     <AlertTriangle className="h-4 w-4" />
                     ALARM ACTIVE
                   </span>
                 )}
+
                 {isOffline && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-400/20 bg-slate-500/10 px-3 py-1 text-xs font-semibold text-slate-300">
                     <WifiOff className="h-4 w-4" />
                     Disabled (Offline)
                   </span>
                 )}
+
                 {canControl && (
                   <button
                     onClick={handleToggleOffline}
                     disabled={togglingOffline}
                     className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-semibold text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {togglingOffline ? 'Updating...' : `Mark ${isOffline ? 'Online' : 'Offline'}`}
+                    {togglingOffline
+                      ? "Updating..."
+                      : `Mark ${isOffline ? "Online" : "Offline"}`}
                   </button>
                 )}
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400">
-                <span className="font-mono text-slate-300">{normalizedPanel.serial}</span>
+                <span className="font-mono text-slate-300">
+                  {normalizedPanel.serial}
+                </span>
                 <span>{normalizedPanel.zoneCount} Zones</span>
-                {normalizedPanel.ipAddress && <span className="font-mono text-slate-300">{normalizedPanel.ipAddress}</span>}
+                {normalizedPanel.ipAddress && (
+                  <span className="font-mono text-slate-300">
+                    {normalizedPanel.ipAddress}
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
+          {/* 3 stat mini-cards */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:w-[420px]">
             <div className="surface-muted rounded-lg px-4 py-3">
               <p className="text-xs text-slate-500">Total Zones</p>
-              <p className="mt-1 text-xl font-semibold text-white">{normalizedPanel.zoneCount}</p>
+              <p className="mt-1 text-xl font-semibold text-white">
+                {normalizedPanel.zoneCount}
+              </p>
             </div>
             <div className="surface-muted rounded-lg px-4 py-3">
               <p className="text-xs text-slate-500">In Alarm</p>
-              <p className={`mt-1 text-xl font-semibold ${activeZones > 0 ? 'text-red-200' : 'text-slate-300'}`}>
+              <p
+                className={`mt-1 text-xl font-semibold ${activeZones > 0 ? "text-red-200" : "text-slate-300"}`}
+              >
                 {activeZones}
               </p>
             </div>
             <div className="surface-muted rounded-lg px-4 py-3">
               <p className="text-xs text-slate-500">Commands</p>
-              <p className="mt-1 text-xl font-semibold text-amber-200">{panelCommands.length}</p>
+              <p className="mt-1 text-xl font-semibold text-amber-200">
+                {panelCommands.length}
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="surface-muted flex flex-col gap-2 rounded-lg p-1 sm:inline-flex sm:flex-row">
+      {/* Tab bar — polished underline style */}
+      <div className="flex flex-row gap-0 border-b border-white/10 bg-transparent">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
+            className={`flex items-center justify-center gap-2 rounded-none border-b-2 px-5 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
-                : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                ? "border-amber-400 bg-transparent text-white"
+                : "border-transparent text-slate-400 hover:text-white"
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -276,13 +331,18 @@ export function PanelDetail() {
         ))}
       </div>
 
-      {activeTab === 'zones' && (
+      {/* Zones tab */}
+      {activeTab === "zones" && (
         <div className="space-y-6">
           <section className="surface-panel rounded-lg p-5">
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-white">Zone Status Grid</h2>
-                <p className="mt-1 text-sm text-slate-500">{visibleZones} zones displayed</p>
+                <h2 className="text-lg font-semibold text-white">
+                  Zone Status Grid
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  {visibleZones} zones displayed
+                </p>
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-2">
@@ -296,7 +356,7 @@ export function PanelDetail() {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 sm:grid-cols-8 lg:grid-cols-[repeat(16,minmax(0,1fr))]">
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
               {Array.from({ length: visibleZones }).map((_, idx) => {
                 const zoneAlarm = panel.zones[idx] || false;
                 return (
@@ -304,10 +364,10 @@ export function PanelDetail() {
                     key={idx}
                     className={`aspect-square rounded-lg border text-sm font-semibold transition-all ${
                       zoneAlarm
-                        ? 'border-red-300/40 bg-red-500 text-white shadow-lg shadow-red-950/30'
-                        : 'border-white/10 bg-white/[0.04] text-slate-400 hover:border-white/20 hover:bg-white/[0.07]'
+                        ? "animate-pulse-shadow border-red-300/40 bg-red-500 text-white shadow-lg shadow-red-950/30"
+                        : "border-white/10 bg-white/[0.04] text-slate-400 hover:border-white/20 hover:bg-white/[0.07]"
                     } flex items-center justify-center`}
-                    title={`Zone ${idx + 1}: ${zoneAlarm ? 'ALARM' : 'Normal'}`}
+                    title={`Zone ${idx + 1}: ${zoneAlarm ? "ALARM" : "Normal"}`}
                   >
                     {idx + 1}
                   </div>
@@ -317,8 +377,13 @@ export function PanelDetail() {
           </section>
 
           {panel.zones.some((z) => z) && (
-            <section className="rounded-lg border border-red-300/25 bg-red-500/10 p-5">
+            <section className="rounded-lg border border-red-400/40 bg-gradient-to-r from-red-950/40 to-slate-950/60 p-5">
               <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-red-100">
+                {/* Pulsing live-indicator dot */}
+                <span className="relative mr-1 flex h-3 w-3">
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                  <span className="relative h-3 w-3 rounded-full bg-red-500" />
+                </span>
                 <AlertTriangle className="h-5 w-5" />
                 Active Alarms
               </h3>
@@ -327,12 +392,16 @@ export function PanelDetail() {
                   zoneAlarm ? (
                     <div
                       key={idx}
-                      className="rounded-lg border border-red-300/25 bg-slate-950/60 p-4"
+                      className="animate-pulse-shadow rounded-lg border border-red-300/25 bg-slate-950/60 p-4"
                     >
-                      <p className="font-semibold text-red-100">Zone {idx + 1}</p>
-                      <p className="mt-1 text-xs text-red-200/70">ALARM ACTIVE</p>
+                      <p className="text-lg font-semibold text-red-100">
+                        Zone {idx + 1}
+                      </p>
+                      <p className="mt-1 text-xs text-red-200/70">
+                        ALARM ACTIVE
+                      </p>
                     </div>
-                  ) : null
+                  ) : null,
                 )}
               </div>
             </section>
@@ -340,7 +409,7 @@ export function PanelDetail() {
         </div>
       )}
 
-      {activeTab === 'controls' && (
+      {activeTab === "controls" && (
         <div className="space-y-5">
           {!canControl && (
             <div className="rounded-lg border border-amber-300/25 bg-amber-400/10 p-4">
@@ -358,7 +427,9 @@ export function PanelDetail() {
 
           <section className="surface-panel rounded-lg p-5">
             <div className="mb-5">
-              <h3 className="text-lg font-semibold text-white">Available Commands</h3>
+              <h3 className="text-lg font-semibold text-white">
+                Available Commands
+              </h3>
               <p className="mt-1 text-sm text-slate-500">
                 Commands are sent to the selected panel.
               </p>
@@ -370,11 +441,11 @@ export function PanelDetail() {
                   onClick={() => handleSendCommand(command)}
                   disabled={!canControl || commandLoading !== null}
                   className={`rounded-lg border p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
-                    commandSuccess === command 
-                      ? 'border-emerald-300/40 bg-emerald-400/10 text-emerald-100'
+                    commandSuccess === command
+                      ? "border-emerald-300/40 bg-emerald-400/10 text-emerald-100"
                       : commandLoading === command
-                      ? 'border-amber-300/40 bg-amber-400/10 text-amber-100'
-                      : 'border-white/10 bg-white/[0.03] text-white hover:border-amber-300/35 hover:bg-amber-400/10'
+                        ? "border-amber-300/40 bg-amber-400/10 text-amber-100"
+                        : "border-white/10 bg-white/[0.03] text-white hover:border-amber-300/35 hover:bg-amber-400/10"
                   }`}
                 >
                   {commandSuccess === command ? (
@@ -402,11 +473,13 @@ export function PanelDetail() {
         </div>
       )}
 
-      {activeTab === 'history' && (
+      {activeTab === "history" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-white">Event History</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Event History
+              </h2>
               <p className="mt-1 text-sm text-slate-500">Panel event stream</p>
             </div>
             <button
@@ -414,7 +487,9 @@ export function PanelDetail() {
               disabled={eventsLoading}
               className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <RefreshCw className={`h-4 w-4 ${eventsLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${eventsLoading ? "animate-spin" : ""}`}
+              />
               Refresh
             </button>
           </div>
@@ -431,7 +506,7 @@ export function PanelDetail() {
           ) : (
             <div className="table-shell overflow-x-auto">
               <table className="w-full min-w-[720px]">
-                <thead className="bg-white/[0.04]">
+                <thead className="sticky top-0 bg-slate-950/90 backdrop-blur">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
                       Timestamp
@@ -446,18 +521,23 @@ export function PanelDetail() {
                 </thead>
                 <tbody className="divide-y divide-white/10">
                   {events.map((event) => (
-                    <tr key={event.id} className="transition-colors hover:bg-white/[0.035]">
+                    <tr
+                      key={event.id}
+                      className="transition-colors hover:bg-white/[0.035]"
+                    >
                       <td className="px-4 py-3 font-mono text-sm text-slate-300">
-                        {formatDateTime(event.timestamp || (event as any).createdAt)}
+                        {formatDateTime(
+                          event.timestamp || (event as any).createdAt,
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
-                            event.type.includes('alarm')
-                              ? 'border-red-300/30 bg-red-500/10 text-red-100'
-                              : event.type.includes('warning')
-                              ? 'border-amber-300/30 bg-amber-400/10 text-amber-100'
-                              : 'border-white/10 bg-white/[0.04] text-slate-300'
+                            event.type.includes("alarm")
+                              ? "border-red-300/30 bg-red-500/10 text-red-100"
+                              : event.type.includes("warning")
+                                ? "border-amber-300/30 bg-amber-400/10 text-amber-100"
+                                : "border-white/10 bg-white/[0.04] text-slate-300"
                           }`}
                         >
                           {event.type}
@@ -466,7 +546,9 @@ export function PanelDetail() {
                       <td className="px-4 py-3 text-sm text-slate-400">
                         {event.details}
                         {event.zoneNumber && (
-                          <span className="ml-2 font-mono text-slate-500">(Zone {event.zoneNumber})</span>
+                          <span className="ml-2 font-mono text-slate-500">
+                            (Zone {event.zoneNumber})
+                          </span>
                         )}
                       </td>
                     </tr>
@@ -478,27 +560,30 @@ export function PanelDetail() {
         </div>
       )}
 
-      {activeTab === 'contacts' && (
+      {activeTab === "contacts" && (
         <div className="space-y-4">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold text-white">Contact Numbers</h2>
+            <h2 className="text-lg font-semibold text-white">
+              Contact Numbers
+            </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Configure up to 9 mobile numbers to receive alerts from this panel.
+              Configure up to 9 mobile numbers to receive alerts from this
+              panel.
             </p>
           </div>
 
           {commandError && (
-            <div className="rounded-lg border border-red-300/25 bg-red-500/10 p-4 mb-4">
+            <div className="mb-4 rounded-lg border border-red-300/25 bg-red-500/10 p-4">
               <p className="text-sm text-red-100">{commandError}</p>
             </div>
           )}
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 9 }).map((_, idx) => {
-              const slot = String(idx + 1).padStart(2, '0');
+              const slot = String(idx + 1).padStart(2, "0");
               const isSyncing = syncingSlot === slot;
               const isSuccess = syncSuccessSlot === slot;
-              
+
               return (
                 <div key={slot} className="surface-panel rounded-lg p-4">
                   <label className="mb-2 block text-sm font-medium text-slate-300">
@@ -508,8 +593,13 @@ export function PanelDetail() {
                     <input
                       type="text"
                       placeholder="Mobile Number"
-                      value={contactNumbers[slot] || ''}
-                      onChange={(e) => setContactNumbers(prev => ({ ...prev, [slot]: e.target.value }))}
+                      value={contactNumbers[slot] || ""}
+                      onChange={(e) =>
+                        setContactNumbers((prev) => ({
+                          ...prev,
+                          [slot]: e.target.value,
+                        }))
+                      }
                       disabled={!canControl || isSyncing}
                       className="form-input flex-1 disabled:opacity-50"
                     />
@@ -518,8 +608,8 @@ export function PanelDetail() {
                       disabled={!canControl || isSyncing}
                       className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                         isSuccess
-                          ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
-                          : 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30'
+                          ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30"
+                          : "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
                       }`}
                     >
                       {isSuccess ? (
