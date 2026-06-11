@@ -2,6 +2,11 @@ import apiClient from './axios';
 import { Panel, Event, CommandResponse } from '../types';
 
 export const PanelService = {
+  async getPanels(): Promise<Panel[]> {
+    const response = await apiClient.get('/panels');
+    return response.data.panels;
+  },
+
   async getEvents(serial: string, limit: number = 50): Promise<Event[]> {
     const response = await apiClient.get(`/panels/${serial}/events`, {
       params: { limit }
@@ -14,7 +19,14 @@ export const PanelService = {
     return response.data;
   },
 
-  async createPanel(data: { serial: string; name: string; zoneCount: number; groupId: string }): Promise<Panel> {
+  async createPanel(data: {
+    serial: string;
+    name: string;
+    zoneCount: number;
+    groupId: string;
+    ipAddress?: string;
+    allowedCommands?: string[];
+  }): Promise<Panel> {
     const response = await apiClient.post('/panels', data);
     return response.data;
   },

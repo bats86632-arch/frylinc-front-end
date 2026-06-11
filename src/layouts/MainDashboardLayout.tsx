@@ -37,7 +37,9 @@ const navigation: Array<{
 export function MainDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { userData, logout, hasRole } = useAuth();
+  const [displayNameDraft, setDisplayNameDraft] = useState('');
+  const [savingDisplayName, setSavingDisplayName] = useState(false);
+  const { userData, logout, hasRole, saveDisplayName } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -56,11 +58,25 @@ export function MainDashboardLayout() {
     : 'Fire Alarm Panels';
 
   const roleLabel = userData?.role?.replace(/_/g, ' ') || 'Operator';
+  const needsDisplayName = !userData?.displayName || userData.displayName === 'User';
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const handleSaveDisplayName = async () => {
+    const nextValue = displayNameDraft.trim();
+    if (!nextValue) return;
+
+    setSavingDisplayName(true);
+    try {
+      await saveDisplayName(nextValue);
+      setDisplayNameDraft('');
+    } finally {
+      setSavingDisplayName(false);
+    }
   };
 
   return (
@@ -212,6 +228,29 @@ export function MainDashboardLayout() {
         </header>
 
         <main className="min-h-[calc(100vh-5rem)] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+          {needsDisplayName && (
+            <div className="mb-5 rounded-lg border border-amber-300/20 bg-amber-400/10 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-100">Add your display name</p>
+                  <p className="mt-1 text-sm text-amber-100/70">This will be shown in the top right of the dashboard.</p>
+                </div>
+                <input
+                  value={displayNameDraft}
+                  onChange={(e) => setDisplayNameDraft(e.target.value)}
+                  placeholder="Your name"
+                  className="control-field rounded-lg px-4 py-2.5 text-sm text-white sm:w-80"
+                />
+                <button
+                  onClick={handleSaveDisplayName}
+                  disabled={savingDisplayName}
+                  className="btn-primary rounded-lg px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
+                >
+                  {savingDisplayName ? 'Saving...' : 'Save name'}
+                </button>
+              </div>
+            </div>
+          )}
           <Outlet />
         </main>
       </div>

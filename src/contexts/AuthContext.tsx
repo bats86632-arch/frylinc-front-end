@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { onAuthStateChanged, User as FirebaseUser, signOut } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { User, Role } from '../types';
+import apiClient from '../api/axios';
 
 interface AuthContextType {
   currentUser: FirebaseUser | null;
@@ -9,6 +10,8 @@ interface AuthContextType {
   role: Role | null;
   loading: boolean;
   logout: () => Promise<void>;
+  refreshUserData: () => Promise<void>;
+  saveDisplayName: (displayName: string) => Promise<void>;
   hasRole: (allowedRoles: Role[]) => boolean;
 }
 
@@ -27,25 +30,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadUserProfile = async (user: FirebaseUser) => {
+    const tokenResult = await user.getIdTokenResult(true);
+    const customClaims = tokenResult.claims;
+    const response = await apiClient.get('/me');
+    const profile = response.data;
+
+    const userData: User = {
+      uid: user.uid,
+      email: user.email || profile.email || '',
+      displayName: profile.displayName || user.displayName || user.email?.split('@')[0] || 'User',
+      role: (customClaims.role as Role) || profile.role || 'end_user',
+      groups: (profile.groups as string[]) || (customClaims.groups as string[]) || []
+    };
+
+    setUserData(userData);
+    setRole(userData.role);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
 
       if (user) {
         try {
-          const tokenResult = await user.getIdTokenResult();
-          const customClaims = tokenResult.claims;
-
-          const userData: User = {
-            uid: user.uid,
-            email: user.email || '',
-            displayName: user.displayName || 'User',
-            role: (customClaims.role as Role) || 'end_user',
-            groups: (customClaims.groups as string[]) || []
-          };
-
-          setUserData(userData);
-          setRole(userData.role);
+          await loadUserProfile(user);
         } catch (error) {
           console.error('Error fetching custom claims:', error);
           setUserData(null);
@@ -61,6 +70,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribe();
   }, []);
+
+  const refreshUserData = async () => {
+    if (!auth.currentUser) return;
+    await loadUserProfile(auth.currentUser);
+  };
+
+  const saveDisplayName = async (displayName: string) => {
+    const trimmed = displayName.trim();
+    if (!trimmed) return;
+
+    await apiClient.patch('/me/profile', { displayName: trimmed });
+    await refreshUserData();
+  };
 
   const logout = async () => {
     await signOut(auth);
@@ -85,6 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role,
     loading,
     logout,
+    refreshUserData,
+    saveDisplayName,
     hasRole
   };
 

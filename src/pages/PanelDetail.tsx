@@ -131,10 +131,17 @@ export function PanelDetail() {
     );
   }
 
-  const isOnline = panel.mqttConnected;
-  const hasAlarm = panel.alarm;
-  const activeZones = panel.zones.filter(Boolean).length;
-  const visibleZones = Math.min(panel.zoneCount, 64);
+  const normalizedPanel = {
+    ...panel,
+    zones: Array.isArray(panel.zones) ? panel.zones : [],
+    allowedCommands: Array.isArray(panel.allowedCommands) ? panel.allowedCommands : [],
+    groupId: panel.groupId || ''
+  };
+
+  const isOnline = normalizedPanel.mqttConnected;
+  const hasAlarm = normalizedPanel.alarm;
+  const activeZones = normalizedPanel.zones.filter(Boolean).length;
+  const visibleZones = Math.min(normalizedPanel.zoneCount || 0, 64);
 
   return (
     <div className="space-y-6">
@@ -151,7 +158,7 @@ export function PanelDetail() {
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="truncate text-3xl font-semibold leading-tight text-white">{panel.name}</h1>
+                <h1 className="truncate text-3xl font-semibold leading-tight text-white">{normalizedPanel.name}</h1>
                 {hasAlarm && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-100">
                     <AlertTriangle className="h-4 w-4" />
@@ -171,9 +178,9 @@ export function PanelDetail() {
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400">
-                <span className="font-mono text-slate-300">{panel.serial}</span>
-                <span>{panel.zoneCount} Zones</span>
-                {panel.ipAddress && <span className="font-mono text-slate-300">{panel.ipAddress}</span>}
+                <span className="font-mono text-slate-300">{normalizedPanel.serial}</span>
+                <span>{normalizedPanel.zoneCount} Zones</span>
+                {normalizedPanel.ipAddress && <span className="font-mono text-slate-300">{normalizedPanel.ipAddress}</span>}
               </div>
             </div>
           </div>
@@ -181,7 +188,7 @@ export function PanelDetail() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:w-[420px]">
             <div className="surface-muted rounded-lg px-4 py-3">
               <p className="text-xs text-slate-500">Total Zones</p>
-              <p className="mt-1 text-xl font-semibold text-white">{panel.zoneCount}</p>
+              <p className="mt-1 text-xl font-semibold text-white">{normalizedPanel.zoneCount}</p>
             </div>
             <div className="surface-muted rounded-lg px-4 py-3">
               <p className="text-xs text-slate-500">In Alarm</p>
@@ -191,7 +198,7 @@ export function PanelDetail() {
             </div>
             <div className="surface-muted rounded-lg px-4 py-3">
               <p className="text-xs text-slate-500">Commands</p>
-              <p className="mt-1 text-xl font-semibold text-amber-200">{panel.allowedCommands.length}</p>
+              <p className="mt-1 text-xl font-semibold text-amber-200">{normalizedPanel.allowedCommands.length}</p>
             </div>
           </div>
         </div>
@@ -297,10 +304,12 @@ export function PanelDetail() {
           <section className="surface-panel rounded-lg p-5">
             <div className="mb-5">
               <h3 className="text-lg font-semibold text-white">Available Commands</h3>
-              <p className="mt-1 text-sm text-slate-500">Commands are sent to the selected panel.</p>
+              <p className="mt-1 text-sm text-slate-500">
+                {isOnline ? 'Commands are sent to the selected panel.' : 'Panel is offline. View status and history; commands are disabled until the panel reconnects.'}
+              </p>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {panel.allowedCommands.map((command) => (
+              {normalizedPanel.allowedCommands.length > 0 ? normalizedPanel.allowedCommands.map((command) => (
                 <button
                   key={command}
                   onClick={() => handleSendCommand(command)}
@@ -325,7 +334,11 @@ export function PanelDetail() {
                     </div>
                   )}
                 </button>
-              ))}
+              )) : (
+                <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-400 xl:col-span-4">
+                  No commands are configured for this panel.
+                </div>
+              )}
             </div>
           </section>
 

@@ -12,6 +12,17 @@ export const UserService = {
     return response.data;
   },
 
+  async createUser(data: {
+    email: string;
+    password: string;
+    displayName: string;
+    role: Role;
+    groups: string[];
+  }): Promise<User> {
+    const response = await apiClient.post('/users', data);
+    return response.data.user;
+  },
+
   async updateUser(uid: string, data: Partial<User>): Promise<User> {
     const response = await apiClient.patch(`/users/${uid}`, data);
     return response.data;
@@ -19,5 +30,15 @@ export const UserService = {
 
   async deleteUser(uid: string): Promise<void> {
     await apiClient.delete(`/users/${uid}`);
+  },
+
+  async updateUserGroups(uid: string, groups: string[]): Promise<User> {
+    const response = await apiClient.patch(`/users/${uid}/groups`, { groups });
+    return response.data;
+  },
+
+  async updateProfile(displayName: string): Promise<{ ok: boolean; uid: string; displayName: string }> {
+    const response = await apiClient.patch('/me/profile', { displayName });
+    return response.data;
   }
 };
