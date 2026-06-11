@@ -2,12 +2,47 @@ import { useState, useMemo } from 'react';
 import { usePanels } from '../hooks/usePanels';
 import { PanelCard } from '../components/PanelCard';
 import {
+  AlertTriangle,
+  Filter,
+  LayoutGrid,
+  List,
   RefreshCw,
-  AlertTriangle
+  Search,
+  ShieldCheck
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
 type FilterMode = 'all' | 'alarms';
+
+interface StatCardProps {
+  label: string;
+  value: number;
+  caption: string;
+  icon: typeof LayoutGrid;
+  tone: 'neutral' | 'alarm';
+}
+
+const statToneClasses: Record<StatCardProps['tone'], string> = {
+  neutral: 'border-cyan-300/20 bg-cyan-300/10 text-cyan-200',
+  alarm: 'border-red-400/30 bg-red-500/10 text-red-200'
+};
+
+function StatCard({ label, value, caption, icon: Icon, tone }: StatCardProps) {
+  return (
+    <div className="surface-panel rounded-lg p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-slate-400">{label}</p>
+          <p className="mt-3 text-3xl font-semibold leading-none text-white">{value}</p>
+        </div>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-lg border ${statToneClasses[tone]}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+      <p className="mt-4 border-t border-white/10 pt-3 text-xs text-slate-500">{caption}</p>
+    </div>
+  );
+}
 
 export function Dashboard() {
   const { panels, loading, error } = usePanels();
@@ -47,12 +82,17 @@ export function Dashboard() {
     alarms: panels.filter((p) => p.alarm).length
   }), [panels]);
 
+  const filters: Array<{ value: FilterMode; label: string; count: number }> = [
+    { value: 'all', label: 'All Panels', count: stats.total },
+    { value: 'alarms', label: 'Alarms', count: stats.alarms }
+  ];
+
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="glass-panel rounded-xl px-8 py-7 text-center">
-          <RefreshCw className="mx-auto mb-4 h-8 w-8 animate-spin text-tertiary-container" />
-          <p className="font-label-md text-label-md text-on-surface-variant">Loading panels...</p>
+        <div className="surface-panel rounded-lg px-8 py-7 text-center">
+          <RefreshCw className="mx-auto mb-4 h-8 w-8 animate-spin text-amber-300" />
+          <p className="text-sm font-medium text-slate-300">Loading panels...</p>
         </div>
       </div>
     );
@@ -61,15 +101,15 @@ export function Dashboard() {
   if (error) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="glass-panel max-w-md rounded-xl p-8 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-tertiary-container/10 text-tertiary-container">
-            <span className="material-symbols-outlined text-[32px]">warning</span>
+        <div className="surface-panel max-w-md rounded-lg p-8 text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/10 text-red-200">
+            <AlertTriangle className="h-7 w-7" />
           </div>
-          <h3 className="font-headline-md text-headline-md text-on-surface">Error Loading Panels</h3>
-          <p className="mt-2 text-sm leading-6 text-on-surface-variant">{error.message}</p>
+          <h3 className="text-lg font-semibold text-white">Error Loading Panels</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-400">{error.message}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-primary/20 hover:bg-primary/30 mt-5 rounded-lg px-4 py-2.5 font-label-md text-label-md text-primary transition-all"
+            className="btn-primary mt-5 rounded-lg px-4 py-2.5 text-sm font-semibold"
           >
             Retry
           </button>
@@ -79,100 +119,149 @@ export function Dashboard() {
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto px-margin py-lg space-y-lg">
-      <div className="space-y-md mb-lg">
-        <h1 className="font-headline-lg text-headline-lg text-on-surface">Fyrlinc Fire Panel Monitoring Station</h1>
-        <p className="font-body-md text-primary/80 tracking-wide text-sm">High trust monitoring for every connected fire panel.</p>
-      </div>
+    <div className="space-y-6">
+      <section className="surface-panel rounded-lg p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Live panel telemetry
+            </div>
+            <h1 className="text-3xl font-semibold leading-tight text-white">Fire Alarm Panels</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              Real-time monitoring of all connected panels
+            </p>
+          </div>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
-        <div className="glass-panel p-md rounded-xl flex items-center justify-between group hover:border-secondary/30 transition-all">
-          <div className="space-y-xs">
-            <span className="text-on-surface-variant font-label-md text-label-md">Total Panels</span>
-            <h2 className="font-headline-lg text-headline-lg text-secondary">{stats.total}</h2>
-          </div>
-          <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
-            <span className="material-symbols-outlined">domain</span>
-          </div>
-        </div>
-
-        <div className={`glass-panel p-md rounded-xl flex items-center justify-between transition-all ${stats.alarms > 0 ? 'border-tertiary-container/20 group hover:animate-pulse-alarm' : 'group hover:border-primary/30'}`}>
-          <div className="space-y-xs">
-            <span className="text-on-surface-variant font-label-md text-label-md">Active Alarms</span>
-            <h2 className={`font-headline-lg text-headline-lg ${stats.alarms > 0 ? 'text-tertiary-container' : 'text-on-surface'}`}>{stats.alarms}</h2>
-          </div>
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stats.alarms > 0 ? 'bg-tertiary-container/20 text-tertiary-container animate-pulse' : 'bg-white/5 text-on-surface-variant'}`}>
-            <span className="material-symbols-outlined" style={stats.alarms > 0 ? { fontVariationSettings: "'FILL' 1" } : {}}>emergency_home</span>
+          <div className="grid grid-cols-2 gap-3 text-sm sm:flex sm:items-center">
+            <div className="surface-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-slate-500">Filtered</p>
+              <p className="mt-1 font-semibold text-white">{filteredPanels.length} panels</p>
+            </div>
+            <div className="surface-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-slate-500">Alarm load</p>
+              <p className={`mt-1 font-semibold ${stats.alarms > 0 ? 'text-red-200' : 'text-emerald-200'}`}>
+                {stats.alarms} active
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="flex flex-col md:flex-row gap-gutter items-center">
-        <div className="relative w-full md:max-w-md group">
-          <span className="material-symbols-outlined absolute left-base top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-lg pr-base py-sm bg-white/5 border border-white/10 rounded-xl text-on-surface placeholder:text-on-surface-variant focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all backdrop-blur-md"
-            placeholder="Search by panel name or serial..."
-          />
-        </div>
-        <div className="flex p-xs bg-white/5 rounded-xl border border-white/10 backdrop-blur-md self-stretch md:self-auto">
-          <button
-            onClick={() => setFilterMode('all')}
-            className={`px-md py-xs rounded-lg font-label-md text-label-md transition-all ${filterMode === 'all' ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilterMode('alarms')}
-            className={`px-md py-xs rounded-lg font-label-md text-label-md transition-all ${filterMode === 'alarms' ? 'bg-tertiary-container text-white' : 'text-on-surface-variant hover:text-on-surface'}`}
-          >
-            Alarms Only
-          </button>
-        </div>
-        <div className="flex ml-auto p-xs bg-white/5 rounded-xl border border-white/10 backdrop-blur-md">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-xs rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-on-surface' : 'text-on-surface-variant hover:text-on-surface'}`}
-          >
-            <span className="material-symbols-outlined text-[20px]">grid_view</span>
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-xs rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-on-surface' : 'text-on-surface-variant hover:text-on-surface'}`}
-          >
-            <span className="material-symbols-outlined text-[20px]">view_list</span>
-          </button>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <StatCard
+          label="Total Panels"
+          value={stats.total}
+          caption="All provisioned panels"
+          icon={ShieldCheck}
+          tone="neutral"
+        />
+        <StatCard
+          label="Active Alarms"
+          value={stats.alarms}
+          caption={stats.alarms > 0 ? 'Needs immediate review' : 'No active alarms'}
+          icon={AlertTriangle}
+          tone="alarm"
+        />
+      </div>
+
+      <section className="surface-muted rounded-lg p-3">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            {filters.map((filter) => {
+              const active = filterMode === filter.value;
+
+              return (
+                <button
+                  key={filter.value}
+                  onClick={() => setFilterMode(filter.value)}
+                  className={`rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
+                    active
+                      ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
+                      : 'border border-white/10 bg-white/[0.03] text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                  }`}
+                >
+                  {filter.label} ({filter.count})
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative min-w-0 sm:w-80">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search panels by name or serial..."
+                className="control-field w-full rounded-lg py-2.5 pl-10 pr-4 text-sm placeholder:text-slate-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-black/20 p-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-amber-400 text-slate-950'
+                    : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                }`}
+                aria-label="Grid view"
+              >
+                <LayoutGrid className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-amber-400 text-slate-950'
+                    : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                }`}
+                aria-label="List view"
+              >
+                <List className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
       {filteredPanels.length === 0 ? (
-        <div className="glass-panel rounded-xl py-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-white/5">
-            <span className="material-symbols-outlined text-on-surface-variant text-[32px]">filter_list_off</span>
+        <div className="surface-panel rounded-lg py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03]">
+            <Filter className="h-8 w-8 text-slate-500" />
           </div>
-          <h3 className="font-headline-md text-headline-md text-on-surface">No panels found</h3>
-          <p className="mt-2 text-sm text-on-surface-variant">
+          <h3 className="text-lg font-semibold text-white">No panels found</h3>
+          <p className="mt-2 text-sm text-slate-400">
             {searchQuery
               ? `No panels matching "${searchQuery}"`
               : 'No panels match the current filter'}
           </p>
         </div>
       ) : (
-        <section className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter" : "flex flex-col gap-sm"}>
+        <div
+          className={
+            viewMode === 'grid'
+              ? 'grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3'
+              : 'space-y-3'
+          }
+        >
           {filteredPanels.map((panel) => (
             <PanelCard key={panel.serial} panel={panel} viewMode={viewMode} />
           ))}
-        </section>
+        </div>
       )}
 
       {stats.alarms > 0 && (
-        <button className="fixed bottom-margin right-margin bg-tertiary-container text-white px-lg py-md rounded-full shadow-2xl shadow-tertiary-container/50 hover:scale-105 active:scale-95 transition-all flex items-center gap-base z-40 group">
-          <span className="material-symbols-outlined animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>crisis_alert</span>
-          <span className="font-bold uppercase tracking-widest text-sm">Emergency Protocol ({stats.alarms})</span>
-        </button>
+        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2">
+          <div className="flex items-center gap-3 rounded-full border border-red-300/30 bg-red-500 px-5 py-3 text-white shadow-2xl shadow-red-950/40 animate-bounce-subtle">
+            <AlertTriangle className="h-5 w-5" />
+            <span className="text-sm font-semibold">
+              {stats.alarms} Active Alarm{stats.alarms > 1 ? 's' : ''} Detected
+            </span>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -9,8 +9,18 @@ import { PanelService } from '../api/PanelService';
 import { Panel, User, Role, Company, Branch } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import {
+  AlertCircle,
+  CheckCircle,
   Loader2,
+  Plus,
   RefreshCw,
+  Shield,
+  Users,
+  Layers3,
+  XCircle,
+  Trash2,
+  Building2,
+  MapPin
 } from 'lucide-react';
 
 const panelSchema = z.object({
@@ -57,10 +67,10 @@ const roleLabels: Record<Role, string> = {
 };
 
 const roleColors: Record<Role, string> = {
-  super_admin: 'border-tertiary-container/30 bg-tertiary-container/10 text-tertiary-container',
-  head_office: 'border-secondary/30 bg-secondary/10 text-secondary',
-  system_integrator: 'border-primary/30 bg-primary/10 text-primary',
-  end_user: 'border-white/10 bg-white/[0.04] text-on-surface-variant'
+  super_admin: 'border-red-300/30 bg-red-500/10 text-red-100',
+  head_office: 'border-amber-300/30 bg-amber-400/10 text-amber-100',
+  system_integrator: 'border-cyan-300/30 bg-cyan-400/10 text-cyan-100',
+  end_user: 'border-white/10 bg-white/[0.04] text-slate-300'
 };
 
 function getApiErrorMessage(error: unknown, fallback: string) {
@@ -309,85 +319,97 @@ export function AdminSettings() {
   };
 
   return (
-    <div className="max-w-[1440px] mx-auto px-margin py-lg space-y-lg">
-      <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-md">
-        <div>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface">System Administration</h1>
-          <p className="text-on-surface-variant font-body-md text-body-md mt-xs">Manage organizations, panels, and access controls</p>
-        </div>
-        
-        <nav className="flex bg-white/5 border border-white/10 p-xs rounded-xl backdrop-blur-md overflow-x-auto">
-          <button onClick={() => setActiveTab('users')} className={`px-md py-xs rounded-lg font-label-md text-label-md flex items-center gap-xs transition-colors whitespace-nowrap ${activeTab === 'users' ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}>
-            <span className="material-symbols-outlined text-[18px]">group</span>
-            Users
-          </button>
-          {(userData?.role === 'super_admin' || userData?.role === 'head_office' || userData?.role === 'system_integrator') && (
-            <button onClick={() => setActiveTab('orgs')} className={`px-md py-xs rounded-lg font-label-md text-label-md flex items-center gap-xs transition-colors whitespace-nowrap ${activeTab === 'orgs' ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}>
-              <span className="material-symbols-outlined text-[18px]">domain</span>
-              Hierarchy
+    <div className="space-y-6">
+      <section className="surface-panel rounded-lg p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold leading-tight text-white">Admin Settings</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-400">Manage organization hierarchy and access</p>
+          </div>
+
+          <div className="surface-muted flex rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
+                activeTab === 'users' ? 'bg-red-500 text-white shadow-lg shadow-red-950/30' : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+              }`}
+            >
+              <Users className="h-4 w-4" /><span>Users</span>
             </button>
-          )}
-          <button onClick={() => setActiveTab('panels')} className={`px-md py-xs rounded-lg font-label-md text-label-md flex items-center gap-xs transition-colors whitespace-nowrap ${activeTab === 'panels' ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}>
-            <span className="material-symbols-outlined text-[18px]">router</span>
-            Panels
-          </button>
-        </nav>
-      </header>
+            {(userData?.role === 'super_admin' || userData?.role === 'head_office' || userData?.role === 'system_integrator') && (
+              <button
+                onClick={() => setActiveTab('orgs')}
+                className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
+                  activeTab === 'orgs' ? 'bg-red-500 text-white shadow-lg shadow-red-950/30' : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                }`}
+              >
+                <Layers3 className="h-4 w-4" /><span>Hierarchy</span>
+              </button>
+            )}
+            <button
+              onClick={() => setActiveTab('panels')}
+              className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
+                activeTab === 'panels' ? 'bg-red-500 text-white shadow-lg shadow-red-950/30' : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+              }`}
+            >
+              <Shield className="h-4 w-4" /><span>Panels</span>
+            </button>
+          </div>
+        </div>
+      </section>
 
       {error && (
-        <div className="bg-tertiary-container/10 border border-tertiary-container/30 text-tertiary-container rounded-lg p-md mb-md flex items-center gap-sm">
-          <span className="material-symbols-outlined">error</span>
-          <p className="text-sm font-medium flex-1">{error}</p>
-          <button onClick={() => setError(null)} className="hover:text-white"><span className="material-symbols-outlined text-sm">close</span></button>
+        <div className="flex items-center gap-3 rounded-lg border border-red-300/25 bg-red-500/10 p-4">
+          <AlertCircle className="h-5 w-5 shrink-0 text-red-200" />
+          <p className="text-sm text-red-100">{error}</p>
+          <button onClick={() => setError(null)} className="ml-auto text-red-200/80 hover:text-red-100">
+            <XCircle className="h-4 w-4" />
+          </button>
         </div>
       )}
 
       {success && (
-        <div className="bg-secondary/10 border border-secondary/30 text-secondary rounded-lg p-md mb-md flex items-center gap-sm">
-          <span className="material-symbols-outlined">check_circle</span>
-          <p className="text-sm font-medium flex-1">{success}</p>
-          <button onClick={() => setSuccess(null)} className="hover:text-white"><span className="material-symbols-outlined text-sm">close</span></button>
+        <div className="flex items-center gap-3 rounded-lg border border-emerald-300/25 bg-emerald-400/10 p-4">
+          <CheckCircle className="h-5 w-5 shrink-0 text-emerald-200" />
+          <p className="text-sm text-emerald-100">{success}</p>
+          <button onClick={() => setSuccess(null)} className="ml-auto text-emerald-200/80 hover:text-emerald-100">
+            <XCircle className="h-4 w-4" />
+          </button>
         </div>
       )}
 
       {activeTab === 'users' && (
-        <div className="space-y-lg">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-headline-md text-headline-md text-on-surface">User Management</h2>
+              <h2 className="text-lg font-semibold text-white">User Management</h2>
             </div>
-            <div className="flex gap-sm">
-              <button onClick={loadUsers} disabled={usersLoading} className="bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors disabled:opacity-50">
-                <RefreshCw className={`h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} /> Refresh
-              </button>
-              <button onClick={() => setUserFormOpen(true)} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors">
-                <span className="material-symbols-outlined text-[18px]">person_add</span>
-                Add User
-              </button>
-            </div>
+            <button onClick={loadUsers} disabled={usersLoading} className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
+              <RefreshCw className={`h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} /> Refresh
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => setUserFormOpen(true)} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
+              Add User
+            </button>
           </div>
 
           {userFormOpen && (
-            <div className="glass-panel p-gutter rounded-xl">
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-md">Create User</h3>
-              <form onSubmit={handleSubmitUser(handleCreateUser)} className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                <div className="md:col-span-2">
-                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Display Name</label>
-                  <input {...registerUser('displayName')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+            <div className="surface-panel rounded-lg p-5">
+              <h3 className="mb-4 text-lg font-semibold text-white">Create User</h3>
+              <form onSubmit={handleSubmitUser(handleCreateUser)} className="grid gap-4 md:grid-cols-2">
+                <input {...registerUser('displayName')} placeholder="Display name" className="control-field rounded-lg px-4 py-2.5 text-sm md:col-span-2" />
+                <div>
+                  <input {...registerUser('email')} placeholder="Email" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                  {userErrors.email && <p className="mt-1 text-sm text-red-300">{userErrors.email.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Email Address</label>
-                  <input {...registerUser('email')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                  {userErrors.email && <p className="mt-1 text-xs text-tertiary-container">{userErrors.email.message}</p>}
+                  <input {...registerUser('password')} type="password" placeholder="Password" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                  {userErrors.password && <p className="mt-1 text-sm text-red-300">{userErrors.password.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Password</label>
-                  <input {...registerUser('password')} type="password" className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                  {userErrors.password && <p className="mt-1 text-xs text-tertiary-container">{userErrors.password.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Role</label>
-                  <select {...registerUser('role')} className="w-full bg-[#1e2336] border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors appearance-none">
+                  <select {...registerUser('role')} className="control-field w-full rounded-lg px-4 py-2.5 text-sm">
                     <option value="end_user">End User</option>
                     {(userData?.role === 'super_admin' || userData?.role === 'head_office') && (
                       <option value="system_integrator">System Integrator</option>
@@ -400,248 +422,202 @@ export function AdminSettings() {
                 
                 {(selectedUserRole === 'head_office' || selectedUserRole === 'system_integrator' || selectedUserRole === 'end_user') && userData?.role === 'super_admin' && (
                   <div>
-                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Company ID</label>
-                    <input {...registerUser('companyId')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                    <input {...registerUser('companyId')} placeholder="Company ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
                   </div>
                 )}
                 
                 {(selectedUserRole === 'system_integrator' || selectedUserRole === 'end_user') && (
                   <div>
-                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Branch IDs (comma separated)</label>
-                    <input {...registerUser('branchIds')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                    <input {...registerUser('branchIds')} placeholder="Branch IDs (comma separated)" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
                   </div>
                 )}
 
-                <div className="md:col-span-2 flex gap-md mt-sm">
-                  <button type="submit" disabled={userFormLoading} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg transition-colors disabled:opacity-50">
+                <div className="md:col-span-2 flex gap-2">
+                  <button type="submit" disabled={userFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
                     {userFormLoading ? 'Creating...' : 'Create User'}
                   </button>
-                  <button type="button" onClick={() => setUserFormOpen(false)} className="bg-white/5 hover:bg-white/10 text-on-surface font-label-md text-label-md px-lg py-sm rounded-lg transition-colors border border-white/10">
-                    Cancel
-                  </button>
+                  <button type="button" onClick={() => setUserFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
                 </div>
               </form>
             </div>
           )}
 
           {usersLoading ? (
-            <div className="glass-panel flex justify-center rounded-xl py-xl">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="surface-panel flex justify-center rounded-lg py-14">
+              <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
             </div>
           ) : (
-            <div className="glass-panel rounded-xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[800px] text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-white/10 bg-white/5">
-                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">User</th>
-                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Email</th>
-                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Role</th>
-                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Scope</th>
-                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+            <div className="table-shell overflow-x-auto">
+              <table className="w-full min-w-[820px]">
+                <thead className="bg-white/[0.04]">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">User</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Role</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Scope</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {users.map((user) => (
+                    <tr key={user.uid} className="transition-colors hover:bg-white/[0.035]">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 text-sm font-semibold text-white">
+                            {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                          <p className="font-medium text-white">{user.displayName || 'Unknown'}</p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-slate-300">{user.email}</td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${roleColors[user.role]}`}>
+                          {roleLabels[user.role]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-col gap-1 text-xs text-slate-400">
+                          {user.companyId && <span>Company: {user.companyId}</span>}
+                          {user.branchIds && user.branchIds.length > 0 && <span>Branches: {user.branchIds.join(', ')}</span>}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <button onClick={() => handleDeleteUser(user.uid)} className="rounded-lg px-3 py-2 text-sm text-red-200 transition-colors hover:bg-red-500/10">
+                          Delete
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {users.map((user) => (
-                      <tr key={user.uid} className="hover:bg-white/5 transition-colors group">
-                        <td className="px-md py-sm">
-                          <div className="flex items-center gap-sm">
-                            <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-lg">
-                              {user.displayName?.charAt(0).toUpperCase() || 'U'}
-                            </div>
-                            <span className="font-label-md text-label-md text-on-surface">{user.displayName || 'Unknown'}</span>
-                          </div>
-                        </td>
-                        <td className="px-md py-sm text-on-surface-variant text-body-md">{user.email}</td>
-                        <td className="px-md py-sm">
-                          <span className={`inline-block px-sm py-[2px] rounded-full text-[11px] font-bold uppercase tracking-wider border ${roleColors[user.role]}`}>
-                            {roleLabels[user.role]}
-                          </span>
-                        </td>
-                        <td className="px-md py-sm">
-                          <div className="flex flex-col gap-[2px]">
-                            {user.companyId && <span className="text-on-surface-variant text-[12px] font-data-mono">C: {user.companyId}</span>}
-                            {user.branchIds && user.branchIds.length > 0 && <span className="text-on-surface-variant text-[12px] font-data-mono">B: {user.branchIds.join(', ')}</span>}
-                          </div>
-                        </td>
-                        <td className="px-md py-sm text-right">
-                          <button onClick={() => handleDeleteUser(user.uid)} className="text-tertiary-container/70 hover:text-tertiary-container hover:bg-tertiary-container/10 p-sm rounded-lg transition-colors" title="Delete User">
-                            <span className="material-symbols-outlined text-[20px]">delete</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
       )}
 
       {activeTab === 'orgs' && (
-        <div className="space-y-lg">
-           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md">
-              <h2 className="font-headline-md text-headline-md text-on-surface">Hierarchy Management</h2>
-              <div className="flex gap-sm">
-                {userData?.role === 'super_admin' && (
-                  <button onClick={() => setCompanyFormOpen(true)} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors">
-                    <span className="material-symbols-outlined text-[18px]">domain_add</span>
-                    Add Company
-                  </button>
-                )}
-                {(userData?.role === 'super_admin' || userData?.role === 'head_office') && (
-                  <button onClick={() => setBranchFormOpen(true)} className="bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors">
-                    <span className="material-symbols-outlined text-[18px]">add_business</span>
-                    Add Branch
-                  </button>
-                )}
-              </div>
+        <div className="space-y-4">
+           <div className="flex flex-wrap gap-2">
+            {userData?.role === 'super_admin' && (
+              <button onClick={() => setCompanyFormOpen(true)} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
+                Add Company
+              </button>
+            )}
+            {(userData?.role === 'super_admin' || userData?.role === 'head_office') && (
+              <button onClick={() => setBranchFormOpen(true)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">
+                <Layers3 className="mr-2 inline h-4 w-4" />
+                Add Branch
+              </button>
+            )}
           </div>
 
           {companyFormOpen && (
-            <div className="glass-panel p-gutter rounded-xl">
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-md">Create Company</h3>
-              <form onSubmit={handleSubmitCompany(handleCreateCompany)} className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                <div>
-                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Company Name</label>
-                  <input {...registerCompany('name')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                </div>
-                <div>
-                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Description</label>
-                  <input {...registerCompany('description')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                </div>
-                <div className="md:col-span-2 flex gap-md mt-sm">
-                  <button type="submit" disabled={companyFormLoading} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg transition-colors disabled:opacity-50">
+            <div className="surface-panel rounded-lg p-5">
+              <h3 className="mb-4 text-lg font-semibold text-white">Create Company</h3>
+              <form onSubmit={handleSubmitCompany(handleCreateCompany)} className="grid gap-4 md:grid-cols-2">
+                <input {...registerCompany('name')} placeholder="Company Name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                <input {...registerCompany('description')} placeholder="Description" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                <div className="md:col-span-2 flex gap-2">
+                  <button type="submit" disabled={companyFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
                     {companyFormLoading ? 'Creating...' : 'Create'}
                   </button>
-                  <button type="button" onClick={() => setCompanyFormOpen(false)} className="bg-white/5 hover:bg-white/10 text-on-surface font-label-md text-label-md px-lg py-sm rounded-lg transition-colors border border-white/10">Cancel</button>
+                  <button type="button" onClick={() => setCompanyFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
                 </div>
               </form>
             </div>
           )}
 
           {branchFormOpen && (
-            <div className="glass-panel p-gutter rounded-xl">
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-md">Create Branch</h3>
-              <form onSubmit={handleSubmitBranch(handleCreateBranch)} className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                <div>
-                   <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Branch Name</label>
-                  <input {...registerBranch('name')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                </div>
+            <div className="surface-panel rounded-lg p-5">
+              <h3 className="mb-4 text-lg font-semibold text-white">Create Branch</h3>
+              <form onSubmit={handleSubmitBranch(handleCreateBranch)} className="grid gap-4 md:grid-cols-2">
+                <input {...registerBranch('name')} placeholder="Branch Name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
                 {userData?.role === 'super_admin' && (
-                  <div>
-                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Company ID</label>
-                    <input {...registerBranch('companyId')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                  </div>
+                  <input {...registerBranch('companyId')} placeholder="Company ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
                 )}
-                <div className="md:col-span-2">
-                   <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Address</label>
-                  <input {...registerBranch('address')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                </div>
-                <div>
-                   <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Manager/Supervisor</label>
-                  <input {...registerBranch('supervisorName')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                </div>
-                <div>
-                   <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Contact Number</label>
-                  <input {...registerBranch('contactNumber')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                </div>
-                <div className="md:col-span-2 flex gap-md mt-sm">
-                  <button type="submit" disabled={branchFormLoading} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg transition-colors disabled:opacity-50">
+                <input {...registerBranch('address')} placeholder="Address" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                <input {...registerBranch('supervisorName')} placeholder="Manager/Supervisor" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                <input {...registerBranch('contactNumber')} placeholder="Contact Number" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                <div className="md:col-span-2 flex gap-2">
+                  <button type="submit" disabled={branchFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
                     {branchFormLoading ? 'Creating...' : 'Create'}
                   </button>
-                  <button type="button" onClick={() => setBranchFormOpen(false)} className="bg-white/5 hover:bg-white/10 text-on-surface font-label-md text-label-md px-lg py-sm rounded-lg transition-colors border border-white/10">Cancel</button>
+                  <button type="button" onClick={() => setBranchFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
                 </div>
               </form>
             </div>
           )}
 
-          <div className="grid gap-gutter lg:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-2">
             {userData?.role === 'super_admin' && (
-              <div className="glass-panel p-gutter rounded-xl">
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-md flex items-center gap-xs">
-                  <span className="material-symbols-outlined text-primary">domain</span>
-                  Companies
-                </h3>
-                {orgsLoading ? <div className="py-xl flex justify-center"><Loader2 className="animate-spin text-primary" /></div> : (
-                  <div className="space-y-sm">
-                    {companies.map(c => (
-                      <div key={c.id} className="bg-white/5 border border-white/10 rounded-lg p-md flex flex-col hover:border-white/20 transition-colors">
-                        <span className="font-label-md text-label-md text-on-surface">{c.name}</span>
-                        <span className="font-data-mono text-[12px] text-on-surface-variant mt-xs">ID: {c.id}</span>
-                      </div>
-                    ))}
+              <div className="surface-panel rounded-lg p-5">
+                <h3 className="text-lg font-semibold text-white mb-4"><Building2 className="inline mr-2" />Companies</h3>
+                {orgsLoading ? <Loader2 className="animate-spin" /> : companies.map(c => (
+                  <div key={c.id} className="p-3 bg-white/[0.03] border border-white/10 rounded-lg mb-2">
+                    <p className="text-white font-semibold">{c.name}</p>
+                    <p className="text-xs text-slate-500">ID: {c.id}</p>
                   </div>
-                )}
+                ))}
               </div>
             )}
-            <div className="glass-panel p-gutter rounded-xl">
-               <h3 className="font-headline-md text-headline-md text-on-surface mb-md flex items-center gap-xs">
-                  <span className="material-symbols-outlined text-secondary">storefront</span>
-                  Branches
-               </h3>
-               {orgsLoading ? <div className="py-xl flex justify-center"><Loader2 className="animate-spin text-primary" /></div> : (
-                 <div className="space-y-sm">
-                   {branches.map(b => (
-                    <div key={b.id} className="bg-white/5 border border-white/10 rounded-lg p-md flex flex-col hover:border-white/20 transition-colors">
-                      <div className="flex justify-between items-start">
-                        <span className="font-label-md text-label-md text-on-surface">{b.name}</span>
-                        {b.supervisorName && <span className="bg-secondary/10 text-secondary text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Mgr: {b.supervisorName}</span>}
-                      </div>
-                      <span className="font-data-mono text-[12px] text-on-surface-variant mt-xs">ID: {b.id} • Company: {b.companyId}</span>
-                    </div>
-                  ))}
-                 </div>
-               )}
+            <div className="surface-panel rounded-lg p-5">
+               <h3 className="text-lg font-semibold text-white mb-4"><MapPin className="inline mr-2" />Branches</h3>
+               {orgsLoading ? <Loader2 className="animate-spin" /> : branches.map(b => (
+                  <div key={b.id} className="p-3 bg-white/[0.03] border border-white/10 rounded-lg mb-2">
+                    <p className="text-white font-semibold">{b.name}</p>
+                    <p className="text-xs text-slate-500">ID: {b.id} | Company: {b.companyId}</p>
+                    {b.supervisorName && <p className="text-xs text-slate-400 mt-1">Mgr: {b.supervisorName}</p>}
+                  </div>
+                ))}
             </div>
           </div>
         </div>
       )}
 
       {activeTab === 'panels' && (
-        <div className="space-y-lg">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md">
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-headline-md text-headline-md text-on-surface">Panel Provisioning</h2>
+              <h2 className="text-lg font-semibold text-white">Panel Provisioning</h2>
             </div>
-            <div className="flex gap-sm">
-              <button onClick={loadPanels} disabled={panelsLoading} className="bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors disabled:opacity-50">
-                <RefreshCw className={`h-4 w-4 ${panelsLoading ? 'animate-spin' : ''}`} /> Refresh
+            {(userData?.role !== 'end_user') && (
+              <button onClick={() => setPanelFormOpen(true)} className="btn-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold">
+                <Plus className="h-5 w-5" /><span>Add Panel</span>
               </button>
-              {(userData?.role !== 'end_user') && (
-                <button onClick={() => setPanelFormOpen(true)} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors">
-                  <span className="material-symbols-outlined text-[18px]">add_box</span>
-                  Add Panel
-                </button>
-              )}
-            </div>
+            )}
           </div>
 
-          <div className="glass-panel p-gutter rounded-xl">
+          <div className="surface-panel rounded-lg p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Provisioned Panels</h3>
+              <button onClick={loadPanels} disabled={panelsLoading} className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
+                <RefreshCw className={`h-4 w-4 ${panelsLoading ? 'animate-spin' : ''}`} /> Refresh
+              </button>
+            </div>
+
             {panelsLoading ? (
-              <div className="py-xl flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+              <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-amber-300" /></div>
             ) : panels.length === 0 ? (
-              <div className="py-xl text-center text-on-surface-variant font-label-md text-label-md">No panels provisioned yet.</div>
+              <p className="text-sm text-slate-500">No panels provisioned yet.</p>
             ) : (
-              <div className="grid gap-md sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {panels.map((panel) => (
-                  <div key={panel.serial} className="bg-white/5 border border-white/10 rounded-xl p-md flex flex-col group hover:border-primary/30 transition-colors">
-                    <div className="flex items-start justify-between mb-sm">
+                  <div key={panel.serial} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-headline-md text-headline-md text-on-surface truncate pr-2">{panel.name}</p>
-                        <p className="font-data-mono text-label-sm text-on-surface-variant mt-xs">SN: {panel.serial}</p>
+                        <p className="font-semibold text-white">{panel.name}</p>
+                        <p className="mt-1 font-mono text-xs text-slate-500">{panel.serial}</p>
                       </div>
                       {(userData?.role !== 'end_user') && (
-                        <button onClick={() => handleDeletePanel(panel.serial)} className="text-tertiary-container/70 hover:text-tertiary-container bg-tertiary-container/10 p-[4px] rounded transition-colors opacity-0 group-hover:opacity-100" title="Delete Panel">
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        <button onClick={() => handleDeletePanel(panel.serial)} className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-500/10">
+                          <Trash2 className="inline h-4 w-4" />
                         </button>
                       )}
                     </div>
-                    <div className="flex flex-col gap-[2px] mt-auto">
-                      <span className="text-[12px] text-on-surface-variant">Company: <span className="font-data-mono text-on-surface">{panel.companyId}</span></span>
-                      <span className="text-[12px] text-on-surface-variant">Branch: <span className="font-data-mono text-on-surface">{panel.branchId}</span></span>
-                      {panel.mobileNumber && <span className="text-[12px] text-on-surface-variant">Mobile: <span className="font-data-mono text-on-surface">{panel.mobileNumber}</span></span>}
+                    <div className="mt-3 text-sm text-slate-400">
+                      <p>Company ID: {panel.companyId}</p>
+                      <p>Branch ID: {panel.branchId}</p>
+                      {panel.mobileNumber && <p>Mobile: {panel.mobileNumber}</p>}
                     </div>
                   </div>
                 ))}
@@ -652,45 +628,36 @@ export function AdminSettings() {
           {panelFormOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setPanelFormOpen(false)} />
-              <div className="glass-panel relative w-full max-w-md rounded-xl p-gutter shadow-2xl">
-                <div className="mb-lg flex items-center justify-between border-b border-white/10 pb-md">
-                  <h3 className="font-headline-md text-headline-md text-on-surface">Provision New Panel</h3>
-                  <button onClick={() => setPanelFormOpen(false)} className="text-on-surface-variant hover:text-white transition-colors">
-                    <span className="material-symbols-outlined text-[24px]">close</span>
-                  </button>
+              <div className="surface-panel relative w-full max-w-md rounded-lg p-6">
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <h3 className="text-xl font-semibold text-white">Add New Panel</h3>
+                  <button onClick={() => setPanelFormOpen(false)} className="text-slate-400 hover:text-white"><XCircle className="h-5 w-5" /></button>
                 </div>
 
-                <form onSubmit={handleSubmitPanel(handleCreatePanel)} className="space-y-md">
+                <form onSubmit={handleSubmitPanel(handleCreatePanel)} className="space-y-4">
                   <div>
-                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Serial Number</label>
-                    <input {...registerPanel('serial')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors font-data-mono" />
-                    {panelErrors.serial && <p className="mt-1 text-xs text-tertiary-container">{panelErrors.serial.message}</p>}
+                    <input {...registerPanel('serial')} placeholder="Panel Serial Number" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                    {panelErrors.serial && <p className="mt-1 text-xs text-red-300">{panelErrors.serial.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Panel Name</label>
-                    <input {...registerPanel('name')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                    {panelErrors.name && <p className="mt-1 text-xs text-tertiary-container">{panelErrors.name.message}</p>}
+                    <input {...registerPanel('name')} placeholder="Panel Name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                    {panelErrors.name && <p className="mt-1 text-xs text-red-300">{panelErrors.name.message}</p>}
                   </div>
                   {userData?.role === 'super_admin' && (
                     <div>
-                      <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Company ID</label>
-                      <input {...registerPanel('companyId')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                      <input {...registerPanel('companyId')} placeholder="Company ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
                     </div>
                   )}
                   <div>
-                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Branch ID</label>
-                    <input {...registerPanel('branchId')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
-                    {panelErrors.branchId && <p className="mt-1 text-xs text-tertiary-container">{panelErrors.branchId.message}</p>}
+                    <input {...registerPanel('branchId')} placeholder="Branch ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                    {panelErrors.branchId && <p className="mt-1 text-xs text-red-300">{panelErrors.branchId.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Configured Mobile Number (Optional)</label>
-                    <input {...registerPanel('mobileNumber')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                    <input {...registerPanel('mobileNumber')} placeholder="Configured Mobile Number" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
                   </div>
-                  <div className="pt-sm">
-                    <button type="submit" disabled={panelFormLoading} className="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-lg py-md rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-xs">
-                      {panelFormLoading ? <Loader2 className="animate-spin" /> : <><span className="material-symbols-outlined text-[20px]">router</span> Provision Panel</>}
-                    </button>
-                  </div>
+                  <button type="submit" disabled={panelFormLoading} className="btn-primary w-full rounded-lg px-4 py-3 text-sm font-semibold">
+                    {panelFormLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Provision Panel'}
+                  </button>
                 </form>
               </div>
             </div>

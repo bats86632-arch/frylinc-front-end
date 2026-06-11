@@ -5,13 +5,26 @@ import { PanelService } from '../api/PanelService';
 import { useAuth } from '../contexts/AuthContext';
 import { DEFAULT_PANEL_COMMANDS } from '../config/panelDefaults';
 import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  History,
+  Loader2,
+  Play,
   RefreshCw,
-  Loader2
+  Settings
 } from 'lucide-react';
 import { formatDateTime } from '../utils/formatters';
 import { Event } from '../types';
 
 type Tab = 'zones' | 'controls' | 'history';
+
+const tabs: Array<{ id: Tab; label: string; icon: typeof Settings }> = [
+  { id: 'zones', label: 'Zone Status', icon: Settings },
+  { id: 'controls', label: 'Controls', icon: Play },
+  { id: 'history', label: 'Event History', icon: History }
+];
 
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (typeof error === 'object' && error !== null && 'response' in error) {
@@ -20,6 +33,7 @@ function getApiErrorMessage(error: unknown, fallback: string) {
       return response.data.message;
     }
   }
+
   return fallback;
 }
 
@@ -57,6 +71,8 @@ export function PanelDetail() {
     }
   }, [activeTab, loadEvents, serial]);
 
+
+
   const handleSendCommand = async (command: string) => {
     if (!serial) return;
 
@@ -77,9 +93,9 @@ export function PanelDetail() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="glass-panel rounded-xl px-8 py-7 text-center">
-          <RefreshCw className="mx-auto mb-4 h-8 w-8 animate-spin text-tertiary-container" />
-          <p className="font-label-md text-label-md text-on-surface-variant">Loading panel details...</p>
+        <div className="surface-panel rounded-lg px-8 py-7 text-center">
+          <RefreshCw className="mx-auto mb-4 h-8 w-8 animate-spin text-amber-300" />
+          <p className="text-sm font-medium text-slate-300">Loading panel details...</p>
         </div>
       </div>
     );
@@ -88,17 +104,17 @@ export function PanelDetail() {
   if (error || !panel) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="glass-panel max-w-md rounded-xl p-8 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-tertiary-container/10 text-tertiary-container">
-            <span className="material-symbols-outlined text-[32px]">warning</span>
+        <div className="surface-panel max-w-md rounded-lg p-8 text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/10 text-red-200">
+            <AlertTriangle className="h-7 w-7" />
           </div>
-          <h3 className="font-headline-md text-headline-md text-on-surface">Panel Not Found</h3>
-          <p className="mt-2 text-sm leading-6 text-on-surface-variant">
+          <h3 className="text-lg font-semibold text-white">Panel Not Found</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
             The panel with serial "{serial}" could not be found.
           </p>
           <button
             onClick={() => navigate('/')}
-            className="bg-primary/20 hover:bg-primary/30 mt-5 rounded-lg px-4 py-2.5 font-label-md text-label-md text-primary transition-all"
+            className="btn-primary mt-5 rounded-lg px-4 py-2.5 text-sm font-semibold"
           >
             Go to Dashboard
           </button>
@@ -110,199 +126,284 @@ export function PanelDetail() {
   const normalizedPanel = {
     ...panel,
     zones: Array.isArray(panel.zones) ? panel.zones : [],
+    allowedCommands: Array.isArray(panel.allowedCommands) ? panel.allowedCommands : []
   };
 
-  const panelCommands = DEFAULT_PANEL_COMMANDS;
+  const panelCommands = normalizedPanel.allowedCommands.length > 0 ? normalizedPanel.allowedCommands : DEFAULT_PANEL_COMMANDS;
 
   const hasAlarm = normalizedPanel.alarm;
   const activeZones = normalizedPanel.zones.filter(Boolean).length;
   const visibleZones = Math.min(normalizedPanel.zoneCount || 0, 64);
 
   return (
-    <div className="max-w-[1440px] mx-auto px-margin py-lg space-y-lg">
-      <header className="flex justify-between items-start border-b border-white/10 pb-md">
-        <div>
-          <Link to="/" className="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md flex items-center gap-xs mb-sm">
-            <span className="material-symbols-outlined text-sm">arrow_back</span>
-            Back to Dashboard
-          </Link>
-          <div className="flex items-center gap-md">
-            <h1 className="font-headline-lg text-headline-lg text-on-surface">{normalizedPanel.name}</h1>
-            {hasAlarm && (
-              <div className="bg-tertiary-container/20 border border-tertiary-container text-tertiary-container px-sm py-xs rounded-full flex items-center gap-xs animate-pulse">
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>report</span>
-                <span className="font-label-md text-label-md font-bold">ALARM ACTIVE</span>
-              </div>
-            )}
-          </div>
-          <p className="text-on-surface-variant font-label-md text-label-md mt-xs">SN: {normalizedPanel.serial} • {normalizedPanel.zoneCount} Total Zones {normalizedPanel.ipAddress && `• IP: ${normalizedPanel.ipAddress}`}</p>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <section className="surface-panel rounded-lg p-5">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 gap-4">
+            <Link
+              to="/"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+              aria-label="Back to dashboard"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
 
-      <nav className="flex gap-md border-b border-white/10">
-        <button onClick={() => setActiveTab('zones')} className={`pb-sm font-label-md text-label-md transition-colors ${activeTab === 'zones' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>Zone Status</button>
-        <button onClick={() => setActiveTab('controls')} className={`pb-sm font-label-md text-label-md transition-colors ${activeTab === 'controls' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>Controls</button>
-        <button onClick={() => setActiveTab('history')} className={`pb-sm font-label-md text-label-md transition-colors ${activeTab === 'history' ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>Event History</button>
-      </nav>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="truncate text-3xl font-semibold leading-tight text-white">{normalizedPanel.name}</h1>
+                {hasAlarm && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-100">
+                    <AlertTriangle className="h-4 w-4" />
+                    ALARM ACTIVE
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400">
+                <span className="font-mono text-slate-300">{normalizedPanel.serial}</span>
+                <span>{normalizedPanel.zoneCount} Zones</span>
+                {normalizedPanel.ipAddress && <span className="font-mono text-slate-300">{normalizedPanel.ipAddress}</span>}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:w-[420px]">
+            <div className="surface-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-slate-500">Total Zones</p>
+              <p className="mt-1 text-xl font-semibold text-white">{normalizedPanel.zoneCount}</p>
+            </div>
+            <div className="surface-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-slate-500">In Alarm</p>
+              <p className={`mt-1 text-xl font-semibold ${activeZones > 0 ? 'text-red-200' : 'text-slate-300'}`}>
+                {activeZones}
+              </p>
+            </div>
+            <div className="surface-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-slate-500">Commands</p>
+              <p className="mt-1 text-xl font-semibold text-amber-200">{panelCommands.length}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="surface-muted flex flex-col gap-2 rounded-lg p-1 sm:inline-flex sm:flex-row">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
+                : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+            }`}
+          >
+            <tab.icon className="h-4 w-4" />
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
 
       {activeTab === 'zones' && (
-        <div className="space-y-lg">
-          <div className="glass-panel p-gutter rounded-xl">
-            <div className="mb-md flex justify-between items-center">
-              <h2 className="font-headline-md text-headline-md text-on-surface">Zone Map</h2>
-              <div className="flex gap-md">
-                <div className="flex items-center gap-xs text-on-surface-variant text-label-sm">
-                  <div className="w-3 h-3 bg-tertiary-container rounded-[2px] shadow-[0_0_10px_rgba(255,84,81,0.5)]"></div>
-                  Alarm
+        <div className="space-y-6">
+          <section className="surface-panel rounded-lg p-5">
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Zone Status Grid</h2>
+                <p className="mt-1 text-sm text-slate-500">{visibleZones} zones displayed</p>
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-[3px] bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.75)]" />
+                  <span className="text-slate-400">Alarm</span>
                 </div>
-                <div className="flex items-center gap-xs text-on-surface-variant text-label-sm">
-                  <div className="w-3 h-3 bg-white/10 rounded-[2px]"></div>
-                  Normal
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-[3px] bg-slate-700" />
+                  <span className="text-slate-400">Normal</span>
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-16 gap-xs">
+
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-8 lg:grid-cols-[repeat(16,minmax(0,1fr))]">
               {Array.from({ length: visibleZones }).map((_, idx) => {
                 const zoneAlarm = panel.zones[idx] || false;
                 return (
                   <div
                     key={idx}
-                    className={`aspect-square rounded-md flex items-center justify-center font-data-mono text-sm transition-all ${
+                    className={`aspect-square rounded-lg border text-sm font-semibold transition-all ${
                       zoneAlarm
-                        ? 'bg-tertiary-container text-white shadow-[0_0_15px_rgba(255,84,81,0.6)] font-bold'
-                        : 'bg-white/5 text-on-surface-variant border border-white/5'
-                    }`}
+                        ? 'border-red-300/40 bg-red-500 text-white shadow-lg shadow-red-950/30'
+                        : 'border-white/10 bg-white/[0.04] text-slate-400 hover:border-white/20 hover:bg-white/[0.07]'
+                    } flex items-center justify-center`}
+                    title={`Zone ${idx + 1}: ${zoneAlarm ? 'ALARM' : 'Normal'}`}
                   >
                     {idx + 1}
                   </div>
                 );
               })}
             </div>
-          </div>
+          </section>
 
-          {activeZones > 0 && (
-            <div className="glass-panel-raised p-gutter rounded-xl border-tertiary-container/30">
-              <h3 className="font-headline-md text-headline-md text-tertiary-container mb-md flex items-center gap-xs">
-                <span className="material-symbols-outlined">warning</span> Active Alarms
+          {panel.zones.some((z) => z) && (
+            <section className="rounded-lg border border-red-300/25 bg-red-500/10 p-5">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-red-100">
+                <AlertTriangle className="h-5 w-5" />
+                Active Alarms
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-sm">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {panel.zones.map((zoneAlarm, idx) =>
                   zoneAlarm ? (
-                    <div key={idx} className="bg-tertiary-container/10 border border-tertiary-container/30 rounded-lg p-md">
-                      <span className="font-label-md text-label-md text-on-surface-variant">Zone {idx + 1}</span>
-                      <p className="font-headline-md text-headline-md text-tertiary-container mt-xs">ALARM ACTIVE</p>
+                    <div
+                      key={idx}
+                      className="rounded-lg border border-red-300/25 bg-slate-950/60 p-4"
+                    >
+                      <p className="font-semibold text-red-100">Zone {idx + 1}</p>
+                      <p className="mt-1 text-xs text-red-200/70">ALARM ACTIVE</p>
                     </div>
                   ) : null
                 )}
               </div>
-            </div>
+            </section>
           )}
         </div>
       )}
 
       {activeTab === 'controls' && (
-        <div className="glass-panel p-gutter rounded-xl">
-          <h2 className="font-headline-md text-headline-md text-on-surface mb-md">Panel Controls</h2>
-          
+        <div className="space-y-5">
           {!canControl && (
-            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-200 rounded-lg p-md mb-md">
-              You do not have permission to execute commands on this panel.
+            <div className="rounded-lg border border-amber-300/25 bg-amber-400/10 p-4">
+              <p className="text-sm text-amber-100">
+                You do not have permission to execute commands on this panel.
+              </p>
             </div>
           )}
 
           {commandError && (
-            <div className="bg-tertiary-container/10 border border-tertiary-container/30 text-tertiary-container rounded-lg p-md mb-md">
-              {commandError}
+            <div className="rounded-lg border border-red-300/25 bg-red-500/10 p-4">
+              <p className="text-sm text-red-100">{commandError}</p>
             </div>
           )}
 
           {commandSuccess && (
-            <div className="bg-secondary/10 border border-secondary/30 text-secondary rounded-lg p-md mb-md flex items-center gap-xs">
-              <span className="material-symbols-outlined">check_circle</span>
-              {commandSuccess}
+            <div className="flex items-center gap-2 rounded-lg border border-emerald-300/25 bg-emerald-400/10 p-4">
+              <CheckCircle className="h-5 w-5 text-emerald-300" />
+              <p className="text-sm font-medium text-emerald-100">{commandSuccess}</p>
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-md">
-            {panelCommands.map((command) => (
-              <button
-                key={command}
-                onClick={() => handleSendCommand(command)}
-                disabled={!canControl || commandLoading !== null}
-                className={`flex items-center gap-sm p-md rounded-xl border transition-all text-left ${
-                  commandLoading === command
-                    ? 'border-primary/50 bg-primary/10 text-primary'
-                    : 'border-white/10 bg-white/5 text-on-surface hover:bg-white/10 hover:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed'
-                }`}
-              >
-                {commandLoading === command ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                ) : (
-                  <span className="material-symbols-outlined text-primary">play_arrow</span>
-                )}
-                <span className="font-label-md text-label-md">{command}</span>
-              </button>
-            ))}
-          </div>
+          <section className="surface-panel rounded-lg p-5">
+            <div className="mb-5">
+              <h3 className="text-lg font-semibold text-white">Available Commands</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Commands are sent to the selected panel.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {panelCommands.map((command) => (
+                <button
+                  key={command}
+                  onClick={() => handleSendCommand(command)}
+                  disabled={!canControl || commandLoading !== null}
+                  className={`rounded-lg border p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
+                    commandLoading === command
+                      ? 'border-amber-300/40 bg-amber-400/10 text-amber-100'
+                      : 'border-white/10 bg-white/[0.03] text-white hover:border-amber-300/35 hover:bg-amber-400/10'
+                  }`}
+                >
+                  {commandLoading === command ? (
+                    <div className="flex items-center gap-3">
+                      <Loader2 className="h-5 w-5 animate-spin text-amber-200" />
+                      <span className="text-sm font-semibold">Sending...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-black/20">
+                        <Play className="h-4 w-4" />
+                      </span>
+                      <span className="text-sm font-semibold">{command}</span>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+
+
         </div>
       )}
 
       {activeTab === 'history' && (
-        <div className="glass-panel rounded-xl overflow-hidden">
-          <div className="p-md border-b border-white/5 flex justify-between items-center">
-            <h2 className="font-headline-md text-headline-md text-on-surface">Event History</h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-white">Event History</h2>
+              <p className="mt-1 text-sm text-slate-500">Panel event stream</p>
+            </div>
             <button
               onClick={loadEvents}
               disabled={eventsLoading}
-              className="text-primary text-label-md flex items-center gap-xs hover:underline disabled:opacity-50"
+              className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
             >
               <RefreshCw className={`h-4 w-4 ${eventsLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
           </div>
-          
-          <div className="p-0">
-            {eventsLoading ? (
-              <div className="py-xl flex justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : events.length === 0 ? (
-              <div className="py-xl text-center text-on-surface-variant font-label-md text-label-md">
-                No events recorded.
-              </div>
-            ) : (
-              <div className="divide-y divide-white/5 max-h-[600px] overflow-y-auto">
-                {events.map((event) => {
-                  const isAlarm = event.type.includes('alarm');
-                  const isWarning = event.type.includes('warning');
-                  const colorClass = isAlarm ? 'bg-tertiary-container' : isWarning ? 'bg-amber-500' : 'bg-primary';
-                  const textClass = isAlarm ? 'text-tertiary-container' : isWarning ? 'text-amber-500' : 'text-on-surface-variant';
 
-                  return (
-                    <div key={event.id} className="p-md hover:bg-white/5 transition-colors flex items-start sm:items-center gap-md flex-col sm:flex-row">
-                      <div className="flex items-center gap-sm min-w-[140px]">
-                        <div className={`w-2 h-2 rounded-full ${colorClass}`}></div>
-                        <span className="font-data-mono text-label-md text-on-surface-variant">{formatDateTime(event.timestamp)}</span>
-                      </div>
-                      <div className="flex-grow">
-                        <div className="flex items-center gap-sm mb-xs">
-                          <span className={`uppercase font-bold text-[11px] tracking-wider px-2 py-0.5 rounded-full border ${isAlarm ? 'border-tertiary-container/30 bg-tertiary-container/10 text-tertiary-container' : isWarning ? 'border-amber-500/30 bg-amber-500/10 text-amber-500' : 'border-white/10 bg-white/5 text-on-surface-variant'}`}>
-                            {event.type}
-                          </span>
-                          {event.zoneNumber && (
-                            <span className="font-data-mono text-label-sm text-on-surface-variant">Zone {event.zoneNumber}</span>
-                          )}
-                        </div>
-                        <span className={`font-body-md text-body-md ${isAlarm ? 'text-tertiary-container font-medium' : 'text-on-surface'}`}>
-                          {event.details}
+          {eventsLoading ? (
+            <div className="surface-panel flex justify-center rounded-lg py-14">
+              <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
+            </div>
+          ) : events.length === 0 ? (
+            <div className="surface-panel rounded-lg py-14 text-center">
+              <Clock className="mx-auto mb-4 h-12 w-12 text-slate-600" />
+              <p className="text-sm text-slate-400">No events recorded</p>
+            </div>
+          ) : (
+            <div className="table-shell overflow-x-auto">
+              <table className="w-full min-w-[720px]">
+                <thead className="bg-white/[0.04]">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
+                      Timestamp
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
+                      Type
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
+                      Details
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {events.map((event) => (
+                    <tr key={event.id} className="transition-colors hover:bg-white/[0.035]">
+                      <td className="px-4 py-3 font-mono text-sm text-slate-300">
+                        {formatDateTime(event.timestamp)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
+                            event.type.includes('alarm')
+                              ? 'border-red-300/30 bg-red-500/10 text-red-100'
+                              : event.type.includes('warning')
+                              ? 'border-amber-300/30 bg-amber-400/10 text-amber-100'
+                              : 'border-white/10 bg-white/[0.04] text-slate-300'
+                          }`}
+                        >
+                          {event.type}
                         </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-400">
+                        {event.details}
+                        {event.zoneNumber && (
+                          <span className="ml-2 font-mono text-slate-500">(Zone {event.zoneNumber})</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

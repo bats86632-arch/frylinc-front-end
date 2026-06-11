@@ -1,68 +1,68 @@
 import { useMemo, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Bell,
-  ChevronDown,
-  Flame,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Settings,
-  ShieldCheck,
-  X
-} from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePanels } from '../hooks/usePanels';
 import { Role } from '../types';
 
+/* ------------------------------------------------------------------ */
+/*  Navigation config                                                  */
+/* ------------------------------------------------------------------ */
 const navigation: Array<{
   name: string;
   href: string;
-  icon: typeof LayoutDashboard;
+  icon: string;          // Material Symbols Outlined icon name
   roles: Role[];
 }> = [
   {
     name: 'Dashboard',
     href: '/',
-    icon: LayoutDashboard,
-    roles: ['super_admin', 'head_office', 'system_integrator', 'end_user']
+    icon: 'dashboard',
+    roles: ['super_admin', 'head_office', 'system_integrator', 'end_user'],
   },
   {
     name: 'Admin Settings',
     href: '/admin',
-    icon: Settings,
-    roles: ['super_admin', 'head_office', 'system_integrator']
-  }
+    icon: 'settings',
+    roles: ['super_admin', 'head_office', 'system_integrator'],
+  },
 ];
 
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
 export function MainDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [displayNameDraft, setDisplayNameDraft] = useState('');
   const [savingDisplayName, setSavingDisplayName] = useState(false);
+
   const { userData, logout, hasRole, saveDisplayName } = useAuth();
   const { panels } = usePanels();
   const location = useLocation();
   const navigate = useNavigate();
 
+  /* ---- derived state ---- */
   const isActive = (path: string) => {
     if (path === '/') {
       return location.pathname === '/' || location.pathname.startsWith('/panel');
     }
-
     return location.pathname === path;
   };
 
-  const pageTitle = location.pathname === '/admin'
-    ? 'Admin Settings'
-    : location.pathname.startsWith('/panel')
-    ? 'Panel Details'
-    : 'Fire Alarm Panels';
+  const pageTitle =
+    location.pathname === '/admin'
+      ? 'Admin Settings'
+      : location.pathname.startsWith('/panel')
+        ? 'Panel Details'
+        : 'Fire Alarm Panels';
 
   const roleLabel = userData?.role?.replace(/_/g, ' ') || 'Operator';
-  const needsDisplayName = !userData?.displayName || userData.displayName === 'User';
+  const needsDisplayName =
+    !userData?.displayName || userData.displayName === 'User';
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
+
   const notifications = useMemo(
     () =>
       panels
@@ -70,12 +70,13 @@ export function MainDashboardLayout() {
         .map((panel) => ({
           id: panel.serial,
           title: panel.name,
-          message: `Alarm active on ${panel.serial}`
+          message: `Alarm active on ${panel.serial}`,
         })),
-    [panels]
+    [panels],
   );
   const notificationCount = notifications.length;
 
+  /* ---- handlers ---- */
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -84,7 +85,6 @@ export function MainDashboardLayout() {
   const handleSaveDisplayName = async () => {
     const nextValue = displayNameDraft.trim();
     if (!nextValue) return;
-
     setSavingDisplayName(true);
     try {
       await saveDisplayName(nextValue);
@@ -94,40 +94,63 @@ export function MainDashboardLayout() {
     }
   };
 
+  /* ================================================================ */
+  /*  RENDER                                                           */
+  /* ================================================================ */
   return (
-    <div className="min-h-screen console-bg text-slate-100">
+    <div className="min-h-screen bg-surface font-sans text-on-surface">
+      {/* ---------------------------------------------------------- */}
+      {/*  Mobile backdrop overlay                                    */}
+      {/* ---------------------------------------------------------- */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
+      {/* ---------------------------------------------------------- */}
+      {/*  Sidebar                                                    */}
+      {/* ---------------------------------------------------------- */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col border-r border-white/10 bg-[#070b10]/95 shadow-2xl shadow-black/40 backdrop-blur-xl transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col border-r border-outline-variant bg-surface-dim transition-transform duration-300 ease-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
-          <Link to="/" className="flex items-center gap-3" onClick={() => setSidebarOpen(false)}>
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/40">
-              <Flame className="h-6 w-6 text-white" />
+        {/* -- Logo area -- */}
+        <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-outline-variant px-5">
+          <Link
+            to="/"
+            className="flex items-center gap-3"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-fire to-amber-500 shadow-lg shadow-fire/20">
+              <span className="material-symbols-outlined text-[22px] text-white">
+                local_fire_department
+              </span>
             </div>
             <div>
-              <span className="block text-xl font-semibold leading-none text-white">Fyrlinc</span>
-              <span className="mt-1 block text-xs text-slate-500">Command Console</span>
+              <span className="block font-display text-lg font-semibold leading-none tracking-tight text-white">
+                Fyrlinc
+              </span>
+              <span className="mt-1 block text-[11px] font-medium tracking-wide text-on-surface-variant">
+                Monitoring Station
+              </span>
             </div>
           </Link>
+
+          {/* Close button — mobile only */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-white lg:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-white/5 hover:text-white lg:hidden"
             aria-label="Close sidebar"
           >
-            <X className="h-5 w-5" />
+            <span className="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
-        <nav className="flex-1 space-y-2 px-3 py-5">
+        {/* -- Navigation links -- */}
+        <nav className="flex-1 space-y-1 px-3 py-5">
           {filteredNav.map((item) => {
             const active = isActive(item.href);
 
@@ -135,21 +158,23 @@ export function MainDashboardLayout() {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`group relative flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all ${
-                  active
-                    ? 'bg-red-500/10 text-white shadow-[inset_3px_0_0_rgba(239,68,68,0.95)]'
-                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-white'
-                }`}
                 onClick={() => setSidebarOpen(false)}
+                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                  active
+                    ? 'border-l-[3px] border-l-primary bg-primary/[0.08] pl-[9px] text-white'
+                    : 'text-on-surface-variant hover:bg-white/[0.04] hover:text-white'
+                }`}
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border ${
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
                     active
-                      ? 'border-red-400/30 bg-red-500/10 text-red-200'
-                      : 'border-white/10 bg-white/[0.03] text-slate-400 group-hover:text-white'
+                      ? 'bg-primary/[0.12] text-primary'
+                      : 'bg-white/[0.03] text-on-surface-variant group-hover:bg-white/[0.06] group-hover:text-white'
                   }`}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <span className="material-symbols-outlined text-xl">
+                    {item.icon}
+                  </span>
                 </span>
                 <span>{item.name}</span>
               </Link>
@@ -157,121 +182,197 @@ export function MainDashboardLayout() {
           })}
         </nav>
 
-        <div className="m-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm text-slate-300">
-            <ShieldCheck className="h-4 w-4 text-emerald-300" />
-            <span>Secure session</span>
+        {/* -- Bottom secure session badge -- */}
+        <div className="mx-3 mb-4 rounded-xl border border-outline-variant bg-white/[0.02] p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm text-on-surface">
+            <span className="material-symbols-outlined text-lg text-secondary">
+              verified_user
+            </span>
+            <span className="font-medium">Secure session</span>
           </div>
-          <div className="flex items-center justify-between border-t border-white/10 pt-3">
-            <span className="text-xs text-slate-500">Role</span>
-            <span className="text-xs font-semibold capitalize text-slate-200">{roleLabel}</span>
+          <div className="flex items-center justify-between border-t border-outline-variant pt-3">
+            <span className="text-xs text-on-surface-variant">Role</span>
+            <span className="text-xs font-semibold capitalize text-on-surface">
+              {roleLabel}
+            </span>
           </div>
         </div>
       </aside>
 
+      {/* ---------------------------------------------------------- */}
+      {/*  Main wrapper (offset by sidebar on desktop)                */}
+      {/* ---------------------------------------------------------- */}
       <div className="lg:pl-[280px]">
-        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-white/10 bg-[#070b10]/80 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-4">
+        {/* -------------------------------------------------------- */}
+        {/*  Top header bar                                           */}
+        {/* -------------------------------------------------------- */}
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-outline-variant bg-surface-dim/80 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+          {/* Left cluster */}
+          <div className="flex min-w-0 items-center gap-3">
+            {/* Hamburger — mobile only */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-outline-variant bg-white/[0.03] text-on-surface-variant transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
               aria-label="Open sidebar"
             >
-              <Menu className="h-5 w-5" />
+              <span className="material-symbols-outlined text-xl">menu</span>
             </button>
 
             <div className="min-w-0">
-              <p className="truncate text-base font-semibold text-white sm:text-lg">{pageTitle}</p>
-              <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.75)]" />
+              <h1 className="truncate font-display text-base font-semibold text-white sm:text-lg">
+                {pageTitle}
+              </h1>
+              <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-on-surface-variant">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(74,222,128,0.6)]" />
                 <span>Live monitoring</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Right cluster */}
+          <div className="flex items-center gap-2">
+            {/* -- Notifications bell -- */}
             <div className="relative">
               <button
-                onClick={() => setNotificationOpen((value) => !value)}
-                className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                onClick={() => {
+                  setNotificationOpen((v) => !v);
+                  setUserMenuOpen(false);
+                }}
+                className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-outline-variant bg-white/[0.03] text-on-surface-variant transition-colors hover:bg-white/[0.06] hover:text-white"
                 aria-label="Notifications"
                 aria-expanded={notificationOpen}
                 aria-haspopup="menu"
               >
-                <Bell className="h-5 w-5" />
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border border-[#070b10] bg-red-500 px-1 text-[10px] font-bold text-white">
-                  {notificationCount}
+                <span className="material-symbols-outlined text-xl">
+                  notifications
                 </span>
+                {notificationCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-fire px-1 text-[10px] font-bold leading-none text-white ring-2 ring-surface-dim">
+                    {notificationCount}
+                  </span>
+                )}
               </button>
 
+              {/* Notification dropdown */}
               {notificationOpen && (
-                <div className="surface-panel absolute right-0 z-50 mt-3 w-80 rounded-lg p-3 shadow-2xl shadow-black/40">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                    <div>
-                      <p className="text-sm font-semibold text-white">Notifications</p>
-                      <p className="mt-1 text-xs text-slate-500">Live panel alerts</p>
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setNotificationOpen(false)}
+                  />
+                  <div className="absolute right-0 z-50 mt-2 w-80 animate-fade-in rounded-xl border border-outline-variant bg-surface-container p-3 shadow-2xl shadow-black/50">
+                    <div className="flex items-center justify-between border-b border-outline-variant pb-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">
+                          Notifications
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-on-surface-variant">
+                          Live panel alerts
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-outline-variant bg-white/[0.04] px-2.5 py-0.5 text-xs font-medium text-on-surface-variant">
+                        {notificationCount}
+                      </span>
                     </div>
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-slate-300">
-                      {notificationCount}
-                    </span>
-                  </div>
 
-                  {notificationCount === 0 ? (
-                    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-center">
-                      <p className="text-sm font-medium text-white">Nothing new here</p>
-                      <p className="mt-1 text-xs text-slate-500">You’ll see active alarms here when panels report them.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 pt-3">
-                      {notifications.map((notification) => (
-                        <div key={notification.id} className="rounded-lg border border-red-300/20 bg-red-500/10 p-3">
-                          <p className="text-sm font-semibold text-red-100">{notification.title}</p>
-                          <p className="mt-1 text-xs text-red-100/75">{notification.message}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                    {notificationCount === 0 ? (
+                      <div className="mt-3 rounded-lg border border-outline-variant bg-white/[0.02] p-4 text-center">
+                        <span className="material-symbols-outlined mb-2 text-2xl text-on-surface-variant">
+                          notifications_off
+                        </span>
+                        <p className="text-sm font-medium text-on-surface">
+                          All clear
+                        </p>
+                        <p className="mt-1 text-xs text-on-surface-variant">
+                          Active alarms will appear here when panels report
+                          them.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="mt-2 space-y-2">
+                        {notifications.map((n) => (
+                          <div
+                            key={n.id}
+                            className="rounded-lg border border-fire/20 bg-fire/[0.08] p-3"
+                          >
+                            <div className="flex items-start gap-2">
+                              <span className="material-symbols-outlined mt-0.5 text-base text-fire">
+                                warning
+                              </span>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-fire/90">
+                                  {n.title}
+                                </p>
+                                <p className="mt-0.5 text-xs text-on-surface-variant">
+                                  {n.message}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
 
+            {/* -- User menu -- */}
             <div className="relative">
               <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] py-1.5 pl-1.5 pr-3 text-slate-200 transition-colors hover:bg-white/[0.06]"
+                onClick={() => {
+                  setUserMenuOpen((v) => !v);
+                  setNotificationOpen(false);
+                }}
+                className="flex items-center gap-2.5 rounded-lg border border-outline-variant bg-white/[0.03] py-1.5 pl-1.5 pr-3 transition-colors hover:bg-white/[0.06]"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 text-sm font-semibold text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-blue-400 text-sm font-bold text-white">
                   {userData?.displayName?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <div className="hidden min-w-0 text-left sm:block">
-                  <p className="max-w-[160px] truncate text-sm font-semibold text-white">
+                  <p className="max-w-[140px] truncate text-sm font-semibold leading-tight text-white">
                     {userData?.displayName}
                   </p>
-                  <p className="text-xs capitalize text-slate-500">{roleLabel}</p>
+                  <p className="text-[11px] capitalize text-on-surface-variant">
+                    {roleLabel}
+                  </p>
                 </div>
-                <ChevronDown className="h-4 w-4 text-slate-500" />
+                <ChevronDown className="h-3.5 w-3.5 text-on-surface-variant" />
               </button>
 
+              {/* User dropdown */}
               {userMenuOpen && (
                 <>
                   <div
                     className="fixed inset-0 z-40"
                     onClick={() => setUserMenuOpen(false)}
                   />
-                  <div className="surface-panel absolute right-0 z-50 mt-3 w-64 rounded-lg p-2">
-                    <div className="border-b border-white/10 p-3">
-                      <p className="truncate text-sm font-semibold text-white">{userData?.displayName}</p>
-                      <p className="mt-1 truncate text-xs text-slate-500">{userData?.email}</p>
-                      <span className="mt-3 inline-flex rounded-full border border-amber-300/20 bg-amber-400/10 px-2.5 py-1 text-xs font-medium capitalize text-amber-200">
+                  <div className="absolute right-0 z-50 mt-2 w-64 animate-fade-in rounded-xl border border-outline-variant bg-surface-container p-1 shadow-2xl shadow-black/50">
+                    {/* User info header */}
+                    <div className="rounded-lg p-3">
+                      <p className="truncate text-sm font-semibold text-white">
+                        {userData?.displayName}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-on-surface-variant">
+                        {userData?.email}
+                      </p>
+                      <span className="mt-2.5 inline-flex items-center rounded-md border border-primary/20 bg-primary/[0.08] px-2 py-0.5 text-[11px] font-semibold capitalize text-primary">
                         {roleLabel}
                       </span>
                     </div>
+
+                    {/* Divider */}
+                    <div className="mx-2 border-t border-outline-variant" />
+
+                    {/* Sign out */}
                     <button
                       onClick={handleLogout}
-                      className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-red-200 transition-colors hover:bg-red-500/10"
+                      className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-on-surface-variant transition-colors hover:bg-fire/[0.08] hover:text-fire"
                     >
-                      <LogOut className="h-4 w-4" />
-                      <span>Sign out</span>
+                      <span className="material-symbols-outlined text-lg">
+                        logout
+                      </span>
+                      <span className="font-medium">Sign out</span>
                     </button>
                   </div>
                 </>
@@ -280,30 +381,49 @@ export function MainDashboardLayout() {
           </div>
         </header>
 
-        <main className="min-h-[calc(100vh-5rem)] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        {/* -------------------------------------------------------- */}
+        {/*  Main content area                                        */}
+        {/* -------------------------------------------------------- */}
+        <main className="min-h-[calc(100vh-4rem)] px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
+          {/* Display‑name prompt bar */}
           {needsDisplayName && (
-            <div className="mb-5 rounded-lg border border-amber-300/20 bg-amber-400/10 p-4">
+            <div className="mb-5 animate-slide-up rounded-xl border border-amber-400/20 bg-amber-400/[0.06] p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-amber-100">Add your display name</p>
-                  <p className="mt-1 text-sm text-amber-100/70">This will be shown in the top right of the dashboard.</p>
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <span className="material-symbols-outlined mt-0.5 text-xl text-amber-400">
+                    badge
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-amber-100">
+                      Set your display name
+                    </p>
+                    <p className="mt-0.5 text-sm text-amber-100/60">
+                      This will be shown across the dashboard.
+                    </p>
+                  </div>
                 </div>
-                <input
-                  value={displayNameDraft}
-                  onChange={(e) => setDisplayNameDraft(e.target.value)}
-                  placeholder="Your name"
-                  className="control-field rounded-lg px-4 py-2.5 text-sm text-white sm:w-80"
-                />
-                <button
-                  onClick={handleSaveDisplayName}
-                  disabled={savingDisplayName}
-                  className="btn-primary rounded-lg px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
-                >
-                  {savingDisplayName ? 'Saving...' : 'Save name'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <input
+                    value={displayNameDraft}
+                    onChange={(e) => setDisplayNameDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveDisplayName();
+                    }}
+                    placeholder="Your name"
+                    className="h-9 rounded-lg border border-outline bg-surface-container px-3 text-sm text-white placeholder:text-on-surface-variant/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/40 sm:w-64"
+                  />
+                  <button
+                    onClick={handleSaveDisplayName}
+                    disabled={savingDisplayName || !displayNameDraft.trim()}
+                    className="h-9 rounded-lg bg-primary px-4 text-sm font-semibold text-surface-dim transition-colors hover:bg-primary-dim disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {savingDisplayName ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
+
           <Outlet />
         </main>
       </div>
