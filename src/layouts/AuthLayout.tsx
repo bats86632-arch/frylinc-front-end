@@ -26,10 +26,6 @@ export function AuthLayout() {
           </div>
 
           <div className="max-w-2xl">
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-sm text-emerald-200">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_18px_rgba(52,211,153,0.9)]" />
-              All systems normal
-            </div>
             <h1 className="max-w-xl text-4xl font-semibold leading-[1.08] text-white xl:text-5xl">
               High-trust monitoring for every connected fire panel.
             </h1>
@@ -50,29 +46,29 @@ export function AuthLayout() {
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="surface-panel max-w-2xl rounded-lg p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm font-medium text-slate-300">Zone telemetry</span>
-              <span className="text-xs text-slate-500">64 zone matrix</span>
-            </div>
-            <div className="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-1">
-              {Array.from({ length: 64 }).map((_, index) => {
-                const active = [3, 8, 19].includes(index);
-                return (
-                  <div
-                    key={index}
-                    className={`h-2.5 rounded-[2px] ${
-                      active
-                        ? 'bg-red-500 shadow-[0_0_14px_rgba(239,68,68,0.7)]'
-                        : index % 7 === 0
-                        ? 'bg-amber-400/70'
-                        : 'bg-slate-700/70'
-                    }`}
-                  />
-                );
-              })}
+            <div className="surface-panel mt-6 max-w-xl rounded-lg p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-sm font-medium text-slate-300">Zone telemetry</span>
+                <span className="text-xs text-slate-500">8 zones</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2.5">
+                {Array.from({ length: 8 }).map((_, index) => {
+                  const active = [2, 5].includes(index);
+                  return (
+                    <div
+                      key={index}
+                      className={`flex h-9 items-center justify-center rounded-lg text-xs font-semibold ${
+                        active
+                          ? 'bg-red-500/90 text-white shadow-[0_0_14px_rgba(239,68,68,0.7)]'
+                          : 'bg-slate-700/70 text-slate-400'
+                      }`}
+                    >
+                      Z{index + 1}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>
