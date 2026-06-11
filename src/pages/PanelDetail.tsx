@@ -448,7 +448,7 @@ export function PanelDetail() {
                   {events.map((event) => (
                     <tr key={event.id} className="transition-colors hover:bg-white/[0.035]">
                       <td className="px-4 py-3 font-mono text-sm text-slate-300">
-                        {formatDateTime(event.timestamp)}
+                        {formatDateTime(event.timestamp || (event as any).createdAt)}
                       </td>
                       <td className="px-4 py-3">
                         <span

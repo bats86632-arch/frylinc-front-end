@@ -83,6 +83,7 @@ export function Dashboard() {
 
   const stats = useMemo(() => ({
     total: panels.length,
+    activePanels: panels.filter((p) => !p.manuallyMarkedOffline).length,
     alarms: panels.filter((p) => p.alarm).length
   }), [panels]);
 
@@ -152,13 +153,20 @@ export function Dashboard() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Total Panels"
           value={stats.total}
           caption="All provisioned panels"
           icon={ShieldCheck}
           tone="neutral"
+        />
+        <StatCard
+          label="Active Panels"
+          value={stats.activePanels}
+          caption="Online & monitored"
+          icon={ShieldCheck}
+          tone="success"
         />
         <StatCard
           label="Active Alarms"

@@ -1,5 +1,12 @@
-export function formatDate(date: Date | string): string {
-  const d = new Date(date);
+export function formatDate(date: any): string {
+  if (!date) return 'Unknown Date';
+  let d: Date;
+  if (typeof date === 'object' && '_seconds' in date) {
+    d = new Date(date._seconds * 1000);
+  } else {
+    d = new Date(date);
+  }
+  if (isNaN(d.getTime())) return 'Invalid Date';
   return d.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -7,8 +14,15 @@ export function formatDate(date: Date | string): string {
   });
 }
 
-export function formatTime(date: Date | string): string {
-  const d = new Date(date);
+export function formatTime(date: any): string {
+  if (!date) return 'Unknown Time';
+  let d: Date;
+  if (typeof date === 'object' && '_seconds' in date) {
+    d = new Date(date._seconds * 1000);
+  } else {
+    d = new Date(date);
+  }
+  if (isNaN(d.getTime())) return 'Invalid Time';
   return d.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
@@ -16,7 +30,8 @@ export function formatTime(date: Date | string): string {
   });
 }
 
-export function formatDateTime(date: Date | string): string {
+export function formatDateTime(date: any): string {
+  if (!date) return 'Unknown';
   return `${formatDate(date)} ${formatTime(date)}`;
 }
 

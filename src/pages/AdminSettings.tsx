@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { UserService } from '../api/UserService';
-import { ApiKeyService, ApiKeyRecord } from '../api/ApiKeyService';
 import { PanelService } from '../api/PanelService';
 import { Panel, User, Role } from '../types';
 import { DEFAULT_PANEL_COMMANDS, normalizeAllowedCommands } from '../config/panelDefaults';
@@ -76,22 +75,12 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 }
 
 export function AdminSettings() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [apiKeys, setApiKeys] = useState<ApiKeyRecord[]>([]);
-  const [panels, setPanels] = useState<Panel[]>([]);
-  const [usersLoading, setUsersLoading] = useState(true);
-  const [apiKeysLoading, setApiKeysLoading] = useState(true);
-  const [panelsLoading, setPanelsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'panels'>('users');
-  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);  const [panels, setPanels] = useState<Panel[]>([]);
+  const [usersLoading, setUsersLoading] = useState(true);  const [panelsLoading, setPanelsLoading] = useState(true);  const [editingUser, setEditingUser] = useState<string | null>(null);
   const [panelFormOpen, setPanelFormOpen] = useState(false);
-  const [userFormOpen, setUserFormOpen] = useState(false);
-  const [apiKeyFormOpen, setApiKeyFormOpen] = useState(false);
-  const [panelFormLoading, setPanelFormLoading] = useState(false);
+  const [userFormOpen, setUserFormOpen] = useState(false);  const [panelFormLoading, setPanelFormLoading] = useState(false);
   const [userFormLoading, setUserFormLoading] = useState(false);
-  const [groupFormLoading, setGroupFormLoading] = useState(false);
-  const [apiKeyFormLoading, setApiKeyFormLoading] = useState(false);
-  const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
+  const [groupFormLoading, setGroupFormLoading] = useState(false);  const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -117,18 +106,8 @@ export function AdminSettings() {
     reset: resetUser,
     formState: { errors: userErrors }
   } = useForm<UserFormData>({ resolver: zodResolver(userSchema) });
-
-  const {
-    register: registerApiKey,
-    handleSubmit: handleSubmitApiKey,
-    reset: resetApiKey,
-    formState: { errors: apiKeyErrors }
-  } = useForm<ApiKeyFormData>({ resolver: zodResolver(apiKeySchema) });
-
   useEffect(() => {
-    loadUsers();
-    loadApiKeys();
-    loadPanels();
+    loadUsers();    loadPanels();
   }, []);
 
   const loadUsers = async () => {
@@ -211,43 +190,7 @@ export function AdminSettings() {
     } finally {
       setUserFormLoading(false);
     }
-  };
-
-  const handleCreateApiKey = async (data: ApiKeyFormData) => {
-    setApiKeyFormLoading(true);
-    setError(null);
-    try {
-      await ApiKeyService.createApiKey({
-        uid: data.uid?.trim() || undefined,
-        email: data.email?.trim() || undefined,
-        label: data.label?.trim() || undefined
-      });
-      setApiKeyFormOpen(false);
-      resetApiKey();
-      await loadApiKeys();
-      setSuccess('API key created successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to create API key'));
-    } finally {
-      setApiKeyFormLoading(false);
-    }
-  };
-
-  const handleRoleChange = async (uid: string, newRole: Role) => {
-    setError(null);
-    try {
-      await UserService.updateUserRole(uid, newRole);
-      setUsers(users.map(u => u.uid === uid ? { ...u, role: newRole } : u));
-      setEditingUser(null);
-      setSuccess('User role updated successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to update role'));
-    }
-  };
-
-  const handleCreatePanel = async (data: PanelFormData) => {
+  };const handleCreatePanel = async (data: PanelFormData) => {
     setPanelFormLoading(true);
     setError(null);
     try {
@@ -282,37 +225,7 @@ export function AdminSettings() {
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to delete user'));
     }
-  };
-
-  const handleDeleteApiKey = async (keyId: string) => {
-    if (!window.confirm('Revoke this API key?')) return;
-
-    setError(null);
-    try {
-      await ApiKeyService.deleteApiKey(keyId);
-      await loadApiKeys();
-      setSuccess('API key revoked successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to revoke API key'));
-    }
-  };
-
-  const handleDeletePanel = async (serial: string) => {
-    if (!window.confirm('Delete this panel? This will disable the panel record.')) return;
-
-    setError(null);
-    try {
-      await PanelService.deletePanel(serial);
-      await loadPanels();
-      setSuccess('Panel deleted successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to delete panel'));
-    }
-  };
-
-  return (
+  };return (
     <div className="space-y-6">
       <section className="surface-panel rounded-lg p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -368,8 +281,7 @@ export function AdminSettings() {
         </div>
       )}
 
-      {activeTab === 'users' && (
-        <div className="space-y-4">
+              <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-white">User Management</h2>
@@ -589,10 +501,8 @@ export function AdminSettings() {
             </div>
           )}
         </div>
-      )}
 
-      {activeTab === 'panels' && (
-        <div className="space-y-4">
+        <div className="space-y-4 mt-10 border-t border-white/10 pt-10">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-white">Panel Provisioning</h2>
@@ -800,7 +710,9 @@ export function AdminSettings() {
             <p className="mt-2 text-sm text-slate-500">All panels will appear on the dashboard after creation.</p>
           </div>
         </div>
-      )}
     </div>
   );
 }
+
+
+

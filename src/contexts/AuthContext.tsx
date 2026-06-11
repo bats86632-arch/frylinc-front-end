@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userData: User = {
       uid: user.uid,
       email: user.email || profile.email || '',
-      displayName: profile.displayName || user.displayName || user.email?.split('@')[0] || 'User',
+      displayName: profile.displayName || user.displayName || 'User',
       role: (customClaims.role as Role) || profile.role || 'end_user',
       groups: (profile.groups as string[]) || (customClaims.groups as string[]) || []
     };
