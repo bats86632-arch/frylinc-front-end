@@ -19,6 +19,7 @@ export interface Panel {
   ipAddress?: string;
   mqttConnected: boolean;
   allowedCommands: string[];
+  manuallyMarkedOffline?: boolean; // User can manually mark a panel as offline
 }
 
 export interface CommandLog {

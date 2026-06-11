@@ -29,7 +29,7 @@ export function AuthLayout() {
             <h1 className="max-w-xl text-4xl font-semibold leading-[1.08] text-white xl:text-5xl">
               High-trust monitoring for every connected fire panel.
             </h1>
-            <p className="mt-4 max-w-lg text-sm leading-6 text-slate-400 xl:text-base xl:leading-7">
+            <p className="mt-6 max-w-lg text-[13px] leading-6 text-slate-400 xl:text-[15px] xl:leading-7">
               Real-time alarm visibility, role-based access, panel controls, and event history in one secure operations console.
             </p>
 
