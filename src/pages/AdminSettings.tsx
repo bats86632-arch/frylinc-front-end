@@ -39,15 +39,8 @@ const userSchema = z.object({
   branchIds: z.string().optional()
 });
 
-const apiKeySchema = z.object({
-  email: z.string().email('Valid email is required').optional(),
-  uid: z.string().optional(),
-  label: z.string().optional()
-});
-
 type PanelFormData = z.infer<typeof panelSchema>;
 type UserFormData = z.infer<typeof userSchema>;
-type ApiKeyFormData = z.infer<typeof apiKeySchema>;
 
 const roleLabels: Record<Role, string> = {
   super_admin: 'Super Admin',
@@ -122,16 +115,7 @@ export function AdminSettings() {
     }
   };
 
-  const loadApiKeys = async () => {
-    setApiKeysLoading(true);
-    try {
-      setApiKeys(await ApiKeyService.getApiKeys());
-    } catch (err) {
-      console.error('Failed to load api keys:', err);
-    } finally {
-      setApiKeysLoading(false);
-    }
-  };
+
 
   const loadPanels = async () => {
     setPanelsLoading(true);
@@ -315,70 +299,7 @@ export function AdminSettings() {
             </div>
           )}
 
-          {apiKeyFormOpen && (
-            <div className="surface-panel rounded-lg p-5">
-              <h3 className="mb-4 text-lg font-semibold text-white">Create API Key</h3>
-              <form onSubmit={handleSubmitApiKey(handleCreateApiKey)} className="grid gap-4 md:grid-cols-3">
-                <div>
-                  <input {...registerApiKey('email')} placeholder="User email" className="control-field rounded-lg px-4 py-2.5 text-sm" />
-                  {apiKeyErrors.email && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.email.message}</p>}
-                </div>
-                <div>
-                  <input {...registerApiKey('uid')} placeholder="Or user UID" className="control-field rounded-lg px-4 py-2.5 text-sm" />
-                  {apiKeyErrors.uid && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.uid.message}</p>}
-                </div>
-                <div>
-                  <input {...registerApiKey('label')} placeholder="Label" className="control-field rounded-lg px-4 py-2.5 text-sm" />
-                  {apiKeyErrors.label && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.label.message}</p>}
-                </div>
-                <div className="md:col-span-3 flex gap-2">
-                  <button type="submit" disabled={apiKeyFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
-                    {apiKeyFormLoading ? 'Creating...' : 'Create API Key'}
-                  </button>
-                  <button type="button" onClick={() => setApiKeyFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                </div>
-              </form>
-            </div>
-          )}
 
-          <div className="grid gap-4 xl:grid-cols-1">
-            <div className="surface-panel rounded-lg p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">API Keys</h3>
-                  <p className="mt-1 text-sm text-slate-500">{apiKeys.length} total</p>
-                </div>
-                <button onClick={loadApiKeys} disabled={apiKeysLoading} className="btn-secondary rounded-lg px-3 py-2 text-sm font-medium">
-                  <RefreshCw className={`h-4 w-4 ${apiKeysLoading ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
-              {apiKeysLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
-              ) : apiKeys.length === 0 ? (
-                <p className="text-sm text-slate-500">No API keys issued yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {apiKeys.map((key) => (
-                    <div key={key.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-white">{key.label || 'Untitled key'}</p>
-                          <p className="mt-1 text-xs text-slate-500">{key.email || key.userId || 'Unknown owner'}</p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteApiKey(key.id)}
-                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
-                        >
-                          <Trash2 className="mr-1 inline h-4 w-4" />
-                          Revoke
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
 
           {usersLoading ? (
             <div className="surface-panel flex justify-center rounded-lg py-14">
