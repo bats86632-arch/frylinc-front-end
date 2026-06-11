@@ -590,19 +590,24 @@ export function PanelDetail() {
                     Slot {slot}
                   </label>
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <input
-                      type="text"
-                      placeholder="Mobile Number"
-                      value={contactNumbers[slot] || ""}
-                      onChange={(e) =>
-                        setContactNumbers((prev) => ({
-                          ...prev,
-                          [slot]: e.target.value,
-                        }))
-                      }
-                      disabled={!canControl || isSyncing}
-                      className="form-input flex-1 disabled:opacity-50"
-                    />
+                    <div className="relative flex-1">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <Phone className="h-4 w-4 text-slate-400" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="0000000000"
+                        value={contactNumbers[slot] || ""}
+                        onChange={(e) =>
+                          setContactNumbers((prev) => ({
+                            ...prev,
+                            [slot]: e.target.value,
+                          }))
+                        }
+                        disabled={!canControl || isSyncing}
+                        className="control-field w-full rounded-lg py-2 pl-10 pr-3 text-sm transition-all focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50"
+                      />
+                    </div>
                     <button
                       onClick={() => handleSyncContact(slot)}
                       disabled={!canControl || isSyncing}
