@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import { AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, Flame, Loader2, LockKeyhole } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -14,6 +14,21 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+type LoginLocationState = {
+  from?: {
+    pathname?: string;
+  };
+};
+
+function getAuthErrorCode(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    const code = (error as { code?: unknown }).code;
+    return typeof code === 'string' ? code : undefined;
+  }
+
+  return undefined;
+}
+
 export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +36,7 @@ export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as any)?.from?.pathname || '/';
+  const from = (location.state as LoginLocationState | null)?.from?.pathname || '/';
 
   const {
     register,
@@ -38,10 +53,10 @@ export function Login() {
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       navigate(from, { replace: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
       let errorMessage = 'An error occurred during login';
 
-      switch (err.code) {
+      switch (getAuthErrorCode(err)) {
         case 'auth/invalid-credential':
           errorMessage = 'Invalid email or password';
           break;
@@ -66,84 +81,91 @@ export function Login() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 p-8">
-        <h2 className="text-2xl font-bold text-white text-center mb-2">Welcome Back</h2>
-        <p className="text-slate-400 text-center text-sm mb-8">
-          Sign in to access your monitoring dashboard
+    <div className="surface-panel rounded-lg p-6 sm:p-7">
+      <div className="mb-8">
+        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/10 text-red-200 shadow-lg shadow-red-950/30">
+          <LockKeyhole className="h-6 w-6" />
+        </div>
+        <h2 className="text-3xl font-semibold leading-tight text-white">Welcome back</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-400">
+          Sign in to access your monitoring dashboard.
         </p>
+      </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
+      {error && (
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-400/30 bg-red-500/10 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-300" />
+          <p className="text-sm leading-6 text-red-100">{error}</p>
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-              Email Address
-            </label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-200">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            {...register('email')}
+            className={`control-field w-full rounded-lg px-4 py-3 text-sm placeholder:text-slate-500 ${
+              errors.email ? 'border-red-400/70' : ''
+            }`}
+            placeholder="you@example.com"
+            disabled={isLoading}
+          />
+          {errors.email && (
+            <p className="mt-2 text-sm text-red-300">{errors.email.message}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-200">
+            Password
+          </label>
+          <div className="relative">
             <input
-              id="email"
-              type="email"
-              {...register('email')}
-              className={`w-full px-4 py-3 bg-slate-900/50 border ${
-                errors.email ? 'border-red-500' : 'border-slate-600'
-              } rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all`}
-              placeholder="you@example.com"
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              {...register('password')}
+              className={`control-field w-full rounded-lg px-4 py-3 pr-12 text-sm placeholder:text-slate-500 ${
+                errors.password ? 'border-red-400/70' : ''
+              }`}
+              placeholder="Enter your password"
               disabled={isLoading}
             />
-            {errors.email && (
-              <p className="mt-2 text-sm text-red-400">{errors.email.message}</p>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
           </div>
+          {errors.password && (
+            <p className="mt-2 text-sm text-red-300">{errors.password.message}</p>
+          )}
+        </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                {...register('password')}
-                className={`w-full px-4 py-3 bg-slate-900/50 border ${
-                  errors.password ? 'border-red-500' : 'border-slate-600'
-                } rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all pr-12`}
-                placeholder="Enter your password"
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="mt-2 text-sm text-red-400">{errors.password.message}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Signing in...</span>
-              </>
-            ) : (
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="btn-primary flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Signing in...</span>
+            </>
+          ) : (
+            <>
+              <Flame className="h-4 w-4" />
               <span>Sign In</span>
-            )}
-          </button>
-        </form>
-      </div>
+            </>
+          )}
+        </button>
+      </form>
     </div>
   );
 }

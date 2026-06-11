@@ -1,16 +1,38 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
+  Bell,
+  ChevronDown,
   Flame,
   LayoutDashboard,
-  Settings,
   LogOut,
   Menu,
-  X,
-  Bell,
-  ChevronDown
+  Settings,
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { Role } from '../types';
+
+const navigation: Array<{
+  name: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  roles: Role[];
+}> = [
+  {
+    name: 'Dashboard',
+    href: '/',
+    icon: LayoutDashboard,
+    roles: ['super_admin', 'head_office', 'system_integrator', 'end_user']
+  },
+  {
+    name: 'Admin Settings',
+    href: '/admin',
+    icon: Settings,
+    roles: ['super_admin', 'head_office']
+  }
+];
 
 export function MainDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,87 +41,127 @@ export function MainDashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/' || location.pathname.startsWith('/panel');
+    }
+
+    return location.pathname === path;
+  };
+
+  const pageTitle = location.pathname === '/admin'
+    ? 'Admin Settings'
+    : location.pathname.startsWith('/panel')
+    ? 'Panel Details'
+    : 'Fire Alarm Panels';
+
+  const roleLabel = userData?.role?.replace(/_/g, ' ') || 'Operator';
+  const filteredNav = navigation.filter((item) => hasRole(item.roles));
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['super_admin', 'head_office', 'system_integrator', 'end_user'] },
-    { name: 'Admin Settings', href: '/admin', icon: Settings, roles: ['super_admin', 'head_office'] },
-  ];
-
-  const filteredNav = navigation.filter(item => hasRole(item.roles as any));
-
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Mobile sidebar overlay */}
+    <div className="min-h-screen console-bg text-slate-100">
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 border-r border-slate-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col border-r border-white/10 bg-[#070b10]/95 shadow-2xl shadow-black/40 backdrop-blur-xl transition-transform duration-300 ease-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-700">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg">
-              <Flame className="w-5 h-5 text-white" />
+        <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
+          <Link to="/" className="flex items-center gap-3" onClick={() => setSidebarOpen(false)}>
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/40">
+              <Flame className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">Fyrlinc</span>
+            <div>
+              <span className="block text-xl font-semibold leading-none text-white">Fyrlinc</span>
+              <span className="mt-1 block text-xs text-slate-500">Command Console</span>
+            </div>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-slate-400 hover:text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-white lg:hidden"
+            aria-label="Close sidebar"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="p-4 space-y-1">
-          {filteredNav.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                isActive(item.href)
-                  ? 'bg-amber-500/10 text-amber-500 border-l-2 border-amber-500'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-              }`}
-              onClick={() => setSidebarOpen(false)}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.name}</span>
-            </Link>
-          ))}
+        <nav className="flex-1 space-y-2 px-3 py-5">
+          {filteredNav.map((item) => {
+            const active = isActive(item.href);
+
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`group relative flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all ${
+                  active
+                    ? 'bg-red-500/10 text-white shadow-[inset_3px_0_0_rgba(239,68,68,0.95)]'
+                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-white'
+                }`}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <span
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg border ${
+                    active
+                      ? 'border-red-400/30 bg-red-500/10 text-red-200'
+                      : 'border-white/10 bg-white/[0.03] text-slate-400 group-hover:text-white'
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                </span>
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
         </nav>
+
+        <div className="m-3 rounded-lg border border-white/10 bg-white/[0.03] p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm text-slate-300">
+            <ShieldCheck className="h-4 w-4 text-emerald-300" />
+            <span>Secure session</span>
+          </div>
+          <div className="flex items-center justify-between border-t border-white/10 pt-3">
+            <span className="text-xs text-slate-500">Role</span>
+            <span className="text-xs font-semibold capitalize text-slate-200">{roleLabel}</span>
+          </div>
+        </div>
       </aside>
 
-      {/* Main content */}
-      <div className="lg:pl-64">
-        {/* Header */}
-        <header className="sticky top-0 z-30 h-16 bg-slate-800/80 backdrop-blur-md border-b border-slate-700 flex items-center justify-between px-4 lg:px-6">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-slate-400 hover:text-white"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+      <div className="lg:pl-[280px]">
+        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-white/10 bg-[#070b10]/80 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
 
-          <div className="flex-1" />
+            <div className="min-w-0">
+              <p className="truncate text-base font-semibold text-white sm:text-lg">{pageTitle}</p>
+              <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.75)]" />
+                <span>Live monitoring</span>
+              </div>
+            </div>
+          </div>
 
-          <div className="flex items-center gap-4">
-            <button className="relative text-slate-400 hover:text-white transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
+          <div className="flex items-center gap-3">
+            <button className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white">
+              <Bell className="h-5 w-5" />
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border border-[#070b10] bg-red-500 px-1 text-[10px] font-bold text-white">
                 3
               </span>
             </button>
@@ -107,13 +169,18 @@ export function MainDashboardLayout() {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
+                className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] py-1.5 pl-1.5 pr-3 text-slate-200 transition-colors hover:bg-white/[0.06]"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 text-sm font-semibold text-white">
                   {userData?.displayName?.charAt(0).toUpperCase() || 'U'}
                 </div>
-                <span className="hidden sm:block text-sm font-medium">{userData?.displayName}</span>
-                <ChevronDown className="w-4 h-4" />
+                <div className="hidden min-w-0 text-left sm:block">
+                  <p className="max-w-[160px] truncate text-sm font-semibold text-white">
+                    {userData?.displayName}
+                  </p>
+                  <p className="text-xs capitalize text-slate-500">{roleLabel}</p>
+                </div>
+                <ChevronDown className="h-4 w-4 text-slate-500" />
               </button>
 
               {userMenuOpen && (
@@ -122,19 +189,19 @@ export function MainDashboardLayout() {
                     className="fixed inset-0 z-40"
                     onClick={() => setUserMenuOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-48 bg-slate-700 rounded-lg shadow-xl border border-slate-600 z-50">
-                    <div className="p-3 border-b border-slate-600">
-                      <p className="text-sm font-medium text-white">{userData?.displayName}</p>
-                      <p className="text-xs text-slate-400">{userData?.email}</p>
-                      <span className="inline-block mt-1 px-2 py-0.5 bg-amber-500/20 text-amber-500 text-xs rounded-full capitalize">
-                        {userData?.role?.replace('_', ' ')}
+                  <div className="surface-panel absolute right-0 z-50 mt-3 w-64 rounded-lg p-2">
+                    <div className="border-b border-white/10 p-3">
+                      <p className="truncate text-sm font-semibold text-white">{userData?.displayName}</p>
+                      <p className="mt-1 truncate text-xs text-slate-500">{userData?.email}</p>
+                      <span className="mt-3 inline-flex rounded-full border border-amber-300/20 bg-amber-400/10 px-2.5 py-1 text-xs font-medium capitalize text-amber-200">
+                        {roleLabel}
                       </span>
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-400 hover:bg-slate-600 transition-colors rounded-b-lg"
+                      className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-red-200 transition-colors hover:bg-red-500/10"
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut className="h-4 w-4" />
                       <span>Sign out</span>
                     </button>
                   </div>
@@ -144,8 +211,7 @@ export function MainDashboardLayout() {
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="p-4 lg:p-6">
+        <main className="min-h-[calc(100vh-5rem)] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
           <Outlet />
         </main>
       </div>

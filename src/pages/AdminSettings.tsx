@@ -6,14 +6,14 @@ import { UserService } from '../api/UserService';
 import { PanelService } from '../api/PanelService';
 import { User, Role } from '../types';
 import {
-  Users,
-  Plus,
-  Edit2,
-  Shield,
-  RefreshCw,
-  Loader2,
   AlertCircle,
   CheckCircle,
+  Edit2,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Shield,
+  Users,
   XCircle
 } from 'lucide-react';
 
@@ -34,11 +34,22 @@ const roleLabels: Record<Role, string> = {
 };
 
 const roleColors: Record<Role, string> = {
-  super_admin: 'bg-red-500/20 text-red-500',
-  head_office: 'bg-orange-500/20 text-orange-500',
-  system_integrator: 'bg-blue-500/20 text-blue-500',
-  end_user: 'bg-slate-600 text-slate-300'
+  super_admin: 'border-red-300/30 bg-red-500/10 text-red-100',
+  head_office: 'border-amber-300/30 bg-amber-400/10 text-amber-100',
+  system_integrator: 'border-cyan-300/30 bg-cyan-400/10 text-cyan-100',
+  end_user: 'border-white/10 bg-white/[0.04] text-slate-300'
 };
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const response = (error as { response?: { data?: { message?: unknown } } }).response;
+    if (typeof response?.data?.message === 'string') {
+      return response.data.message;
+    }
+  }
+
+  return fallback;
+}
 
 export function AdminSettings() {
   const [users, setUsers] = useState<User[]>([]);
@@ -49,7 +60,6 @@ export function AdminSettings() {
   const [panelFormLoading, setPanelFormLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
 
   const {
     register,
@@ -83,8 +93,8 @@ export function AdminSettings() {
       setEditingUser(null);
       setSuccess('User role updated successfully');
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update role');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to update role'));
     }
   };
 
@@ -97,8 +107,8 @@ export function AdminSettings() {
       reset();
       setSuccess('Panel created successfully');
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create panel');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to create panel'));
     } finally {
       setPanelFormLoading(false);
     }
@@ -106,107 +116,109 @@ export function AdminSettings() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Admin Settings</h1>
-          <p className="text-slate-400 text-sm mt-1">Manage users and panel provisioning</p>
-        </div>
+      <section className="surface-panel rounded-lg p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold leading-tight text-white">Admin Settings</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-400">Manage users and panel provisioning</p>
+          </div>
 
-        <div className="flex items-center gap-1 bg-slate-800 rounded-lg p-1">
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === 'users'
-                ? 'bg-amber-500 text-slate-900'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Users className="w-5 h-5" />
-            <span className="font-medium">Users</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('panels')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === 'panels'
-                ? 'bg-amber-500 text-slate-900'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <Shield className="w-5 h-5" />
-            <span className="font-medium">Panels</span>
-          </button>
+          <div className="surface-muted flex rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
+                activeTab === 'users'
+                  ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
+                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+              }`}
+            >
+              <Users className="h-4 w-4" />
+              <span>Users</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('panels')}
+              className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
+                activeTab === 'panels'
+                  ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
+                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+              }`}
+            >
+              <Shield className="h-4 w-4" />
+              <span>Panels</span>
+            </button>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Notifications */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
-          <p className="text-red-500 text-sm">{error}</p>
-          <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-300">
-            <XCircle className="w-4 h-4" />
+        <div className="flex items-center gap-3 rounded-lg border border-red-300/25 bg-red-500/10 p-4">
+          <AlertCircle className="h-5 w-5 shrink-0 text-red-200" />
+          <p className="text-sm text-red-100">{error}</p>
+          <button onClick={() => setError(null)} className="ml-auto text-red-200/80 hover:text-red-100">
+            <XCircle className="h-4 w-4" />
           </button>
         </div>
       )}
 
       {success && (
-        <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-3">
-          <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
-          <p className="text-green-500 text-sm">{success}</p>
-          <button onClick={() => setSuccess(null)} className="ml-auto text-green-400 hover:text-green-300">
-            <XCircle className="w-4 h-4" />
+        <div className="flex items-center gap-3 rounded-lg border border-emerald-300/25 bg-emerald-400/10 p-4">
+          <CheckCircle className="h-5 w-5 shrink-0 text-emerald-200" />
+          <p className="text-sm text-emerald-100">{success}</p>
+          <button onClick={() => setSuccess(null)} className="ml-auto text-emerald-200/80 hover:text-emerald-100">
+            <XCircle className="h-4 w-4" />
           </button>
         </div>
       )}
 
-      {/* Users Tab */}
       {activeTab === 'users' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">User Management</h2>
+            <div>
+              <h2 className="text-lg font-semibold text-white">User Management</h2>
+              <p className="mt-1 text-sm text-slate-500">{users.length} user{users.length === 1 ? '' : 's'}</p>
+            </div>
             <button
               onClick={loadUsers}
               disabled={usersLoading}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${usersLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
           </div>
 
           {usersLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 text-amber-500 animate-spin" />
+            <div className="surface-panel flex justify-center rounded-lg py-14">
+              <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
             </div>
           ) : (
-            <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-slate-700/50">
+            <div className="table-shell overflow-x-auto">
+              <table className="w-full min-w-[820px]">
+                <thead className="bg-white/[0.04]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
                       User
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
                       Email
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
                       Role
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
                       Groups
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700">
+                <tbody className="divide-y divide-white/10">
                   {users.map((user) => (
-                    <tr key={user.uid} className="hover:bg-slate-700/30">
+                    <tr key={user.uid} className="transition-colors hover:bg-white/[0.035]">
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 text-sm font-semibold text-white">
                             {user.displayName?.charAt(0).toUpperCase() || 'U'}
                           </div>
                           <div>
@@ -220,7 +232,7 @@ export function AdminSettings() {
                           <select
                             defaultValue={user.role}
                             onChange={(e) => handleRoleChange(user.uid, e.target.value as Role)}
-                            className="px-3 py-1.5 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            className="control-field rounded-lg px-3 py-2 text-sm"
                           >
                             <option value="super_admin">Super Admin</option>
                             <option value="head_office">Head Office</option>
@@ -228,7 +240,7 @@ export function AdminSettings() {
                             <option value="end_user">End User</option>
                           </select>
                         ) : (
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${roleColors[user.role]}`}>
+                          <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${roleColors[user.role]}`}>
                             {roleLabels[user.role]}
                           </span>
                         )}
@@ -242,16 +254,16 @@ export function AdminSettings() {
                         {editingUser === user.uid ? (
                           <button
                             onClick={() => setEditingUser(null)}
-                            className="text-slate-400 hover:text-white px-2 py-1 text-sm"
+                            className="rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
                           >
                             Cancel
                           </button>
                         ) : (
                           <button
                             onClick={() => setEditingUser(user.uid)}
-                            className="flex items-center gap-1 px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors text-sm"
+                            className="ml-auto flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="h-4 w-4" />
                             <span>Edit Role</span>
                           </button>
                         )}
@@ -265,16 +277,18 @@ export function AdminSettings() {
         </div>
       )}
 
-      {/* Panels Tab */}
       {activeTab === 'panels' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Panel Provisioning</h2>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-white">Panel Provisioning</h2>
+              <p className="mt-1 text-sm text-slate-500">Create panel records for monitoring</p>
+            </div>
             <button
               onClick={() => setPanelFormOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-500 text-slate-900 rounded-lg font-medium hover:bg-amber-400 transition-colors"
+              className="btn-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="h-5 w-5" />
               <span>Add Panel</span>
             </button>
           </div>
@@ -282,92 +296,105 @@ export function AdminSettings() {
           {panelFormOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <div
-                className="absolute inset-0 bg-black/50"
+                className="absolute inset-0 bg-black/75 backdrop-blur-sm"
                 onClick={() => setPanelFormOpen(false)}
               />
-              <div className="relative bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md p-6">
-                <h3 className="text-xl font-bold text-white mb-6">Add New Panel</h3>
+              <div className="surface-panel relative w-full max-w-md rounded-lg p-6">
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Add New Panel</h3>
+                    <p className="mt-1 text-sm text-slate-500">Provision a new fire alarm panel.</p>
+                  </div>
+                  <button
+                    onClick={() => setPanelFormOpen(false)}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+                    type="button"
+                    aria-label="Close panel form"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </button>
+                </div>
 
                 <form onSubmit={handleSubmit(handleCreatePanel)} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
                       Serial Number
                     </label>
                     <input
                       {...register('serial')}
-                      className={`w-full px-4 py-2.5 bg-slate-900/50 border ${
-                        errors.serial ? 'border-red-500' : 'border-slate-600'
-                      } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500`}
+                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
+                        errors.serial ? 'border-red-400/70' : ''
+                      }`}
                       placeholder="e.g., FP-2024-001"
                       disabled={panelFormLoading}
                     />
                     {errors.serial && (
-                      <p className="mt-1 text-sm text-red-400">{errors.serial.message}</p>
+                      <p className="mt-1 text-sm text-red-300">{errors.serial.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
                       Panel Name
                     </label>
                     <input
                       {...register('name')}
-                      className={`w-full px-4 py-2.5 bg-slate-900/50 border ${
-                        errors.name ? 'border-red-500' : 'border-slate-600'
-                      } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500`}
+                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
+                        errors.name ? 'border-red-400/70' : ''
+                      }`}
                       placeholder="e.g., Building A - Floor 1"
                       disabled={panelFormLoading}
                     />
                     {errors.name && (
-                      <p className="mt-1 text-sm text-red-400">{errors.name.message}</p>
+                      <p className="mt-1 text-sm text-red-300">{errors.name.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
                       Number of Zones (1-64)
                     </label>
                     <input
                       type="number"
                       {...register('zoneCount')}
-                      className={`w-full px-4 py-2.5 bg-slate-900/50 border ${
-                        errors.zoneCount ? 'border-red-500' : 'border-slate-600'
-                      } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500`}
+                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
+                        errors.zoneCount ? 'border-red-400/70' : ''
+                      }`}
                       placeholder="8"
                       min={1}
                       max={64}
                       disabled={panelFormLoading}
                     />
                     {errors.zoneCount && (
-                      <p className="mt-1 text-sm text-red-400">{errors.zoneCount.message}</p>
+                      <p className="mt-1 text-sm text-red-300">{errors.zoneCount.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
                       Group ID
                     </label>
                     <input
                       {...register('groupId')}
-                      className={`w-full px-4 py-2.5 bg-slate-900/50 border ${
-                        errors.groupId ? 'border-red-500' : 'border-slate-600'
-                      } rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500`}
+                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
+                        errors.groupId ? 'border-red-400/70' : ''
+                      }`}
                       placeholder="e.g., group-building-a"
                       disabled={panelFormLoading}
                     />
                     {errors.groupId && (
-                      <p className="mt-1 text-sm text-red-400">{errors.groupId.message}</p>
+                      <p className="mt-1 text-sm text-red-300">{errors.groupId.message}</p>
                     )}
                   </div>
 
-                  <div className="flex gap-3 pt-4">
+                  <div className="grid grid-cols-2 gap-3 pt-4">
                     <button
                       type="button"
                       onClick={() => {
                         setPanelFormOpen(false);
                         reset();
                       }}
-                      className="flex-1 px-4 py-2.5 bg-slate-700 text-white rounded-lg font-medium hover:bg-slate-600 transition-colors"
+                      className="btn-secondary rounded-lg px-4 py-2.5 text-sm font-semibold"
                       disabled={panelFormLoading}
                     >
                       Cancel
@@ -375,11 +402,11 @@ export function AdminSettings() {
                     <button
                       type="submit"
                       disabled={panelFormLoading}
-                      className="flex-1 px-4 py-2.5 bg-amber-500 text-slate-900 rounded-lg font-medium hover:bg-amber-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="btn-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold"
                     >
                       {panelFormLoading ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="h-4 w-4 animate-spin" />
                           <span>Creating...</span>
                         </>
                       ) : (
@@ -392,10 +419,12 @@ export function AdminSettings() {
             </div>
           )}
 
-          <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-8 text-center">
-            <Shield className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <p className="text-slate-400">Use the "Add Panel" button above to provision new fire alarm panels.</p>
-            <p className="text-slate-500 text-sm mt-2">All panels will appear on the dashboard after creation.</p>
+          <div className="surface-panel rounded-lg p-10 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03]">
+              <Shield className="h-7 w-7 text-slate-500" />
+            </div>
+            <p className="text-sm text-slate-300">Use the "Add Panel" button above to provision new fire alarm panels.</p>
+            <p className="mt-2 text-sm text-slate-500">All panels will appear on the dashboard after creation.</p>
           </div>
         </div>
       )}
