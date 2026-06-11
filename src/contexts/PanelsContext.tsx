@@ -26,12 +26,17 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
     }
 
     let q;
-    if (userData.role === 'super_admin' || userData.role === 'head_office') {
+    if (userData.role === 'super_admin') {
       q = query(collection(db, 'panels'));
+    } else if (userData.role === 'head_office') {
+      q = query(
+        collection(db, 'panels'), 
+        where('companyId', '==', userData.companyId || '')
+      );
     } else {
       q = query(
         collection(db, 'panels'),
-        where('groupId', 'in', userData.groups.length > 0 ? userData.groups : [''])
+        where('branchId', 'in', userData.branchIds && userData.branchIds.length > 0 ? userData.branchIds : [''])
       );
     }
 

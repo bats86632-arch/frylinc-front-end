@@ -41,7 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: user.email || profile.email || '',
       displayName: profile.displayName || user.displayName || 'User',
       role: (customClaims.role as Role) || profile.role || 'end_user',
-      groups: (profile.groups as string[]) || (customClaims.groups as string[]) || []
+      companyId: profile.companyId || customClaims.companyId || undefined,
+      branchIds: (profile.branchIds as string[]) || (customClaims.branchIds as string[]) || []
     };
 
     setUserData(userData);
