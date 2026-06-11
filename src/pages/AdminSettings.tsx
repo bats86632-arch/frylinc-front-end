@@ -3,33 +3,22 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { UserService } from '../api/UserService';
-import { GroupService } from '../api/GroupService';
-import { ApiKeyService, ApiKeyRecord } from '../api/ApiKeyService';
+import { CompanyService } from '../api/CompanyService';
+import { BranchService } from '../api/BranchService';
 import { PanelService } from '../api/PanelService';
-import { Panel, User, Role, Group } from '../types';
-import { DEFAULT_PANEL_COMMANDS, normalizeAllowedCommands } from '../config/panelDefaults';
+import { Panel, User, Role, Company, Branch } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 import {
-  AlertCircle,
-  CheckCircle,
-  Edit2,
   Loader2,
-  Plus,
   RefreshCw,
-  Shield,
-  Users,
-  KeyRound,
-  Layers3,
-  XCircle,
-  Trash2
 } from 'lucide-react';
 
 const panelSchema = z.object({
   serial: z.string().min(1, 'Serial is required'),
   name: z.string().min(1, 'Name is required'),
-  zoneCount: z.coerce.number().min(1).max(64, 'Max 64 zones'),
-  groupId: z.string().min(1, 'Group ID is required'),
-  ipAddress: z.string().optional(),
-  allowedCommands: z.string().optional()
+  companyId: z.string().min(1, 'Company ID is required'),
+  branchId: z.string().min(1, 'Branch ID is required'),
+  mobileNumber: z.string().optional()
 });
 
 const userSchema = z.object({
@@ -37,26 +26,28 @@ const userSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   displayName: z.string().min(1, 'Display name is required'),
   role: z.enum(['super_admin', 'head_office', 'system_integrator', 'end_user']),
-  groups: z.string().optional()
+  companyId: z.string().optional(),
+  branchIds: z.string().optional()
 });
 
-const groupSchema = z.object({
+const companySchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  groupId: z.string().optional(),
-  description: z.string().optional(),
-  allowedCommands: z.string().optional()
+  description: z.string().optional()
 });
 
-const apiKeySchema = z.object({
-  email: z.string().email('Valid email is required').optional(),
-  uid: z.string().optional(),
-  label: z.string().optional()
+const branchSchema = z.object({
+  companyId: z.string().min(1, 'Company ID is required'),
+  name: z.string().min(1, 'Name is required'),
+  address: z.string().optional(),
+  supervisorName: z.string().optional(),
+  contactNumber: z.string().optional(),
+  emailAddress: z.string().email('Invalid email').optional().or(z.literal(''))
 });
 
 type PanelFormData = z.infer<typeof panelSchema>;
 type UserFormData = z.infer<typeof userSchema>;
-type GroupFormData = z.infer<typeof groupSchema>;
-type ApiKeyFormData = z.infer<typeof apiKeySchema>;
+type CompanyFormData = z.infer<typeof companySchema>;
+type BranchFormData = z.infer<typeof branchSchema>;
 
 const roleLabels: Record<Role, string> = {
   super_admin: 'Super Admin',
@@ -66,59 +57,61 @@ const roleLabels: Record<Role, string> = {
 };
 
 const roleColors: Record<Role, string> = {
-  super_admin: 'border-red-300/30 bg-red-500/10 text-red-100',
-  head_office: 'border-amber-300/30 bg-amber-400/10 text-amber-100',
-  system_integrator: 'border-cyan-300/30 bg-cyan-400/10 text-cyan-100',
-  end_user: 'border-white/10 bg-white/[0.04] text-slate-300'
+  super_admin: 'border-tertiary-container/30 bg-tertiary-container/10 text-tertiary-container',
+  head_office: 'border-secondary/30 bg-secondary/10 text-secondary',
+  system_integrator: 'border-primary/30 bg-primary/10 text-primary',
+  end_user: 'border-white/10 bg-white/[0.04] text-on-surface-variant'
 };
 
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (typeof error === 'object' && error !== null && 'response' in error) {
-    const response = (error as { response?: { data?: { message?: unknown } } }).response;
+    const response = (error as { response?: { data?: { error?: string, message?: unknown } } }).response;
+    if (typeof response?.data?.error === 'string') {
+      return response.data.error;
+    }
     if (typeof response?.data?.message === 'string') {
       return response.data.message;
     }
   }
-
   return fallback;
 }
 
 export function AdminSettings() {
+  const { userData } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [apiKeys, setApiKeys] = useState<ApiKeyRecord[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [panels, setPanels] = useState<Panel[]>([]);
+  
   const [usersLoading, setUsersLoading] = useState(true);
-  const [groupsLoading, setGroupsLoading] = useState(true);
-  const [apiKeysLoading, setApiKeysLoading] = useState(true);
+  const [orgsLoading, setOrgsLoading] = useState(true);
   const [panelsLoading, setPanelsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'panels'>('users');
-  const [editingUser, setEditingUser] = useState<string | null>(null);
+  
+  const [activeTab, setActiveTab] = useState<'users' | 'orgs' | 'panels'>('users');
+  
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
-  const [groupFormOpen, setGroupFormOpen] = useState(false);
-  const [apiKeyFormOpen, setApiKeyFormOpen] = useState(false);
+  const [companyFormOpen, setCompanyFormOpen] = useState(false);
+  const [branchFormOpen, setBranchFormOpen] = useState(false);
+  
   const [panelFormLoading, setPanelFormLoading] = useState(false);
   const [userFormLoading, setUserFormLoading] = useState(false);
-  const [groupFormLoading, setGroupFormLoading] = useState(false);
-  const [apiKeyFormLoading, setApiKeyFormLoading] = useState(false);
-  const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
+  const [companyFormLoading, setCompanyFormLoading] = useState(false);
+  const [branchFormLoading, setBranchFormLoading] = useState(false);
+  
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors }
+    register: registerPanel,
+    handleSubmit: handleSubmitPanel,
+    reset: resetPanel,
+    formState: { errors: panelErrors }
   } = useForm<PanelFormData>({
     resolver: zodResolver(panelSchema),
     defaultValues: {
-      serial: '219111',
-      name: 'Fyrlinc Panel 219111',
-      zoneCount: 8,
-      groupId: 'group-building-a',
-      ipAddress: '72.167.225.142'
+      serial: '',
+      name: ''
     }
   });
 
@@ -126,35 +119,34 @@ export function AdminSettings() {
     register: registerUser,
     handleSubmit: handleSubmitUser,
     reset: resetUser,
+    watch: watchUser,
     formState: { errors: userErrors }
   } = useForm<UserFormData>({ resolver: zodResolver(userSchema) });
 
   const {
-    register: registerGroup,
-    handleSubmit: handleSubmitGroup,
-    reset: resetGroup,
-    formState: { errors: groupErrors }
-  } = useForm<GroupFormData>({ resolver: zodResolver(groupSchema) });
+    register: registerCompany,
+    handleSubmit: handleSubmitCompany,
+    reset: resetCompany
+  } = useForm<CompanyFormData>({ resolver: zodResolver(companySchema) });
 
   const {
-    register: registerApiKey,
-    handleSubmit: handleSubmitApiKey,
-    reset: resetApiKey,
-    formState: { errors: apiKeyErrors }
-  } = useForm<ApiKeyFormData>({ resolver: zodResolver(apiKeySchema) });
+    register: registerBranch,
+    handleSubmit: handleSubmitBranch,
+    reset: resetBranch
+  } = useForm<BranchFormData>({ resolver: zodResolver(branchSchema) });
+
+  const selectedUserRole = watchUser('role');
 
   useEffect(() => {
     loadUsers();
-    loadGroups();
-    loadApiKeys();
+    loadOrgs();
     loadPanels();
   }, []);
 
   const loadUsers = async () => {
     setUsersLoading(true);
     try {
-      const data = await UserService.getUsers();
-      setUsers(data);
+      setUsers(await UserService.getUsers());
     } catch (err) {
       console.error('Failed to load users:', err);
     } finally {
@@ -162,53 +154,24 @@ export function AdminSettings() {
     }
   };
 
-  const loadGroups = async () => {
-    setGroupsLoading(true);
+  const loadOrgs = async () => {
+    setOrgsLoading(true);
     try {
-      setGroups(await GroupService.getGroups());
+      if (userData?.role === 'super_admin' || userData?.role === 'head_office') {
+        setCompanies(await CompanyService.getCompanies());
+      }
+      setBranches(await BranchService.getBranches());
     } catch (err) {
-      console.error('Failed to load groups:', err);
+      console.error('Failed to load orgs:', err);
     } finally {
-      setGroupsLoading(false);
-    }
-  };
-
-  const loadApiKeys = async () => {
-    setApiKeysLoading(true);
-    try {
-      setApiKeys(await ApiKeyService.getApiKeys());
-    } catch (err) {
-      console.error('Failed to load api keys:', err);
-    } finally {
-      setApiKeysLoading(false);
+      setOrgsLoading(false);
     }
   };
 
   const loadPanels = async () => {
     setPanelsLoading(true);
     try {
-      const data = await PanelService.getPanels();
-      setPanels(data);
-
-      const panelsMissingCommands = data.filter((panel) => !Array.isArray(panel.allowedCommands) || panel.allowedCommands.length === 0);
-      if (panelsMissingCommands.length > 0 && !syncingPanelDefaults) {
-        setSyncingPanelDefaults(true);
-        try {
-          await Promise.all(
-            panelsMissingCommands.map((panel) =>
-              PanelService.updatePanel(panel.serial, {
-                allowedCommands: [...DEFAULT_PANEL_COMMANDS]
-              })
-            )
-          );
-          const refreshedPanels = await PanelService.getPanels();
-          setPanels(refreshedPanels);
-          setSuccess(`Applied default controls to ${panelsMissingCommands.length} panel${panelsMissingCommands.length === 1 ? '' : 's'}`);
-          setTimeout(() => setSuccess(null), 3000);
-        } finally {
-          setSyncingPanelDefaults(false);
-        }
-      }
+      setPanels(await PanelService.getPanels());
     } catch (err) {
       console.error('Failed to load panels:', err);
     } finally {
@@ -220,15 +183,22 @@ export function AdminSettings() {
     setUserFormLoading(true);
     setError(null);
     try {
-      const groups = data.groups
-        ? data.groups.split(',').map((group) => group.trim()).filter(Boolean)
+      const branchIds = data.branchIds
+        ? data.branchIds.split(',').map((id) => id.trim()).filter(Boolean)
         : [];
+      
+      let companyId = data.companyId;
+      if (userData?.role === 'head_office' && userData.companyId) {
+         companyId = userData.companyId;
+      }
+
       await UserService.createUser({
         email: data.email,
         password: data.password,
         displayName: data.displayName,
         role: data.role,
-        groups
+        companyId: companyId || undefined,
+        branchIds
       });
       setUserFormOpen(false);
       resetUser();
@@ -242,59 +212,45 @@ export function AdminSettings() {
     }
   };
 
-  const handleCreateGroup = async (data: GroupFormData) => {
-    setGroupFormLoading(true);
+  const handleCreateCompany = async (data: CompanyFormData) => {
+    setCompanyFormLoading(true);
     setError(null);
     try {
-      await GroupService.createGroup({
-        name: data.name,
-        groupId: data.groupId?.trim() || undefined,
-        description: data.description?.trim() || undefined,
-        allowedCommands: normalizeAllowedCommands(undefined)
-      });
-      setGroupFormOpen(false);
-      resetGroup();
-      await loadGroups();
-      setSuccess('Group created successfully');
+      await CompanyService.createCompany(data);
+      setCompanyFormOpen(false);
+      resetCompany();
+      await loadOrgs();
+      setSuccess('Company created successfully');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to create group'));
+      setError(getApiErrorMessage(err, 'Failed to create company'));
     } finally {
-      setGroupFormLoading(false);
+      setCompanyFormLoading(false);
     }
   };
 
-  const handleCreateApiKey = async (data: ApiKeyFormData) => {
-    setApiKeyFormLoading(true);
+  const handleCreateBranch = async (data: BranchFormData) => {
+    setBranchFormLoading(true);
     setError(null);
     try {
-      await ApiKeyService.createApiKey({
-        uid: data.uid?.trim() || undefined,
-        email: data.email?.trim() || undefined,
-        label: data.label?.trim() || undefined
+      let compId = data.companyId;
+      if (userData?.role === 'head_office' && userData.companyId) {
+        compId = userData.companyId;
+      }
+      
+      await BranchService.createBranch({
+         ...data,
+         companyId: compId
       });
-      setApiKeyFormOpen(false);
-      resetApiKey();
-      await loadApiKeys();
-      setSuccess('API key created successfully');
+      setBranchFormOpen(false);
+      resetBranch();
+      await loadOrgs();
+      setSuccess('Branch created successfully');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to create API key'));
+      setError(getApiErrorMessage(err, 'Failed to create branch'));
     } finally {
-      setApiKeyFormLoading(false);
-    }
-  };
-
-  const handleRoleChange = async (uid: string, newRole: Role) => {
-    setError(null);
-    try {
-      await UserService.updateUserRole(uid, newRole);
-      setUsers(users.map(u => u.uid === uid ? { ...u, role: newRole } : u));
-      setEditingUser(null);
-      setSuccess('User role updated successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to update role'));
+      setBranchFormLoading(false);
     }
   };
 
@@ -302,16 +258,21 @@ export function AdminSettings() {
     setPanelFormLoading(true);
     setError(null);
     try {
+      let compId = data.companyId;
+      if (userData?.role === 'head_office' && userData.companyId) {
+        compId = userData.companyId;
+      }
+
       await PanelService.createPanel({
         serial: data.serial,
         name: data.name,
-        zoneCount: data.zoneCount,
-        groupId: data.groupId,
-        ipAddress: data.ipAddress?.trim() || undefined,
-        allowedCommands: normalizeAllowedCommands(undefined)
+        companyId: compId,
+        branchId: data.branchId,
+        mobileNumber: data.mobileNumber?.trim() || undefined
       });
       setPanelFormOpen(false);
-      reset();
+      resetPanel();
+      await loadPanels();
       setSuccess('Panel created successfully');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
@@ -322,8 +283,7 @@ export function AdminSettings() {
   };
 
   const handleDeleteUser = async (uid: string) => {
-    if (!window.confirm('Delete this user? Their account will be disabled.')) return;
-
+    if (!window.confirm('Delete this user? This action cannot be undone.')) return;
     setError(null);
     try {
       await UserService.deleteUser(uid);
@@ -335,39 +295,8 @@ export function AdminSettings() {
     }
   };
 
-  const handleDeleteApiKey = async (keyId: string) => {
-    if (!window.confirm('Revoke this API key?')) return;
-
-    setError(null);
-    try {
-      await ApiKeyService.deleteApiKey(keyId);
-      await loadApiKeys();
-      setSuccess('API key revoked successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to revoke API key'));
-    }
-  };
-
-  const handleDeleteGroup = async (groupId: string) => {
-    if (!window.confirm('Delete this group? Panels using it may lose access controls.')) return;
-
-    setError(null);
-    try {
-      await GroupService.deleteGroup(groupId);
-      await loadGroups();
-      await loadPanels();
-      await loadUsers();
-      setSuccess('Group deleted successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to delete group'));
-    }
-  };
-
   const handleDeletePanel = async (serial: string) => {
-    if (!window.confirm('Delete this panel? This will disable the panel record.')) return;
-
+    if (!window.confirm('Delete this panel?')) return;
     setError(null);
     try {
       await PanelService.deletePanel(serial);
@@ -380,398 +309,339 @@ export function AdminSettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <section className="surface-panel rounded-lg p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold leading-tight text-white">Admin Settings</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-400">Manage users and panel provisioning</p>
-          </div>
-
-          <div className="surface-muted flex rounded-lg p-1">
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === 'users'
-                  ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
-                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
-              }`}
-            >
-              <Users className="h-4 w-4" />
-              <span>Users</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('panels')}
-              className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === 'panels'
-                  ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
-                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
-              }`}
-            >
-              <Shield className="h-4 w-4" />
-              <span>Panels</span>
-            </button>
-          </div>
+    <div className="max-w-[1440px] mx-auto px-margin py-lg space-y-lg">
+      <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-md">
+        <div>
+          <h1 className="font-headline-lg text-headline-lg text-on-surface">System Administration</h1>
+          <p className="text-on-surface-variant font-body-md text-body-md mt-xs">Manage organizations, panels, and access controls</p>
         </div>
-      </section>
+        
+        <nav className="flex bg-white/5 border border-white/10 p-xs rounded-xl backdrop-blur-md overflow-x-auto">
+          <button onClick={() => setActiveTab('users')} className={`px-md py-xs rounded-lg font-label-md text-label-md flex items-center gap-xs transition-colors whitespace-nowrap ${activeTab === 'users' ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}>
+            <span className="material-symbols-outlined text-[18px]">group</span>
+            Users
+          </button>
+          {(userData?.role === 'super_admin' || userData?.role === 'head_office' || userData?.role === 'system_integrator') && (
+            <button onClick={() => setActiveTab('orgs')} className={`px-md py-xs rounded-lg font-label-md text-label-md flex items-center gap-xs transition-colors whitespace-nowrap ${activeTab === 'orgs' ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}>
+              <span className="material-symbols-outlined text-[18px]">domain</span>
+              Hierarchy
+            </button>
+          )}
+          <button onClick={() => setActiveTab('panels')} className={`px-md py-xs rounded-lg font-label-md text-label-md flex items-center gap-xs transition-colors whitespace-nowrap ${activeTab === 'panels' ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}>
+            <span className="material-symbols-outlined text-[18px]">router</span>
+            Panels
+          </button>
+        </nav>
+      </header>
 
       {error && (
-        <div className="flex items-center gap-3 rounded-lg border border-red-300/25 bg-red-500/10 p-4">
-          <AlertCircle className="h-5 w-5 shrink-0 text-red-200" />
-          <p className="text-sm text-red-100">{error}</p>
-          <button onClick={() => setError(null)} className="ml-auto text-red-200/80 hover:text-red-100">
-            <XCircle className="h-4 w-4" />
-          </button>
+        <div className="bg-tertiary-container/10 border border-tertiary-container/30 text-tertiary-container rounded-lg p-md mb-md flex items-center gap-sm">
+          <span className="material-symbols-outlined">error</span>
+          <p className="text-sm font-medium flex-1">{error}</p>
+          <button onClick={() => setError(null)} className="hover:text-white"><span className="material-symbols-outlined text-sm">close</span></button>
         </div>
       )}
 
       {success && (
-        <div className="flex items-center gap-3 rounded-lg border border-emerald-300/25 bg-emerald-400/10 p-4">
-          <CheckCircle className="h-5 w-5 shrink-0 text-emerald-200" />
-          <p className="text-sm text-emerald-100">{success}</p>
-          <button onClick={() => setSuccess(null)} className="ml-auto text-emerald-200/80 hover:text-emerald-100">
-            <XCircle className="h-4 w-4" />
-          </button>
+        <div className="bg-secondary/10 border border-secondary/30 text-secondary rounded-lg p-md mb-md flex items-center gap-sm">
+          <span className="material-symbols-outlined">check_circle</span>
+          <p className="text-sm font-medium flex-1">{success}</p>
+          <button onClick={() => setSuccess(null)} className="hover:text-white"><span className="material-symbols-outlined text-sm">close</span></button>
         </div>
       )}
 
       {activeTab === 'users' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="space-y-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md">
             <div>
-              <h2 className="text-lg font-semibold text-white">User Management</h2>
-              <p className="mt-1 text-sm text-slate-500">{users.length} user{users.length === 1 ? '' : 's'}</p>
+              <h2 className="font-headline-md text-headline-md text-on-surface">User Management</h2>
             </div>
-            <button
-              onClick={loadUsers}
-              disabled={usersLoading}
-              className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <RefreshCw className={`h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <button onClick={() => setUserFormOpen(true)} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
-              Add User
-            </button>
-            <button onClick={() => setGroupFormOpen(true)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">
-              <Layers3 className="mr-2 inline h-4 w-4" />
-              Add Group
-            </button>
+            <div className="flex gap-sm">
+              <button onClick={loadUsers} disabled={usersLoading} className="bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors disabled:opacity-50">
+                <RefreshCw className={`h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} /> Refresh
+              </button>
+              <button onClick={() => setUserFormOpen(true)} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors">
+                <span className="material-symbols-outlined text-[18px]">person_add</span>
+                Add User
+              </button>
+            </div>
           </div>
 
           {userFormOpen && (
-            <div className="surface-panel rounded-lg p-5">
-              <h3 className="mb-4 text-lg font-semibold text-white">Create User</h3>
-              <form onSubmit={handleSubmitUser(handleCreateUser)} className="grid gap-4 md:grid-cols-2">
-                <input {...registerUser('displayName')} placeholder="Display name" className="control-field rounded-lg px-4 py-2.5 text-sm md:col-span-2" />
-                <div>
-                  <input {...registerUser('email')} placeholder="Email" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                  {userErrors.email && <p className="mt-1 text-sm text-red-300">{userErrors.email.message}</p>}
+            <div className="glass-panel p-gutter rounded-xl">
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-md">Create User</h3>
+              <form onSubmit={handleSubmitUser(handleCreateUser)} className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                <div className="md:col-span-2">
+                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Display Name</label>
+                  <input {...registerUser('displayName')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
                 </div>
                 <div>
-                  <input {...registerUser('password')} type="password" placeholder="Password" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                  {userErrors.password && <p className="mt-1 text-sm text-red-300">{userErrors.password.message}</p>}
+                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Email Address</label>
+                  <input {...registerUser('email')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                  {userErrors.email && <p className="mt-1 text-xs text-tertiary-container">{userErrors.email.message}</p>}
                 </div>
                 <div>
-                  <select {...registerUser('role')} className="control-field w-full rounded-lg px-4 py-2.5 text-sm">
+                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Password</label>
+                  <input {...registerUser('password')} type="password" className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                  {userErrors.password && <p className="mt-1 text-xs text-tertiary-container">{userErrors.password.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Role</label>
+                  <select {...registerUser('role')} className="w-full bg-[#1e2336] border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors appearance-none">
                     <option value="end_user">End User</option>
-                    <option value="system_integrator">System Integrator</option>
-                    <option value="head_office">Head Office</option>
-                    <option value="super_admin">Super Admin</option>
+                    {(userData?.role === 'super_admin' || userData?.role === 'head_office') && (
+                      <option value="system_integrator">System Integrator</option>
+                    )}
+                    {userData?.role === 'super_admin' && (
+                      <option value="head_office">Head Office</option>
+                    )}
                   </select>
                 </div>
-                <div>
-                  <input {...registerUser('groups')} placeholder="group-a, group-b" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                </div>
-                <div className="md:col-span-2 flex gap-2">
-                  <button type="submit" disabled={userFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
+                
+                {(selectedUserRole === 'head_office' || selectedUserRole === 'system_integrator' || selectedUserRole === 'end_user') && userData?.role === 'super_admin' && (
+                  <div>
+                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Company ID</label>
+                    <input {...registerUser('companyId')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                  </div>
+                )}
+                
+                {(selectedUserRole === 'system_integrator' || selectedUserRole === 'end_user') && (
+                  <div>
+                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Branch IDs (comma separated)</label>
+                    <input {...registerUser('branchIds')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                  </div>
+                )}
+
+                <div className="md:col-span-2 flex gap-md mt-sm">
+                  <button type="submit" disabled={userFormLoading} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg transition-colors disabled:opacity-50">
                     {userFormLoading ? 'Creating...' : 'Create User'}
                   </button>
-                  <button type="button" onClick={() => setUserFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {groupFormOpen && (
-            <div className="surface-panel rounded-lg p-5">
-              <h3 className="mb-4 text-lg font-semibold text-white">Create Group</h3>
-              <form onSubmit={handleSubmitGroup(handleCreateGroup)} className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <input {...registerGroup('name')} placeholder="Group name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                  {groupErrors.name && <p className="mt-1 text-sm text-red-300">{groupErrors.name.message}</p>}
-                </div>
-                <input {...registerGroup('groupId')} placeholder="Optional group ID" className="control-field rounded-lg px-4 py-2.5 text-sm" />
-                <textarea {...registerGroup('description')} placeholder="Description" className="control-field min-h-24 rounded-lg px-4 py-2.5 text-sm md:col-span-2" />
-                <div className="md:col-span-2 flex gap-2">
-                  <button type="submit" disabled={groupFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
-                    {groupFormLoading ? 'Creating...' : 'Create Group'}
+                  <button type="button" onClick={() => setUserFormOpen(false)} className="bg-white/5 hover:bg-white/10 text-on-surface font-label-md text-label-md px-lg py-sm rounded-lg transition-colors border border-white/10">
+                    Cancel
                   </button>
-                  <button type="button" onClick={() => setGroupFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
                 </div>
               </form>
             </div>
           )}
-
-          {apiKeyFormOpen && (
-            <div className="surface-panel rounded-lg p-5">
-              <h3 className="mb-4 text-lg font-semibold text-white">Create API Key</h3>
-              <form onSubmit={handleSubmitApiKey(handleCreateApiKey)} className="grid gap-4 md:grid-cols-3">
-                <div>
-                  <input {...registerApiKey('email')} placeholder="User email" className="control-field rounded-lg px-4 py-2.5 text-sm" />
-                  {apiKeyErrors.email && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.email.message}</p>}
-                </div>
-                <div>
-                  <input {...registerApiKey('uid')} placeholder="Or user UID" className="control-field rounded-lg px-4 py-2.5 text-sm" />
-                  {apiKeyErrors.uid && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.uid.message}</p>}
-                </div>
-                <div>
-                  <input {...registerApiKey('label')} placeholder="Label" className="control-field rounded-lg px-4 py-2.5 text-sm" />
-                  {apiKeyErrors.label && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.label.message}</p>}
-                </div>
-                <div className="md:col-span-3 flex gap-2">
-                  <button type="submit" disabled={apiKeyFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
-                    {apiKeyFormLoading ? 'Creating...' : 'Create API Key'}
-                  </button>
-                  <button type="button" onClick={() => setApiKeyFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          <div className="grid gap-4 xl:grid-cols-2">
-            <div className="surface-panel rounded-lg p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Groups</h3>
-                  <p className="mt-1 text-sm text-slate-500">{groups.length} total</p>
-                </div>
-                <button onClick={loadGroups} disabled={groupsLoading} className="btn-secondary rounded-lg px-3 py-2 text-sm font-medium">
-                  <RefreshCw className={`h-4 w-4 ${groupsLoading ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
-              {groupsLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
-              ) : groups.length === 0 ? (
-                <p className="text-sm text-slate-500">No groups yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {groups.map((group) => (
-                    <div key={group.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-white">{group.name}</p>
-                          <p className="mt-1 text-xs text-slate-500">{group.id}</p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteGroup(group.id)}
-                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
-                        >
-                          <Trash2 className="mr-1 inline h-4 w-4" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="surface-panel rounded-lg p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">API Keys</h3>
-                  <p className="mt-1 text-sm text-slate-500">{apiKeys.length} total</p>
-                </div>
-                <button onClick={loadApiKeys} disabled={apiKeysLoading} className="btn-secondary rounded-lg px-3 py-2 text-sm font-medium">
-                  <RefreshCw className={`h-4 w-4 ${apiKeysLoading ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
-              {apiKeysLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
-              ) : apiKeys.length === 0 ? (
-                <p className="text-sm text-slate-500">No API keys issued yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {apiKeys.map((key) => (
-                    <div key={key.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-white">{key.label || 'Untitled key'}</p>
-                          <p className="mt-1 text-xs text-slate-500">{key.email || key.userId || 'Unknown owner'}</p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteApiKey(key.id)}
-                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
-                        >
-                          <Trash2 className="mr-1 inline h-4 w-4" />
-                          Revoke
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
 
           {usersLoading ? (
-            <div className="surface-panel flex justify-center rounded-lg py-14">
-              <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
+            <div className="glass-panel flex justify-center rounded-xl py-xl">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="table-shell overflow-x-auto">
-              <table className="w-full min-w-[820px]">
-                <thead className="bg-white/[0.04]">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
-                      User
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
-                      Role
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
-                      Groups
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {users.map((user) => (
-                    <tr key={user.uid} className="transition-colors hover:bg-white/[0.035]">
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 text-sm font-semibold text-white">
-                            {user.displayName?.charAt(0).toUpperCase() || 'U'}
+            <div className="glass-panel rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px] text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-white/10 bg-white/5">
+                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">User</th>
+                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Email</th>
+                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Role</th>
+                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Scope</th>
+                      <th className="px-md py-sm font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {users.map((user) => (
+                      <tr key={user.uid} className="hover:bg-white/5 transition-colors group">
+                        <td className="px-md py-sm">
+                          <div className="flex items-center gap-sm">
+                            <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-lg">
+                              {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                            <span className="font-label-md text-label-md text-on-surface">{user.displayName || 'Unknown'}</span>
                           </div>
-                          <div>
-                            <p className="font-medium text-white">{user.displayName || 'Unknown'}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-slate-300">{user.email}</td>
-                      <td className="px-4 py-4">
-                        {editingUser === user.uid ? (
-                          <select
-                            defaultValue={user.role}
-                            onChange={(e) => handleRoleChange(user.uid, e.target.value as Role)}
-                            className="control-field rounded-lg px-3 py-2 text-sm"
-                          >
-                            <option value="super_admin">Super Admin</option>
-                            <option value="head_office">Head Office</option>
-                            <option value="system_integrator">System Integrator</option>
-                            <option value="end_user">End User</option>
-                          </select>
-                        ) : (
-                          <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${roleColors[user.role]}`}>
+                        </td>
+                        <td className="px-md py-sm text-on-surface-variant text-body-md">{user.email}</td>
+                        <td className="px-md py-sm">
+                          <span className={`inline-block px-sm py-[2px] rounded-full text-[11px] font-bold uppercase tracking-wider border ${roleColors[user.role]}`}>
                             {roleLabels[user.role]}
                           </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="text-sm text-slate-400">
-                          {user.groups.length > 0 ? `${user.groups.length} groups` : 'None'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {editingUser === user.uid ? (
-                            <button
-                              onClick={() => setEditingUser(null)}
-                              className="rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
-                            >
-                              Cancel
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setEditingUser(user.uid)}
-                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                              <span>Edit Role</span>
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDeleteUser(user.uid)}
-                            className="rounded-lg px-3 py-2 text-sm text-red-200 transition-colors hover:bg-red-500/10"
-                          >
-                            Delete
+                        </td>
+                        <td className="px-md py-sm">
+                          <div className="flex flex-col gap-[2px]">
+                            {user.companyId && <span className="text-on-surface-variant text-[12px] font-data-mono">C: {user.companyId}</span>}
+                            {user.branchIds && user.branchIds.length > 0 && <span className="text-on-surface-variant text-[12px] font-data-mono">B: {user.branchIds.join(', ')}</span>}
+                          </div>
+                        </td>
+                        <td className="px-md py-sm text-right">
+                          <button onClick={() => handleDeleteUser(user.uid)} className="text-tertiary-container/70 hover:text-tertiary-container hover:bg-tertiary-container/10 p-sm rounded-lg transition-colors" title="Delete User">
+                            <span className="material-symbols-outlined text-[20px]">delete</span>
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
       )}
 
-      {activeTab === 'panels' && (
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-white">Panel Provisioning</h2>
-              <p className="mt-1 text-sm text-slate-500">Create panel records for monitoring</p>
-            </div>
-            <button
-              onClick={() => setPanelFormOpen(true)}
-              className="btn-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold"
-            >
-              <Plus className="h-5 w-5" />
-              <span>Add Panel</span>
-            </button>
+      {activeTab === 'orgs' && (
+        <div className="space-y-lg">
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md">
+              <h2 className="font-headline-md text-headline-md text-on-surface">Hierarchy Management</h2>
+              <div className="flex gap-sm">
+                {userData?.role === 'super_admin' && (
+                  <button onClick={() => setCompanyFormOpen(true)} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors">
+                    <span className="material-symbols-outlined text-[18px]">domain_add</span>
+                    Add Company
+                  </button>
+                )}
+                {(userData?.role === 'super_admin' || userData?.role === 'head_office') && (
+                  <button onClick={() => setBranchFormOpen(true)} className="bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors">
+                    <span className="material-symbols-outlined text-[18px]">add_business</span>
+                    Add Branch
+                  </button>
+                )}
+              </div>
           </div>
 
-          <div className="surface-panel rounded-lg p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-white">Provisioned Panels</h3>
-                <p className="mt-1 text-sm text-slate-500">Panels currently stored in Firestore</p>
-              </div>
-              <button onClick={loadPanels} disabled={panelsLoading} className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
-                <RefreshCw className={`h-4 w-4 ${panelsLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
+          {companyFormOpen && (
+            <div className="glass-panel p-gutter rounded-xl">
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-md">Create Company</h3>
+              <form onSubmit={handleSubmitCompany(handleCreateCompany)} className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                <div>
+                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Company Name</label>
+                  <input {...registerCompany('name')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                </div>
+                <div>
+                  <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Description</label>
+                  <input {...registerCompany('description')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                </div>
+                <div className="md:col-span-2 flex gap-md mt-sm">
+                  <button type="submit" disabled={companyFormLoading} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg transition-colors disabled:opacity-50">
+                    {companyFormLoading ? 'Creating...' : 'Create'}
+                  </button>
+                  <button type="button" onClick={() => setCompanyFormOpen(false)} className="bg-white/5 hover:bg-white/10 text-on-surface font-label-md text-label-md px-lg py-sm rounded-lg transition-colors border border-white/10">Cancel</button>
+                </div>
+              </form>
             </div>
+          )}
 
-            {panelsLoading ? (
-              <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-amber-300" /></div>
-            ) : panels.length === 0 ? (
-              <p className="text-sm text-slate-500">No panels provisioned yet.</p>
-            ) : (
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {panels.map((panel) => (
-                  <div key={panel.serial} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-white">{panel.name}</p>
-                        <p className="mt-1 font-mono text-xs text-slate-500">{panel.serial}</p>
+          {branchFormOpen && (
+            <div className="glass-panel p-gutter rounded-xl">
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-md">Create Branch</h3>
+              <form onSubmit={handleSubmitBranch(handleCreateBranch)} className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                <div>
+                   <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Branch Name</label>
+                  <input {...registerBranch('name')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                </div>
+                {userData?.role === 'super_admin' && (
+                  <div>
+                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Company ID</label>
+                    <input {...registerBranch('companyId')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                  </div>
+                )}
+                <div className="md:col-span-2">
+                   <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Address</label>
+                  <input {...registerBranch('address')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                </div>
+                <div>
+                   <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Manager/Supervisor</label>
+                  <input {...registerBranch('supervisorName')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                </div>
+                <div>
+                   <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Contact Number</label>
+                  <input {...registerBranch('contactNumber')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                </div>
+                <div className="md:col-span-2 flex gap-md mt-sm">
+                  <button type="submit" disabled={branchFormLoading} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-lg py-sm rounded-lg transition-colors disabled:opacity-50">
+                    {branchFormLoading ? 'Creating...' : 'Create'}
+                  </button>
+                  <button type="button" onClick={() => setBranchFormOpen(false)} className="bg-white/5 hover:bg-white/10 text-on-surface font-label-md text-label-md px-lg py-sm rounded-lg transition-colors border border-white/10">Cancel</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="grid gap-gutter lg:grid-cols-2">
+            {userData?.role === 'super_admin' && (
+              <div className="glass-panel p-gutter rounded-xl">
+                <h3 className="font-headline-md text-headline-md text-on-surface mb-md flex items-center gap-xs">
+                  <span className="material-symbols-outlined text-primary">domain</span>
+                  Companies
+                </h3>
+                {orgsLoading ? <div className="py-xl flex justify-center"><Loader2 className="animate-spin text-primary" /></div> : (
+                  <div className="space-y-sm">
+                    {companies.map(c => (
+                      <div key={c.id} className="bg-white/5 border border-white/10 rounded-lg p-md flex flex-col hover:border-white/20 transition-colors">
+                        <span className="font-label-md text-label-md text-on-surface">{c.name}</span>
+                        <span className="font-data-mono text-[12px] text-on-surface-variant mt-xs">ID: {c.id}</span>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className={`rounded-full border px-2 py-1 text-xs ${panel.mqttConnected ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-slate-400/20 bg-slate-500/10 text-slate-300'}`}>{panel.mqttConnected ? 'Online' : 'Offline'}</span>
-                        <button
-                          onClick={() => handleDeletePanel(panel.serial)}
-                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
-                        >
-                          <Trash2 className="mr-1 inline h-4 w-4" />
-                          Delete
-                        </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="glass-panel p-gutter rounded-xl">
+               <h3 className="font-headline-md text-headline-md text-on-surface mb-md flex items-center gap-xs">
+                  <span className="material-symbols-outlined text-secondary">storefront</span>
+                  Branches
+               </h3>
+               {orgsLoading ? <div className="py-xl flex justify-center"><Loader2 className="animate-spin text-primary" /></div> : (
+                 <div className="space-y-sm">
+                   {branches.map(b => (
+                    <div key={b.id} className="bg-white/5 border border-white/10 rounded-lg p-md flex flex-col hover:border-white/20 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <span className="font-label-md text-label-md text-on-surface">{b.name}</span>
+                        {b.supervisorName && <span className="bg-secondary/10 text-secondary text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Mgr: {b.supervisorName}</span>}
                       </div>
+                      <span className="font-data-mono text-[12px] text-on-surface-variant mt-xs">ID: {b.id} • Company: {b.companyId}</span>
                     </div>
-                    <div className="mt-3 text-sm text-slate-400">
-                      <p>{panel.zoneCount} zones</p>
-                      <p>{panel.groupId || 'No group'}</p>
-                      <p className="mt-2 text-xs text-slate-500">{panel.allowedCommands?.length || DEFAULT_PANEL_COMMANDS.length} commands configured</p>
+                  ))}
+                 </div>
+               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'panels' && (
+        <div className="space-y-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md">
+            <div>
+              <h2 className="font-headline-md text-headline-md text-on-surface">Panel Provisioning</h2>
+            </div>
+            <div className="flex gap-sm">
+              <button onClick={loadPanels} disabled={panelsLoading} className="bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors disabled:opacity-50">
+                <RefreshCw className={`h-4 w-4 ${panelsLoading ? 'animate-spin' : ''}`} /> Refresh
+              </button>
+              {(userData?.role !== 'end_user') && (
+                <button onClick={() => setPanelFormOpen(true)} className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-md py-xs rounded-lg flex items-center gap-xs transition-colors">
+                  <span className="material-symbols-outlined text-[18px]">add_box</span>
+                  Add Panel
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="glass-panel p-gutter rounded-xl">
+            {panelsLoading ? (
+              <div className="py-xl flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+            ) : panels.length === 0 ? (
+              <div className="py-xl text-center text-on-surface-variant font-label-md text-label-md">No panels provisioned yet.</div>
+            ) : (
+              <div className="grid gap-md sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {panels.map((panel) => (
+                  <div key={panel.serial} className="bg-white/5 border border-white/10 rounded-xl p-md flex flex-col group hover:border-primary/30 transition-colors">
+                    <div className="flex items-start justify-between mb-sm">
+                      <div>
+                        <p className="font-headline-md text-headline-md text-on-surface truncate pr-2">{panel.name}</p>
+                        <p className="font-data-mono text-label-sm text-on-surface-variant mt-xs">SN: {panel.serial}</p>
+                      </div>
+                      {(userData?.role !== 'end_user') && (
+                        <button onClick={() => handleDeletePanel(panel.serial)} className="text-tertiary-container/70 hover:text-tertiary-container bg-tertiary-container/10 p-[4px] rounded transition-colors opacity-0 group-hover:opacity-100" title="Delete Panel">
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-[2px] mt-auto">
+                      <span className="text-[12px] text-on-surface-variant">Company: <span className="font-data-mono text-on-surface">{panel.companyId}</span></span>
+                      <span className="text-[12px] text-on-surface-variant">Branch: <span className="font-data-mono text-on-surface">{panel.branchId}</span></span>
+                      {panel.mobileNumber && <span className="text-[12px] text-on-surface-variant">Mobile: <span className="font-data-mono text-on-surface">{panel.mobileNumber}</span></span>}
                     </div>
                   </div>
                 ))}
@@ -781,149 +651,50 @@ export function AdminSettings() {
 
           {panelFormOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div
-                className="absolute inset-0 bg-black/75 backdrop-blur-sm"
-                onClick={() => setPanelFormOpen(false)}
-              />
-              <div className="surface-panel relative w-full max-w-md rounded-lg p-6">
-                <div className="mb-6 flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-white">Add New Panel</h3>
-                    <p className="mt-1 text-sm text-slate-500">Provision a new fire alarm panel.</p>
-                  </div>
-                  <button
-                    onClick={() => setPanelFormOpen(false)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
-                    type="button"
-                    aria-label="Close panel form"
-                  >
-                    <XCircle className="h-5 w-5" />
+              <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setPanelFormOpen(false)} />
+              <div className="glass-panel relative w-full max-w-md rounded-xl p-gutter shadow-2xl">
+                <div className="mb-lg flex items-center justify-between border-b border-white/10 pb-md">
+                  <h3 className="font-headline-md text-headline-md text-on-surface">Provision New Panel</h3>
+                  <button onClick={() => setPanelFormOpen(false)} className="text-on-surface-variant hover:text-white transition-colors">
+                    <span className="material-symbols-outlined text-[24px]">close</span>
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit(handleCreatePanel)} className="space-y-4">
+                <form onSubmit={handleSubmitPanel(handleCreatePanel)} className="space-y-md">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                      Serial Number
-                    </label>
-                    <input
-                      {...register('serial')}
-                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
-                        errors.serial ? 'border-red-400/70' : ''
-                      }`}
-                      placeholder="e.g., FP-2024-001"
-                      disabled={panelFormLoading}
-                    />
-                    {errors.serial && (
-                      <p className="mt-1 text-sm text-red-300">{errors.serial.message}</p>
-                    )}
+                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Serial Number</label>
+                    <input {...registerPanel('serial')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors font-data-mono" />
+                    {panelErrors.serial && <p className="mt-1 text-xs text-tertiary-container">{panelErrors.serial.message}</p>}
                   </div>
-
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                      Panel Name
-                    </label>
-                    <input
-                      {...register('name')}
-                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
-                        errors.name ? 'border-red-400/70' : ''
-                      }`}
-                      placeholder="e.g., Building A - Floor 1"
-                      disabled={panelFormLoading}
-                    />
-                    {errors.name && (
-                      <p className="mt-1 text-sm text-red-300">{errors.name.message}</p>
-                    )}
+                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Panel Name</label>
+                    <input {...registerPanel('name')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                    {panelErrors.name && <p className="mt-1 text-xs text-tertiary-container">{panelErrors.name.message}</p>}
                   </div>
-
+                  {userData?.role === 'super_admin' && (
+                    <div>
+                      <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Company ID</label>
+                      <input {...registerPanel('companyId')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                    </div>
+                  )}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                      Number of Zones (1-64)
-                    </label>
-                    <input
-                      type="number"
-                      {...register('zoneCount')}
-                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
-                        errors.zoneCount ? 'border-red-400/70' : ''
-                      }`}
-                      placeholder="8"
-                      min={1}
-                      max={64}
-                      disabled={panelFormLoading}
-                    />
-                    {errors.zoneCount && (
-                      <p className="mt-1 text-sm text-red-300">{errors.zoneCount.message}</p>
-                    )}
+                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Branch ID</label>
+                    <input {...registerPanel('branchId')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
+                    {panelErrors.branchId && <p className="mt-1 text-xs text-tertiary-container">{panelErrors.branchId.message}</p>}
                   </div>
-
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                      Group ID
-                    </label>
-                    <input
-                      {...register('groupId')}
-                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
-                        errors.groupId ? 'border-red-400/70' : ''
-                      }`}
-                      placeholder="e.g., group-building-a"
-                      disabled={panelFormLoading}
-                    />
-                    {errors.groupId && (
-                      <p className="mt-1 text-sm text-red-300">{errors.groupId.message}</p>
-                    )}
+                    <label className="block text-on-surface-variant font-label-sm text-label-sm mb-xs">Configured Mobile Number (Optional)</label>
+                    <input {...registerPanel('mobileNumber')} className="w-full bg-white/5 border border-white/10 rounded-lg px-md py-sm text-on-surface focus:outline-none focus:border-primary transition-colors" />
                   </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-200">
-                      IP Address
-                    </label>
-                    <input
-                      {...register('ipAddress')}
-                      className="control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500"
-                      placeholder="Optional"
-                      disabled={panelFormLoading}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPanelFormOpen(false);
-                        reset();
-                      }}
-                      className="btn-secondary rounded-lg px-4 py-2.5 text-sm font-semibold"
-                      disabled={panelFormLoading}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={panelFormLoading}
-                      className="btn-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold"
-                    >
-                      {panelFormLoading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Creating...</span>
-                        </>
-                      ) : (
-                        <span>Create Panel</span>
-                      )}
+                  <div className="pt-sm">
+                    <button type="submit" disabled={panelFormLoading} className="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-lg py-md rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-xs">
+                      {panelFormLoading ? <Loader2 className="animate-spin" /> : <><span className="material-symbols-outlined text-[20px]">router</span> Provision Panel</>}
                     </button>
                   </div>
                 </form>
               </div>
             </div>
           )}
-
-          <div className="surface-panel rounded-lg p-10 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03]">
-              <Shield className="h-7 w-7 text-slate-500" />
-            </div>
-            <p className="text-sm text-slate-300">Use the "Add Panel" button above to provision new fire alarm panels.</p>
-            <p className="mt-2 text-sm text-slate-500">All panels will appear on the dashboard after creation.</p>
-          </div>
         </div>
       )}
     </div>

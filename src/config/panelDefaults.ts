@@ -1,5 +1,5 @@
 // Fixed commands for all panels - no customization needed
-export const DEFAULT_PANEL_COMMANDS = ['ARM', 'ZONE OFF', 'MOB=01=9871050479'];
+export const DEFAULT_PANEL_COMMANDS = ['ARM', 'ZONE OFF', 'Set Mobile Number'];
 
 // Default MQTT broker settings (from Python script)
 export const DEFAULT_MQTT_CONFIG = {
@@ -19,7 +19,7 @@ export const ZONE_STATUS = {
   ISOLATE: '5',
 } as const;
 
-export function normalizeAllowedCommands(commands: string[] | undefined | null): string[] {
-  // Always return the fixed default commands
-  return [...DEFAULT_PANEL_COMMANDS];
+export function normalizeAllowedCommands(commands?: string[] | null): string[] {
+  if (!commands || commands.length === 0) return DEFAULT_PANEL_COMMANDS;
+  return [...new Set(commands.map((c) => c.trim()).filter(Boolean))];
 }

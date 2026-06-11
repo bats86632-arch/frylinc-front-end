@@ -17,13 +17,23 @@ export function usePanels() {
     }
 
     let q;
-    if (userData.role === 'super_admin' || userData.role === 'head_office') {
+    if (userData.role === 'super_admin') {
       q = query(collection(db, 'panels'));
+    } else if (userData.role === 'head_office') {
+      if (!userData.companyId) {
+        setPanels([]);
+        setLoading(false);
+        return;
+      }
+      q = query(collection(db, 'panels'), where('companyId', '==', userData.companyId));
     } else {
-      q = query(
-        collection(db, 'panels'),
-        where('groupId', 'in', userData.groups.length > 0 ? userData.groups : [''])
-      );
+      const branchIds = userData.branchIds || [];
+      if (branchIds.length === 0) {
+        setPanels([]);
+        setLoading(false);
+        return;
+      }
+      q = query(collection(db, 'panels'), where('branchId', 'in', branchIds));
     }
 
     const unsubscribe = onSnapshot(
