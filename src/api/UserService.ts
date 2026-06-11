@@ -17,8 +17,7 @@ export const UserService = {
     password: string;
     displayName: string;
     role: Role;
-    companyId?: string;
-    branchIds?: string[];
+    groups: string[];
   }): Promise<User> {
     const response = await apiClient.post('/users', data);
     return response.data.user;
@@ -33,7 +32,10 @@ export const UserService = {
     await apiClient.delete(`/users/${uid}`);
   },
 
-
+  async updateUserGroups(uid: string, groups: string[]): Promise<User> {
+    const response = await apiClient.patch(`/users/${uid}/groups`, { groups });
+    return response.data;
+  },
 
   async updateProfile(displayName: string): Promise<{ ok: boolean; uid: string; displayName: string }> {
     const response = await apiClient.patch('/me/profile', { displayName });

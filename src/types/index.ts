@@ -5,8 +5,7 @@ export interface User {
   email: string;
   displayName: string;
   role: Role;
-  companyId?: string;
-  branchIds?: string[];
+  groups: string[];
 }
 
 export interface Panel {
@@ -16,10 +15,8 @@ export interface Panel {
   zoneCount: number;
   zones: boolean[];
   alarm: boolean;
-  companyId?: string;
-  branchId?: string;
+  groupId: string;
   ipAddress?: string;
-  mobileNumber?: string;
   mqttConnected: boolean;
   allowedCommands: string[];
   manuallyMarkedOffline?: boolean; // User can manually mark a panel as offline
@@ -41,32 +38,11 @@ export interface Event {
   zoneNumber?: number;
 }
 
-export interface Company {
+export interface Group {
   id: string;
   name: string;
   description?: string;
-}
-
-export interface Branch {
-  id: string;
-  companyId: string;
-  name: string;
-  address?: string;
-  supervisorName?: string;
-  contactNumber?: string;
-  emailAddress?: string;
-}
-
-export interface AuditLog {
-  id: string;
-  timestamp: Date;
-  userEmail: string;
-  role: string;
-  action: string;
-  companyId?: string;
-  branchId?: string;
-  panelSerial?: string;
-  result: string;
+  memberCount: number;
 }
 
 export interface CommandResponse {

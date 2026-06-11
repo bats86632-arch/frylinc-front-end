@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onAuthStateChanged, User as FirebaseUser, signOut, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, User as FirebaseUser, signOut } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { User, Role } from '../types';
 import apiClient from '../api/axios';
@@ -9,7 +9,6 @@ interface AuthContextType {
   userData: User | null;
   role: Role | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUserData: () => Promise<void>;
   saveDisplayName: (displayName: string) => Promise<void>;
@@ -42,8 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: user.email || profile.email || '',
       displayName: profile.displayName || user.displayName || user.email?.split('@')[0] || 'User',
       role: (customClaims.role as Role) || profile.role || 'end_user',
-      companyId: profile.companyId || customClaims.companyId,
-      branchIds: profile.branchIds || customClaims.branchIds || []
+      groups: (profile.groups as string[]) || (customClaims.groups as string[]) || []
     };
 
     setUserData(userData);
@@ -86,10 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await refreshUserData();
   };
 
-  const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
-  };
-
   const logout = async () => {
     await signOut(auth);
     setCurrentUser(null);
@@ -112,7 +106,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userData,
     role,
     loading,
-    login,
     logout,
     refreshUserData,
     saveDisplayName,

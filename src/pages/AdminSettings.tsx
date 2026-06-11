@@ -3,32 +3,33 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { UserService } from '../api/UserService';
-import { CompanyService } from '../api/CompanyService';
-import { BranchService } from '../api/BranchService';
+import { GroupService } from '../api/GroupService';
+import { ApiKeyService, ApiKeyRecord } from '../api/ApiKeyService';
 import { PanelService } from '../api/PanelService';
-import { Panel, User, Role, Company, Branch } from '../types';
-import { useAuth } from '../contexts/AuthContext';
+import { Panel, User, Role, Group } from '../types';
+import { DEFAULT_PANEL_COMMANDS, normalizeAllowedCommands } from '../config/panelDefaults';
 import {
   AlertCircle,
   CheckCircle,
+  Edit2,
   Loader2,
   Plus,
   RefreshCw,
   Shield,
   Users,
+  KeyRound,
   Layers3,
   XCircle,
-  Trash2,
-  Building2,
-  MapPin
+  Trash2
 } from 'lucide-react';
 
 const panelSchema = z.object({
   serial: z.string().min(1, 'Serial is required'),
   name: z.string().min(1, 'Name is required'),
-  companyId: z.string().min(1, 'Company ID is required'),
-  branchId: z.string().min(1, 'Branch ID is required'),
-  mobileNumber: z.string().optional()
+  zoneCount: z.coerce.number().min(1).max(64, 'Max 64 zones'),
+  groupId: z.string().min(1, 'Group ID is required'),
+  ipAddress: z.string().optional(),
+  allowedCommands: z.string().optional()
 });
 
 const userSchema = z.object({
@@ -36,28 +37,26 @@ const userSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   displayName: z.string().min(1, 'Display name is required'),
   role: z.enum(['super_admin', 'head_office', 'system_integrator', 'end_user']),
-  companyId: z.string().optional(),
-  branchIds: z.string().optional()
+  groups: z.string().optional()
 });
 
-const companySchema = z.object({
+const groupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  description: z.string().optional()
+  groupId: z.string().optional(),
+  description: z.string().optional(),
+  allowedCommands: z.string().optional()
 });
 
-const branchSchema = z.object({
-  companyId: z.string().min(1, 'Company ID is required'),
-  name: z.string().min(1, 'Name is required'),
-  address: z.string().optional(),
-  supervisorName: z.string().optional(),
-  contactNumber: z.string().optional(),
-  emailAddress: z.string().email('Invalid email').optional().or(z.literal(''))
+const apiKeySchema = z.object({
+  email: z.string().email('Valid email is required').optional(),
+  uid: z.string().optional(),
+  label: z.string().optional()
 });
 
 type PanelFormData = z.infer<typeof panelSchema>;
 type UserFormData = z.infer<typeof userSchema>;
-type CompanyFormData = z.infer<typeof companySchema>;
-type BranchFormData = z.infer<typeof branchSchema>;
+type GroupFormData = z.infer<typeof groupSchema>;
+type ApiKeyFormData = z.infer<typeof apiKeySchema>;
 
 const roleLabels: Record<Role, string> = {
   super_admin: 'Super Admin',
@@ -75,53 +74,51 @@ const roleColors: Record<Role, string> = {
 
 function getApiErrorMessage(error: unknown, fallback: string) {
   if (typeof error === 'object' && error !== null && 'response' in error) {
-    const response = (error as { response?: { data?: { error?: string, message?: unknown } } }).response;
-    if (typeof response?.data?.error === 'string') {
-      return response.data.error;
-    }
+    const response = (error as { response?: { data?: { message?: unknown } } }).response;
     if (typeof response?.data?.message === 'string') {
       return response.data.message;
     }
   }
+
   return fallback;
 }
 
 export function AdminSettings() {
-  const { userData } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [apiKeys, setApiKeys] = useState<ApiKeyRecord[]>([]);
   const [panels, setPanels] = useState<Panel[]>([]);
-  
   const [usersLoading, setUsersLoading] = useState(true);
-  const [orgsLoading, setOrgsLoading] = useState(true);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [apiKeysLoading, setApiKeysLoading] = useState(true);
   const [panelsLoading, setPanelsLoading] = useState(true);
-  
-  const [activeTab, setActiveTab] = useState<'users' | 'orgs' | 'panels'>('users');
-  
+  const [activeTab, setActiveTab] = useState<'users' | 'panels'>('users');
+  const [editingUser, setEditingUser] = useState<string | null>(null);
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
-  const [companyFormOpen, setCompanyFormOpen] = useState(false);
-  const [branchFormOpen, setBranchFormOpen] = useState(false);
-  
+  const [groupFormOpen, setGroupFormOpen] = useState(false);
+  const [apiKeyFormOpen, setApiKeyFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
   const [userFormLoading, setUserFormLoading] = useState(false);
-  const [companyFormLoading, setCompanyFormLoading] = useState(false);
-  const [branchFormLoading, setBranchFormLoading] = useState(false);
-  
+  const [groupFormLoading, setGroupFormLoading] = useState(false);
+  const [apiKeyFormLoading, setApiKeyFormLoading] = useState(false);
+  const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const {
-    register: registerPanel,
-    handleSubmit: handleSubmitPanel,
-    reset: resetPanel,
-    formState: { errors: panelErrors }
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
   } = useForm<PanelFormData>({
     resolver: zodResolver(panelSchema),
     defaultValues: {
-      serial: '',
-      name: ''
+      serial: '219111',
+      name: 'Fyrlinc Panel 219111',
+      zoneCount: 8,
+      groupId: 'group-building-a',
+      ipAddress: '72.167.225.142'
     }
   });
 
@@ -129,34 +126,35 @@ export function AdminSettings() {
     register: registerUser,
     handleSubmit: handleSubmitUser,
     reset: resetUser,
-    watch: watchUser,
     formState: { errors: userErrors }
   } = useForm<UserFormData>({ resolver: zodResolver(userSchema) });
 
   const {
-    register: registerCompany,
-    handleSubmit: handleSubmitCompany,
-    reset: resetCompany
-  } = useForm<CompanyFormData>({ resolver: zodResolver(companySchema) });
+    register: registerGroup,
+    handleSubmit: handleSubmitGroup,
+    reset: resetGroup,
+    formState: { errors: groupErrors }
+  } = useForm<GroupFormData>({ resolver: zodResolver(groupSchema) });
 
   const {
-    register: registerBranch,
-    handleSubmit: handleSubmitBranch,
-    reset: resetBranch
-  } = useForm<BranchFormData>({ resolver: zodResolver(branchSchema) });
-
-  const selectedUserRole = watchUser('role');
+    register: registerApiKey,
+    handleSubmit: handleSubmitApiKey,
+    reset: resetApiKey,
+    formState: { errors: apiKeyErrors }
+  } = useForm<ApiKeyFormData>({ resolver: zodResolver(apiKeySchema) });
 
   useEffect(() => {
     loadUsers();
-    loadOrgs();
+    loadGroups();
+    loadApiKeys();
     loadPanels();
   }, []);
 
   const loadUsers = async () => {
     setUsersLoading(true);
     try {
-      setUsers(await UserService.getUsers());
+      const data = await UserService.getUsers();
+      setUsers(data);
     } catch (err) {
       console.error('Failed to load users:', err);
     } finally {
@@ -164,24 +162,53 @@ export function AdminSettings() {
     }
   };
 
-  const loadOrgs = async () => {
-    setOrgsLoading(true);
+  const loadGroups = async () => {
+    setGroupsLoading(true);
     try {
-      if (userData?.role === 'super_admin' || userData?.role === 'head_office') {
-        setCompanies(await CompanyService.getCompanies());
-      }
-      setBranches(await BranchService.getBranches());
+      setGroups(await GroupService.getGroups());
     } catch (err) {
-      console.error('Failed to load orgs:', err);
+      console.error('Failed to load groups:', err);
     } finally {
-      setOrgsLoading(false);
+      setGroupsLoading(false);
+    }
+  };
+
+  const loadApiKeys = async () => {
+    setApiKeysLoading(true);
+    try {
+      setApiKeys(await ApiKeyService.getApiKeys());
+    } catch (err) {
+      console.error('Failed to load api keys:', err);
+    } finally {
+      setApiKeysLoading(false);
     }
   };
 
   const loadPanels = async () => {
     setPanelsLoading(true);
     try {
-      setPanels(await PanelService.getPanels());
+      const data = await PanelService.getPanels();
+      setPanels(data);
+
+      const panelsMissingCommands = data.filter((panel) => !Array.isArray(panel.allowedCommands) || panel.allowedCommands.length === 0);
+      if (panelsMissingCommands.length > 0 && !syncingPanelDefaults) {
+        setSyncingPanelDefaults(true);
+        try {
+          await Promise.all(
+            panelsMissingCommands.map((panel) =>
+              PanelService.updatePanel(panel.serial, {
+                allowedCommands: [...DEFAULT_PANEL_COMMANDS]
+              })
+            )
+          );
+          const refreshedPanels = await PanelService.getPanels();
+          setPanels(refreshedPanels);
+          setSuccess(`Applied default controls to ${panelsMissingCommands.length} panel${panelsMissingCommands.length === 1 ? '' : 's'}`);
+          setTimeout(() => setSuccess(null), 3000);
+        } finally {
+          setSyncingPanelDefaults(false);
+        }
+      }
     } catch (err) {
       console.error('Failed to load panels:', err);
     } finally {
@@ -193,22 +220,15 @@ export function AdminSettings() {
     setUserFormLoading(true);
     setError(null);
     try {
-      const branchIds = data.branchIds
-        ? data.branchIds.split(',').map((id) => id.trim()).filter(Boolean)
+      const groups = data.groups
+        ? data.groups.split(',').map((group) => group.trim()).filter(Boolean)
         : [];
-      
-      let companyId = data.companyId;
-      if (userData?.role === 'head_office' && userData.companyId) {
-         companyId = userData.companyId;
-      }
-
       await UserService.createUser({
         email: data.email,
         password: data.password,
         displayName: data.displayName,
         role: data.role,
-        companyId: companyId || undefined,
-        branchIds
+        groups
       });
       setUserFormOpen(false);
       resetUser();
@@ -222,45 +242,59 @@ export function AdminSettings() {
     }
   };
 
-  const handleCreateCompany = async (data: CompanyFormData) => {
-    setCompanyFormLoading(true);
+  const handleCreateGroup = async (data: GroupFormData) => {
+    setGroupFormLoading(true);
     setError(null);
     try {
-      await CompanyService.createCompany(data);
-      setCompanyFormOpen(false);
-      resetCompany();
-      await loadOrgs();
-      setSuccess('Company created successfully');
+      await GroupService.createGroup({
+        name: data.name,
+        groupId: data.groupId?.trim() || undefined,
+        description: data.description?.trim() || undefined,
+        allowedCommands: normalizeAllowedCommands(undefined)
+      });
+      setGroupFormOpen(false);
+      resetGroup();
+      await loadGroups();
+      setSuccess('Group created successfully');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to create company'));
+      setError(getApiErrorMessage(err, 'Failed to create group'));
     } finally {
-      setCompanyFormLoading(false);
+      setGroupFormLoading(false);
     }
   };
 
-  const handleCreateBranch = async (data: BranchFormData) => {
-    setBranchFormLoading(true);
+  const handleCreateApiKey = async (data: ApiKeyFormData) => {
+    setApiKeyFormLoading(true);
     setError(null);
     try {
-      let compId = data.companyId;
-      if (userData?.role === 'head_office' && userData.companyId) {
-        compId = userData.companyId;
-      }
-      
-      await BranchService.createBranch({
-         ...data,
-         companyId: compId
+      await ApiKeyService.createApiKey({
+        uid: data.uid?.trim() || undefined,
+        email: data.email?.trim() || undefined,
+        label: data.label?.trim() || undefined
       });
-      setBranchFormOpen(false);
-      resetBranch();
-      await loadOrgs();
-      setSuccess('Branch created successfully');
+      setApiKeyFormOpen(false);
+      resetApiKey();
+      await loadApiKeys();
+      setSuccess('API key created successfully');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to create branch'));
+      setError(getApiErrorMessage(err, 'Failed to create API key'));
     } finally {
-      setBranchFormLoading(false);
+      setApiKeyFormLoading(false);
+    }
+  };
+
+  const handleRoleChange = async (uid: string, newRole: Role) => {
+    setError(null);
+    try {
+      await UserService.updateUserRole(uid, newRole);
+      setUsers(users.map(u => u.uid === uid ? { ...u, role: newRole } : u));
+      setEditingUser(null);
+      setSuccess('User role updated successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to update role'));
     }
   };
 
@@ -268,21 +302,16 @@ export function AdminSettings() {
     setPanelFormLoading(true);
     setError(null);
     try {
-      let compId = data.companyId;
-      if (userData?.role === 'head_office' && userData.companyId) {
-        compId = userData.companyId;
-      }
-
       await PanelService.createPanel({
         serial: data.serial,
         name: data.name,
-        companyId: compId,
-        branchId: data.branchId,
-        mobileNumber: data.mobileNumber?.trim() || undefined
+        zoneCount: data.zoneCount,
+        groupId: data.groupId,
+        ipAddress: data.ipAddress?.trim() || undefined,
+        allowedCommands: normalizeAllowedCommands(undefined)
       });
       setPanelFormOpen(false);
-      resetPanel();
-      await loadPanels();
+      reset();
       setSuccess('Panel created successfully');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
@@ -293,7 +322,8 @@ export function AdminSettings() {
   };
 
   const handleDeleteUser = async (uid: string) => {
-    if (!window.confirm('Delete this user? This action cannot be undone.')) return;
+    if (!window.confirm('Delete this user? Their account will be disabled.')) return;
+
     setError(null);
     try {
       await UserService.deleteUser(uid);
@@ -305,8 +335,39 @@ export function AdminSettings() {
     }
   };
 
+  const handleDeleteApiKey = async (keyId: string) => {
+    if (!window.confirm('Revoke this API key?')) return;
+
+    setError(null);
+    try {
+      await ApiKeyService.deleteApiKey(keyId);
+      await loadApiKeys();
+      setSuccess('API key revoked successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to revoke API key'));
+    }
+  };
+
+  const handleDeleteGroup = async (groupId: string) => {
+    if (!window.confirm('Delete this group? Panels using it may lose access controls.')) return;
+
+    setError(null);
+    try {
+      await GroupService.deleteGroup(groupId);
+      await loadGroups();
+      await loadPanels();
+      await loadUsers();
+      setSuccess('Group deleted successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to delete group'));
+    }
+  };
+
   const handleDeletePanel = async (serial: string) => {
-    if (!window.confirm('Delete this panel?')) return;
+    if (!window.confirm('Delete this panel? This will disable the panel record.')) return;
+
     setError(null);
     try {
       await PanelService.deletePanel(serial);
@@ -324,35 +385,31 @@ export function AdminSettings() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-3xl font-semibold leading-tight text-white">Admin Settings</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-400">Manage organization hierarchy and access</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">Manage users and panel provisioning</p>
           </div>
 
           <div className="surface-muted flex rounded-lg p-1">
             <button
               onClick={() => setActiveTab('users')}
               className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === 'users' ? 'bg-red-500 text-white shadow-lg shadow-red-950/30' : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                activeTab === 'users'
+                  ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
+                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
               }`}
             >
-              <Users className="h-4 w-4" /><span>Users</span>
+              <Users className="h-4 w-4" />
+              <span>Users</span>
             </button>
-            {(userData?.role === 'super_admin' || userData?.role === 'head_office' || userData?.role === 'system_integrator') && (
-              <button
-                onClick={() => setActiveTab('orgs')}
-                className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
-                  activeTab === 'orgs' ? 'bg-red-500 text-white shadow-lg shadow-red-950/30' : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
-                }`}
-              >
-                <Layers3 className="h-4 w-4" /><span>Hierarchy</span>
-              </button>
-            )}
             <button
               onClick={() => setActiveTab('panels')}
               className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === 'panels' ? 'bg-red-500 text-white shadow-lg shadow-red-950/30' : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                activeTab === 'panels'
+                  ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
+                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
               }`}
             >
-              <Shield className="h-4 w-4" /><span>Panels</span>
+              <Shield className="h-4 w-4" />
+              <span>Panels</span>
             </button>
           </div>
         </div>
@@ -383,15 +440,25 @@ export function AdminSettings() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-white">User Management</h2>
+              <p className="mt-1 text-sm text-slate-500">{users.length} user{users.length === 1 ? '' : 's'}</p>
             </div>
-            <button onClick={loadUsers} disabled={usersLoading} className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
-              <RefreshCw className={`h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} /> Refresh
+            <button
+              onClick={loadUsers}
+              disabled={usersLoading}
+              className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
+              Refresh
             </button>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setUserFormOpen(true)} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
               Add User
+            </button>
+            <button onClick={() => setGroupFormOpen(true)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">
+              <Layers3 className="mr-2 inline h-4 w-4" />
+              Add Group
             </button>
           </div>
 
@@ -411,27 +478,14 @@ export function AdminSettings() {
                 <div>
                   <select {...registerUser('role')} className="control-field w-full rounded-lg px-4 py-2.5 text-sm">
                     <option value="end_user">End User</option>
-                    {(userData?.role === 'super_admin' || userData?.role === 'head_office') && (
-                      <option value="system_integrator">System Integrator</option>
-                    )}
-                    {userData?.role === 'super_admin' && (
-                      <option value="head_office">Head Office</option>
-                    )}
+                    <option value="system_integrator">System Integrator</option>
+                    <option value="head_office">Head Office</option>
+                    <option value="super_admin">Super Admin</option>
                   </select>
                 </div>
-                
-                {(selectedUserRole === 'head_office' || selectedUserRole === 'system_integrator' || selectedUserRole === 'end_user') && userData?.role === 'super_admin' && (
-                  <div>
-                    <input {...registerUser('companyId')} placeholder="Company ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                  </div>
-                )}
-                
-                {(selectedUserRole === 'system_integrator' || selectedUserRole === 'end_user') && (
-                  <div>
-                    <input {...registerUser('branchIds')} placeholder="Branch IDs (comma separated)" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                  </div>
-                )}
-
+                <div>
+                  <input {...registerUser('groups')} placeholder="group-a, group-b" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                </div>
                 <div className="md:col-span-2 flex gap-2">
                   <button type="submit" disabled={userFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
                     {userFormLoading ? 'Creating...' : 'Create User'}
@@ -442,6 +496,128 @@ export function AdminSettings() {
             </div>
           )}
 
+          {groupFormOpen && (
+            <div className="surface-panel rounded-lg p-5">
+              <h3 className="mb-4 text-lg font-semibold text-white">Create Group</h3>
+              <form onSubmit={handleSubmitGroup(handleCreateGroup)} className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <input {...registerGroup('name')} placeholder="Group name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                  {groupErrors.name && <p className="mt-1 text-sm text-red-300">{groupErrors.name.message}</p>}
+                </div>
+                <input {...registerGroup('groupId')} placeholder="Optional group ID" className="control-field rounded-lg px-4 py-2.5 text-sm" />
+                <textarea {...registerGroup('description')} placeholder="Description" className="control-field min-h-24 rounded-lg px-4 py-2.5 text-sm md:col-span-2" />
+                <div className="md:col-span-2 flex gap-2">
+                  <button type="submit" disabled={groupFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
+                    {groupFormLoading ? 'Creating...' : 'Create Group'}
+                  </button>
+                  <button type="button" onClick={() => setGroupFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {apiKeyFormOpen && (
+            <div className="surface-panel rounded-lg p-5">
+              <h3 className="mb-4 text-lg font-semibold text-white">Create API Key</h3>
+              <form onSubmit={handleSubmitApiKey(handleCreateApiKey)} className="grid gap-4 md:grid-cols-3">
+                <div>
+                  <input {...registerApiKey('email')} placeholder="User email" className="control-field rounded-lg px-4 py-2.5 text-sm" />
+                  {apiKeyErrors.email && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.email.message}</p>}
+                </div>
+                <div>
+                  <input {...registerApiKey('uid')} placeholder="Or user UID" className="control-field rounded-lg px-4 py-2.5 text-sm" />
+                  {apiKeyErrors.uid && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.uid.message}</p>}
+                </div>
+                <div>
+                  <input {...registerApiKey('label')} placeholder="Label" className="control-field rounded-lg px-4 py-2.5 text-sm" />
+                  {apiKeyErrors.label && <p className="mt-1 text-sm text-red-300">{apiKeyErrors.label.message}</p>}
+                </div>
+                <div className="md:col-span-3 flex gap-2">
+                  <button type="submit" disabled={apiKeyFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
+                    {apiKeyFormLoading ? 'Creating...' : 'Create API Key'}
+                  </button>
+                  <button type="button" onClick={() => setApiKeyFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="surface-panel rounded-lg p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Groups</h3>
+                  <p className="mt-1 text-sm text-slate-500">{groups.length} total</p>
+                </div>
+                <button onClick={loadGroups} disabled={groupsLoading} className="btn-secondary rounded-lg px-3 py-2 text-sm font-medium">
+                  <RefreshCw className={`h-4 w-4 ${groupsLoading ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+              {groupsLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
+              ) : groups.length === 0 ? (
+                <p className="text-sm text-slate-500">No groups yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {groups.map((group) => (
+                    <div key={group.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-white">{group.name}</p>
+                          <p className="mt-1 text-xs text-slate-500">{group.id}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteGroup(group.id)}
+                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
+                        >
+                          <Trash2 className="mr-1 inline h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="surface-panel rounded-lg p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white">API Keys</h3>
+                  <p className="mt-1 text-sm text-slate-500">{apiKeys.length} total</p>
+                </div>
+                <button onClick={loadApiKeys} disabled={apiKeysLoading} className="btn-secondary rounded-lg px-3 py-2 text-sm font-medium">
+                  <RefreshCw className={`h-4 w-4 ${apiKeysLoading ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+              {apiKeysLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
+              ) : apiKeys.length === 0 ? (
+                <p className="text-sm text-slate-500">No API keys issued yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {apiKeys.map((key) => (
+                    <div key={key.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-white">{key.label || 'Untitled key'}</p>
+                          <p className="mt-1 text-xs text-slate-500">{key.email || key.userId || 'Unknown owner'}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteApiKey(key.id)}
+                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
+                        >
+                          <Trash2 className="mr-1 inline h-4 w-4" />
+                          Revoke
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           {usersLoading ? (
             <div className="surface-panel flex justify-center rounded-lg py-14">
               <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
@@ -451,11 +627,21 @@ export function AdminSettings() {
               <table className="w-full min-w-[820px]">
                 <thead className="bg-white/[0.04]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">User</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Email</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">Scope</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">Actions</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
+                      User
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
+                      Email
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
+                      Role
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
+                      Groups
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
@@ -466,25 +652,60 @@ export function AdminSettings() {
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 text-sm font-semibold text-white">
                             {user.displayName?.charAt(0).toUpperCase() || 'U'}
                           </div>
-                          <p className="font-medium text-white">{user.displayName || 'Unknown'}</p>
+                          <div>
+                            <p className="font-medium text-white">{user.displayName || 'Unknown'}</p>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-4 text-sm text-slate-300">{user.email}</td>
                       <td className="px-4 py-4">
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${roleColors[user.role]}`}>
-                          {roleLabels[user.role]}
-                        </span>
+                        {editingUser === user.uid ? (
+                          <select
+                            defaultValue={user.role}
+                            onChange={(e) => handleRoleChange(user.uid, e.target.value as Role)}
+                            className="control-field rounded-lg px-3 py-2 text-sm"
+                          >
+                            <option value="super_admin">Super Admin</option>
+                            <option value="head_office">Head Office</option>
+                            <option value="system_integrator">System Integrator</option>
+                            <option value="end_user">End User</option>
+                          </select>
+                        ) : (
+                          <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${roleColors[user.role]}`}>
+                            {roleLabels[user.role]}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex flex-col gap-1 text-xs text-slate-400">
-                          {user.companyId && <span>Company: {user.companyId}</span>}
-                          {user.branchIds && user.branchIds.length > 0 && <span>Branches: {user.branchIds.join(', ')}</span>}
-                        </div>
+                        <span className="text-sm text-slate-400">
+                          {user.groups.length > 0 ? `${user.groups.length} groups` : 'None'}
+                        </span>
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <button onClick={() => handleDeleteUser(user.uid)} className="rounded-lg px-3 py-2 text-sm text-red-200 transition-colors hover:bg-red-500/10">
-                          Delete
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          {editingUser === user.uid ? (
+                            <button
+                              onClick={() => setEditingUser(null)}
+                              className="rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+                            >
+                              Cancel
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setEditingUser(user.uid)}
+                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                              <span>Edit Role</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteUser(user.uid)}
+                            className="rounded-lg px-3 py-2 text-sm text-red-200 transition-colors hover:bg-red-500/10"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -495,103 +716,31 @@ export function AdminSettings() {
         </div>
       )}
 
-      {activeTab === 'orgs' && (
-        <div className="space-y-4">
-           <div className="flex flex-wrap gap-2">
-            {userData?.role === 'super_admin' && (
-              <button onClick={() => setCompanyFormOpen(true)} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
-                Add Company
-              </button>
-            )}
-            {(userData?.role === 'super_admin' || userData?.role === 'head_office') && (
-              <button onClick={() => setBranchFormOpen(true)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">
-                <Layers3 className="mr-2 inline h-4 w-4" />
-                Add Branch
-              </button>
-            )}
-          </div>
-
-          {companyFormOpen && (
-            <div className="surface-panel rounded-lg p-5">
-              <h3 className="mb-4 text-lg font-semibold text-white">Create Company</h3>
-              <form onSubmit={handleSubmitCompany(handleCreateCompany)} className="grid gap-4 md:grid-cols-2">
-                <input {...registerCompany('name')} placeholder="Company Name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                <input {...registerCompany('description')} placeholder="Description" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                <div className="md:col-span-2 flex gap-2">
-                  <button type="submit" disabled={companyFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
-                    {companyFormLoading ? 'Creating...' : 'Create'}
-                  </button>
-                  <button type="button" onClick={() => setCompanyFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {branchFormOpen && (
-            <div className="surface-panel rounded-lg p-5">
-              <h3 className="mb-4 text-lg font-semibold text-white">Create Branch</h3>
-              <form onSubmit={handleSubmitBranch(handleCreateBranch)} className="grid gap-4 md:grid-cols-2">
-                <input {...registerBranch('name')} placeholder="Branch Name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                {userData?.role === 'super_admin' && (
-                  <input {...registerBranch('companyId')} placeholder="Company ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                )}
-                <input {...registerBranch('address')} placeholder="Address" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                <input {...registerBranch('supervisorName')} placeholder="Manager/Supervisor" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                <input {...registerBranch('contactNumber')} placeholder="Contact Number" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                <div className="md:col-span-2 flex gap-2">
-                  <button type="submit" disabled={branchFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
-                    {branchFormLoading ? 'Creating...' : 'Create'}
-                  </button>
-                  <button type="button" onClick={() => setBranchFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          <div className="grid gap-4 xl:grid-cols-2">
-            {userData?.role === 'super_admin' && (
-              <div className="surface-panel rounded-lg p-5">
-                <h3 className="text-lg font-semibold text-white mb-4"><Building2 className="inline mr-2" />Companies</h3>
-                {orgsLoading ? <Loader2 className="animate-spin" /> : companies.map(c => (
-                  <div key={c.id} className="p-3 bg-white/[0.03] border border-white/10 rounded-lg mb-2">
-                    <p className="text-white font-semibold">{c.name}</p>
-                    <p className="text-xs text-slate-500">ID: {c.id}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="surface-panel rounded-lg p-5">
-               <h3 className="text-lg font-semibold text-white mb-4"><MapPin className="inline mr-2" />Branches</h3>
-               {orgsLoading ? <Loader2 className="animate-spin" /> : branches.map(b => (
-                  <div key={b.id} className="p-3 bg-white/[0.03] border border-white/10 rounded-lg mb-2">
-                    <p className="text-white font-semibold">{b.name}</p>
-                    <p className="text-xs text-slate-500">ID: {b.id} | Company: {b.companyId}</p>
-                    {b.supervisorName && <p className="text-xs text-slate-400 mt-1">Mgr: {b.supervisorName}</p>}
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {activeTab === 'panels' && (
         <div className="space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-white">Panel Provisioning</h2>
+              <p className="mt-1 text-sm text-slate-500">Create panel records for monitoring</p>
             </div>
-            {(userData?.role !== 'end_user') && (
-              <button onClick={() => setPanelFormOpen(true)} className="btn-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold">
-                <Plus className="h-5 w-5" /><span>Add Panel</span>
-              </button>
-            )}
+            <button
+              onClick={() => setPanelFormOpen(true)}
+              className="btn-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Add Panel</span>
+            </button>
           </div>
 
           <div className="surface-panel rounded-lg p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Provisioned Panels</h3>
+              <div>
+                <h3 className="text-lg font-semibold text-white">Provisioned Panels</h3>
+                <p className="mt-1 text-sm text-slate-500">Panels currently stored in Firestore</p>
+              </div>
               <button onClick={loadPanels} disabled={panelsLoading} className="btn-secondary flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
-                <RefreshCw className={`h-4 w-4 ${panelsLoading ? 'animate-spin' : ''}`} /> Refresh
+                <RefreshCw className={`h-4 w-4 ${panelsLoading ? 'animate-spin' : ''}`} />
+                Refresh
               </button>
             </div>
 
@@ -608,16 +757,21 @@ export function AdminSettings() {
                         <p className="font-semibold text-white">{panel.name}</p>
                         <p className="mt-1 font-mono text-xs text-slate-500">{panel.serial}</p>
                       </div>
-                      {(userData?.role !== 'end_user') && (
-                        <button onClick={() => handleDeletePanel(panel.serial)} className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 hover:bg-red-500/10">
-                          <Trash2 className="inline h-4 w-4" />
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`rounded-full border px-2 py-1 text-xs ${panel.mqttConnected ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-slate-400/20 bg-slate-500/10 text-slate-300'}`}>{panel.mqttConnected ? 'Online' : 'Offline'}</span>
+                        <button
+                          onClick={() => handleDeletePanel(panel.serial)}
+                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
+                        >
+                          <Trash2 className="mr-1 inline h-4 w-4" />
+                          Delete
                         </button>
-                      )}
+                      </div>
                     </div>
                     <div className="mt-3 text-sm text-slate-400">
-                      <p>Company ID: {panel.companyId}</p>
-                      <p>Branch ID: {panel.branchId}</p>
-                      {panel.mobileNumber && <p>Mobile: {panel.mobileNumber}</p>}
+                      <p>{panel.zoneCount} zones</p>
+                      <p>{panel.groupId || 'No group'}</p>
+                      <p className="mt-2 text-xs text-slate-500">{panel.allowedCommands?.length || DEFAULT_PANEL_COMMANDS.length} commands configured</p>
                     </div>
                   </div>
                 ))}
@@ -627,41 +781,149 @@ export function AdminSettings() {
 
           {panelFormOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setPanelFormOpen(false)} />
+              <div
+                className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+                onClick={() => setPanelFormOpen(false)}
+              />
               <div className="surface-panel relative w-full max-w-md rounded-lg p-6">
                 <div className="mb-6 flex items-start justify-between gap-4">
-                  <h3 className="text-xl font-semibold text-white">Add New Panel</h3>
-                  <button onClick={() => setPanelFormOpen(false)} className="text-slate-400 hover:text-white"><XCircle className="h-5 w-5" /></button>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Add New Panel</h3>
+                    <p className="mt-1 text-sm text-slate-500">Provision a new fire alarm panel.</p>
+                  </div>
+                  <button
+                    onClick={() => setPanelFormOpen(false)}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+                    type="button"
+                    aria-label="Close panel form"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </button>
                 </div>
 
-                <form onSubmit={handleSubmitPanel(handleCreatePanel)} className="space-y-4">
+                <form onSubmit={handleSubmit(handleCreatePanel)} className="space-y-4">
                   <div>
-                    <input {...registerPanel('serial')} placeholder="Panel Serial Number" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                    {panelErrors.serial && <p className="mt-1 text-xs text-red-300">{panelErrors.serial.message}</p>}
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
+                      Serial Number
+                    </label>
+                    <input
+                      {...register('serial')}
+                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
+                        errors.serial ? 'border-red-400/70' : ''
+                      }`}
+                      placeholder="e.g., FP-2024-001"
+                      disabled={panelFormLoading}
+                    />
+                    {errors.serial && (
+                      <p className="mt-1 text-sm text-red-300">{errors.serial.message}</p>
+                    )}
                   </div>
+
                   <div>
-                    <input {...registerPanel('name')} placeholder="Panel Name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                    {panelErrors.name && <p className="mt-1 text-xs text-red-300">{panelErrors.name.message}</p>}
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
+                      Panel Name
+                    </label>
+                    <input
+                      {...register('name')}
+                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
+                        errors.name ? 'border-red-400/70' : ''
+                      }`}
+                      placeholder="e.g., Building A - Floor 1"
+                      disabled={panelFormLoading}
+                    />
+                    {errors.name && (
+                      <p className="mt-1 text-sm text-red-300">{errors.name.message}</p>
+                    )}
                   </div>
-                  {userData?.role === 'super_admin' && (
-                    <div>
-                      <input {...registerPanel('companyId')} placeholder="Company ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                    </div>
-                  )}
+
                   <div>
-                    <input {...registerPanel('branchId')} placeholder="Branch ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                    {panelErrors.branchId && <p className="mt-1 text-xs text-red-300">{panelErrors.branchId.message}</p>}
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
+                      Number of Zones (1-64)
+                    </label>
+                    <input
+                      type="number"
+                      {...register('zoneCount')}
+                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
+                        errors.zoneCount ? 'border-red-400/70' : ''
+                      }`}
+                      placeholder="8"
+                      min={1}
+                      max={64}
+                      disabled={panelFormLoading}
+                    />
+                    {errors.zoneCount && (
+                      <p className="mt-1 text-sm text-red-300">{errors.zoneCount.message}</p>
+                    )}
                   </div>
+
                   <div>
-                    <input {...registerPanel('mobileNumber')} placeholder="Configured Mobile Number" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
+                      Group ID
+                    </label>
+                    <input
+                      {...register('groupId')}
+                      className={`control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 ${
+                        errors.groupId ? 'border-red-400/70' : ''
+                      }`}
+                      placeholder="e.g., group-building-a"
+                      disabled={panelFormLoading}
+                    />
+                    {errors.groupId && (
+                      <p className="mt-1 text-sm text-red-300">{errors.groupId.message}</p>
+                    )}
                   </div>
-                  <button type="submit" disabled={panelFormLoading} className="btn-primary w-full rounded-lg px-4 py-3 text-sm font-semibold">
-                    {panelFormLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Provision Panel'}
-                  </button>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-200">
+                      IP Address
+                    </label>
+                    <input
+                      {...register('ipAddress')}
+                      className="control-field w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500"
+                      placeholder="Optional"
+                      disabled={panelFormLoading}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPanelFormOpen(false);
+                        reset();
+                      }}
+                      className="btn-secondary rounded-lg px-4 py-2.5 text-sm font-semibold"
+                      disabled={panelFormLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={panelFormLoading}
+                      className="btn-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold"
+                    >
+                      {panelFormLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Creating...</span>
+                        </>
+                      ) : (
+                        <span>Create Panel</span>
+                      )}
+                    </button>
+                  </div>
                 </form>
               </div>
             </div>
           )}
+
+          <div className="surface-panel rounded-lg p-10 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03]">
+              <Shield className="h-7 w-7 text-slate-500" />
+            </div>
+            <p className="text-sm text-slate-300">Use the "Add Panel" button above to provision new fire alarm panels.</p>
+            <p className="mt-2 text-sm text-slate-500">All panels will appear on the dashboard after creation.</p>
+          </div>
         </div>
       )}
     </div>

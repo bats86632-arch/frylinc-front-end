@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Panel } from '../types';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Wifi, WifiOff } from 'lucide-react';
 
 interface PanelCardProps {
   panel: Panel;
@@ -9,13 +9,17 @@ interface PanelCardProps {
 
 export function PanelCard({ panel, viewMode = 'grid' }: PanelCardProps) {
   const hasAlarm = panel.alarm;
+  const isOnline = panel.manuallyMarkedOffline !== true;
   const alarmZones = panel.zones.filter(Boolean).length;
   const visibleZones = Math.min(panel.zoneCount, 64);
 
+  const statusLabel = hasAlarm ? 'ALARM' : isOnline ? 'Online' : 'Offline';
   const stateClasses = hasAlarm
     ? 'border-red-400/50 bg-red-500/10 text-red-100'
+    : isOnline
+    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
     : 'border-slate-400/20 bg-slate-500/10 text-slate-300';
-  const railClass = hasAlarm ? 'bg-red-500' : 'bg-slate-500';
+  const railClass = hasAlarm ? 'bg-red-500' : isOnline ? 'bg-emerald-400' : 'bg-slate-500';
 
   return (
     <Link
@@ -23,7 +27,9 @@ export function PanelCard({ panel, viewMode = 'grid' }: PanelCardProps) {
       className={`group relative block overflow-hidden rounded-lg border bg-slate-950/40 transition-all hover:-translate-y-0.5 hover:border-amber-300/30 hover:bg-slate-900/70 hover:shadow-2xl hover:shadow-black/30 ${
         hasAlarm
           ? 'border-red-400/40 animate-pulse-shadow'
-          : 'border-white/10'
+          : isOnline
+          ? 'border-white/10'
+          : 'border-white/10 opacity-80'
       }`}
     >
       <div className={`absolute left-0 top-0 h-full w-1 ${railClass}`} />
@@ -45,12 +51,16 @@ export function PanelCard({ panel, viewMode = 'grid' }: PanelCardProps) {
               <p className="mt-1 font-mono text-xs text-slate-500">{panel.serial}</p>
             </div>
 
-            {hasAlarm && (
-              <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${stateClasses}`}>
+            <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${stateClasses}`}>
+              {hasAlarm ? (
                 <AlertTriangle className="h-3.5 w-3.5" />
-                ALARM
-              </span>
-            )}
+              ) : isOnline ? (
+                <Wifi className="h-3.5 w-3.5" />
+              ) : (
+                <WifiOff className="h-3.5 w-3.5" />
+              )}
+              {statusLabel}
+            </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-400">
@@ -83,7 +93,9 @@ export function PanelCard({ panel, viewMode = 'grid' }: PanelCardProps) {
                   className={`h-2 rounded-[2px] ${
                     zoneAlarm
                       ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.75)]'
-                      : 'bg-slate-700/90'
+                      : isOnline
+                      ? 'bg-slate-700/90'
+                      : 'bg-slate-800'
                   }`}
                   title={`Zone ${idx + 1}: ${zoneAlarm ? 'ALARM' : 'Normal'}`}
                 />
@@ -95,12 +107,18 @@ export function PanelCard({ panel, viewMode = 'grid' }: PanelCardProps) {
         <div
           className={
             viewMode === 'list'
-              ? 'flex items-center justify-end rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 sm:block'
-              : 'mt-5 flex items-center justify-end border-t border-white/10 pt-4'
+              ? 'flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 sm:block'
+              : 'mt-5 flex items-center justify-between border-t border-white/10 pt-4'
           }
         >
+          <div>
+            <p className="text-xs text-slate-500">Connection</p>
+            <p className={`mt-1 text-sm font-semibold ${isOnline ? 'text-emerald-200' : 'text-slate-400'}`}>
+              {isOnline ? 'MQTT connected' : 'Awaiting signal'}
+            </p>
+          </div>
           <span className="text-xs font-medium text-amber-200 opacity-0 transition-opacity group-hover:opacity-100">
-            Open Details
+            Open
           </span>
         </div>
       </div>

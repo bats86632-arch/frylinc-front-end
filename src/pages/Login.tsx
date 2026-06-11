@@ -1,177 +1,171 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Flame, AlertTriangle, Mail, Lock, Eye, EyeOff, Loader2, LogIn } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/firebase';
+import { AlertCircle, Eye, EyeOff, Flame, Loader2, LockKeyhole } from 'lucide-react';
+
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters')
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+type LoginLocationState = {
+  from?: {
+    pathname?: string;
+  };
+};
+
+function getAuthErrorCode(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    const code = (error as { code?: unknown }).code;
+    return typeof code === 'string' ? code : undefined;
+  }
+
+  return undefined;
+}
 
 export function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const location = useLocation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const from = (location.state as LoginLocationState | null)?.from?.pathname || '/';
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema)
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
     setError(null);
     setIsLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/', { replace: true });
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      navigate(from, { replace: true });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred. Please try again.');
+      let errorMessage = 'An error occurred during login';
+
+      switch (getAuthErrorCode(err)) {
+        case 'auth/invalid-credential':
+          errorMessage = 'Invalid email or password';
+          break;
+        case 'auth/user-not-found':
+          errorMessage = 'No account found with this email';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'Incorrect password';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This account has been disabled';
+          break;
       }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-surface px-4">
-      {/* ── Background decoration ── */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-      >
-        {/* Radial glow — top-center, primary tint */}
-        <div className="absolute -top-32 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-primary/[.07] blur-[120px]" />
-
-        {/* Secondary warm glow — bottom-right, fire tint */}
-        <div className="absolute -bottom-40 -right-40 h-[480px] w-[480px] rounded-full bg-fire/[.05] blur-[100px]" />
-
-        {/* Subtle dot grid overlay */}
-        <div
-          className="absolute inset-0 opacity-[.04]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, #e2e8f0 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
+    <div className="surface-panel rounded-lg p-6 sm:p-7">
+      <div className="mb-8">
+        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/10 text-red-200 shadow-lg shadow-red-950/30">
+          <LockKeyhole className="h-6 w-6" />
+        </div>
+        <h2 className="text-3xl font-semibold leading-tight text-white">Welcome back</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-400">
+          Sign in to access your monitoring dashboard.
+        </p>
       </div>
 
-      {/* ── Login card ── */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="rounded-2xl border border-outline/60 bg-surface-container/80 p-8 shadow-2xl shadow-black/40 backdrop-blur-sm sm:p-10">
-          {/* ── Brand header ── */}
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-fire/20 bg-fire/10 shadow-lg shadow-fire/10">
-              <Flame className="h-8 w-8 text-fire" />
-            </div>
+      {error && (
+        <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-400/30 bg-red-500/10 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-300" />
+          <p className="text-sm leading-6 text-red-100">{error}</p>
+        </div>
+      )}
 
-            <h1 className="font-display text-2xl font-bold tracking-tight text-on-surface">
-              Fyrlinc
-            </h1>
-            <p className="mt-1 font-sans text-sm text-on-surface-variant">
-              Fire Panel Monitoring System
-            </p>
-          </div>
-
-          {/* ── Error banner ── */}
-          {error && (
-            <div className="mb-6 flex items-start gap-3 rounded-lg border border-fire/30 bg-fire/10 px-4 py-3">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-fire" />
-              <p className="font-sans text-sm leading-relaxed text-red-200">
-                {error}
-              </p>
-            </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-200">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            {...register('email')}
+            className={`control-field w-full rounded-lg px-4 py-3 text-sm placeholder:text-slate-500 ${
+              errors.email ? 'border-red-400/70' : ''
+            }`}
+            placeholder="you@example.com"
+            disabled={isLoading}
+          />
+          {errors.email && (
+            <p className="mt-2 text-sm text-red-300">{errors.email.message}</p>
           )}
-
-          {/* ── Form ── */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="login-email"
-                className="mb-2 block font-sans text-sm font-medium text-on-surface"
-              >
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
-                <input
-                  id="login-email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
-                  placeholder="you@company.com"
-                  className="w-full rounded-lg border border-outline bg-surface-container py-3 pl-11 pr-4 font-sans text-sm text-on-surface placeholder:text-on-surface-variant/50 transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="login-password"
-                className="mb-2 block font-sans text-sm font-medium text-on-surface"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
-                <input
-                  id="login-password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                  placeholder="Enter your password"
-                  className="w-full rounded-lg border border-outline bg-surface-container py-3 pl-11 pr-12 font-sans text-sm text-on-surface placeholder:text-on-surface-variant/50 transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-on-surface-variant transition-colors hover:bg-on-surface/5 hover:text-on-surface"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-sans font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30 active:scale-[.98] disabled:pointer-events-none disabled:opacity-60"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Signing in…</span>
-                </>
-              ) : (
-                <>
-                  <LogIn className="h-5 w-5" />
-                  <span>Sign In</span>
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* ── Footer note ── */}
-          <p className="mt-8 text-center font-sans text-xs text-on-surface-variant/60">
-            Protected system — authorised personnel only.
-          </p>
         </div>
 
-        {/* Card-bottom glow accent */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-4 left-1/2 h-8 w-3/4 -translate-x-1/2 rounded-full bg-primary/10 blur-xl"
-        />
-      </div>
+        <div>
+          <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-200">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              {...register('password')}
+              className={`control-field w-full rounded-lg px-4 py-3 pr-12 text-sm placeholder:text-slate-500 ${
+                errors.password ? 'border-red-400/70' : ''
+              }`}
+              placeholder="Enter your password"
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="mt-2 text-sm text-red-300">{errors.password.message}</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="btn-primary flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Signing in...</span>
+            </>
+          ) : (
+            <>
+              <Flame className="h-4 w-4" />
+              <span>Sign In</span>
+            </>
+          )}
+        </button>
+      </form>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { usePanel } from '../hooks/usePanels';
+import { useCommandStatus } from '../hooks/useCommands';
 import { PanelService } from '../api/PanelService';
 import { useAuth } from '../contexts/AuthContext';
 import { DEFAULT_PANEL_COMMANDS } from '../config/panelDefaults';
@@ -13,7 +14,10 @@ import {
   Loader2,
   Play,
   RefreshCw,
-  Settings
+  Settings,
+  Wifi,
+  WifiOff,
+  XCircle
 } from 'lucide-react';
 import { formatDateTime } from '../utils/formatters';
 import { Event } from '../types';
@@ -47,8 +51,11 @@ export function PanelDetail() {
   const [events, setEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [commandLoading, setCommandLoading] = useState<string | null>(null);
+  const [commandId, setCommandId] = useState<string | null>(null);
   const [commandError, setCommandError] = useState<string | null>(null);
-  const [commandSuccess, setCommandSuccess] = useState<string | null>(null);
+  const [togglingOffline, setTogglingOffline] = useState(false);
+
+  const { commandLog } = useCommandStatus(serial!, commandId);
 
   const canControl = hasRole(['super_admin', 'head_office', 'system_integrator']);
 
@@ -71,21 +78,39 @@ export function PanelDetail() {
     }
   }, [activeTab, loadEvents, serial]);
 
+  useEffect(() => {
+    if (commandLog?.status === 'sent' && commandLog?.ackStatus === 'acknowledged') {
+      setCommandLoading(null);
+      setCommandId(null);
+    }
+  }, [commandLog]);
 
+  const handleToggleOffline = async () => {
+    if (!serial) return;
+    setTogglingOffline(true);
+    setCommandError(null);
+    try {
+      await PanelService.updatePanel(serial, {
+        manuallyMarkedOffline: !normalizedPanel.manuallyMarkedOffline
+      });
+    } catch (err: unknown) {
+      setCommandError(getApiErrorMessage(err, 'Failed to update panel status'));
+    } finally {
+      setTogglingOffline(false);
+    }
+  };
 
   const handleSendCommand = async (command: string) => {
     if (!serial) return;
 
     setCommandError(null);
-    setCommandSuccess(null);
     setCommandLoading(command);
 
     try {
-      await PanelService.sendCommand(serial, command);
-      setCommandSuccess('Sent');
+      const response = await PanelService.sendCommand(serial, command);
+      setCommandId(response.commandId);
     } catch (err: unknown) {
       setCommandError(getApiErrorMessage(err, 'Failed to send command'));
-    } finally {
       setCommandLoading(null);
     }
   };
@@ -126,11 +151,13 @@ export function PanelDetail() {
   const normalizedPanel = {
     ...panel,
     zones: Array.isArray(panel.zones) ? panel.zones : [],
-    allowedCommands: Array.isArray(panel.allowedCommands) ? panel.allowedCommands : []
+    allowedCommands: Array.isArray(panel.allowedCommands) ? panel.allowedCommands : [],
+    groupId: panel.groupId || ''
   };
 
   const panelCommands = normalizedPanel.allowedCommands.length > 0 ? normalizedPanel.allowedCommands : DEFAULT_PANEL_COMMANDS;
 
+  const isOnline = normalizedPanel.manuallyMarkedOffline !== true;
   const hasAlarm = normalizedPanel.alarm;
   const activeZones = normalizedPanel.zones.filter(Boolean).length;
   const visibleZones = Math.min(normalizedPanel.zoneCount || 0, 64);
@@ -156,6 +183,25 @@ export function PanelDetail() {
                     <AlertTriangle className="h-4 w-4" />
                     ALARM ACTIVE
                   </span>
+                )}
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
+                    isOnline
+                      ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
+                      : 'border-slate-400/20 bg-slate-500/10 text-slate-300'
+                  }`}
+                >
+                  {isOnline ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+                  {isOnline ? 'Online' : 'Offline'}
+                </span>
+                {canControl && (
+                  <button
+                    onClick={handleToggleOffline}
+                    disabled={togglingOffline}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs font-semibold text-slate-300 transition-all hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {togglingOffline ? 'Updating...' : `Mark ${isOnline ? 'Offline' : 'Online'}`}
+                  </button>
                 )}
               </div>
 
@@ -283,18 +329,11 @@ export function PanelDetail() {
             </div>
           )}
 
-          {commandSuccess && (
-            <div className="flex items-center gap-2 rounded-lg border border-emerald-300/25 bg-emerald-400/10 p-4">
-              <CheckCircle className="h-5 w-5 text-emerald-300" />
-              <p className="text-sm font-medium text-emerald-100">{commandSuccess}</p>
-            </div>
-          )}
-
           <section className="surface-panel rounded-lg p-5">
             <div className="mb-5">
               <h3 className="text-lg font-semibold text-white">Available Commands</h3>
               <p className="mt-1 text-sm text-slate-500">
-                Commands are sent to the selected panel.
+                {isOnline ? 'Commands are sent to the selected panel.' : 'Panel is offline. View status and history; commands are disabled until the panel reconnects.'}
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -302,7 +341,7 @@ export function PanelDetail() {
                 <button
                   key={command}
                   onClick={() => handleSendCommand(command)}
-                  disabled={!canControl || commandLoading !== null}
+                  disabled={!canControl || !isOnline || commandLoading !== null}
                   className={`rounded-lg border p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
                     commandLoading === command
                       ? 'border-amber-300/40 bg-amber-400/10 text-amber-100'
@@ -327,7 +366,48 @@ export function PanelDetail() {
             </div>
           </section>
 
+          {commandLog && (
+            <section className="surface-panel rounded-lg p-5">
+              <h3 className="mb-4 text-lg font-semibold text-white">Command Status</h3>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="surface-muted flex items-center gap-2 rounded-lg px-4 py-3">
+                  {commandLog.status === 'queued' && (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin text-amber-200" />
+                      <span className="text-sm font-medium text-amber-100">Queued</span>
+                    </>
+                  )}
+                  {commandLog.status === 'sent' && (
+                    <>
+                      <CheckCircle className="h-5 w-5 text-emerald-300" />
+                      <span className="text-sm font-medium text-emerald-100">Sent</span>
+                    </>
+                  )}
+                  {commandLog.status === 'failed' && (
+                    <>
+                      <XCircle className="h-5 w-5 text-red-300" />
+                      <span className="text-sm font-medium text-red-100">Failed</span>
+                    </>
+                  )}
+                </div>
 
+                <div className="surface-muted flex items-center gap-2 rounded-lg px-4 py-3">
+                  {commandLog.ackStatus === 'pending' && (
+                    <>
+                      <RefreshCw className="h-5 w-5 animate-spin text-amber-200" />
+                      <span className="text-sm font-medium text-amber-100">Awaiting Acknowledgment</span>
+                    </>
+                  )}
+                  {commandLog.ackStatus === 'acknowledged' && (
+                    <>
+                      <CheckCircle className="h-5 w-5 text-emerald-300" />
+                      <span className="text-sm font-medium text-emerald-100">Acknowledged by Panel</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
         </div>
       )}
 

@@ -22,9 +22,10 @@ export const PanelService = {
   async createPanel(data: {
     serial: string;
     name: string;
-    companyId: string;
-    branchId: string;
-    mobileNumber?: string;
+    zoneCount: number;
+    groupId: string;
+    ipAddress?: string;
+    allowedCommands?: string[];
   }): Promise<Panel> {
     const response = await apiClient.post('/panels', data);
     return response.data;

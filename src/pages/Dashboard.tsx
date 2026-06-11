@@ -8,23 +8,27 @@ import {
   List,
   RefreshCw,
   Search,
-  ShieldCheck
+  ShieldCheck,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
-type FilterMode = 'all' | 'alarms';
+type FilterMode = 'all' | 'alarms' | 'online' | 'offline';
 
 interface StatCardProps {
   label: string;
   value: number;
   caption: string;
   icon: typeof LayoutGrid;
-  tone: 'neutral' | 'alarm';
+  tone: 'neutral' | 'alarm' | 'online' | 'offline';
 }
 
 const statToneClasses: Record<StatCardProps['tone'], string> = {
   neutral: 'border-cyan-300/20 bg-cyan-300/10 text-cyan-200',
-  alarm: 'border-red-400/30 bg-red-500/10 text-red-200'
+  alarm: 'border-red-400/30 bg-red-500/10 text-red-200',
+  online: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
+  offline: 'border-slate-400/20 bg-slate-500/10 text-slate-300'
 };
 
 function StatCard({ label, value, caption, icon: Icon, tone }: StatCardProps) {
@@ -66,11 +70,19 @@ export function Dashboard() {
       case 'alarms':
         result = result.filter((panel) => panel.alarm);
         break;
+      case 'online':
+        result = result.filter((panel) => panel.mqttConnected);
+        break;
+      case 'offline':
+        result = result.filter((panel) => !panel.mqttConnected);
+        break;
     }
 
     result.sort((a, b) => {
       if (a.alarm && !b.alarm) return -1;
       if (!a.alarm && b.alarm) return 1;
+      if (!a.mqttConnected && b.mqttConnected) return 1;
+      if (a.mqttConnected && !b.mqttConnected) return -1;
       return a.name.localeCompare(b.name);
     });
 
@@ -79,12 +91,16 @@ export function Dashboard() {
 
   const stats = useMemo(() => ({
     total: panels.length,
-    alarms: panels.filter((p) => p.alarm).length
+    alarms: panels.filter((p) => p.alarm).length,
+    online: panels.filter((p) => p.mqttConnected).length,
+    offline: panels.filter((p) => !p.mqttConnected).length
   }), [panels]);
 
   const filters: Array<{ value: FilterMode; label: string; count: number }> = [
     { value: 'all', label: 'All Panels', count: stats.total },
-    { value: 'alarms', label: 'Alarms', count: stats.alarms }
+    { value: 'alarms', label: 'Alarms', count: stats.alarms },
+    { value: 'online', label: 'Online', count: stats.online },
+    { value: 'offline', label: 'Offline', count: stats.offline }
   ];
 
   if (loading) {
@@ -121,12 +137,16 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       <section className="surface-panel rounded-lg p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               Live panel telemetry
             </div>
+            <h1 className="text-3xl font-semibold leading-tight text-white">Fire Alarm Panels</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              Real-time monitoring of all connected panels
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-sm sm:flex sm:items-center">
@@ -144,7 +164,7 @@ export function Dashboard() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total Panels"
           value={stats.total}
@@ -158,6 +178,20 @@ export function Dashboard() {
           caption={stats.alarms > 0 ? 'Needs immediate review' : 'No active alarms'}
           icon={AlertTriangle}
           tone="alarm"
+        />
+        <StatCard
+          label="Online"
+          value={stats.online}
+          caption="MQTT connected"
+          icon={Wifi}
+          tone="online"
+        />
+        <StatCard
+          label="Offline"
+          value={stats.offline}
+          caption="Awaiting connection"
+          icon={WifiOff}
+          tone="offline"
         />
       </div>
 
