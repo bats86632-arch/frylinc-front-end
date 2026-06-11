@@ -1,6 +1,19 @@
 import { useMemo, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { 
+  ChevronDown, 
+  Flame, 
+  X, 
+  LayoutDashboard, 
+  Settings, 
+  ShieldCheck, 
+  Menu, 
+  Bell, 
+  BellOff, 
+  AlertTriangle, 
+  LogOut, 
+  User 
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePanels } from '../hooks/usePanels';
 import { Role } from '../types';
@@ -11,19 +24,19 @@ import { Role } from '../types';
 const navigation: Array<{
   name: string;
   href: string;
-  icon: string;          // Material Symbols Outlined icon name
+  icon: any;          // Lucide component
   roles: Role[];
 }> = [
   {
     name: 'Dashboard',
     href: '/',
-    icon: 'dashboard',
+    icon: LayoutDashboard,
     roles: ['super_admin', 'head_office', 'system_integrator', 'end_user'],
   },
   {
     name: 'Admin Settings',
     href: '/admin',
-    icon: 'settings',
+    icon: Settings,
     roles: ['super_admin', 'head_office', 'system_integrator'],
   },
 ];
@@ -125,9 +138,7 @@ export function MainDashboardLayout() {
             onClick={() => setSidebarOpen(false)}
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-fire to-amber-500 shadow-lg shadow-fire/20">
-              <span className="material-symbols-outlined text-[22px] text-white">
-                local_fire_department
-              </span>
+              <Flame className="h-6 w-6 text-white" />
             </div>
             <div>
               <span className="block font-display text-lg font-semibold leading-none tracking-tight text-white">
@@ -145,7 +156,7 @@ export function MainDashboardLayout() {
             className="flex h-8 w-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-white/5 hover:text-white lg:hidden"
             aria-label="Close sidebar"
           >
-            <span className="material-symbols-outlined text-xl">close</span>
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -172,9 +183,7 @@ export function MainDashboardLayout() {
                       : 'bg-white/[0.03] text-on-surface-variant group-hover:bg-white/[0.06] group-hover:text-white'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-xl">
-                    {item.icon}
-                  </span>
+                  <item.icon className="h-5 w-5" />
                 </span>
                 <span>{item.name}</span>
               </Link>
@@ -185,9 +194,7 @@ export function MainDashboardLayout() {
         {/* -- Bottom secure session badge -- */}
         <div className="mx-3 mb-4 rounded-xl border border-outline-variant bg-white/[0.02] p-4">
           <div className="mb-3 flex items-center gap-2 text-sm text-on-surface">
-            <span className="material-symbols-outlined text-lg text-secondary">
-              verified_user
-            </span>
+            <ShieldCheck className="h-5 w-5 text-secondary" />
             <span className="font-medium">Secure session</span>
           </div>
           <div className="flex items-center justify-between border-t border-outline-variant pt-3">
@@ -215,7 +222,7 @@ export function MainDashboardLayout() {
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-outline-variant bg-white/[0.03] text-on-surface-variant transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
               aria-label="Open sidebar"
             >
-              <span className="material-symbols-outlined text-xl">menu</span>
+              <Menu className="h-5 w-5" />
             </button>
 
             <div className="min-w-0">
@@ -243,9 +250,7 @@ export function MainDashboardLayout() {
                 aria-expanded={notificationOpen}
                 aria-haspopup="menu"
               >
-                <span className="material-symbols-outlined text-xl">
-                  notifications
-                </span>
+                <Bell className="h-5 w-5" />
                 {notificationCount > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-fire px-1 text-[10px] font-bold leading-none text-white ring-2 ring-surface-dim">
                     {notificationCount}
@@ -277,9 +282,7 @@ export function MainDashboardLayout() {
 
                     {notificationCount === 0 ? (
                       <div className="mt-3 rounded-lg border border-outline-variant bg-white/[0.02] p-4 text-center">
-                        <span className="material-symbols-outlined mb-2 text-2xl text-on-surface-variant">
-                          notifications_off
-                        </span>
+                        <BellOff className="mb-2 h-7 w-7 text-on-surface-variant" />
                         <p className="text-sm font-medium text-on-surface">
                           All clear
                         </p>
@@ -296,9 +299,7 @@ export function MainDashboardLayout() {
                             className="rounded-lg border border-fire/20 bg-fire/[0.08] p-3"
                           >
                             <div className="flex items-start gap-2">
-                              <span className="material-symbols-outlined mt-0.5 text-base text-fire">
-                                warning
-                              </span>
+                              <AlertTriangle className="mt-0.5 h-4 w-4 text-fire" />
                               <div className="min-w-0">
                                 <p className="truncate text-sm font-semibold text-fire/90">
                                   {n.title}
@@ -369,9 +370,7 @@ export function MainDashboardLayout() {
                       onClick={handleLogout}
                       className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-on-surface-variant transition-colors hover:bg-fire/[0.08] hover:text-fire"
                     >
-                      <span className="material-symbols-outlined text-lg">
-                        logout
-                      </span>
+                      <LogOut className="h-5 w-5" />
                       <span className="font-medium">Sign out</span>
                     </button>
                   </div>
@@ -390,9 +389,7 @@ export function MainDashboardLayout() {
             <div className="mb-5 animate-slide-up rounded-xl border border-amber-400/20 bg-amber-400/[0.06] p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
-                  <span className="material-symbols-outlined mt-0.5 text-xl text-amber-400">
-                    badge
-                  </span>
+                  <User className="mt-0.5 h-6 w-6 text-amber-400" />
                   <div>
                     <p className="text-sm font-semibold text-amber-100">
                       Set your display name
@@ -410,12 +407,12 @@ export function MainDashboardLayout() {
                       if (e.key === 'Enter') handleSaveDisplayName();
                     }}
                     placeholder="Your name"
-                    className="h-9 rounded-lg border border-outline bg-surface-container px-3 text-sm text-white placeholder:text-on-surface-variant/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/40 sm:w-64"
+                    className="control-field h-9 rounded-lg px-3 text-sm sm:w-64"
                   />
                   <button
                     onClick={handleSaveDisplayName}
                     disabled={savingDisplayName || !displayNameDraft.trim()}
-                    className="h-9 rounded-lg bg-primary px-4 text-sm font-semibold text-surface-dim transition-colors hover:bg-primary-dim disabled:cursor-not-allowed disabled:opacity-40"
+                    className="btn-primary h-9 rounded-lg px-4 text-sm font-semibold"
                   >
                     {savingDisplayName ? 'Saving…' : 'Save'}
                   </button>

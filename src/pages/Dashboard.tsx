@@ -121,16 +121,12 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       <section className="surface-panel rounded-lg p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               Live panel telemetry
             </div>
-            <h1 className="text-3xl font-semibold leading-tight text-white">Fire Alarm Panels</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-              Real-time monitoring of all connected panels
-            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-sm sm:flex sm:items-center">

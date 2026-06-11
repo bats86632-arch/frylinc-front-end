@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Flame, AlertTriangle, Mail, Lock, Eye, EyeOff, Loader2, LogIn } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export function Login() {
@@ -61,9 +62,7 @@ export function Login() {
           {/* ── Brand header ── */}
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-fire/20 bg-fire/10 shadow-lg shadow-fire/10">
-              <span className="material-symbols-outlined text-3xl text-fire">
-                local_fire_department
-              </span>
+              <Flame className="h-8 w-8 text-fire" />
             </div>
 
             <h1 className="font-display text-2xl font-bold tracking-tight text-on-surface">
@@ -77,9 +76,7 @@ export function Login() {
           {/* ── Error banner ── */}
           {error && (
             <div className="mb-6 flex items-start gap-3 rounded-lg border border-fire/30 bg-fire/10 px-4 py-3">
-              <span className="material-symbols-outlined mt-0.5 shrink-0 text-[20px] text-fire">
-                error
-              </span>
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-fire" />
               <p className="font-sans text-sm leading-relaxed text-red-200">
                 {error}
               </p>
@@ -97,9 +94,7 @@ export function Login() {
                 Email Address
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant">
-                  mail
-                </span>
+                <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
                 <input
                   id="login-email"
                   type="email"
@@ -122,9 +117,7 @@ export function Login() {
                 Password
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-on-surface-variant">
-                  lock
-                </span>
+                <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
                 <input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
@@ -142,9 +135,7 @@ export function Login() {
                   className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-on-surface-variant transition-colors hover:bg-on-surface/5 hover:text-on-surface"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  <span className="material-symbols-outlined text-[20px]">
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
@@ -157,16 +148,12 @@ export function Login() {
             >
               {isLoading ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin text-[20px]">
-                    progress_activity
-                  </span>
+                  <Loader2 className="h-5 w-5 animate-spin" />
                   <span>Signing in…</span>
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[20px]">
-                    login
-                  </span>
+                  <LogIn className="h-5 w-5" />
                   <span>Sign In</span>
                 </>
               )}
