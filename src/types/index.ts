@@ -5,7 +5,8 @@ export interface User {
   email: string;
   displayName: string;
   role: Role;
-  groups: string[];
+  companyId?: string;
+  branchIds?: string[];
 }
 
 export interface Panel {
@@ -15,12 +16,14 @@ export interface Panel {
   zoneCount: number;
   zones: boolean[];
   alarm: boolean;
-  groupId: string;
+  companyId: string;
+  branchId: string;
+  mobileNumber?: string;
+  contactNumbers?: Record<string, string>;
   ipAddress?: string;
   mqttConnected: boolean;
   allowedCommands: string[];
-  manuallyMarkedOffline?: boolean; // User can manually mark a panel as offline
-}
+  manuallyMarkedOffline?: boolean;
 
 export interface CommandLog {
   id: string;

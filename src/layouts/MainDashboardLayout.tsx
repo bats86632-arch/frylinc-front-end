@@ -60,7 +60,7 @@ export function MainDashboardLayout() {
     ? 'Panel Details'
     : 'Fire Alarm Panels';
 
-  const roleLabel = userData?.role?.replace(/_/g, ' ') || 'Operator';
+  const roleLabel = userData?.role?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'End User';
   const needsDisplayName = !userData?.displayName || userData.displayName === 'User';
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
   const notifications = useMemo(

@@ -11,7 +11,7 @@ export function PanelCard({ panel, viewMode = 'grid' }: PanelCardProps) {
   const hasAlarm = panel.alarm;
   const isOnline = panel.manuallyMarkedOffline !== true;
   const alarmZones = panel.zones.filter(Boolean).length;
-  const visibleZones = Math.min(panel.zoneCount, 64);
+  const visibleZones = Math.min(panel.zoneCount, 8);
 
   const statusLabel = hasAlarm ? 'ALARM' : isOnline ? 'Online' : 'Offline';
   const stateClasses = hasAlarm

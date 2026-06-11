@@ -17,7 +17,8 @@ export const UserService = {
     password: string;
     displayName: string;
     role: Role;
-    groups: string[];
+    companyId?: string;
+    branchIds?: string[];
   }): Promise<User> {
     const response = await apiClient.post('/users', data);
     return response.data.user;

@@ -3,10 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { UserService } from '../api/UserService';
-import { GroupService } from '../api/GroupService';
 import { ApiKeyService, ApiKeyRecord } from '../api/ApiKeyService';
 import { PanelService } from '../api/PanelService';
-import { Panel, User, Role, Group } from '../types';
+import { Panel, User, Role } from '../types';
 import { DEFAULT_PANEL_COMMANDS, normalizeAllowedCommands } from '../config/panelDefaults';
 import {
   AlertCircle,
@@ -26,7 +25,7 @@ import {
 const panelSchema = z.object({
   serial: z.string().min(1, 'Serial is required'),
   name: z.string().min(1, 'Name is required'),
-  zoneCount: z.coerce.number().min(1).max(64, 'Max 64 zones'),
+  zoneCount: z.coerce.number().min(1).max(8, 'Max 8 zones'),
   groupId: z.string().min(1, 'Group ID is required'),
   ipAddress: z.string().optional(),
   allowedCommands: z.string().optional()
@@ -37,14 +36,8 @@ const userSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   displayName: z.string().min(1, 'Display name is required'),
   role: z.enum(['super_admin', 'head_office', 'system_integrator', 'end_user']),
-  groups: z.string().optional()
-});
-
-const groupSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  groupId: z.string().optional(),
-  description: z.string().optional(),
-  allowedCommands: z.string().optional()
+  companyId: z.string().optional(),
+  branchIds: z.string().optional()
 });
 
 const apiKeySchema = z.object({
@@ -55,7 +48,6 @@ const apiKeySchema = z.object({
 
 type PanelFormData = z.infer<typeof panelSchema>;
 type UserFormData = z.infer<typeof userSchema>;
-type GroupFormData = z.infer<typeof groupSchema>;
 type ApiKeyFormData = z.infer<typeof apiKeySchema>;
 
 const roleLabels: Record<Role, string> = {
@@ -85,18 +77,15 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 
 export function AdminSettings() {
   const [users, setUsers] = useState<User[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKeyRecord[]>([]);
   const [panels, setPanels] = useState<Panel[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
-  const [groupsLoading, setGroupsLoading] = useState(true);
   const [apiKeysLoading, setApiKeysLoading] = useState(true);
   const [panelsLoading, setPanelsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'users' | 'panels'>('users');
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
-  const [groupFormOpen, setGroupFormOpen] = useState(false);
   const [apiKeyFormOpen, setApiKeyFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
   const [userFormLoading, setUserFormLoading] = useState(false);
@@ -130,13 +119,6 @@ export function AdminSettings() {
   } = useForm<UserFormData>({ resolver: zodResolver(userSchema) });
 
   const {
-    register: registerGroup,
-    handleSubmit: handleSubmitGroup,
-    reset: resetGroup,
-    formState: { errors: groupErrors }
-  } = useForm<GroupFormData>({ resolver: zodResolver(groupSchema) });
-
-  const {
     register: registerApiKey,
     handleSubmit: handleSubmitApiKey,
     reset: resetApiKey,
@@ -145,7 +127,6 @@ export function AdminSettings() {
 
   useEffect(() => {
     loadUsers();
-    loadGroups();
     loadApiKeys();
     loadPanels();
   }, []);
@@ -159,17 +140,6 @@ export function AdminSettings() {
       console.error('Failed to load users:', err);
     } finally {
       setUsersLoading(false);
-    }
-  };
-
-  const loadGroups = async () => {
-    setGroupsLoading(true);
-    try {
-      setGroups(await GroupService.getGroups());
-    } catch (err) {
-      console.error('Failed to load groups:', err);
-    } finally {
-      setGroupsLoading(false);
     }
   };
 
@@ -220,15 +190,16 @@ export function AdminSettings() {
     setUserFormLoading(true);
     setError(null);
     try {
-      const groups = data.groups
-        ? data.groups.split(',').map((group) => group.trim()).filter(Boolean)
+      const branchIds = data.branchIds
+        ? data.branchIds.split(',').map((id) => id.trim()).filter(Boolean)
         : [];
       await UserService.createUser({
+        displayName: data.displayName,
         email: data.email,
         password: data.password,
-        displayName: data.displayName,
         role: data.role,
-        groups
+        companyId: data.companyId,
+        branchIds
       });
       setUserFormOpen(false);
       resetUser();
@@ -239,28 +210,6 @@ export function AdminSettings() {
       setError(getApiErrorMessage(err, 'Failed to create user'));
     } finally {
       setUserFormLoading(false);
-    }
-  };
-
-  const handleCreateGroup = async (data: GroupFormData) => {
-    setGroupFormLoading(true);
-    setError(null);
-    try {
-      await GroupService.createGroup({
-        name: data.name,
-        groupId: data.groupId?.trim() || undefined,
-        description: data.description?.trim() || undefined,
-        allowedCommands: normalizeAllowedCommands(undefined)
-      });
-      setGroupFormOpen(false);
-      resetGroup();
-      await loadGroups();
-      setSuccess('Group created successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to create group'));
-    } finally {
-      setGroupFormLoading(false);
     }
   };
 
@@ -346,22 +295,6 @@ export function AdminSettings() {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to revoke API key'));
-    }
-  };
-
-  const handleDeleteGroup = async (groupId: string) => {
-    if (!window.confirm('Delete this group? Panels using it may lose access controls.')) return;
-
-    setError(null);
-    try {
-      await GroupService.deleteGroup(groupId);
-      await loadGroups();
-      await loadPanels();
-      await loadUsers();
-      setSuccess('Group deleted successfully');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to delete group'));
     }
   };
 
@@ -456,10 +389,6 @@ export function AdminSettings() {
             <button onClick={() => setUserFormOpen(true)} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">
               Add User
             </button>
-            <button onClick={() => setGroupFormOpen(true)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">
-              <Layers3 className="mr-2 inline h-4 w-4" />
-              Add Group
-            </button>
           </div>
 
           {userFormOpen && (
@@ -484,33 +413,16 @@ export function AdminSettings() {
                   </select>
                 </div>
                 <div>
-                  <input {...registerUser('groups')} placeholder="group-a, group-b" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                  <input {...registerUser('companyId')} placeholder="Company ID" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
+                </div>
+                <div>
+                  <input {...registerUser('branchIds')} placeholder="Branch IDs (comma separated)" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
                 </div>
                 <div className="md:col-span-2 flex gap-2">
                   <button type="submit" disabled={userFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
                     {userFormLoading ? 'Creating...' : 'Create User'}
                   </button>
                   <button type="button" onClick={() => setUserFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {groupFormOpen && (
-            <div className="surface-panel rounded-lg p-5">
-              <h3 className="mb-4 text-lg font-semibold text-white">Create Group</h3>
-              <form onSubmit={handleSubmitGroup(handleCreateGroup)} className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <input {...registerGroup('name')} placeholder="Group name" className="control-field w-full rounded-lg px-4 py-2.5 text-sm" />
-                  {groupErrors.name && <p className="mt-1 text-sm text-red-300">{groupErrors.name.message}</p>}
-                </div>
-                <input {...registerGroup('groupId')} placeholder="Optional group ID" className="control-field rounded-lg px-4 py-2.5 text-sm" />
-                <textarea {...registerGroup('description')} placeholder="Description" className="control-field min-h-24 rounded-lg px-4 py-2.5 text-sm md:col-span-2" />
-                <div className="md:col-span-2 flex gap-2">
-                  <button type="submit" disabled={groupFormLoading} className="btn-primary rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50">
-                    {groupFormLoading ? 'Creating...' : 'Create Group'}
-                  </button>
-                  <button type="button" onClick={() => setGroupFormOpen(false)} className="btn-secondary rounded-lg px-4 py-2 text-sm font-semibold">Cancel</button>
                 </div>
               </form>
             </div>
@@ -542,44 +454,7 @@ export function AdminSettings() {
             </div>
           )}
 
-          <div className="grid gap-4 xl:grid-cols-2">
-            <div className="surface-panel rounded-lg p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Groups</h3>
-                  <p className="mt-1 text-sm text-slate-500">{groups.length} total</p>
-                </div>
-                <button onClick={loadGroups} disabled={groupsLoading} className="btn-secondary rounded-lg px-3 py-2 text-sm font-medium">
-                  <RefreshCw className={`h-4 w-4 ${groupsLoading ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
-              {groupsLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-amber-300" />
-              ) : groups.length === 0 ? (
-                <p className="text-sm text-slate-500">No groups yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {groups.map((group) => (
-                    <div key={group.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-white">{group.name}</p>
-                          <p className="mt-1 text-xs text-slate-500">{group.id}</p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteGroup(group.id)}
-                          className="rounded-lg px-3 py-2 text-xs font-medium text-red-200 transition-colors hover:bg-red-500/10"
-                        >
-                          <Trash2 className="mr-1 inline h-4 w-4" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
+          <div className="grid gap-4 xl:grid-cols-1">
             <div className="surface-panel rounded-lg p-5">
               <div className="mb-4 flex items-center justify-between">
                 <div>
@@ -637,7 +512,7 @@ export function AdminSettings() {
                       Role
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400">
-                      Groups
+                      Company ID
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-400">
                       Actions
@@ -678,7 +553,7 @@ export function AdminSettings() {
                       </td>
                       <td className="px-4 py-4">
                         <span className="text-sm text-slate-400">
-                          {user.groups.length > 0 ? `${user.groups.length} groups` : 'None'}
+                          {user.companyId || 'None'}
                         </span>
                       </td>
                       <td className="px-4 py-4 text-right">
@@ -838,7 +713,7 @@ export function AdminSettings() {
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-200">
-                      Number of Zones (1-64)
+                      Number of Zones (1-8)
                     </label>
                     <input
                       type="number"
@@ -848,7 +723,7 @@ export function AdminSettings() {
                       }`}
                       placeholder="8"
                       min={1}
-                      max={64}
+                      max={8}
                       disabled={panelFormLoading}
                     />
                     {errors.zoneCount && (

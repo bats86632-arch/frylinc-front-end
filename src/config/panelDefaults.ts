@@ -1,5 +1,5 @@
 // Fixed commands for all panels - no customization needed
-export const DEFAULT_PANEL_COMMANDS = ['ARM', 'ZONE OFF', 'MOB=01=9871050479'];
+export const DEFAULT_PANEL_COMMANDS = ['ARM', 'ZONE OFF'];
 
 // Default MQTT broker settings (from Python script)
 export const DEFAULT_MQTT_CONFIG = {

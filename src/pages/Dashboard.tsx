@@ -14,21 +14,19 @@ import {
 } from 'lucide-react';
 
 type ViewMode = 'grid' | 'list';
-type FilterMode = 'all' | 'alarms' | 'online' | 'offline';
+type FilterMode = 'all' | 'alarms';
 
 interface StatCardProps {
   label: string;
   value: number;
   caption: string;
   icon: typeof LayoutGrid;
-  tone: 'neutral' | 'alarm' | 'online' | 'offline';
+  tone: 'neutral' | 'alarm';
 }
 
 const statToneClasses: Record<StatCardProps['tone'], string> = {
   neutral: 'border-cyan-300/20 bg-cyan-300/10 text-cyan-200',
-  alarm: 'border-red-400/30 bg-red-500/10 text-red-200',
-  online: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
-  offline: 'border-slate-400/20 bg-slate-500/10 text-slate-300'
+  alarm: 'border-red-400/30 bg-red-500/10 text-red-200'
 };
 
 function StatCard({ label, value, caption, icon: Icon, tone }: StatCardProps) {
@@ -70,12 +68,6 @@ export function Dashboard() {
       case 'alarms':
         result = result.filter((panel) => panel.alarm);
         break;
-      case 'online':
-        result = result.filter((panel) => panel.mqttConnected);
-        break;
-      case 'offline':
-        result = result.filter((panel) => !panel.mqttConnected);
-        break;
     }
 
     result.sort((a, b) => {
@@ -91,16 +83,12 @@ export function Dashboard() {
 
   const stats = useMemo(() => ({
     total: panels.length,
-    alarms: panels.filter((p) => p.alarm).length,
-    online: panels.filter((p) => p.mqttConnected).length,
-    offline: panels.filter((p) => !p.mqttConnected).length
+    alarms: panels.filter((p) => p.alarm).length
   }), [panels]);
 
   const filters: Array<{ value: FilterMode; label: string; count: number }> = [
     { value: 'all', label: 'All Panels', count: stats.total },
-    { value: 'alarms', label: 'Alarms', count: stats.alarms },
-    { value: 'online', label: 'Online', count: stats.online },
-    { value: 'offline', label: 'Offline', count: stats.offline }
+    { value: 'alarms', label: 'Alarms', count: stats.alarms }
   ];
 
   if (loading) {
@@ -164,7 +152,7 @@ export function Dashboard() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard
           label="Total Panels"
           value={stats.total}
@@ -178,20 +166,6 @@ export function Dashboard() {
           caption={stats.alarms > 0 ? 'Needs immediate review' : 'No active alarms'}
           icon={AlertTriangle}
           tone="alarm"
-        />
-        <StatCard
-          label="Online"
-          value={stats.online}
-          caption="MQTT connected"
-          icon={Wifi}
-          tone="online"
-        />
-        <StatCard
-          label="Offline"
-          value={stats.offline}
-          caption="Awaiting connection"
-          icon={WifiOff}
-          tone="offline"
         />
       </div>
 
