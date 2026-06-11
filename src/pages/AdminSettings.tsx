@@ -233,31 +233,6 @@ export function AdminSettings() {
             <h1 className="text-3xl font-semibold leading-tight text-white">Admin Settings</h1>
             <p className="mt-2 text-sm leading-6 text-slate-400">Manage users and panel provisioning</p>
           </div>
-
-          <div className="surface-muted flex rounded-lg p-1">
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === 'users'
-                  ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
-                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
-              }`}
-            >
-              <Users className="h-4 w-4" />
-              <span>Users</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('panels')}
-              className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === 'panels'
-                  ? 'bg-red-500 text-white shadow-lg shadow-red-950/30'
-                  : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
-              }`}
-            >
-              <Shield className="h-4 w-4" />
-              <span>Panels</span>
-            </button>
-          </div>
         </div>
       </section>
 
