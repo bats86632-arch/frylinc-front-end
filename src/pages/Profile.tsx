@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { AlertCircle, CheckCircle, Save, KeyRound, User as UserIcon } from "lucide-react";
+import { AlertCircle, CheckCircle, Save, KeyRound, User as UserIcon, ShieldCheck } from "lucide-react";
 import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
 
 export function Profile() {
@@ -66,112 +66,131 @@ export function Profile() {
     }
   };
 
+  const roleLabel = userData?.role
+    ?.split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ") || "End User";
+
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <section className="surface-panel rounded-lg p-5">
-        <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-cyan-400/20 bg-cyan-400/10 text-cyan-200">
-            <UserIcon className="h-5 w-5" />
+    <div className="mx-auto max-w-3xl space-y-8 animate-fade-in-up">
+      {/* Profile header with avatar */}
+      <section className="surface-panel rounded-[14px] p-6">
+        <div className="flex items-center gap-5">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-red-500 to-amber-400 text-xl font-bold text-white shadow-lg shadow-red-950/40 ring-1 ring-white/10">
+            {userData?.displayName?.charAt(0).toUpperCase() || "U"}
           </div>
           <div>
-            <h1 className="text-3xl font-semibold leading-tight text-white">Your Profile</h1>
-            <p className="mt-1 text-sm text-slate-400">Manage your personal settings</p>
+            <h1 className="font-display text-display leading-tight text-white text-balance">Your Profile</h1>
+            <p className="mt-1.5 text-body text-slate-400">Manage your personal settings and security</p>
           </div>
         </div>
       </section>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Profile Info */}
-        <div className="surface-panel rounded-lg p-5">
-          <h2 className="text-lg font-semibold text-white mb-4">Personal Details</h2>
-          <form onSubmit={handleSaveProfile} className="space-y-4">
+        <div className="surface-panel rounded-[14px] p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-200">
+              <UserIcon className="h-[18px] w-[18px]" />
+            </div>
+            <h2 className="text-subtitle font-semibold text-white">Personal Details</h2>
+          </div>
+          <form onSubmit={handleSaveProfile} className="space-y-5">
             {profileError && (
-              <div className="flex items-center gap-2 rounded text-sm text-red-300 bg-red-500/10 p-3">
-                <AlertCircle className="h-4 w-4" /> {profileError}
+              <div className="flex items-center gap-2.5 rounded-[10px] text-sm text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
+                <AlertCircle className="h-4 w-4 shrink-0" /> {profileError}
               </div>
             )}
             {profileSuccess && (
-              <div className="flex items-center gap-2 rounded text-sm text-emerald-300 bg-emerald-500/10 p-3">
-                <CheckCircle className="h-4 w-4" /> Profile updated successfully
+              <div className="flex items-center gap-2.5 rounded-[10px] text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
+                <CheckCircle className="h-4 w-4 shrink-0" /> Profile updated successfully
               </div>
             )}
             
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
               <input
                 type="text"
                 value={userData?.email || ""}
                 disabled
-                className="control-field w-full rounded-lg px-4 py-2.5 text-sm opacity-50 cursor-not-allowed"
+                className="control-field w-full rounded-[10px] px-4 py-3 text-sm opacity-50 cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Role</label>
-              <input
-                type="text"
-                value={userData?.role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || ""}
-                disabled
-                className="control-field w-full rounded-lg px-4 py-2.5 text-sm opacity-50 cursor-not-allowed"
-              />
+              <label className="block text-sm font-medium text-slate-300 mb-2">Role</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={roleLabel}
+                  disabled
+                  className="control-field w-full rounded-[10px] px-4 py-3 text-sm opacity-50 cursor-not-allowed"
+                />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Display Name</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Display Name</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
               />
             </div>
 
             <button
               type="submit"
               disabled={savingProfile}
-              className="btn-primary mt-2 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold w-full"
+              className="btn-primary mt-3 flex items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-sm font-semibold w-full"
             >
               <Save className="h-4 w-4" />
-              {savingProfile ? "Saving..." : "Save Profile"}
+              {savingProfile ? "Saving…" : "Save Profile"}
             </button>
           </form>
         </div>
 
         {/* Password */}
-        <div className="surface-panel rounded-lg p-5">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-amber-400" /> Security
-          </h2>
-          <form onSubmit={handleUpdatePassword} className="space-y-4">
+        <div className="surface-panel rounded-[14px] p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
+              <KeyRound className="h-[18px] w-[18px]" />
+            </div>
+            <h2 className="text-subtitle font-semibold text-white">Security</h2>
+          </div>
+          <form onSubmit={handleUpdatePassword} className="space-y-5">
             {passwordError && (
-              <div className="flex items-center gap-2 rounded text-sm text-red-300 bg-red-500/10 p-3">
-                <AlertCircle className="h-4 w-4" /> {passwordError}
+              <div className="flex items-center gap-2.5 rounded-[10px] text-sm text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
+                <AlertCircle className="h-4 w-4 shrink-0" /> {passwordError}
               </div>
             )}
             {passwordSuccess && (
-              <div className="flex items-center gap-2 rounded text-sm text-emerald-300 bg-emerald-500/10 p-3">
-                <CheckCircle className="h-4 w-4" /> Password updated successfully
+              <div className="flex items-center gap-2.5 rounded-[10px] text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
+                <CheckCircle className="h-4 w-4 shrink-0" /> Password updated successfully
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Current Password</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Current Password</label>
               <input
                 type="password"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
-                className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">New Password</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">New Password</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="control-field w-full rounded-lg px-4 py-2.5 text-sm"
+                className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
                 required
               />
             </div>
@@ -179,10 +198,10 @@ export function Profile() {
             <button
               type="submit"
               disabled={savingPassword || !oldPassword || !newPassword}
-              className="btn-secondary mt-2 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold w-full disabled:opacity-50"
+              className="btn-secondary mt-3 flex items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-sm font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Save className="h-4 w-4" />
-              {savingPassword ? "Updating..." : "Update Password"}
+              <KeyRound className="h-4 w-4" />
+              {savingPassword ? "Updating…" : "Update Password"}
             </button>
           </form>
         </div>

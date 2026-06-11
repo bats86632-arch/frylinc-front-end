@@ -98,39 +98,42 @@ export function MainDashboardLayout() {
     <div className="min-h-screen console-bg text-slate-100">
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col border-r border-white/10 bg-[#070b10]/95 shadow-2xl shadow-black/40 backdrop-blur-xl transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col border-r border-white/[0.08] bg-[#070b10]/95 shadow-elevation-3 backdrop-blur-2xl transition-transform duration-300 ease-smooth lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
+        {/* Subtle gradient overlay at top */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-amber-500/[0.03] to-transparent" />
+
         {/* Logo */}
-        <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
+        <div className="relative flex h-[72px] items-center justify-between border-b border-white/[0.07] px-5">
           <Link
             to="/"
             className="flex items-center gap-3"
             onClick={() => setSidebarOpen(false)}
           >
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/40">
-              <Flame className="h-6 w-6 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/50 ring-1 ring-white/10">
+              <Flame className="h-5 w-5 text-white drop-shadow-sm" />
             </div>
             <div>
-              <span className="block text-xl font-semibold leading-none text-white">
+              <span className="block font-display text-lg font-semibold leading-none tracking-tight text-white">
                 Fyrlinc
               </span>
-              <span className="mt-1 block text-xs text-slate-500">
+              <span className="mt-1 block text-[11px] font-medium text-slate-500 tracking-wide">
                 Command Console
               </span>
             </div>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-white lg:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors duration-150 hover:bg-white/[0.06] hover:text-white lg:hidden"
             aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
@@ -138,7 +141,7 @@ export function MainDashboardLayout() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 space-y-2 px-3 py-5">
+        <nav className="flex-1 space-y-1.5 px-3 py-5">
           {filteredNav.map((item) => {
             const active = isActive(item.href);
 
@@ -146,70 +149,86 @@ export function MainDashboardLayout() {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`group relative flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-150 ${
+                className={`group relative flex items-center gap-3 rounded-[10px] px-3 py-3 text-sm font-medium transition-all duration-200 ease-smooth ${
                   active
-                    ? "bg-red-500/10 text-white shadow-[inset_3px_0_0_#ef4444,_0_0_16px_rgba(239,68,68,0.06)]"
-                    : "text-slate-400 hover:bg-white/[0.04] hover:text-white"
+                    ? "bg-red-500/[0.08] text-white shadow-[inset_3px_0_0_#ef4444,_0_0_20px_rgba(239,68,68,0.06)]"
+                    : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border ${
+                  className={`flex h-9 w-9 items-center justify-center rounded-[8px] border transition-all duration-200 ${
                     active
-                      ? "border-red-400/30 bg-red-500/10 text-red-200"
-                      : "border-white/10 bg-white/[0.03] text-slate-400 group-hover:text-white"
+                      ? "border-red-400/25 bg-red-500/[0.12] text-red-200"
+                      : "border-white/[0.08] bg-white/[0.03] text-slate-400 group-hover:text-slate-200 group-hover:border-white/[0.12]"
                   }`}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-[18px] w-[18px]" />
                 </span>
                 <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
+
+        {/* Sidebar bottom - user info */}
+        <div className="border-t border-white/[0.07] px-3 py-4">
+          <div className="flex items-center gap-3 rounded-[10px] px-3 py-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-gradient-to-br from-red-500 to-amber-400 text-xs font-semibold text-white shadow-sm">
+              {userData?.displayName?.charAt(0).toUpperCase() || "U"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-slate-200">{userData?.displayName}</p>
+              <p className="truncate text-[11px] text-slate-500">{roleLabel}</p>
+            </div>
+          </div>
+        </div>
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
       <div className="lg:pl-[280px]">
-        {/* Header — border tints red when system has active alarms */}
+        {/* Header */}
         <header
-          className={`sticky top-0 z-30 flex h-20 items-center justify-between border-b bg-[#070b10]/80 px-4 backdrop-blur-xl transition-colors duration-300 sm:px-6 lg:px-8 ${
-            notificationCount > 0 ? "border-red-500/20" : "border-white/10"
+          className={`sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-[#070b10]/85 px-4 backdrop-blur-2xl transition-colors duration-300 sm:px-6 lg:px-8 ${
+            notificationCount > 0 ? "border-red-500/20" : "border-white/[0.07]"
           }`}
         >
           <div className="flex min-w-0 items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
+              className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-white/[0.08] bg-white/[0.03] text-slate-300 transition-all duration-150 hover:bg-white/[0.06] hover:text-white lg:hidden"
               aria-label="Open sidebar"
             >
               <Menu className="h-5 w-5" />
             </button>
 
             <div className="min-w-0">
-              <p className="truncate text-base font-semibold text-white sm:text-lg">
+              <p className="truncate font-display text-base font-semibold tracking-tight text-white sm:text-lg">
                 {pageTitle}
               </p>
-              <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.75)]" />
+              <div className="mt-0.5 flex items-center gap-2 text-[11px] font-medium text-slate-500">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+                  <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                </span>
                 <span>Live monitoring</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {/* Notification bell */}
             <div className="relative">
               <button
                 onClick={() => setNotificationOpen((value) => !value)}
-                className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                className="relative flex h-9 w-9 items-center justify-center rounded-[8px] border border-white/[0.08] bg-white/[0.03] text-slate-300 transition-all duration-150 hover:bg-white/[0.06] hover:text-white"
                 aria-label="Notifications"
                 aria-expanded={notificationOpen}
                 aria-haspopup="menu"
               >
-                <Bell className="h-5 w-5" />
+                <Bell className="h-[18px] w-[18px]" />
                 <span
-                  className={`absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border border-[#070b10] bg-red-500 px-1 text-[10px] font-bold text-white ${
+                  className={`absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-[#070b10] bg-red-500 px-1 text-[9px] font-bold text-white ${
                     notificationCount > 0 ? "animate-pulse" : ""
                   }`}
                 >
@@ -218,48 +237,55 @@ export function MainDashboardLayout() {
               </button>
 
               {notificationOpen && (
-                <div className="surface-panel absolute right-0 z-50 mt-3 w-80 rounded-lg p-3 shadow-2xl shadow-black/40">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                    <div>
-                      <p className="text-sm font-semibold text-white">
-                        Notifications
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Live panel alerts
-                      </p>
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setNotificationOpen(false)}
+                  />
+                  <div className="surface-panel absolute right-0 z-50 mt-2.5 w-80 rounded-[14px] p-3.5 shadow-elevation-3 animate-scale-in">
+                    <div className="flex items-center justify-between border-b border-white/[0.07] pb-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">
+                          Notifications
+                        </p>
+                        <p className="mt-0.5 text-[11px] font-medium text-slate-500">
+                          Live panel alerts
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold tabular-nums text-slate-300">
+                        {notificationCount}
+                      </span>
                     </div>
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-slate-300">
-                      {notificationCount}
-                    </span>
-                  </div>
 
-                  {notificationCount === 0 ? (
-                    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-center">
-                      <p className="text-sm font-medium text-white">
-                        Nothing new here
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        You'll see active alarms here when panels report them.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 pt-3">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className="animate-pulse rounded-lg border border-red-300/20 bg-red-500/10 p-3"
-                        >
-                          <p className="text-sm font-semibold text-red-100">
-                            {notification.title}
-                          </p>
-                          <p className="mt-1 text-xs text-red-100/75">
-                            {notification.message}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                    {notificationCount === 0 ? (
+                      <div className="mt-3 rounded-[10px] border border-white/[0.07] bg-white/[0.02] p-5 text-center">
+                        <Bell className="mx-auto mb-3 h-8 w-8 text-slate-600" />
+                        <p className="text-sm font-medium text-white">
+                          All clear
+                        </p>
+                        <p className="mt-1 text-[12px] text-slate-500">
+                          You'll see active alarms here when panels report them.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2 pt-3">
+                        {notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className="animate-pulse rounded-[10px] border border-red-300/20 bg-red-500/10 p-3.5"
+                          >
+                            <p className="text-sm font-semibold text-red-100">
+                              {notification.title}
+                            </p>
+                            <p className="mt-1 text-[12px] text-red-100/70">
+                              {notification.message}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
 
@@ -267,20 +293,20 @@ export function MainDashboardLayout() {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.03] py-1.5 pl-1.5 pr-3 text-slate-200 transition-colors hover:bg-white/[0.06]"
+                className="flex items-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.03] py-1.5 pl-1.5 pr-3 text-slate-200 transition-all duration-150 hover:bg-white/[0.06] hover:border-white/[0.12]"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-amber-400 text-sm font-semibold text-white shadow-md shadow-red-950/30">
+                <div className="flex h-8 w-8 items-center justify-center rounded-[7px] bg-gradient-to-br from-red-500 to-amber-400 text-xs font-semibold text-white shadow-sm ring-1 ring-white/10">
                   {userData?.displayName?.charAt(0).toUpperCase() || "U"}
                 </div>
                 <div className="hidden min-w-0 text-left sm:block">
-                  <p className="max-w-[160px] truncate text-sm font-semibold text-white">
+                  <p className="max-w-[140px] truncate text-sm font-semibold text-white leading-tight">
                     {userData?.displayName}
                   </p>
-                  <p className="text-xs capitalize text-slate-500">
+                  <p className="text-[11px] capitalize text-slate-500">
                     {roleLabel}
                   </p>
                 </div>
-                <ChevronDown className="h-4 w-4 text-slate-500" />
+                <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
               </button>
 
               {userMenuOpen && (
@@ -289,21 +315,21 @@ export function MainDashboardLayout() {
                     className="fixed inset-0 z-40"
                     onClick={() => setUserMenuOpen(false)}
                   />
-                  <div className="surface-panel absolute right-0 z-50 mt-3 w-64 rounded-lg p-2">
-                    <div className="border-b border-white/10 p-3">
+                  <div className="surface-panel absolute right-0 z-50 mt-2.5 w-64 rounded-[14px] p-2 shadow-elevation-3 animate-scale-in">
+                    <div className="border-b border-white/[0.07] p-3.5">
                       <p className="truncate text-sm font-semibold text-white">
                         {userData?.displayName}
                       </p>
-                      <p className="mt-1 truncate text-xs text-slate-500">
+                      <p className="mt-1 truncate text-[12px] text-slate-500">
                         {userData?.email}
                       </p>
-                      <span className="mt-3 inline-flex rounded-full border border-amber-300/20 bg-amber-400/10 px-2.5 py-1 text-xs font-medium capitalize text-amber-200">
+                      <span className="mt-3 inline-flex rounded-full border border-amber-300/20 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold capitalize text-amber-200">
                         {roleLabel}
                       </span>
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="mt-2 flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-red-200 transition-colors hover:bg-red-500/10"
+                      className="mt-1.5 flex w-full items-center gap-2 rounded-[8px] px-3.5 py-2.5 text-sm font-medium text-red-200 transition-all duration-150 hover:bg-red-500/[0.08]"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>Sign out</span>
@@ -315,7 +341,7 @@ export function MainDashboardLayout() {
           </div>
         </header>
 
-        <main className="min-h-[calc(100vh-5rem)] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        <main className="min-h-[calc(100vh-4rem)] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           <Outlet />
         </main>
       </div>

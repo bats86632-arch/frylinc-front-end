@@ -2,33 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Design Tokens ────────────────────────────────────────────────────────── */
 :root {
-    font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-    color: #f8fafc;
-    background: #070b10;
+    /* Brand palette */
+    --color-brand-50: #fff7ed;
+    --color-brand-100: #ffedd5;
+    --color-brand-200: #fed7aa;
+    --color-brand-300: #fdba74;
+    --color-brand-400: #fb923c;
+    --color-brand-500: #f59e0b;
+    --color-brand-600: #d97706;
+    --color-brand-700: #b45309;
+
+    /* Neutral scale */
+    --color-neutral-950: #070b10;
+    --color-neutral-900: #0a0f18;
+    --color-neutral-850: #0d1320;
+    --color-neutral-800: #111827;
+    --color-neutral-700: #1e293b;
+    --color-neutral-600: #334155;
+    --color-neutral-500: #475569;
+    --color-neutral-400: #64748b;
+    --color-neutral-300: #94a3b8;
+    --color-neutral-200: #cbd5e1;
+    --color-neutral-100: #e2e8f0;
+    --color-neutral-50: #f8fafc;
+
+    /* Semantic */
+    --color-success: #34d399;
+    --color-warning: #fbbf24;
+    --color-error: #ef4444;
+    --color-info: #22d3ee;
+
+    /* Surfaces */
+    --surface-base: #070b10;
+    --surface-raised: rgba(10, 15, 22, 0.65);
+    --surface-overlay: rgba(15, 23, 42, 0.45);
+    --surface-hover: rgba(255, 255, 255, 0.04);
+
+    /* Borders */
+    --border-subtle: rgba(255, 255, 255, 0.07);
+    --border-default: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    /* Elevation */
+    --shadow-low: 0 1px 3px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.32);
+    --shadow-mid: 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.24);
+    --shadow-high: 0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.32);
+
+    /* Radius */
+    --radius-card: 14px;
+    --radius-element: 10px;
+    --radius-small: 6px;
+
+    /* Motion */
+    --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 350ms;
+
+    /* Typography */
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--color-neutral-50);
+    background: var(--surface-base);
     color-scheme: dark;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variation-settings: 'opsz' 32;
 }
 
 html {
-    background: #070b10;
+    background: var(--surface-base);
+    scroll-behavior: smooth;
 }
 
 body {
     min-width: 320px;
     margin: 0;
     background:
-        linear-gradient(180deg, rgba(14, 20, 30, 0.92), #070b10 42%), #070b10;
+        linear-gradient(180deg, rgba(14, 20, 30, 0.92), var(--surface-base) 42%),
+        var(--surface-base);
 }
 
 button,
@@ -39,148 +96,151 @@ textarea {
 }
 
 ::selection {
-    background: rgba(245, 158, 11, 0.32);
-    color: #fff7ed;
+    background: rgba(245, 158, 11, 0.28);
+    color: var(--color-brand-50);
 }
 
+/* ─── Component Layer ──────────────────────────────────────────────────────── */
 @layer components {
+
+    /* ── Surfaces ─────────────────────────────────────────────────────────── */
     .console-bg {
         background:
-            linear-gradient(
-                180deg,
-                rgba(14, 20, 30, 0.96),
-                rgba(7, 11, 16, 0.98)
-            ),
-            radial-gradient(
-                circle at 50% -20%,
-                rgba(34, 211, 238, 0.1),
-                transparent 34%
-            ),
-            #070b10;
+            linear-gradient(180deg, rgba(14, 20, 30, 0.96), rgba(7, 11, 16, 0.98)),
+            radial-gradient(circle at 50% -20%, rgba(34, 211, 238, 0.08), transparent 34%),
+            var(--surface-base);
     }
 
     .console-grid {
         background-image:
-            linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
-            linear-gradient(
-                90deg,
-                rgba(148, 163, 184, 0.055) 1px,
-                transparent 1px
-            );
-        background-size: 28px 28px;
+            linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+        background-size: 32px 32px;
     }
 
-    /* transition extended to include border-color */
     .surface-panel {
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--border-subtle);
         background:
-            linear-gradient(
-                135deg,
-                rgba(255, 255, 255, 0.05) 0%,
-                rgba(255, 255, 255, 0.01) 100%
-            ),
-            rgba(10, 15, 22, 0.6);
+            linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.008) 100%),
+            var(--surface-raised);
         box-shadow:
-            0 8px 32px 0 rgba(0, 0, 0, 0.4),
+            var(--shadow-mid),
             inset 0 1px 0 rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
-        border-radius: 12px;
+        border-radius: var(--radius-card);
         transition:
-            transform 0.3s ease,
-            box-shadow 0.3s ease,
-            border-color 200ms ease;
+            transform var(--duration-normal) var(--ease-smooth),
+            box-shadow var(--duration-normal) var(--ease-smooth),
+            border-color var(--duration-fast) var(--ease-standard);
     }
 
     .surface-panel:hover {
         box-shadow:
-            0 12px 40px 0 rgba(0, 0, 0, 0.5),
-            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            0 12px 48px 0 rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.07);
         transform: translateY(-2px);
     }
 
     .surface-muted {
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: var(--surface-overlay);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border-radius: 12px;
-        transition: 
-            background 0.3s ease,
-            transform 0.3s ease,
-            box-shadow 0.3s ease;
+        border-radius: var(--radius-card);
+        transition:
+            background var(--duration-normal) var(--ease-smooth),
+            transform var(--duration-normal) var(--ease-smooth),
+            box-shadow var(--duration-normal) var(--ease-smooth);
     }
 
     .surface-muted:hover {
         background: rgba(15, 23, 42, 0.55);
         transform: translateY(-1px);
-        box-shadow: 
+        box-shadow:
             0 8px 24px 0 rgba(0, 0, 0, 0.3),
             inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
-    /* Glassmorphism alarm card — red tint, red border, glow, pulsing left rail */
     .surface-alarm {
         position: relative;
         border: 1px solid rgba(239, 68, 68, 0.3);
         border-left: 3px solid #ef4444;
         background:
-            linear-gradient(
-                135deg,
-                rgba(239, 68, 68, 0.08) 0%,
-                rgba(239, 68, 68, 0.02) 100%
-            ),
+            linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 100%),
             rgba(10, 15, 22, 0.65);
         box-shadow:
             0 0 20px rgba(239, 68, 68, 0.12),
-            0 8px 32px 0 rgba(0, 0, 0, 0.4),
+            var(--shadow-mid),
             inset 0 1px 0 rgba(255, 255, 255, 0.04);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
-        border-radius: 12px;
+        border-radius: var(--radius-card);
         animation: alarm-rail-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         transition:
-            transform 0.3s ease,
-            box-shadow 0.3s ease,
-            border-color 200ms ease;
+            transform var(--duration-normal) var(--ease-smooth),
+            box-shadow var(--duration-normal) var(--ease-smooth),
+            border-color var(--duration-fast) var(--ease-standard);
     }
 
+    /* ── Interactive Elements ──────────────────────────────────────────────── */
     .control-field {
-        border: 1px solid rgba(148, 163, 184, 0.18);
+        border: 1px solid rgba(148, 163, 184, 0.16);
         background: rgba(5, 10, 18, 0.72);
-        color: #f8fafc;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+        color: var(--color-neutral-50);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        border-radius: var(--radius-element);
         transition:
-            border-color 160ms ease,
-            box-shadow 160ms ease,
-            background-color 160ms ease;
+            border-color var(--duration-fast) var(--ease-standard),
+            box-shadow var(--duration-fast) var(--ease-standard),
+            background-color var(--duration-fast) var(--ease-standard);
     }
 
     .control-field:focus {
-        border-color: rgba(245, 158, 11, 0.74);
+        border-color: rgba(245, 158, 11, 0.65);
         box-shadow:
-            0 0 0 3px rgba(245, 158, 11, 0.14),
-            inset 0 1px 0 rgba(255, 255, 255, 0.035);
+            0 0 0 3px rgba(245, 158, 11, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.03);
         outline: none;
+        background: rgba(8, 14, 24, 0.85);
     }
 
+    .control-field::placeholder {
+        color: var(--color-neutral-500);
+    }
+
+    /* ── Buttons ───────────────────────────────────────────────────────────── */
     .btn-primary {
-        background: linear-gradient(135deg, #f59e0b, #f97316, #ef4444);
+        background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%);
         background-size: 200% auto;
-        color: #fff7ed;
+        color: var(--color-brand-50);
+        font-weight: 600;
         box-shadow:
-            0 4px 15px rgba(239, 68, 68, 0.3),
+            0 4px 16px rgba(239, 68, 68, 0.25),
+            0 1px 3px rgba(0, 0, 0, 0.2),
             inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
+        border-radius: var(--radius-element);
+        transition:
+            background-position var(--duration-normal) var(--ease-smooth),
+            box-shadow var(--duration-fast) var(--ease-standard),
+            transform var(--duration-fast) var(--ease-smooth);
     }
 
     .btn-primary:hover {
         background-position: right center;
         box-shadow:
-            0 6px 20px rgba(239, 68, 68, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        transform: translateY(-2px);
+            0 8px 24px rgba(239, 68, 68, 0.35),
+            0 2px 6px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0) scale(0.98);
+        box-shadow:
+            0 2px 8px rgba(239, 68, 68, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 
     .btn-primary:disabled {
@@ -188,49 +248,68 @@ textarea {
         filter: grayscale(0.2);
         opacity: 0.55;
         transform: none;
+        pointer-events: none;
     }
 
     .btn-secondary {
-        border: 1px solid rgba(148, 163, 184, 0.16);
-        background: rgba(15, 23, 42, 0.7);
-        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        background: rgba(15, 23, 42, 0.65);
+        color: var(--color-neutral-100);
+        font-weight: 500;
+        border-radius: var(--radius-element);
         transition:
-            border-color 160ms ease,
-            background-color 160ms ease,
-            color 160ms ease;
+            border-color var(--duration-fast) var(--ease-standard),
+            background-color var(--duration-fast) var(--ease-standard),
+            color var(--duration-fast) var(--ease-standard),
+            transform var(--duration-fast) var(--ease-smooth);
     }
 
     .btn-secondary:hover {
-        border-color: rgba(245, 158, 11, 0.38);
-        background: rgba(30, 41, 59, 0.76);
+        border-color: rgba(245, 158, 11, 0.32);
+        background: rgba(30, 41, 59, 0.72);
         color: #ffffff;
+        transform: translateY(-1px);
     }
 
-    /* Solid red button for destructive actions */
+    .btn-secondary:active {
+        transform: translateY(0) scale(0.98);
+    }
+
     .btn-danger {
         background: linear-gradient(135deg, #ef4444, #dc2626);
         background-size: 200% auto;
         color: #fff1f2;
+        font-weight: 600;
         box-shadow:
-            0 4px 15px rgba(239, 68, 68, 0.35),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        transition: all 0.25s ease;
+            0 4px 16px rgba(239, 68, 68, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        border-radius: var(--radius-element);
+        transition:
+            background-position var(--duration-normal) var(--ease-smooth),
+            box-shadow var(--duration-fast) var(--ease-standard),
+            transform var(--duration-fast) var(--ease-smooth);
     }
 
     .btn-danger:hover {
         background-position: right center;
         box-shadow:
-            0 6px 20px rgba(239, 68, 68, 0.5),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            0 8px 24px rgba(239, 68, 68, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.18);
         transform: translateY(-1px);
+    }
+
+    .btn-danger:active {
+        transform: translateY(0) scale(0.98);
     }
 
     .btn-danger:disabled {
         cursor: not-allowed;
         opacity: 0.5;
         transform: none;
+        pointer-events: none;
     }
 
+    /* ── Status ────────────────────────────────────────────────────────────── */
     .status-dot {
         width: 0.5rem;
         height: 0.5rem;
@@ -238,136 +317,155 @@ textarea {
         box-shadow: 0 0 0 4px currentColor;
     }
 
+    /* ── Table ─────────────────────────────────────────────────────────────── */
     .table-shell {
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        background: rgba(15, 23, 42, 0.4);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-card);
+        background: var(--surface-overlay);
+        box-shadow: var(--shadow-mid);
         backdrop-filter: blur(16px);
     }
 
     tr {
         transition:
-            background-color 0.2s ease,
-            transform 0.2s ease;
+            background-color var(--duration-fast) var(--ease-standard),
+            transform var(--duration-fast) var(--ease-standard);
     }
 
-    /* Loading skeleton with shimmer sweep */
+    /* ── Skeleton Shimmer ──────────────────────────────────────────────────── */
     .skeleton {
         background: linear-gradient(
             90deg,
-            rgba(30, 41, 59, 0.6) 25%,
-            rgba(51, 65, 85, 0.5) 50%,
-            rgba(30, 41, 59, 0.6) 75%
+            rgba(30, 41, 59, 0.5) 25%,
+            rgba(51, 65, 85, 0.4) 50%,
+            rgba(30, 41, 59, 0.5) 75%
         );
         background-size: 200% 100%;
-        animation: skeleton-shimmer 1.6s ease-in-out infinite;
-        border-radius: 6px;
+        animation: shimmer 1.8s ease-in-out infinite;
+        border-radius: var(--radius-small);
     }
 
-    /* Semantic badge pills */
+    /* ── Badges ────────────────────────────────────────────────────────────── */
     .badge-alarm {
         display: inline-flex;
         align-items: center;
-        padding: 0.125rem 0.625rem;
+        gap: 4px;
+        padding: 3px 10px;
         border-radius: 9999px;
         font-size: 0.6875rem;
         font-weight: 600;
-        letter-spacing: 0.025em;
-        background: rgba(239, 68, 68, 0.15);
+        letter-spacing: 0.03em;
+        background: rgba(239, 68, 68, 0.14);
         color: #fca5a5;
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        border: 1px solid rgba(239, 68, 68, 0.28);
     }
 
     .badge-online {
         display: inline-flex;
         align-items: center;
-        padding: 0.125rem 0.625rem;
+        gap: 4px;
+        padding: 3px 10px;
         border-radius: 9999px;
         font-size: 0.6875rem;
         font-weight: 600;
-        letter-spacing: 0.025em;
-        background: rgba(52, 211, 153, 0.12);
+        letter-spacing: 0.03em;
+        background: rgba(52, 211, 153, 0.1);
         color: #6ee7b7;
-        border: 1px solid rgba(52, 211, 153, 0.25);
+        border: 1px solid rgba(52, 211, 153, 0.22);
     }
 
     .badge-offline {
         display: inline-flex;
         align-items: center;
-        padding: 0.125rem 0.625rem;
+        gap: 4px;
+        padding: 3px 10px;
         border-radius: 9999px;
         font-size: 0.6875rem;
         font-weight: 600;
-        letter-spacing: 0.025em;
-        background: rgba(100, 116, 139, 0.15);
+        letter-spacing: 0.03em;
+        background: rgba(100, 116, 139, 0.12);
         color: #94a3b8;
-        border: 1px solid rgba(100, 116, 139, 0.22);
+        border: 1px solid rgba(100, 116, 139, 0.2);
     }
 
     .badge-warning {
         display: inline-flex;
         align-items: center;
-        padding: 0.125rem 0.625rem;
+        gap: 4px;
+        padding: 3px 10px;
         border-radius: 9999px;
         font-size: 0.6875rem;
         font-weight: 600;
-        letter-spacing: 0.025em;
-        background: rgba(245, 158, 11, 0.13);
+        letter-spacing: 0.03em;
+        background: rgba(245, 158, 11, 0.12);
         color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.28);
+        border: 1px solid rgba(245, 158, 11, 0.24);
     }
 
-    /* Zone state indicator tiles */
+    /* ── Zones ─────────────────────────────────────────────────────────────── */
     .zone-alarm {
-        background: rgba(239, 68, 68, 0.9);
+        background: rgba(239, 68, 68, 0.88);
         color: #ffffff;
-        border: 1px solid rgba(239, 68, 68, 0.6);
+        border: 1px solid rgba(239, 68, 68, 0.55);
         box-shadow:
-            0 0 14px rgba(239, 68, 68, 0.55),
+            0 0 16px rgba(239, 68, 68, 0.5),
             inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 
     .zone-normal {
-        background: rgba(51, 65, 85, 0.7);
-        color: #94a3b8;
+        background: rgba(51, 65, 85, 0.6);
+        color: var(--color-neutral-300);
         border: 1px solid rgba(255, 255, 255, 0.06);
     }
 }
 
+/* ─── Utility Layer ────────────────────────────────────────────────────────── */
 @layer utilities {
     .animate-pulse-shadow {
         animation: pulse-shadow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
 
     .animate-bounce-subtle {
-        animation: bounce-subtle 2s ease-in-out infinite;
+        animation: bounce-subtle 2.5s ease-in-out infinite;
     }
 
-    /* Entrance: opacity 0→1 + translateY 8px→0, 200ms */
     .animate-fade-in {
-        animation: fade-in 200ms ease-out both;
+        animation: fade-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
-    /* Modal entrance: opacity 0→1 + translateY 12px→0, 250ms */
+    .animate-fade-in-up {
+        animation: fade-in-up 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
     .animate-slide-up {
-        animation: slide-up 250ms ease-out both;
+        animation: slide-up 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .animate-scale-in {
+        animation: scale-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
     .text-balance {
         text-wrap: balance;
     }
-}
 
-@keyframes pulse-shadow {
-    0%,
-    100% {
-        box-shadow:
-            0 0 0 0 rgba(239, 68, 68, 0.34),
-            0 18px 48px rgba(0, 0, 0, 0.32);
+    .font-display {
+        font-family: 'Outfit', 'Inter', ui-sans-serif, system-ui, sans-serif;
     }
 
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+/* ─── Keyframes ────────────────────────────────────────────────────────────── */
+@keyframes pulse-shadow {
+    0%, 100% {
+        box-shadow:
+            0 0 0 0 rgba(239, 68, 68, 0.3),
+            0 18px 48px rgba(0, 0, 0, 0.32);
+    }
     50% {
         box-shadow:
             0 0 0 10px rgba(239, 68, 68, 0),
@@ -376,74 +474,65 @@ textarea {
 }
 
 @keyframes bounce-subtle {
-    0%,
-    100% {
-        transform: translateX(-50%) translateY(0);
-    }
-
-    50% {
-        transform: translateX(-50%) translateY(-5px);
-    }
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-6px); }
 }
 
 @keyframes fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-up {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+@keyframes scale-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes alarm-rail-pulse {
+    0%, 100% {
+        border-left-color: rgba(239, 68, 68, 0.65);
+        box-shadow:
+            -2px 0 12px rgba(239, 68, 68, 0.18),
+            var(--shadow-mid),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    50% {
+        border-left-color: rgba(239, 68, 68, 1);
+        box-shadow:
+            -2px 0 24px rgba(239, 68, 68, 0.45),
+            var(--shadow-mid),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
 }
 
 @keyframes skeleton-shimmer {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
-/* Pulses the left border glow of surface-alarm cards */
-@keyframes alarm-rail-pulse {
-    0%,
-    100% {
-        border-left-color: rgba(239, 68, 68, 0.7);
-        box-shadow:
-            -2px 0 10px rgba(239, 68, 68, 0.2),
-            0 8px 32px 0 rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-
-    50% {
-        border-left-color: rgba(239, 68, 68, 1);
-        box-shadow:
-            -2px 0 20px rgba(239, 68, 68, 0.48),
-            0 8px 32px 0 rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
+@keyframes ember-float {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+    50% { transform: translateY(-24px) scale(1.15); opacity: 0.7; }
 }
 
+/* ─── Accessibility ────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
         animation-duration: 0.001ms !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
@@ -451,30 +540,41 @@ textarea {
     }
 }
 
+/* ─── Scrollbar ────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #080d14;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #334155;
-    border: 2px solid #080d14;
+    background: rgba(51, 65, 85, 0.6);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+    background: rgba(71, 85, 105, 0.8);
+    border: 2px solid transparent;
+    background-clip: padding-box;
 }
 
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* ─── Focus ────────────────────────────────────────────────────────────────── */
 *:focus-visible {
-    outline: 2px solid rgba(245, 158, 11, 0.9);
-    outline-offset: 3px;
+    outline: 2px solid rgba(245, 158, 11, 0.85);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
+/* ─── Autofill ─────────────────────────────────────────────────────────────── */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -482,4 +582,10 @@ input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px #0b111a inset !important;
     -webkit-text-fill-color: #fff !important;
     transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ─── Select Styling ───────────────────────────────────────────────────────── */
+select option {
+    background: #111827;
+    color: #e2e8f0;
 }

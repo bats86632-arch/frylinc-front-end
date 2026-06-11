@@ -23,7 +23,8 @@ export const PanelService = {
     serial: string;
     name: string;
     zoneCount: number;
-    groupId: string;
+    companyId: string;
+    branchId: string;
     ipAddress?: string;
     allowedCommands?: string[];
   }): Promise<Panel> {

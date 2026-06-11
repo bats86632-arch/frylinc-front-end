@@ -18,9 +18,9 @@ export function PanelCard({ panel, viewMode = "grid" }: PanelCardProps) {
 
   const statusLabel = hasAlarm ? "ALARM" : isOnline ? "Online" : "Offline";
   const stateClasses = hasAlarm
-    ? "border-red-400/50 bg-red-500/10 text-red-100"
+    ? "border-red-400/40 bg-red-500/10 text-red-100"
     : isOnline
-      ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+      ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
       : "border-slate-400/20 bg-slate-500/10 text-slate-300";
   const railClass = hasAlarm
     ? "bg-red-500"
@@ -31,34 +31,34 @@ export function PanelCard({ panel, viewMode = "grid" }: PanelCardProps) {
   return (
     <Link
       to={`/panel/${panel.serial}`}
-      className={`group relative block overflow-hidden rounded-lg border transition-all duration-200 hover:-translate-y-0.5 hover:border-amber-300/30 hover:shadow-2xl hover:shadow-black/30 ${
+      className={`group relative block overflow-hidden rounded-[14px] border transition-all duration-250 ease-smooth hover:-translate-y-1 hover:border-amber-300/25 hover:shadow-elevation-2 ${
         hasAlarm
-          ? "border-red-400/50 bg-red-950/20 animate-pulse-shadow shadow-[0_0_32px_rgba(239,68,68,0.12)] hover:bg-red-950/30"
+          ? "border-red-400/40 bg-red-950/20 animate-pulse-shadow shadow-glow-red hover:bg-red-950/30"
           : isOnline
-            ? "border-white/10 bg-slate-950/40 hover:bg-slate-900/70"
-            : "border-white/10 bg-slate-950/40 opacity-70 hover:bg-slate-900/70"
+            ? "border-white/[0.07] bg-slate-950/40 hover:bg-slate-900/60"
+            : "border-white/[0.07] bg-slate-950/40 opacity-65 hover:opacity-85 hover:bg-slate-900/60"
       }`}
     >
-      <div className={`absolute left-0 top-0 h-full w-1 ${railClass}`} />
+      <div className={`absolute left-0 top-0 h-full w-[3px] rounded-l-[14px] ${railClass}`} />
 
       <div
         className={
           viewMode === "list"
-            ? "grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_220px_180px] sm:items-center"
+            ? "grid gap-4 p-5 sm:grid-cols-[minmax(0,1fr)_220px_180px] sm:items-center"
             : "p-5"
         }
       >
         {/* ── Primary info ── */}
         <div className="min-w-0">
-          <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="mb-3.5 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="truncate text-lg font-semibold text-white">
+                <h3 className="truncate text-base font-semibold text-white leading-snug">
                   {panel.name}
                 </h3>
-                <ExternalLink className="h-4 w-4 shrink-0 text-slate-600 transition-colors group-hover:text-amber-200" />
+                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-slate-600 transition-all duration-200 group-hover:text-amber-300/70 group-hover:translate-x-0.5" />
               </div>
-              <p className="mt-1 font-mono text-xs text-slate-500">
+              <p className="mt-1 font-mono text-[11px] text-slate-500 tracking-wide">
                 {panel.serial}
               </p>
               {groupId && (
@@ -68,33 +68,33 @@ export function PanelCard({ panel, viewMode = "grid" }: PanelCardProps) {
               )}
             </div>
 
-            {/* Status badge — larger + bolder for alarm state */}
+            {/* Status badge */}
             <span
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold tracking-wide ${stateClasses}`}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-bold tracking-wide ${stateClasses}`}
             >
               {hasAlarm ? (
-                <AlertTriangle className="h-3.5 w-3.5" />
+                <AlertTriangle className="h-3 w-3" />
               ) : isOnline ? (
-                <Wifi className="h-3.5 w-3.5" />
+                <Wifi className="h-3 w-3" />
               ) : (
-                <WifiOff className="h-3.5 w-3.5" />
+                <WifiOff className="h-3 w-3" />
               )}
               {statusLabel}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-400">
-            <span>{panel.zoneCount} Zones</span>
+            <span className="tabular-nums">{panel.zoneCount} Zones</span>
             {panel.ipAddress && (
-              <span className="font-mono text-xs">{panel.ipAddress}</span>
+              <span className="font-mono text-[11px] tracking-wide">{panel.ipAddress}</span>
             )}
             {hasAlarm && (
               <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-300">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-300 opacity-75" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-400" />
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-300 opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-red-400" />
                 </span>
-                {alarmZones} zone{alarmZones === 1 ? "" : "s"} active
+                <span className="tabular-nums">{alarmZones}</span> zone{alarmZones === 1 ? "" : "s"} active
               </span>
             )}
           </div>
@@ -102,24 +102,23 @@ export function PanelCard({ panel, viewMode = "grid" }: PanelCardProps) {
 
         {/* ── Zone map ── */}
         <div className={viewMode === "list" ? "sm:px-2" : "mt-5"}>
-          <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
+          <div className="mb-2 flex items-center justify-between text-[11px] font-medium text-slate-500">
             <span>Zone map</span>
-            <span>{visibleZones} shown</span>
+            <span className="tabular-nums">{visibleZones} shown</span>
           </div>
-          {/* 8-column grid makes each zone pip larger and more legible */}
-          <div className="grid grid-cols-8 gap-1">
+          <div className="grid grid-cols-8 gap-1.5">
             {Array.from({ length: visibleZones }).map((_, idx) => {
               const zoneAlarm = panel.zones[idx] || false;
 
               return (
                 <div
                   key={idx}
-                  className={`h-2.5 rounded-sm ${
+                  className={`h-[10px] rounded-[3px] transition-all duration-200 ${
                     zoneAlarm
-                      ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.75)]"
+                      ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.65)]"
                       : isOnline
-                        ? "bg-slate-700/90"
-                        : "bg-slate-800"
+                        ? "bg-slate-700/80 group-hover:bg-slate-600/80"
+                        : "bg-slate-800/60"
                   }`}
                   title={`Zone ${idx + 1}: ${zoneAlarm ? "ALARM" : "Normal"}`}
                 />
@@ -132,12 +131,12 @@ export function PanelCard({ panel, viewMode = "grid" }: PanelCardProps) {
         <div
           className={
             viewMode === "list"
-              ? "flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 sm:block"
-              : "mt-5 flex items-center justify-between border-t border-white/10 pt-4"
+              ? "flex items-center justify-between rounded-[10px] border border-white/[0.07] bg-white/[0.02] px-4 py-3 sm:block"
+              : "mt-5 flex items-center justify-between border-t border-white/[0.07] pt-4"
           }
         >
           <div>
-            <p className="text-xs text-slate-500">Connection</p>
+            <p className="text-[11px] font-medium text-slate-500">Connection</p>
             <p
               className={`mt-1 text-sm font-semibold ${
                 isOnline ? "text-emerald-200" : "text-slate-400"
@@ -146,8 +145,7 @@ export function PanelCard({ panel, viewMode = "grid" }: PanelCardProps) {
               {isOnline ? "MQTT connected" : "Awaiting signal"}
             </p>
           </div>
-          {/* Always faintly visible, fully visible on hover */}
-          <span className="text-xs font-medium text-amber-200 opacity-30 transition-opacity duration-150 group-hover:opacity-100">
+          <span className="text-[11px] font-semibold text-amber-300 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5">
             View →
           </span>
         </div>

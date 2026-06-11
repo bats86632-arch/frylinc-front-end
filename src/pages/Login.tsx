@@ -89,36 +89,36 @@ export function Login() {
   };
 
   return (
-    <div className="surface-panel animate-fade-in rounded-lg p-6 sm:p-7">
+    <div className="surface-panel animate-fade-in rounded-[14px] p-7 sm:p-8">
       {/* Header */}
       <div>
-        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-lg border border-red-400/30 bg-red-500/10 text-red-200 shadow-[0_0_24px_rgba(239,68,68,0.2)]">
+        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-[12px] border border-red-400/25 bg-red-500/10 text-red-200 shadow-[0_0_28px_rgba(239,68,68,0.15)]">
           <LockKeyhole className="h-6 w-6" />
         </div>
-        <h2 className="text-3xl font-semibold leading-tight tracking-tight text-white">
+        <h2 className="font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-white text-balance">
           Welcome back
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-400">
+        <p className="mt-2.5 text-body leading-relaxed text-slate-400">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
 
       {error && (
-        <div className="mt-6 flex items-start gap-3 rounded-lg border border-red-400/30 bg-red-500/10 p-4">
+        <div className="mt-7 flex items-start gap-3 rounded-[10px] border border-red-400/25 bg-red-500/10 p-4 animate-fade-in">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-300" />
           <p className="text-sm leading-6 text-red-100">{error}</p>
         </div>
       )}
 
       {/* Divider between header and form */}
-      <div className="mt-8 border-t border-white/[0.08]" />
+      <div className="mt-8 border-t border-white/[0.07]" />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="pt-7">
-        <div className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="pt-8">
+        <div className="space-y-6">
           <div>
             <label
               htmlFor="email"
-              className="mb-2 block text-sm font-medium text-slate-200"
+              className="mb-2.5 block text-sm font-medium text-slate-200"
             >
               Email Address <span className="text-red-400">*</span>
             </label>
@@ -127,18 +127,18 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full rounded-lg px-4 py-3 text-sm placeholder:text-slate-500 ${
-                  errors.email ? "border-red-400/70 pr-10" : ""
+                className={`control-field w-full rounded-[10px] px-4 py-3.5 text-sm placeholder:text-slate-500 ${
+                  errors.email ? "border-red-400/60 pr-10" : ""
                 }`}
                 placeholder="you@example.com"
                 disabled={isLoading}
               />
               {errors.email && (
-                <AlertCircle className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-red-400" />
+                <AlertCircle className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-red-400" />
               )}
             </div>
             {errors.email && (
-              <p className="mt-2 text-sm text-red-300">
+              <p className="mt-2.5 text-sm text-red-300 animate-fade-in">
                 {errors.email.message}
               </p>
             )}
@@ -147,7 +147,7 @@ export function Login() {
           <div>
             <label
               htmlFor="password"
-              className="mb-2 block text-sm font-medium text-slate-200"
+              className="mb-2.5 block text-sm font-medium text-slate-200"
             >
               Password <span className="text-red-400">*</span>
             </label>
@@ -156,8 +156,8 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full rounded-lg px-4 py-3 pr-12 text-sm placeholder:text-slate-500 ${
-                  errors.password ? "border-red-400/70" : ""
+                className={`control-field w-full rounded-[10px] px-4 py-3.5 pr-12 text-sm placeholder:text-slate-500 ${
+                  errors.password ? "border-red-400/60" : ""
                 }`}
                 placeholder="Enter your password"
                 disabled={isLoading}
@@ -165,7 +165,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-all duration-150 hover:bg-white/[0.06] hover:text-white"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -176,7 +176,7 @@ export function Login() {
               </button>
             </div>
             {errors.password && (
-              <p className="mt-2 text-sm text-red-300">
+              <p className="mt-2.5 text-sm text-red-300 animate-fade-in">
                 {errors.password.message}
               </p>
             )}
@@ -186,12 +186,12 @@ export function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="btn-primary mt-6 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3.5 text-sm font-semibold"
+          className="btn-primary mt-8 flex w-full items-center justify-center gap-2.5 rounded-[10px] px-4 py-4 text-sm font-semibold tracking-wide"
         >
           {isLoading ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Signing in...</span>
+              <span>Signing in…</span>
             </>
           ) : (
             <>
