@@ -352,7 +352,7 @@ export function AdminSettings() {
           <h1 className="font-display text-[22px] font-bold tracking-tight text-[#f0ede8]">
             Admin Settings
           </h1>
-          <div className="flex items-center gap-1.5 rounded-full bg-[rgba(34,197,94,0.12)] px-2 py-0.5 text-[10px] font-medium text-[#4ade80]">
+          <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-[rgba(34,197,94,0.12)] px-2 py-0.5 text-[10px] font-medium text-[#4ade80]">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4ade80] opacity-75"></span>
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4ade80]"></span>
