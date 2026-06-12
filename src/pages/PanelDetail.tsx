@@ -581,8 +581,8 @@ export function PanelDetail() {
                   </label>
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <div className="relative flex-1">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                        <Phone className="h-4 w-4 text-slate-500" />
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 z-10">
+                        <Phone className="h-4 w-4 text-white/40" />
                       </div>
                       <input
                         type="text"

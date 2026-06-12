@@ -204,7 +204,7 @@ export function Dashboard() {
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40 z-10" />
           <input
             type="text"
             placeholder="Search panels..."
