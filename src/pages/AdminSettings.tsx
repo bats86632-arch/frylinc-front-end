@@ -886,14 +886,8 @@ export function AdminSettings() {
                       </p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-2.5">
-                      <span
-                        className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-                          panel.mqttConnected
-                            ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
-                            : "border-slate-400/20 bg-slate-500/10 text-slate-300"
-                        }`}
-                      >
-                        {panel.mqttConnected ? "Online" : "Offline"}
+                      <span className="rounded-full border px-2.5 py-1 text-xs font-medium border-emerald-400/30 bg-emerald-400/10 text-emerald-200">
+                        Online
                       </span>
                       <div className="flex items-center gap-1.5">
                         <Link

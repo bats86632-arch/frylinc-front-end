@@ -48,15 +48,10 @@ export function PanelCard({ panel }: PanelCardProps) {
             </span>
             Alarm
           </span>
-        ) : panel.status === "online" ? (
+        ) : (
           <span className="badge-online">
             <span className="status-dot bg-[#34d399]" />
             Online
-          </span>
-        ) : (
-          <span className="badge-offline">
-            <span className="status-dot bg-white/20" />
-            Offline
           </span>
         )}
       </div>
