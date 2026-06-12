@@ -265,18 +265,14 @@ export function PanelDetail() {
           {/* 3 stat mini-cards */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:w-[440px]">
             <div className="surface-muted relative overflow-hidden rounded-[10px] px-4 py-3.5">
-              <div className="absolute right-2 top-2 hidden sm:flex h-8 w-8 items-center justify-center rounded-lg bg-slate-400/[0.06]">
-                <Settings className="h-4 w-4 text-slate-600" />
-              </div>
+              {/* Icon removed */}
               <p className="text-micro uppercase tracking-wider text-slate-500">Total Zones</p>
               <p className="mt-1.5 text-2xl font-semibold tabular-nums text-white">
                 {normalizedPanel.zoneCount}
               </p>
             </div>
             <div className="surface-muted relative overflow-hidden rounded-[10px] px-4 py-3.5">
-              <div className={`absolute right-2 top-2 hidden sm:flex h-8 w-8 items-center justify-center rounded-lg ${activeZones > 0 ? "bg-red-500/10" : "bg-slate-400/[0.06]"}`}>
-                <AlertTriangle className={`h-4 w-4 ${activeZones > 0 ? "text-red-400/60" : "text-slate-600"}`} />
-              </div>
+              {/* Icon removed */}
               <p className="text-micro uppercase tracking-wider text-slate-500">In Alarm</p>
               <p
                 className={`mt-1.5 text-2xl font-semibold tabular-nums ${activeZones > 0 ? "text-red-200" : "text-slate-300"}`}
@@ -285,9 +281,7 @@ export function PanelDetail() {
               </p>
             </div>
             <div className="surface-muted relative overflow-hidden rounded-[10px] px-4 py-3.5">
-              <div className="absolute right-2 top-2 hidden sm:flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/[0.08]">
-                <Play className="h-4 w-4 text-amber-500/50" />
-              </div>
+              {/* Icon removed */}
               <p className="text-micro uppercase tracking-wider text-slate-500">Commands</p>
               <p className="mt-1.5 text-2xl font-semibold tabular-nums text-amber-200">
                 {panelCommands.length}
