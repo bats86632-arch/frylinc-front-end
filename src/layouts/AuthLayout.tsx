@@ -46,10 +46,10 @@ export function AuthLayout() {
       <div className="relative z-10 grid min-h-screen lg:grid-cols-[minmax(0,1fr)_500px]">
 
         {/* ── Left info panel ────────────────────────────────────────────── */}
-        <section className="relative hidden h-screen flex-col justify-between overflow-y-auto border-r border-white/[0.06] px-10 py-12 lg:flex xl:px-16">
+        <section className="relative hidden h-screen flex-col overflow-y-auto border-r border-white/[0.06] px-10 py-12 lg:flex xl:px-16">
 
           {/* Brand lock-up */}
-          <div className="flex items-center gap-3.5">
+          <div className="flex shrink-0 items-center gap-3.5">
             <div className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#e8173a] to-[#ff6b35] shadow-lg inset-highlight ring-1 ring-white/10">
               <Flame className="h-5 w-5 text-white drop-shadow-sm" />
             </div>
@@ -60,7 +60,7 @@ export function AuthLayout() {
           </div>
 
           {/* Hero copy */}
-          <div className="animate-fade-in flex flex-col items-start justify-center h-full pt-12 pb-8">
+          <div className="animate-fade-in flex flex-1 flex-col items-start justify-center py-12">
             <h1 className="font-display max-w-xl text-[3rem] font-bold leading-[1.05] tracking-tight text-white text-balance xl:text-[3.5rem] drop-shadow-sm">
               High-trust monitoring for every connected fire panel.
             </h1>
