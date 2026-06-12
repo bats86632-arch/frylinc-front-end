@@ -863,18 +863,18 @@ export function AdminSettings() {
             <p className="text-sm text-slate-500">No panels provisioned yet.</p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {panels.map((panel) => (
+              {(panels || []).filter(Boolean).map((panel) => (
                 <div
-                  key={panel.serial}
+                  key={panel.serial || Math.random().toString()}
                   className="surface-muted rounded-[14px] border border-white/[0.07] p-5 transition-all duration-200 ease-out hover:border-white/[0.12] hover:bg-white/[0.04]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-white">
-                        {panel.name}
+                        {panel.name || "Unknown Panel"}
                       </p>
                       <p className="mt-1 font-mono text-xs tabular-nums text-slate-500">
-                        {panel.serial}
+                        {panel.serial || "No serial"}
                       </p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-2.5">

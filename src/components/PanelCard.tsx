@@ -93,7 +93,7 @@ export function PanelCard({ panel }: PanelCardProps) {
           </div>
 
           <div className="grid grid-cols-4 gap-2">
-            {panel.zones.slice(0, 8).map((zone) => (
+            {(panel.zones || []).filter(Boolean).slice(0, 8).map((zone) => (
               <div
                 key={zone.id}
                 title={zone.name}
@@ -106,13 +106,14 @@ export function PanelCard({ panel }: PanelCardProps) {
                 }`}
               >
                 <span className="text-[12px] font-bold">
-                  {zone.name.split(" ")[1] || `Z${zone.id.split("-")[1]}`}
+                  {zone.name ? zone.name.split(" ")[1] : ""}
+                  {!zone.name && zone.id ? `Z${zone.id.split("-")[1]}` : ""}
                 </span>
               </div>
             ))}
-            {panel.zones.length > 8 && (
+            {(panel.zones || []).length > 8 && (
               <div className="flex h-10 items-center justify-center rounded-[8px] border border-dashed border-white/[0.10] text-[11px] font-bold text-white/30">
-                +{panel.zones.length - 8}
+                +{(panel.zones || []).length - 8}
               </div>
             )}
           </div>

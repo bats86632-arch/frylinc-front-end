@@ -78,12 +78,12 @@ export function MainDashboardLayout() {
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
   const notifications = useMemo(
     () =>
-      panels
-        .filter((panel) => panel.alarm)
+      (panels || [])
+        .filter((panel) => panel && panel.alarm)
         .map((panel) => ({
           id: panel.serial,
-          title: panel.name,
-          message: `Alarm active on ${panel.serial}`,
+          title: panel.name || "Unknown Panel",
+          message: `Alarm active on ${panel.serial || "unknown"}`,
         })),
     [panels],
   );

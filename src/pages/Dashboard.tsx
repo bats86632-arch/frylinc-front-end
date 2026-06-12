@@ -71,14 +71,15 @@ export function Dashboard() {
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const activeAlarms = panels.filter((p) => p.alarm).length;
-  const onlinePanels = panels.filter((p) => p.status === "online").length;
-  const offlinePanels = panels.filter((p) => p.status === "offline").length;
+  const activeAlarms = (panels || []).filter((p) => p && p.alarm).length;
+  const onlinePanels = (panels || []).filter((p) => p && p.status === "online").length;
+  const offlinePanels = (panels || []).filter((p) => p && p.status === "offline").length;
 
-  const filteredPanels = panels.filter((panel) => {
+  const filteredPanels = (panels || []).filter((panel) => {
+    if (!panel) return false;
     const matchesSearch =
-      panel.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      panel.serial.toLowerCase().includes(searchQuery.toLowerCase());
+      (panel.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (panel.serial || "").toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
       filter === "all" ||
