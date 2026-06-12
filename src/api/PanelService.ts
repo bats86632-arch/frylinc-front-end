@@ -39,5 +39,9 @@ export const PanelService = {
 
   async deletePanel(serial: string): Promise<void> {
     await apiClient.delete(`/panels/${serial}`);
+  },
+
+  async resolveZoneAlarm(serial: string, zoneIndex: number): Promise<void> {
+    await apiClient.patch(`/panels/${serial}/zones/${zoneIndex}/resolve`);
   }
 };
