@@ -81,7 +81,7 @@ export function PanelCard({ panel }: PanelCardProps) {
         <div className="flex-1 p-5">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-white/30">Location</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-white/30">Branch ID</p>
               <div className="flex items-center gap-2 text-[13.5px] font-medium text-white/80">
                 <MapPin className="h-3.5 w-3.5 text-white/40" />
                 <span className="truncate" title={panel.branchId || "Unknown"}>
@@ -90,10 +90,12 @@ export function PanelCard({ panel }: PanelCardProps) {
               </div>
             </div>
             <div className="space-y-1">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-white/30">Model</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-white/30">Company ID</p>
               <div className="flex items-center gap-2 text-[13.5px] font-medium text-white/80">
                 <RadioTower className="h-3.5 w-3.5 text-white/40" />
-                <span>Wireless Base</span>
+                <span className="truncate" title={panel.companyId || "Unknown"}>
+                  {panel.companyId || "Unknown"}
+                </span>
               </div>
             </div>
           </div>
@@ -136,13 +138,7 @@ export function PanelCard({ panel }: PanelCardProps) {
         </div>
 
         {/* ── Footer ──────────────────────────────────────────────────────────── */}
-        <div className="mt-auto flex items-center justify-between border-t border-white/[0.04] bg-white/[0.01] px-5 py-3">
-          <div className="flex items-center gap-2">
-            <Zap className="h-3.5 w-3.5 text-white/30" />
-            <span className="text-[12px] font-medium text-white/40">
-              Last ping: <span className="text-white/60">2m ago</span>
-            </span>
-          </div>
+        <div className="mt-auto flex items-center justify-end border-t border-white/[0.04] bg-white/[0.01] px-5 py-3">
           <span className="text-[12px] font-bold text-[#e8173a] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             View details &rarr;
           </span>
