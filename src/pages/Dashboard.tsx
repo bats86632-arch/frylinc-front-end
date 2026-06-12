@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { usePanels } from "../hooks/usePanels";
 import { PanelCard } from "../components/PanelCard";
-import { Activity, Flame, Search, ShieldAlert, Users } from "lucide-react";
+import { Activity, Flame, Search, ShieldAlert, Users, LayoutDashboard } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 type FilterStatus = "all" | "alarm" | "online" | "offline";
