@@ -254,7 +254,12 @@ export function AdminSettings() {
     setEditUserValue("email", user.email || "");
     setEditUserValue("role", user.role);
     setEditUserValue("companyId", user.companyId || "");
-    setEditUserValue("branchIds", user.branchIds?.join(", ") || "");
+    setEditUserValue(
+      "branchIds",
+      Array.isArray(user.branchIds)
+        ? user.branchIds.join(", ")
+        : String(user.branchIds || "")
+    );
     setEditUserValue("password", "");
   };
 
