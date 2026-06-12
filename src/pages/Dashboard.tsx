@@ -7,73 +7,17 @@ import { useAuth } from "../contexts/AuthContext";
 
 type FilterStatus = "all" | "alarm" | "online" | "offline";
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  trend,
-  trendLabel,
-  alert,
-}: {
-  title: string;
-  value: string | number;
-  icon: any;
-  trend?: string;
-  trendLabel?: string;
-  alert?: boolean;
-}) {
-  return (
-    <div
-      className={`surface-panel p-6 ${
-        alert ? "border-[rgba(232,23,58,0.30)] bg-gradient-to-br from-[rgba(232,23,58,0.08)] to-transparent" : ""
-      }`}
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[13px] font-semibold text-white/50 uppercase tracking-wide">
-            {title}
-          </p>
-          <p className="mt-3 font-display text-[2rem] font-bold leading-none tracking-tight text-white drop-shadow-sm">
-            {value}
-          </p>
-        </div>
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-[12px] shadow-sm inset-highlight ring-1 ring-white/10 ${
-            alert
-              ? "bg-[rgba(232,23,58,0.15)] text-[#ff8099] border border-[rgba(232,23,58,0.3)]"
-              : "bg-white/[0.04] text-white/60 border border-white/[0.08]"
-          }`}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
-      {(trend || trendLabel) && (
-        <div className="mt-4 flex items-center gap-2 text-sm font-medium">
-          {trend && (
-            <span
-              className={
-                trend.startsWith("+") ? "text-emerald-400" : "text-[#ff8099]"
-              }
-            >
-              {trend}
-            </span>
-          )}
-          {trendLabel && <span className="text-white/40">{trendLabel}</span>}
-        </div>
-      )}
-    </div>
-  );
-}
+
 
 export function Dashboard() {
-  const { panels, loading, error } = usePanels();
   const { userData, hasRole } = useAuth();
+  const { panels, loading, error } = usePanels();
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const activeAlarms = (panels || []).filter((p) => p && p.alarm).length;
-  const onlinePanels = (panels || []).filter((p) => p && p.status === "online").length;
-  const offlinePanels = (panels || []).filter((p) => p && p.status === "offline").length;
+  // Assume all panels are online unless they are in alarm
+  const onlinePanels = (panels || []).filter((p) => p && !p.alarm).length;
 
   const filteredPanels = (panels || []).filter((panel) => {
     if (!panel) return false;
@@ -84,8 +28,7 @@ export function Dashboard() {
     const matchesStatus =
       filter === "all" ||
       (filter === "alarm" && panel.alarm) ||
-      (filter === "online" && panel.status === "online" && !panel.alarm) ||
-      (filter === "offline" && panel.status === "offline");
+      (filter === "online" && !panel.alarm);
 
     return matchesSearch && matchesStatus;
   });
@@ -121,87 +64,81 @@ export function Dashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* ── Stats Row ──────────────────────────────────────────────────────── */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          title="Active Alarms"
-          value={activeAlarms}
-          icon={Flame}
-          alert={activeAlarms > 0}
-          trend={activeAlarms > 0 ? "+2 from last hour" : undefined}
-          trendLabel={activeAlarms === 0 ? "All clear" : undefined}
-        />
-        <StatCard
-          title="Online Panels"
-          value={onlinePanels}
-          icon={Activity}
-          trend="+100%"
-          trendLabel="uptime"
-        />
-        <StatCard
-          title="Total Devices"
-          value={(panels || []).length}
-          icon={LayoutDashboard}
-        />
+      <div className="grid gap-6">
+        {/* Hero Card */}
+        <div className="surface-panel p-[20px] border-t-2 border-[#e53d3d]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">Active Alarms</p>
+          <p className={`mt-3 font-['Barlow_Condensed'] text-[56px] leading-none tabular-nums ${activeAlarms > 0 ? 'text-[#e53d3d]' : 'text-[#f0ede8]'}`}>
+            {activeAlarms}
+          </p>
+        </div>
+
+        {/* Secondary Stats */}
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="surface-panel p-[20px] border-t-2 border-[#34d399]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">Online Panels</p>
+            <p className="mt-2 font-display text-[2rem] font-medium leading-none tabular-nums text-[#f0ede8]">
+              {onlinePanels}
+            </p>
+            <div className="mt-5 flex gap-[2px]">
+              {[...Array(30)].map((_, i) => (
+                <div key={i} className={`h-3 w-[6px] rounded-[1px] ${i < 29 ? 'bg-[#34d399]/80' : 'bg-[#e53d3d]/80'}`} />
+              ))}
+            </div>
+          </div>
+
+          <div className="surface-panel p-[20px] border-t-2 border-white/10">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">Total Devices</p>
+            <p className="mt-2 font-display text-[2rem] font-medium leading-none tabular-nums text-[#f0ede8]">
+              {(panels || []).length}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ── Controls Row ────────────────────────────────────────────────────── */}
-      <div className="surface-muted flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between inset-highlight backdrop-blur-md sticky top-[80px] z-20">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-white/[0.06] pb-0 sticky top-[72px] z-20 bg-[#0f0f0e]/90 backdrop-blur-xl pt-4">
+        <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setFilter("all")}
-            className={`whitespace-nowrap rounded-pill px-4 py-2.5 text-[13px] font-bold transition-all duration-150 ${
+            className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
               filter === "all"
-                ? "bg-white/[0.08] text-white inset-highlight shadow-sm border border-white/[0.12]"
-                : "text-white/50 border border-transparent hover:bg-white/[0.04] hover:text-white/90"
+                ? "border-[#e53d3d] text-[#f0ede8]"
+                : "border-transparent text-[#7a7773] hover:text-[#f0ede8]"
             }`}
           >
-            All Panels
+            All Panels <span className="ml-1.5 rounded bg-white/5 px-1.5 py-0.5 text-[10px] tabular-nums">{(panels || []).length}</span>
           </button>
           <button
             onClick={() => setFilter("alarm")}
-            className={`whitespace-nowrap rounded-pill px-4 py-2.5 text-[13px] font-bold transition-all duration-150 ${
+            className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
               filter === "alarm"
-                ? "bg-[rgba(232,23,58,0.12)] text-[#ff8099] inset-highlight shadow-sm border border-[rgba(232,23,58,0.25)]"
-                : "text-white/50 border border-transparent hover:bg-[rgba(232,23,58,0.08)] hover:text-[#ffb3c0]"
+                ? "border-[#e53d3d] text-[#f0ede8]"
+                : "border-transparent text-[#7a7773] hover:text-[#f0ede8]"
             }`}
           >
-            Alarms
-            {activeAlarms > 0 && (
-              <span className="ml-2 rounded-full bg-[#e8173a] px-2 py-0.5 text-[11px] font-bold text-white shadow-sm">
-                {activeAlarms}
-              </span>
-            )}
+            Alarms <span className="ml-1.5 rounded bg-[#e53d3d]/10 text-[#e53d3d] px-1.5 py-0.5 text-[10px] tabular-nums">{activeAlarms}</span>
           </button>
           <button
             onClick={() => setFilter("online")}
-            className={`whitespace-nowrap rounded-pill px-4 py-2.5 text-[13px] font-bold transition-all duration-150 ${
+            className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
               filter === "online"
-                ? "bg-[rgba(52,211,153,0.12)] text-emerald-400 inset-highlight shadow-sm border border-[rgba(52,211,153,0.25)]"
-                : "text-white/50 border border-transparent hover:bg-[rgba(52,211,153,0.08)] hover:text-emerald-300"
+                ? "border-[#e53d3d] text-[#f0ede8]"
+                : "border-transparent text-[#7a7773] hover:text-[#f0ede8]"
             }`}
           >
-            Online
-          </button>
-          <button
-            onClick={() => setFilter("offline")}
-            className={`whitespace-nowrap rounded-pill px-4 py-2.5 text-[13px] font-bold transition-all duration-150 ${
-              filter === "offline"
-                ? "bg-white/[0.08] text-white/80 inset-highlight shadow-sm border border-white/[0.12]"
-                : "text-white/50 border border-transparent hover:bg-white/[0.04] hover:text-white/90"
-            }`}
-          >
-            Offline
+            Online <span className="ml-1.5 rounded bg-[#34d399]/10 text-[#34d399] px-1.5 py-0.5 text-[10px] tabular-nums">{onlinePanels}</span>
           </button>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40 z-10" />
+        <div className="relative mb-[11px] w-full sm:w-72">
+          <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a7773] z-10" />
           <input
             type="text"
-            placeholder="Search panels..."
+            placeholder="Search by panel ID or location…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="control-field w-full pl-10 sm:w-72"
+            className="w-full bg-transparent pl-7 pb-1 text-[13px] text-[#f0ede8] placeholder-[#7a7773] border-b border-white/[0.06] focus:border-white/20 focus:outline-none transition-colors"
           />
         </div>
       </div>

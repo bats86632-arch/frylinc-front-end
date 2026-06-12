@@ -5,17 +5,17 @@
 /* ─── Design Tokens ────────────────────────────────────────────────────────── */
 :root {
     /* ── Accent — single red ── */
-    --accent:            #e8173a;
-    --accent-hover:      #ff1f42;
-    --accent-muted:      rgba(232, 23, 58, 0.10);
-    --accent-border:     rgba(232, 23, 58, 0.28);
+    --accent:            #e53d3d;
+    --accent-hover:      #ff4f4f;
+    --accent-muted:      rgba(229, 61, 61, 0.10);
+    --accent-border:     rgba(229, 61, 61, 0.28);
 
     /* ── Surfaces — deep-black hierarchy, Waitlister-style ── */
-    --surface-base:      #080810;    /* Near-black with micro indigo tint */
-    --surface-raised:    #0f0f18;    /* Cards */
-    --surface-elevated:  #14141f;    /* Hovered/selected cards */
-    --surface-overlay:   #0b0b14;    /* Filter bars, muted areas */
-    --surface-hover:     #16161f;
+    --surface-base:      #0f0f0e;
+    --surface-raised:    #1a1917;
+    --surface-elevated:  #222120;
+    --surface-overlay:   #141412;
+    --surface-hover:     #222120;
 
     /* ── Borders — Waitlister's "lit edge" approach ── */
     /* Very subtle white-alpha hairlines — legible but never loud */
@@ -25,10 +25,10 @@
     --border-focus:      rgba(255, 255, 255, 0.28);
 
     /* ── Text ── */
-    --text-primary:      #ffffff;
-    --text-secondary:    rgba(255, 255, 255, 0.50);
-    --text-tertiary:     rgba(255, 255, 255, 0.28);
-    --text-quaternary:   rgba(255, 255, 255, 0.18);
+    --text-primary:      #f0ede8;
+    --text-secondary:    #7a7773;
+    --text-tertiary:     rgba(122, 119, 115, 0.7);
+    --text-quaternary:   rgba(122, 119, 115, 0.4);
 
     /* ── Status colours ── */
     --color-success:     #34d399;
@@ -88,6 +88,8 @@ body {
     min-width: 320px;
     margin: 0;
     background: var(--surface-base);
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
 }
 
 button, input, select, textarea { font: inherit; }
