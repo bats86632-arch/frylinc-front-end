@@ -139,7 +139,7 @@ export function PanelCard({ panel }: PanelCardProps) {
 
         {/* ── Footer ──────────────────────────────────────────────────────────── */}
         <div className="mt-auto flex items-center justify-end border-t border-white/[0.04] bg-white/[0.01] px-5 py-3">
-          <span className="text-[12px] font-bold text-[#e8173a] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <span className="text-[12px] font-bold text-[#e8173a] transition-opacity duration-200 hover:opacity-80">
             View details &rarr;
           </span>
         </div>
