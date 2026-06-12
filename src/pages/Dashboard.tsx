@@ -121,7 +121,7 @@ export function Dashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* ── Stats Row ──────────────────────────────────────────────────────── */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Active Alarms"
           value={activeAlarms}
@@ -139,18 +139,9 @@ export function Dashboard() {
         />
         <StatCard
           title="Total Devices"
-          value={panels.length}
+          value={(panels || []).length}
           icon={LayoutDashboard}
         />
-        {hasRole(["super_admin", "head_office"]) && (
-          <StatCard
-            title="Active Users"
-            value="24"
-            icon={Users}
-            trend="+3"
-            trendLabel="this week"
-          />
-        )}
       </div>
 
       {/* ── Controls Row ────────────────────────────────────────────────────── */}
