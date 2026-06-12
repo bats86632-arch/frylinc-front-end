@@ -6,6 +6,7 @@ import { z } from "zod";
 import { UserService } from "../api/UserService";
 import { PanelService } from "../api/PanelService";
 import { Panel, User, Role } from "../types";
+import { useAuth } from "../contexts/AuthContext";
 import {
   DEFAULT_PANEL_COMMANDS,
   normalizeAllowedCommands,
@@ -131,6 +132,8 @@ export function AdminSettings() {
     setValue: setEditUserValue,
     formState: { errors: editUserErrors },
   } = useForm<EditUserFormData>({ resolver: zodResolver(editUserSchema) });
+
+  const { hasRole } = useAuth();
 
   useEffect(() => {
     loadUsers();
