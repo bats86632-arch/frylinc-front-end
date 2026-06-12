@@ -599,17 +599,18 @@ export function AdminSettings() {
                       
                       {actionMenuOpen === user.uid && (
                         <>
-                          <div className="fixed inset-0 z-40" onClick={() => setActionMenuOpen(null)} />
-                          <div className="absolute right-5 top-[38px] z-50 w-36 rounded-[6px] border border-white/[0.08] bg-[#1a1917] py-1 shadow-xl">
+                          <div className="fixed inset-0 z-40 bg-black/40 sm:bg-transparent sm:backdrop-blur-none backdrop-blur-sm" onClick={() => setActionMenuOpen(null)} />
+                          <div className="fixed bottom-4 left-4 right-4 z-50 p-2 sm:p-0 sm:absolute sm:right-5 sm:top-[38px] sm:bottom-auto sm:left-auto sm:w-36 rounded-[12px] sm:rounded-[6px] border border-white/[0.08] bg-[#1a1917] sm:py-1 shadow-2xl animate-slide-up sm:animate-none">
                             <button
                               onClick={() => openEditUser(user)}
-                              className="w-full px-4 py-2 text-left text-[13px] text-[#f0ede8] hover:bg-white/[0.04]"
+                              className="w-full px-4 py-3.5 sm:py-2 text-center sm:text-left text-[14px] sm:text-[13px] font-semibold sm:font-medium text-[#f0ede8] hover:bg-white/[0.04] rounded-[8px] sm:rounded-none mb-1 sm:mb-0"
                             >
                               Edit user
                             </button>
+                            <div className="h-[1px] w-full bg-white/[0.04] sm:hidden" />
                             <button
                               onClick={() => handleDeleteUser(user.uid)}
-                              className="w-full px-4 py-2 text-left text-[13px] text-[#f87171] hover:bg-white/[0.04]"
+                              className="w-full px-4 py-3.5 sm:py-2 text-center sm:text-left text-[14px] sm:text-[13px] font-semibold sm:font-medium text-[#f87171] hover:bg-white/[0.04] rounded-[8px] sm:rounded-none mt-1 sm:mt-0"
                             >
                               Delete user
                             </button>
