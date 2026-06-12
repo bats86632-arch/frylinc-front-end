@@ -9,6 +9,8 @@ import { Dashboard } from './pages/Dashboard';
 import { PanelDetail } from './pages/PanelDetail';
 import { AdminSettings } from './pages/AdminSettings';
 import { Profile } from './pages/Profile';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
 
 function App() {
   return (
@@ -20,6 +22,10 @@ function App() {
             <Route element={<AuthLayout />}>
               <Route path="/login" element={<Login />} />
             </Route>
+
+            {/* Public Legal routes (Play Store requirement) */}
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
 
             {/* Protected routes */}
             <Route

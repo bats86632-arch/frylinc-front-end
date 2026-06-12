@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -50,6 +50,18 @@ export function MainDashboardLayout() {
   const { panels } = usePanels();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -324,6 +336,17 @@ export function MainDashboardLayout() {
         </header>
 
         <main className="min-h-[calc(100vh-72px)] px-4 py-8 sm:px-6 lg:px-8">
+          {!isOnline && (
+            <div className="mb-6 rounded-[12px] border border-[rgba(245,158,11,0.25)] bg-[rgba(245,158,11,0.05)] p-4 flex items-center gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(245,158,11,0.2)] text-[#f59e0b]">
+                <Flame className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-[14px] font-bold text-[#f59e0b]">You are currently offline</p>
+                <p className="text-[13px] text-[#f59e0b]/80">Data will sync automatically when your connection is restored.</p>
+              </div>
+            </div>
+          )}
           <Outlet />
         </main>
       </div>
