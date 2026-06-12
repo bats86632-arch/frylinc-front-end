@@ -662,7 +662,7 @@ export function AdminSettings() {
       {editingUserData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            className="absolute inset-0 bg-gradient-to-br from-slate-950/80 to-black/90 transition-opacity"
             onClick={() => setEditingUserData(null)}
           />
           <div className="animate-slide-up surface-panel relative w-full max-w-lg overflow-hidden rounded-[14px] shadow-2xl shadow-black/40">
@@ -926,7 +926,7 @@ export function AdminSettings() {
         {panelFormOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              className="absolute inset-0 bg-gradient-to-br from-slate-950/80 to-black/90 transition-opacity"
               onClick={() => setPanelFormOpen(false)}
             />
             <div className="animate-slide-up surface-panel relative w-full max-w-md overflow-hidden rounded-[14px] shadow-2xl shadow-black/40">
