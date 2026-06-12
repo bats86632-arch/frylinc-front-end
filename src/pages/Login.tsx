@@ -88,39 +88,39 @@ export function Login() {
   };
 
   return (
-    <div className="rounded-[14px] border border-white/[0.09] bg-[#111] p-8 shadow-elevation-3 animate-fade-in">
+    <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in">
 
       {/* Header */}
-      <div className="mb-7">
-        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-[11px] border border-[rgba(232,23,58,0.22)] bg-[rgba(232,23,58,0.10)]">
+      <div className="mb-8">
+        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-[12px] border border-[rgba(232,23,58,0.25)] bg-[rgba(232,23,58,0.08)] inset-highlight shadow-sm">
           <LockKeyhole className="h-5 w-5 text-[#e8173a]" />
         </div>
-        <h2 className="font-display text-[1.75rem] font-bold leading-tight tracking-tight text-white text-balance">
+        <h2 className="font-display text-[2rem] font-bold leading-tight tracking-tight text-white text-balance drop-shadow-sm">
           Welcome back
         </h2>
-        <p className="mt-2 text-body leading-relaxed text-white/45">
+        <p className="mt-2 text-body leading-relaxed text-white/50 font-medium">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
 
       {/* Error banner */}
       {error && (
-        <div className="mb-6 flex items-start gap-3 rounded-[9px] border border-[rgba(232,23,58,0.22)] bg-[rgba(232,23,58,0.08)] p-4 animate-fade-in">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#ff8099]" />
-          <p className="text-sm leading-6 text-[#ffb3c0]">{error}</p>
+        <div className="mb-7 flex items-start gap-3 rounded-[12px] border border-[rgba(232,23,58,0.30)] bg-[rgba(232,23,58,0.12)] p-4 animate-fade-in inset-highlight">
+          <AlertCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#ff8099]" />
+          <p className="text-sm font-medium leading-6 text-[#ffb3c0]">{error}</p>
         </div>
       )}
 
       {/* Divider */}
-      <div className="mb-7 border-t border-white/[0.07]" />
+      <div className="mb-8 border-t border-white/[0.06]" />
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-5">
+        <div className="space-y-6">
           {/* Email */}
           <div>
             <label
               htmlFor="email"
-              className="mb-2 block text-sm font-medium text-white/70"
+              className="mb-2.5 block text-sm font-semibold text-white/80"
             >
               Email address
             </label>
@@ -129,18 +129,18 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full rounded-[9px] px-4 py-3 text-sm ${
-                  errors.email ? "border-[rgba(232,23,58,0.50)] pr-10" : ""
+                className={`control-field w-full px-4 py-3.5 text-sm font-medium ${
+                  errors.email ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)] pr-10" : ""
                 }`}
                 placeholder="you@example.com"
                 disabled={isLoading}
               />
               {errors.email && (
-                <AlertCircle className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#e8173a]" />
+                <AlertCircle className="pointer-events-none absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#e8173a]" />
               )}
             </div>
             {errors.email && (
-              <p className="mt-2 text-sm text-[#ff8099] animate-fade-in">
+              <p className="mt-2 text-[13px] font-medium text-[#ff8099] animate-fade-in">
                 {errors.email.message}
               </p>
             )}
@@ -150,7 +150,7 @@ export function Login() {
           <div>
             <label
               htmlFor="password"
-              className="mb-2 block text-sm font-medium text-white/70"
+              className="mb-2.5 block text-sm font-semibold text-white/80"
             >
               Password
             </label>
@@ -159,8 +159,8 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full rounded-[9px] px-4 py-3 pr-12 text-sm ${
-                  errors.password ? "border-[rgba(232,23,58,0.50)]" : ""
+                className={`control-field w-full px-4 py-3.5 pr-12 text-sm font-medium ${
+                  errors.password ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)]" : ""
                 }`}
                 placeholder="Enter your password"
                 disabled={isLoading}
@@ -168,7 +168,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-white/35 transition-all duration-150 hover:bg-white/[0.06] hover:text-white/80"
+                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[8px] text-white/40 transition-all duration-150 hover:bg-white/[0.08] hover:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -179,28 +179,28 @@ export function Login() {
               </button>
             </div>
             {errors.password && (
-              <p className="mt-2 text-sm text-[#ff8099] animate-fade-in">
+              <p className="mt-2 text-[13px] font-medium text-[#ff8099] animate-fade-in">
                 {errors.password.message}
               </p>
             )}
           </div>
         </div>
 
-        {/* Submit — pill-shaped red CTA matching 10x "Submit resource →" */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}
-          className="btn-primary mt-7 flex w-full items-center justify-center gap-2.5 px-5 py-3.5 text-sm font-semibold"
+          className="btn-primary mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-4 text-[15px] font-bold"
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-[18px] w-[18px] animate-spin" />
               <span>Signing in…</span>
             </>
           ) : (
             <>
               <span>Sign In</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-[18px] w-[18px]" />
             </>
           )}
         </button>

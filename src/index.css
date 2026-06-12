@@ -4,37 +4,39 @@
 
 /* ─── Design Tokens ────────────────────────────────────────────────────────── */
 :root {
-    /* ── Accent — single red, no multi-color palette ── */
+    /* ── Accent — single red ── */
     --accent:            #e8173a;
     --accent-hover:      #ff1f42;
     --accent-muted:      rgba(232, 23, 58, 0.10);
-    --accent-border:     rgba(232, 23, 58, 0.25);
+    --accent-border:     rgba(232, 23, 58, 0.28);
 
-    /* ── Surfaces — true black hierarchy ── */
-    --surface-base:      #0a0a0a;
-    --surface-raised:    #111111;
-    --surface-elevated:  #161616;
-    --surface-overlay:   #0f0f0f;
-    --surface-hover:     #1a1a1a;
+    /* ── Surfaces — deep-black hierarchy, Waitlister-style ── */
+    --surface-base:      #080810;    /* Near-black with micro indigo tint */
+    --surface-raised:    #0f0f18;    /* Cards */
+    --surface-elevated:  #14141f;    /* Hovered/selected cards */
+    --surface-overlay:   #0b0b14;    /* Filter bars, muted areas */
+    --surface-hover:     #16161f;
 
-    /* ── Borders ── */
-    --border-subtle:     rgba(255, 255, 255, 0.07);
-    --border-default:    rgba(255, 255, 255, 0.11);
+    /* ── Borders — Waitlister's "lit edge" approach ── */
+    /* Very subtle white-alpha hairlines — legible but never loud */
+    --border-subtle:     rgba(255, 255, 255, 0.06);
+    --border-default:    rgba(255, 255, 255, 0.10);
     --border-strong:     rgba(255, 255, 255, 0.18);
-    --border-focus:      rgba(255, 255, 255, 0.30);
+    --border-focus:      rgba(255, 255, 255, 0.28);
 
     /* ── Text ── */
     --text-primary:      #ffffff;
-    --text-secondary:    rgba(255, 255, 255, 0.55);
-    --text-tertiary:     rgba(255, 255, 255, 0.30);
+    --text-secondary:    rgba(255, 255, 255, 0.50);
+    --text-tertiary:     rgba(255, 255, 255, 0.28);
+    --text-quaternary:   rgba(255, 255, 255, 0.18);
 
-    /* ── Status colours — kept functional ── */
+    /* ── Status colours ── */
     --color-success:     #34d399;
     --color-warning:     #fbbf24;
     --color-error:       #e8173a;
     --color-info:        #22d3ee;
 
-    /* ── Legacy brand tokens (used by Tailwind classes in TSX) ── */
+    /* ── Legacy brand tokens ── */
     --color-brand-50:    #fff0f2;
     --color-neutral-50:  #f8fafc;
     --color-neutral-100: #e2e8f0;
@@ -42,36 +44,37 @@
     --color-neutral-300: #94a3b8;
     --color-neutral-400: #64748b;
     --color-neutral-500: #475569;
-    --color-neutral-600: #334155;
-    --color-neutral-700: #1e293b;
-    --color-neutral-800: #111827;
 
-    /* ── Elevation — subtle, no colour-glow ── */
-    --shadow-low:        0 1px 2px rgba(0, 0, 0, 0.5);
-    --shadow-mid:        0 4px 16px rgba(0, 0, 0, 0.55);
-    --shadow-high:       0 12px 40px rgba(0, 0, 0, 0.65);
-    --shadow-panel:      0 0 0 1px rgba(255, 255, 255, 0.07), 0 4px 16px rgba(0, 0, 0, 0.5);
+    /* ── Elevation — Waitlister's signature: inner ring + outer depth ── */
+    --shadow-low:   0 0 0 1px rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.5);
+    --shadow-mid:   0 0 0 1px rgba(255,255,255,0.07), 0 8px 32px rgba(0,0,0,0.55);
+    --shadow-high:  0 0 0 1px rgba(255,255,255,0.09), 0 16px 56px rgba(0,0,0,0.65);
+    /* "Panel shadow" — used on cards: inner lit ring + deep outer */
+    --shadow-panel: 0 0 0 1px rgba(255,255,255,0.07), 0 4px 20px rgba(0,0,0,0.50);
+    /* Inset top highlight — gives cards a "lit from above" chamfer feel */
+    --inset-highlight: inset 0 1px 0 rgba(255,255,255,0.07);
 
-    /* ── Radius ── */
-    --radius-card:       12px;
-    --radius-element:    8px;
-    --radius-small:      5px;
-    --radius-pill:       9999px;
+    /* ── Radius — Waitlister uses generous rounding ── */
+    --radius-card:    16px;   /* Cards — 16px like Waitlister */
+    --radius-element: 10px;   /* Inputs, smaller UI */
+    --radius-small:   6px;
+    --radius-pill:    9999px;
 
     /* ── Motion ── */
-    --ease-smooth:       cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-standard:     cubic-bezier(0.4, 0, 0.2, 1);
-    --duration-fast:     120ms;
-    --duration-normal:   220ms;
-    --duration-slow:     320ms;
+    --ease-smooth:    cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-standard:  cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce:    cubic-bezier(0.34, 1.56, 0.64, 1);
+    --duration-fast:  130ms;
+    --duration-normal: 220ms;
+    --duration-slow:  350ms;
 
     /* ── Typography ── */
-    font-family:         'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    color:               var(--text-primary);
-    background:          var(--surface-base);
-    color-scheme:        dark;
-    font-synthesis:      none;
-    text-rendering:      optimizeLegibility;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--text-primary);
+    background: var(--surface-base);
+    color-scheme: dark;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -87,36 +90,35 @@ body {
     background: var(--surface-base);
 }
 
-button, input, select, textarea {
-    font: inherit;
-}
+button, input, select, textarea { font: inherit; }
 
 ::selection {
-    background: rgba(232, 23, 58, 0.22);
+    background: rgba(232, 23, 58, 0.25);
     color: #fff;
 }
 
 /* ─── Component Layer ──────────────────────────────────────────────────────── */
 @layer components {
 
-    /* ── Page background ─────────────────────────────────────────────────── */
+    /* ── Page background ────────────────────────────────────────────────── */
     .console-bg {
         background: var(--surface-base);
     }
 
-    /* The subtle dot-grid overlay kept very faint — editorial feel */
+    /* Waitlister-style: very faint dot pattern, barely visible */
     .console-grid {
         background-image:
-            radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-        background-size: 28px 28px;
+            radial-gradient(circle, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        background-size: 32px 32px;
     }
 
-    /* ── Flat surfaces — no glassmorphism ───────────────────────────────── */
+    /* ── Surface panels — Waitlister's premium dark card ──────────────── */
+    /* Key: inner top-highlight + subtle ring + deep outer shadow */
     .surface-panel {
-        background:   var(--surface-raised);
-        border:       1px solid var(--border-subtle);
+        background:    var(--surface-raised);
+        border:        1px solid var(--border-subtle);
         border-radius: var(--radius-card);
-        box-shadow:   var(--shadow-panel);
+        box-shadow:    var(--inset-highlight), var(--shadow-panel);
         transition:
             border-color var(--duration-fast) var(--ease-standard),
             box-shadow   var(--duration-fast) var(--ease-standard),
@@ -125,17 +127,19 @@ button, input, select, textarea {
 
     .surface-panel:hover {
         border-color: var(--border-default);
-        box-shadow:   0 0 0 1px rgba(255, 255, 255, 0.10), var(--shadow-mid);
+        box-shadow:   var(--inset-highlight), 0 0 0 1px rgba(255,255,255,0.10), 0 8px 32px rgba(0,0,0,0.55);
         transform:    translateY(-1px);
     }
 
+    /* Muted container (filter bars, sub-panels) */
     .surface-muted {
         background:    var(--surface-overlay);
         border:        1px solid var(--border-subtle);
         border-radius: var(--radius-card);
+        box-shadow:    var(--inset-highlight);
         transition:
-            background     var(--duration-fast) var(--ease-standard),
-            border-color   var(--duration-fast) var(--ease-standard);
+            background   var(--duration-fast) var(--ease-standard),
+            border-color var(--duration-fast) var(--ease-standard);
     }
 
     .surface-muted:hover {
@@ -143,33 +147,41 @@ button, input, select, textarea {
         border-color: var(--border-default);
     }
 
-    /* Alarm surface — flat red tint, no animated glow */
+    /* Alarm state — red left rail, muted bg */
     .surface-alarm {
-        position:     relative;
-        background:   var(--accent-muted);
-        border:       1px solid var(--accent-border);
-        border-left:  3px solid var(--accent);
+        position:      relative;
+        background:    linear-gradient(135deg, rgba(232,23,58,0.07) 0%, rgba(232,23,58,0.03) 100%);
+        border:        1px solid var(--accent-border);
+        border-left:   2px solid var(--accent);
         border-radius: var(--radius-card);
-        animation:    alarm-rail-pulse 2.8s ease-in-out infinite;
+        box-shadow:    var(--inset-highlight), 0 0 0 1px rgba(232,23,58,0.12), var(--shadow-mid);
+        animation:     alarm-rail-pulse 2.8s ease-in-out infinite;
         transition:
             border-color var(--duration-fast) var(--ease-standard),
             transform    var(--duration-normal) var(--ease-smooth);
     }
 
-    /* ── Form Controls ──────────────────────────────────────────────────── */
+    /* ── Form Controls — Waitlister's frosted input ──────────────────── */
     .control-field {
-        background:    #0d0d0d;
-        border:        1px solid var(--border-default);
+        background:    rgba(255, 255, 255, 0.04);
+        border:        1px solid rgba(255, 255, 255, 0.10);
         color:         var(--text-primary);
         border-radius: var(--radius-element);
+        box-shadow:    var(--inset-highlight);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         transition:
             border-color var(--duration-fast) var(--ease-standard),
-            box-shadow   var(--duration-fast) var(--ease-standard);
+            box-shadow   var(--duration-fast) var(--ease-standard),
+            background   var(--duration-fast) var(--ease-standard);
     }
 
     .control-field:focus {
-        border-color: var(--border-focus);
-        box-shadow:   0 0 0 3px rgba(255, 255, 255, 0.06);
+        background:   rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.24);
+        /* Waitlister focus: soft white ring, no coloured accent */
+        box-shadow:   var(--inset-highlight),
+                      0 0 0 3px rgba(255, 255, 255, 0.08);
         outline:      none;
     }
 
@@ -177,58 +189,67 @@ button, input, select, textarea {
         color: var(--text-tertiary);
     }
 
-    /* ── Buttons — pill-shaped, editorial ───────────────────────────────── */
+    /* ── Buttons ────────────────────────────────────────────────────────── */
 
-    /* Primary: solid red pill — mirrors the 10x "Submit resource →" CTA */
+    /* Primary — solid red pill */
     .btn-primary {
-        background:    var(--accent);
-        color:         #ffffff;
-        font-weight:   600;
+        background:     var(--accent);
+        color:          #ffffff;
+        font-weight:    600;
         letter-spacing: 0.01em;
-        border-radius: var(--radius-pill);
-        border:        1px solid transparent;
-        box-shadow:    var(--shadow-low);
+        border-radius:  var(--radius-pill);
+        border:         1px solid rgba(255,255,255,0.12);
+        /* Inner highlight gives "lit" button feel */
+        box-shadow:     inset 0 1px 0 rgba(255,255,255,0.20),
+                        0 2px 8px rgba(232,23,58,0.30);
         transition:
-            background    var(--duration-fast) var(--ease-standard),
-            box-shadow    var(--duration-fast) var(--ease-standard),
-            transform     var(--duration-fast) var(--ease-smooth);
+            background   var(--duration-fast) var(--ease-standard),
+            box-shadow   var(--duration-fast) var(--ease-standard),
+            transform    var(--duration-fast) var(--ease-smooth);
     }
 
     .btn-primary:hover {
         background: var(--accent-hover);
-        box-shadow: var(--shadow-mid);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.25),
+                    0 4px 16px rgba(232,23,58,0.40);
         transform:  translateY(-1px);
     }
 
     .btn-primary:active {
         transform:  translateY(0) scale(0.98);
-        box-shadow: var(--shadow-low);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.12),
+                    0 1px 4px rgba(232,23,58,0.25);
     }
 
     .btn-primary:disabled {
         cursor:         not-allowed;
-        opacity:        0.45;
+        opacity:        0.42;
         transform:      none;
         pointer-events: none;
     }
 
-    /* Secondary: ghost pill with white border */
+    /* Secondary — ghost pill, Waitlister's "Use Template for Free" button style */
     .btn-secondary {
-        background:    transparent;
-        border:        1px solid var(--border-default);
-        color:         var(--text-primary);
-        font-weight:   500;
+        background:     rgba(255, 255, 255, 0.05);
+        border:         1px solid rgba(255, 255, 255, 0.12);
+        color:          var(--text-primary);
+        font-weight:    500;
         letter-spacing: 0.01em;
-        border-radius: var(--radius-pill);
+        border-radius:  var(--radius-pill);
+        /* Subtle inset highlight for premium feel */
+        box-shadow:     inset 0 1px 0 rgba(255,255,255,0.08);
         transition:
             border-color var(--duration-fast) var(--ease-standard),
             background   var(--duration-fast) var(--ease-standard),
+            box-shadow   var(--duration-fast) var(--ease-standard),
             transform    var(--duration-fast) var(--ease-smooth);
     }
 
     .btn-secondary:hover {
-        border-color: var(--border-strong);
-        background:   rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.22);
+        background:   rgba(255, 255, 255, 0.09);
+        box-shadow:   inset 0 1px 0 rgba(255,255,255,0.12),
+                      0 4px 16px rgba(0,0,0,0.3);
         transform:    translateY(-1px);
     }
 
@@ -236,31 +257,33 @@ button, input, select, textarea {
         transform: translateY(0) scale(0.98);
     }
 
-    /* Danger: red pill (same shape as primary, darker red) */
+    /* Danger — red pill */
     .btn-danger {
-        background:    var(--accent);
-        color:         #ffffff;
-        font-weight:   600;
-        border-radius: var(--radius-pill);
-        border:        1px solid transparent;
-        box-shadow:    var(--shadow-low);
+        background:     var(--accent);
+        color:          #ffffff;
+        font-weight:    600;
+        border-radius:  var(--radius-pill);
+        border:         1px solid rgba(255,255,255,0.10);
+        box-shadow:     inset 0 1px 0 rgba(255,255,255,0.18),
+                        0 2px 8px rgba(232,23,58,0.25);
         transition:
             background var(--duration-fast) var(--ease-standard),
-            transform  var(--duration-fast) var(--ease-smooth);
+            transform  var(--duration-fast) var(--ease-smooth),
+            box-shadow var(--duration-fast) var(--ease-standard);
     }
 
     .btn-danger:hover {
         background: var(--accent-hover);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.22),
+                    0 4px 16px rgba(232,23,58,0.35);
         transform:  translateY(-1px);
     }
 
-    .btn-danger:active {
-        transform: translateY(0) scale(0.98);
-    }
+    .btn-danger:active  { transform: translateY(0) scale(0.98); }
 
     .btn-danger:disabled {
         cursor:         not-allowed;
-        opacity:        0.45;
+        opacity:        0.42;
         transform:      none;
         pointer-events: none;
     }
@@ -272,13 +295,13 @@ button, input, select, textarea {
         border-radius: 9999px;
     }
 
-    /* ── Table ───────────────────────────────────────────────────────────── */
+    /* ── Table ─────────────────────────────────────────────────────────────── */
     .table-shell {
         overflow:      hidden;
         border:        1px solid var(--border-subtle);
         border-radius: var(--radius-card);
         background:    var(--surface-raised);
-        box-shadow:    var(--shadow-mid);
+        box-shadow:    var(--inset-highlight), var(--shadow-mid);
     }
 
     tr {
@@ -289,134 +312,130 @@ button, input, select, textarea {
     .skeleton {
         background: linear-gradient(
             90deg,
-            rgba(255, 255, 255, 0.04) 25%,
-            rgba(255, 255, 255, 0.08) 50%,
-            rgba(255, 255, 255, 0.04) 75%
+            rgba(255, 255, 255, 0.03) 25%,
+            rgba(255, 255, 255, 0.07) 50%,
+            rgba(255, 255, 255, 0.03) 75%
         );
         background-size: 200% 100%;
         animation:    shimmer 1.8s ease-in-out infinite;
         border-radius: var(--radius-small);
     }
 
-    /* ── Badges ──────────────────────────────────────────────────────────── */
+    /* ── Badges — Waitlister's top "pill chip" treatment ────────────────── */
+    /* Key: rounded-pill, frosted bg, thin white ring, inset highlight */
     .badge-alarm {
-        display:        inline-flex;
-        align-items:    center;
-        gap:            4px;
-        padding:        3px 10px;
-        border-radius:  9999px;
-        font-size:      0.6875rem;
-        font-weight:    600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        background:     var(--accent-muted);
-        color:          #ff8099;
-        border:         1px solid var(--accent-border);
+        display:         inline-flex;
+        align-items:     center;
+        gap:             5px;
+        padding:         4px 11px;
+        border-radius:   9999px;
+        font-size:       0.6875rem;
+        font-weight:     600;
+        letter-spacing:  0.04em;
+        text-transform:  uppercase;
+        background:      var(--accent-muted);
+        color:           #ff8099;
+        border:          1px solid var(--accent-border);
+        box-shadow:      inset 0 1px 0 rgba(255,255,255,0.06);
     }
 
     .badge-online {
-        display:        inline-flex;
-        align-items:    center;
-        gap:            4px;
-        padding:        3px 10px;
-        border-radius:  9999px;
-        font-size:      0.6875rem;
-        font-weight:    600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        background:     rgba(52, 211, 153, 0.08);
-        color:          #6ee7b7;
-        border:         1px solid rgba(52, 211, 153, 0.18);
+        display:         inline-flex;
+        align-items:     center;
+        gap:             5px;
+        padding:         4px 11px;
+        border-radius:   9999px;
+        font-size:       0.6875rem;
+        font-weight:     600;
+        letter-spacing:  0.04em;
+        text-transform:  uppercase;
+        background:      rgba(52, 211, 153, 0.08);
+        color:           #6ee7b7;
+        border:          1px solid rgba(52, 211, 153, 0.18);
+        box-shadow:      inset 0 1px 0 rgba(255,255,255,0.05);
     }
 
     .badge-offline {
-        display:        inline-flex;
-        align-items:    center;
-        gap:            4px;
-        padding:        3px 10px;
-        border-radius:  9999px;
-        font-size:      0.6875rem;
-        font-weight:    600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        background:     rgba(255, 255, 255, 0.04);
-        color:          rgba(255, 255, 255, 0.35);
-        border:         1px solid rgba(255, 255, 255, 0.08);
+        display:         inline-flex;
+        align-items:     center;
+        gap:             5px;
+        padding:         4px 11px;
+        border-radius:   9999px;
+        font-size:       0.6875rem;
+        font-weight:     600;
+        letter-spacing:  0.04em;
+        text-transform:  uppercase;
+        background:      rgba(255, 255, 255, 0.04);
+        color:           rgba(255, 255, 255, 0.32);
+        border:          1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:      inset 0 1px 0 rgba(255,255,255,0.04);
     }
 
     .badge-warning {
-        display:        inline-flex;
-        align-items:    center;
-        gap:            4px;
-        padding:        3px 10px;
-        border-radius:  9999px;
-        font-size:      0.6875rem;
-        font-weight:    600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        background:     rgba(251, 191, 36, 0.08);
-        color:          #fbbf24;
-        border:         1px solid rgba(251, 191, 36, 0.18);
+        display:         inline-flex;
+        align-items:     center;
+        gap:             5px;
+        padding:         4px 11px;
+        border-radius:   9999px;
+        font-size:       0.6875rem;
+        font-weight:     600;
+        letter-spacing:  0.04em;
+        text-transform:  uppercase;
+        background:      rgba(251, 191, 36, 0.08);
+        color:           #fbbf24;
+        border:          1px solid rgba(251, 191, 36, 0.18);
+        box-shadow:      inset 0 1px 0 rgba(255,255,255,0.05);
     }
 
     /* ── Zone pills ──────────────────────────────────────────────────────── */
     .zone-alarm {
         background: var(--accent);
         color:      #ffffff;
-        border:     1px solid rgba(232, 23, 58, 0.5);
+        border:     1px solid rgba(232, 23, 58, 0.55);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
     }
 
     .zone-normal {
         background: rgba(255, 255, 255, 0.05);
-        color:      rgba(255, 255, 255, 0.40);
+        color:      rgba(255, 255, 255, 0.38);
         border:     1px solid rgba(255, 255, 255, 0.07);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
     }
 }
 
 /* ─── Utility Layer ────────────────────────────────────────────────────────── */
 @layer utilities {
-    .animate-pulse-shadow {
-        animation: pulse-shadow 2.4s ease-in-out infinite;
-    }
+    .animate-pulse-shadow { animation: pulse-shadow 2.4s ease-in-out infinite; }
+    .animate-bounce-subtle { animation: bounce-subtle 2.5s ease-in-out infinite; }
+    .animate-fade-in       { animation: fade-in 280ms cubic-bezier(0.16,1,0.3,1) both; }
+    .animate-fade-in-up    { animation: fade-in-up 350ms cubic-bezier(0.16,1,0.3,1) both; }
+    .animate-slide-up      { animation: slide-up 280ms cubic-bezier(0.16,1,0.3,1) both; }
+    .animate-scale-in      { animation: scale-in 200ms cubic-bezier(0.16,1,0.3,1) both; }
 
-    .animate-bounce-subtle {
-        animation: bounce-subtle 2.5s ease-in-out infinite;
-    }
+    .text-balance { text-wrap: balance; }
 
-    .animate-fade-in {
-        animation: fade-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    .animate-fade-in-up {
-        animation: fade-in-up 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    .animate-slide-up {
-        animation: slide-up 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    .animate-scale-in {
-        animation: scale-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    .text-balance {
-        text-wrap: balance;
-    }
-
-    /* Display font — Space Grotesk bold/extra-bold like 10x headlines */
     .font-display {
         font-family: 'Space Grotesk', 'Outfit', 'Inter', ui-sans-serif, system-ui, sans-serif;
     }
 
-    .tabular-nums {
-        font-variant-numeric: tabular-nums;
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    /* Waitlister inset-highlight utility — use on any interactive element */
+    .inset-highlight {
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* Frosted glass utility (for overlapping panels like dropdowns) */
+    .glass-panel {
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
     }
 }
 
 /* ─── Keyframes ────────────────────────────────────────────────────────────── */
 @keyframes pulse-shadow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 23, 58, 0.28); }
-    50%       { box-shadow: 0 0 0 8px rgba(232, 23, 58, 0); }
+    0%, 100% { box-shadow: 0 0 0 1px rgba(232,23,58,0.20), 0 0 0 0 rgba(232,23,58,0.18); }
+    50%       { box-shadow: 0 0 0 1px rgba(232,23,58,0.28), 0 0 0 8px rgba(232,23,58,0); }
 }
 
 @keyframes bounce-subtle {
@@ -430,17 +449,17 @@ button, input, select, textarea {
 }
 
 @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-up {
-    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    from { opacity: 0; transform: translateY(18px) scale(0.98); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.95); }
+    from { opacity: 0; transform: scale(0.94); }
     to   { opacity: 1; transform: scale(1); }
 }
 
@@ -450,40 +469,38 @@ button, input, select, textarea {
 }
 
 @keyframes alarm-rail-pulse {
-    0%, 100% { border-left-color: rgba(232, 23, 58, 0.6); }
-    50%       { border-left-color: rgba(232, 23, 58, 1); }
+    0%, 100% { border-left-color: rgba(232,23,58,0.55); }
+    50%       { border-left-color: rgba(232,23,58,1.00); }
 }
 
 @keyframes ember-float {
-    0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+    0%, 100% { transform: translateY(0) scale(1);    opacity: 0.3; }
     50%      { transform: translateY(-20px) scale(1.1); opacity: 0.7; }
 }
 
 /* ─── Accessibility ────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
-        animation-duration:      0.001ms !important;
+        animation-duration:        0.001ms !important;
         animation-iteration-count: 1 !important;
-        scroll-behavior:         auto !important;
-        transition-duration:     0.001ms !important;
+        scroll-behavior:           auto !important;
+        transition-duration:       0.001ms !important;
     }
 }
 
-/* ─── Scrollbar — slim, dark, 10x-style ────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ─── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-    background:    rgba(255, 255, 255, 0.12);
+    background:    rgba(255, 255, 255, 0.10);
     border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.22);
-}
-::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.20); }
+::-webkit-scrollbar-corner      { background: transparent; }
 
 /* ─── Focus ────────────────────────────────────────────────────────────────── */
 *:focus-visible {
-    outline:        2px solid rgba(255, 255, 255, 0.4);
+    outline:        2px solid rgba(255, 255, 255, 0.30);
     outline-offset: 2px;
     border-radius:  4px;
 }
@@ -493,13 +510,13 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow:       0 0 0 30px #0d0d0d inset !important;
-    -webkit-text-fill-color:  #fff !important;
-    transition:               background-color 5000s ease-in-out 0s;
+    -webkit-box-shadow:      0 0 0 30px #0d0d18 inset !important;
+    -webkit-text-fill-color: #fff !important;
+    transition:              background-color 5000s ease-in-out 0s;
 }
 
 /* ─── Select ───────────────────────────────────────────────────────────────── */
 select option {
-    background: #111111;
+    background: #0f0f18;
     color:      #e2e8f0;
 }

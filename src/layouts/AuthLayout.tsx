@@ -34,87 +34,91 @@ const signalRows = [
 export function AuthLayout() {
   return (
     <div className="relative min-h-screen overflow-hidden console-bg text-white">
-      {/* Very faint dot grid */}
-      <div className="absolute inset-0 console-grid opacity-40" />
-      {/* Top hairline */}
-      <div className="absolute inset-x-0 top-0 h-px bg-white/[0.08]" />
+      {/* Waitlister-inspired starfield / dot grid */}
+      <div className="absolute inset-0 console-grid opacity-30" />
+      
+      {/* Waitlister-inspired deep purple ambient glow behind the hero */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[1200px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,_rgba(99,57,198,0.18)_0%,_transparent_60%)]" />
+
+      {/* Top hairline - waitlister style thin white */}
+      <div className="absolute inset-x-0 top-0 h-px bg-white/[0.04]" />
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-[minmax(0,1fr)_500px]">
 
         {/* ── Left info panel ────────────────────────────────────────────── */}
-        <section className="relative hidden h-screen flex-col justify-between overflow-y-auto border-r border-white/[0.08] px-10 py-12 lg:flex xl:px-16">
+        <section className="relative hidden h-screen flex-col justify-between overflow-y-auto border-r border-white/[0.06] px-10 py-12 lg:flex xl:px-16">
 
           {/* Brand lock-up */}
           <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#e8173a] to-[#ff6b35] shadow-lg ring-1 ring-white/10">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#e8173a] to-[#ff6b35] shadow-lg inset-highlight ring-1 ring-white/10">
               <Flame className="h-5 w-5 text-white drop-shadow-sm" />
             </div>
             <div>
-              <p className="font-display text-[1.1rem] font-700 tracking-tight text-white leading-none">Fyrlinc</p>
-              <p className="mt-0.5 text-[12px] text-white/40 tracking-wide">Fire Alarm Panel Monitoring</p>
+              <p className="font-display text-[1.1rem] font-bold tracking-tight text-white leading-none">Fyrlinc</p>
+              <p className="mt-1 text-[12px] text-white/40 tracking-wide font-medium">Fire Alarm Panel Monitoring</p>
             </div>
           </div>
 
           {/* Hero copy */}
-          <div className="animate-fade-in">
-            <h1 className="font-display max-w-lg text-[2.6rem] font-bold leading-[1.07] tracking-[-0.03em] text-white text-balance xl:text-[3.2rem]">
+          <div className="animate-fade-in flex flex-col items-start justify-center h-full pt-12 pb-8">
+            <h1 className="font-display max-w-xl text-[3rem] font-bold leading-[1.05] tracking-tight text-white text-balance xl:text-[3.5rem] drop-shadow-sm">
               High-trust monitoring for every connected fire panel.
             </h1>
-            <p className="mt-6 max-w-md text-body-lg leading-relaxed text-white/50">
+            <p className="mt-6 max-w-md text-[1.05rem] leading-relaxed text-white/50 font-medium">
               Real-time alarm visibility, role-based access, panel controls, and
               event history — in one secure operations console.
             </p>
 
-            {/* Status rows — flat bordered, no glass */}
-            <div className="mt-10 grid max-w-lg gap-2.5">
+            {/* Status rows — Waitlister premium card style with inset highlight */}
+            <div className="mt-12 grid max-w-lg gap-3 w-full">
               {signalRows.map((row, idx) => (
                 <div
                   key={row.label}
-                  className="flex items-center justify-between rounded-[10px] border px-4 py-3.5 animate-fade-in-up"
+                  className="flex items-center justify-between rounded-[14px] border px-5 py-4 animate-fade-in-up inset-highlight backdrop-blur-md"
                   style={{
                     background: row.accentBg,
                     borderColor: row.accentBorder,
                     animationDelay: `${idx * 90}ms`,
                   }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3.5">
                     <div
-                      className="flex h-8 w-8 items-center justify-center rounded-[7px]"
+                      className="flex h-9 w-9 items-center justify-center rounded-[9px] shadow-sm"
                       style={{ background: row.accentBg, border: `1px solid ${row.accentBorder}` }}
                     >
-                      <row.icon className={`h-4 w-4 ${row.tone}`} />
+                      <row.icon className={`h-[18px] w-[18px] ${row.tone}`} />
                     </div>
-                    <span className="text-sm font-medium text-white/70">{row.label}</span>
+                    <span className="text-sm font-semibold text-white/80">{row.label}</span>
                   </div>
-                  <span className={`text-sm font-semibold ${row.tone}`}>{row.value}</span>
+                  <span className={`text-sm font-bold tracking-wide ${row.tone}`}>{row.value}</span>
                 </div>
               ))}
             </div>
 
             {/* Zone telemetry demo card — flat surface */}
             <div
-              className="mt-8 max-w-lg rounded-[12px] border border-white/[0.09] bg-[#111] p-6 animate-fade-in-up"
+              className="mt-8 max-w-lg w-full rounded-[16px] border border-white/[0.08] bg-[#0f0f18]/80 p-6 animate-fade-in-up inset-highlight backdrop-blur-xl shadow-panel"
               style={{ animationDelay: "300ms" }}
             >
               <div className="mb-5 flex items-center justify-between">
-                <span className="text-sm font-semibold text-white">Zone telemetry</span>
-                <span className="text-xs font-medium text-white/35">8 zones</span>
+                <span className="text-sm font-semibold text-white/90">Zone telemetry</span>
+                <span className="rounded-full bg-white/[0.06] border border-white/[0.08] px-2.5 py-1 text-[10px] font-bold text-white/40 tracking-wider uppercase">8 zones</span>
               </div>
-              <div className="grid grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-4 gap-3">
                 {Array.from({ length: 8 }).map((_, index) => {
                   const active = [2, 5].includes(index);
                   return (
                     <div
                       key={index}
-                      className={`flex h-11 flex-col items-center justify-center gap-0.5 rounded-[8px] text-xs font-semibold border transition-all duration-200 ${
+                      className={`flex h-12 flex-col items-center justify-center gap-0.5 rounded-[10px] text-xs font-semibold border transition-all duration-200 ${
                         active
-                          ? "zone-alarm animate-pulse-shadow"
+                          ? "zone-alarm animate-pulse-shadow shadow-sm"
                           : "zone-normal"
                       }`}
                     >
-                      <span>Z{index + 1}</span>
+                      <span className={active ? "text-white" : "text-white/50"}>Z{index + 1}</span>
                       {active && (
-                        <span className="text-[7px] font-bold tracking-widest opacity-80">
+                        <span className="text-[8px] font-bold tracking-widest opacity-90 mt-0.5">
                           ALARM
                         </span>
                       )}
@@ -126,20 +130,23 @@ export function AuthLayout() {
           </div>
 
           {/* Bottom hairline */}
-          <div className="absolute inset-x-0 bottom-0 h-px bg-white/[0.06]" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-white/[0.04]" />
         </section>
 
         {/* ── Right auth panel ────────────────────────────────────────────── */}
-        <main className="flex min-h-screen items-center justify-center bg-[#0d0d0d] px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:px-12">
-          <div className="w-full max-w-md animate-fade-in-up">
+        <main className="flex min-h-screen items-center justify-center bg-[#0b0b14]/50 backdrop-blur-2xl px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:px-12 relative z-10 border-l border-white/[0.02]">
+          {/* Subtle glow specifically for the login form */}
+          <div className="pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,_rgba(255,255,255,0.03)_0%,_transparent_70%)]" />
+          
+          <div className="w-full max-w-md animate-fade-in-up relative z-10">
             {/* Mobile brand */}
             <div className="mb-10 flex items-center justify-center gap-3 lg:hidden">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#e8173a] to-[#ff6b35] shadow-lg ring-1 ring-white/10">
-                <Flame className="h-5 w-5 text-white" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#e8173a] to-[#ff6b35] shadow-lg inset-highlight ring-1 ring-white/10">
+                <Flame className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="font-display text-[1.15rem] font-bold tracking-tight text-white leading-none">Fyrlinc</p>
-                <p className="mt-0.5 text-sm text-white/40">Fire Alarm Panel Monitoring</p>
+                <p className="font-display text-[1.25rem] font-bold tracking-tight text-white leading-none">Fyrlinc</p>
+                <p className="mt-1 text-sm text-white/40 font-medium">Fire Alarm Panel Monitoring</p>
               </div>
             </div>
             <Outlet />
