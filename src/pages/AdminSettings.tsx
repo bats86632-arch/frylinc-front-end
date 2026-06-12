@@ -599,18 +599,22 @@ export function AdminSettings() {
                       
                       {actionMenuOpen === user.uid && (
                         <>
-                          <div className="fixed inset-0 z-40 bg-black/40 sm:bg-transparent sm:backdrop-blur-none backdrop-blur-sm" onClick={() => setActionMenuOpen(null)} />
-                          <div className="fixed bottom-4 left-4 right-4 z-50 p-2 sm:p-0 sm:absolute sm:right-5 sm:top-[38px] sm:bottom-auto sm:left-auto sm:w-36 rounded-[12px] sm:rounded-[6px] border border-white/[0.08] bg-[#1a1917] sm:py-1 shadow-2xl animate-slide-up sm:animate-none">
+                          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setActionMenuOpen(null)} />
+                          <div className="fixed bottom-4 left-4 right-4 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[320px] z-50 p-2 sm:p-3 rounded-[12px] sm:rounded-[14px] border border-white/[0.08] bg-[#1a1917] shadow-2xl animate-slide-up sm:animate-fade-in-up">
+                            <div className="hidden sm:block mb-3 px-3">
+                              <h4 className="text-[14px] font-semibold text-[#f0ede8]">User Actions</h4>
+                              <p className="text-[12px] text-[#7a7773] mt-0.5">{user.email}</p>
+                            </div>
                             <button
                               onClick={() => openEditUser(user)}
-                              className="w-full px-4 py-3.5 sm:py-2 text-center sm:text-left text-[14px] sm:text-[13px] font-semibold sm:font-medium text-[#f0ede8] hover:bg-white/[0.04] rounded-[8px] sm:rounded-none mb-1 sm:mb-0"
+                              className="w-full px-4 py-3.5 sm:py-2.5 text-center sm:text-left text-[14px] sm:text-[13px] font-semibold sm:font-medium text-[#f0ede8] hover:bg-white/[0.04] rounded-[8px] mb-1 sm:mb-1.5"
                             >
                               Edit user
                             </button>
                             <div className="h-[1px] w-full bg-white/[0.04] sm:hidden" />
                             <button
                               onClick={() => handleDeleteUser(user.uid)}
-                              className="w-full px-4 py-3.5 sm:py-2 text-center sm:text-left text-[14px] sm:text-[13px] font-semibold sm:font-medium text-[#f87171] hover:bg-white/[0.04] rounded-[8px] sm:rounded-none mt-1 sm:mt-0"
+                              className="w-full px-4 py-3.5 sm:py-2.5 text-center sm:text-left text-[14px] sm:text-[13px] font-semibold sm:font-medium text-[#f87171] hover:bg-white/[0.04] rounded-[8px]"
                             >
                               Delete user
                             </button>
