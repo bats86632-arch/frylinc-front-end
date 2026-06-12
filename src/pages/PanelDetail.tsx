@@ -298,12 +298,12 @@ export function PanelDetail() {
       </section>
 
       {/* Tab bar — polished underline style */}
-      <div className="flex flex-row gap-0 border-b border-white/[0.07] bg-transparent">
+      <div className="flex flex-row gap-0 border-b border-white/[0.07] bg-transparent overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center justify-center gap-2 px-5 py-3.5 text-sm font-medium transition-all duration-200 ease-smooth ${
+            className={`whitespace-nowrap shrink-0 flex items-center justify-center gap-2 px-5 py-3.5 text-[13px] font-medium transition-all duration-200 ease-smooth ${
               activeTab === tab.id
                 ? "rounded-t-lg border-b-[3px] border-amber-400 bg-amber-400/[0.04] text-white"
                 : "rounded-t-lg border-b-[3px] border-transparent text-slate-400 hover:bg-white/[0.03] hover:text-slate-200"
