@@ -247,7 +247,7 @@ export function MainDashboardLayout() {
                     className="fixed inset-0 z-40"
                     onClick={() => setNotificationOpen(false)}
                   />
-                  <div className="surface-panel absolute right-0 z-50 mt-3 w-80 rounded-[16px] p-4 animate-scale-in origin-top-right">
+                  <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-80 rounded-[16px] p-4 animate-scale-in origin-top sm:origin-top-right">
                     <div className="flex items-center justify-between border-b border-white/[0.06] pb-3.5 mb-3">
                       <div>
                         <p className="text-[15px] font-bold text-white">Notifications</p>
@@ -309,7 +309,7 @@ export function MainDashboardLayout() {
                     className="fixed inset-0 z-40"
                     onClick={() => setUserMenuOpen(false)}
                   />
-                  <div className="surface-panel absolute right-0 z-50 mt-3 w-64 rounded-[16px] p-2 animate-scale-in origin-top-right">
+                  <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-64 rounded-[16px] p-2 animate-scale-in origin-top sm:origin-top-right">
                     <div className="border-b border-white/[0.06] p-4 mb-2">
                       <p className="truncate text-[15px] font-bold text-white drop-shadow-sm">
                         {userData?.displayName}
