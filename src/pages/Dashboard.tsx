@@ -66,30 +66,30 @@ export function Dashboard() {
       {/* ── Stats Row ──────────────────────────────────────────────────────── */}
       <div className="grid gap-6">
         {/* Hero Card */}
-        <div className="surface-panel p-[20px] border-t-2 border-[#e53d3d] rounded-[14px]">
+        <div className="surface-panel px-5 py-3 border-t-2 border-[#e53d3d] rounded-[14px]">
           <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Active Alarms</p>
-          <p className={`mt-2 font-display text-[32px] font-bold leading-none tabular-nums ${activeAlarms > 0 ? 'text-[#e53d3d]' : 'text-[#f0ede8]'}`}>
+          <p className={`mt-0.5 font-display text-[28px] font-bold leading-none tabular-nums ${activeAlarms > 0 ? 'text-[#e53d3d]' : 'text-[#f0ede8]'}`}>
             {activeAlarms}
           </p>
         </div>
 
         {/* Secondary Stats */}
         <div className="grid gap-6 sm:grid-cols-2">
-          <div className="surface-panel p-[20px] border-t-2 border-[#34d399] rounded-[14px]">
+          <div className="surface-panel relative overflow-hidden px-5 py-3 pb-4 border-t-2 border-[#34d399] rounded-[14px]">
             <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Online Panels</p>
-            <p className="mt-2 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
+            <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
               {onlinePanels}
             </p>
-            <div className="mt-5 flex gap-[2px]">
+            <div className="absolute bottom-0 left-0 right-0 flex h-[3px] w-full gap-[1px]">
               {[...Array(30)].map((_, i) => (
-                <div key={i} className={`h-3 w-[6px] rounded-[1px] ${i < 29 ? 'bg-[#34d399]/80' : 'bg-[#e53d3d]/80'}`} />
+                <div key={i} className={`h-full flex-1 ${i < 29 ? 'bg-[#34d399]' : 'bg-[#e53d3d]'}`} />
               ))}
             </div>
           </div>
 
-          <div className="surface-panel p-[20px] border-t-2 border-white/10 rounded-[14px]">
+          <div className="surface-panel px-5 py-3 border-t-2 border-white/10 rounded-[14px]">
             <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Total Devices</p>
-            <p className="mt-2 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
+            <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
               {(panels || []).length}
             </p>
           </div>
