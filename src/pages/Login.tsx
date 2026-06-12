@@ -9,7 +9,7 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  Flame,
+  ArrowRight,
   Loader2,
   LockKeyhole,
 } from "lucide-react";
@@ -32,7 +32,6 @@ function getAuthErrorCode(error: unknown) {
     const code = (error as { code?: unknown }).code;
     return typeof code === "string" ? code : undefined;
   }
-
   return undefined;
 }
 
@@ -89,75 +88,79 @@ export function Login() {
   };
 
   return (
-    <div className="surface-panel animate-fade-in rounded-[14px] p-7 sm:p-8">
+    <div className="rounded-[14px] border border-white/[0.09] bg-[#111] p-8 shadow-elevation-3 animate-fade-in">
+
       {/* Header */}
-      <div>
-        <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-[12px] border border-red-400/25 bg-red-500/10 text-red-200 shadow-[0_0_28px_rgba(239,68,68,0.15)]">
-          <LockKeyhole className="h-6 w-6" />
+      <div className="mb-7">
+        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-[11px] border border-[rgba(232,23,58,0.22)] bg-[rgba(232,23,58,0.10)]">
+          <LockKeyhole className="h-5 w-5 text-[#e8173a]" />
         </div>
-        <h2 className="font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-white text-balance">
+        <h2 className="font-display text-[1.75rem] font-bold leading-tight tracking-tight text-white text-balance">
           Welcome back
         </h2>
-        <p className="mt-2.5 text-body leading-relaxed text-slate-400">
+        <p className="mt-2 text-body leading-relaxed text-white/45">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
 
+      {/* Error banner */}
       {error && (
-        <div className="mt-7 flex items-start gap-3 rounded-[10px] border border-red-400/25 bg-red-500/10 p-4 animate-fade-in">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-300" />
-          <p className="text-sm leading-6 text-red-100">{error}</p>
+        <div className="mb-6 flex items-start gap-3 rounded-[9px] border border-[rgba(232,23,58,0.22)] bg-[rgba(232,23,58,0.08)] p-4 animate-fade-in">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#ff8099]" />
+          <p className="text-sm leading-6 text-[#ffb3c0]">{error}</p>
         </div>
       )}
 
-      {/* Divider between header and form */}
-      <div className="mt-8 border-t border-white/[0.07]" />
+      {/* Divider */}
+      <div className="mb-7 border-t border-white/[0.07]" />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="pt-8">
-        <div className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="space-y-5">
+          {/* Email */}
           <div>
             <label
               htmlFor="email"
-              className="mb-2.5 block text-sm font-medium text-slate-200"
+              className="mb-2 block text-sm font-medium text-white/70"
             >
-              Email Address <span className="text-red-400">*</span>
+              Email address
             </label>
             <div className="relative">
               <input
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full rounded-[10px] px-4 py-3.5 text-sm placeholder:text-slate-500 ${
-                  errors.email ? "border-red-400/60 pr-10" : ""
+                className={`control-field w-full rounded-[9px] px-4 py-3 text-sm ${
+                  errors.email ? "border-[rgba(232,23,58,0.50)] pr-10" : ""
                 }`}
                 placeholder="you@example.com"
                 disabled={isLoading}
               />
               {errors.email && (
-                <AlertCircle className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-red-400" />
+                <AlertCircle className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#e8173a]" />
               )}
             </div>
             {errors.email && (
-              <p className="mt-2.5 text-sm text-red-300 animate-fade-in">
+              <p className="mt-2 text-sm text-[#ff8099] animate-fade-in">
                 {errors.email.message}
               </p>
             )}
           </div>
 
+          {/* Password */}
           <div>
             <label
               htmlFor="password"
-              className="mb-2.5 block text-sm font-medium text-slate-200"
+              className="mb-2 block text-sm font-medium text-white/70"
             >
-              Password <span className="text-red-400">*</span>
+              Password
             </label>
             <div className="relative">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full rounded-[10px] px-4 py-3.5 pr-12 text-sm placeholder:text-slate-500 ${
-                  errors.password ? "border-red-400/60" : ""
+                className={`control-field w-full rounded-[9px] px-4 py-3 pr-12 text-sm ${
+                  errors.password ? "border-[rgba(232,23,58,0.50)]" : ""
                 }`}
                 placeholder="Enter your password"
                 disabled={isLoading}
@@ -165,38 +168,39 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-all duration-150 hover:bg-white/[0.06] hover:text-white"
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-white/35 transition-all duration-150 hover:bg-white/[0.06] hover:text-white/80"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
+                  <EyeOff className="h-4 w-4" />
                 ) : (
-                  <Eye className="h-5 w-5" />
+                  <Eye className="h-4 w-4" />
                 )}
               </button>
             </div>
             {errors.password && (
-              <p className="mt-2.5 text-sm text-red-300 animate-fade-in">
+              <p className="mt-2 text-sm text-[#ff8099] animate-fade-in">
                 {errors.password.message}
               </p>
             )}
           </div>
         </div>
 
+        {/* Submit — pill-shaped red CTA matching 10x "Submit resource →" */}
         <button
           type="submit"
           disabled={isLoading}
-          className="btn-primary mt-8 flex w-full items-center justify-center gap-2.5 rounded-[10px] px-4 py-4 text-sm font-semibold tracking-wide"
+          className="btn-primary mt-7 flex w-full items-center justify-center gap-2.5 px-5 py-3.5 text-sm font-semibold"
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               <span>Signing in…</span>
             </>
           ) : (
             <>
-              <Flame className="h-4 w-4" />
               <span>Sign In</span>
+              <ArrowRight className="h-4 w-4" />
             </>
           )}
         </button>

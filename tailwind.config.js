@@ -5,17 +5,20 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
-        display: ['Outfit', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Space Grotesk', 'Outfit', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+      colors: {
+        accent: '#e8173a',
       },
       fontSize: {
-        'display-lg': ['2.5rem', { lineHeight: '1.1', letterSpacing: '-0.025em', fontWeight: '600' }],
-        'display': ['2rem', { lineHeight: '1.15', letterSpacing: '-0.02em', fontWeight: '600' }],
-        'title': ['1.5rem', { lineHeight: '1.25', letterSpacing: '-0.015em', fontWeight: '600' }],
-        'subtitle': ['1.125rem', { lineHeight: '1.35', letterSpacing: '-0.01em', fontWeight: '600' }],
-        'body-lg': ['0.9375rem', { lineHeight: '1.6', fontWeight: '400' }],
-        'body': ['0.875rem', { lineHeight: '1.6', fontWeight: '400' }],
-        'caption': ['0.75rem', { lineHeight: '1.5', fontWeight: '500' }],
-        'micro': ['0.6875rem', { lineHeight: '1.4', fontWeight: '600' }],
+        'display-lg': ['2.5rem',  { lineHeight: '1.08', letterSpacing: '-0.03em',  fontWeight: '700' }],
+        'display':    ['2rem',    { lineHeight: '1.12', letterSpacing: '-0.025em', fontWeight: '700' }],
+        'title':      ['1.5rem',  { lineHeight: '1.22', letterSpacing: '-0.02em',  fontWeight: '700' }],
+        'subtitle':   ['1.125rem',{ lineHeight: '1.35', letterSpacing: '-0.01em',  fontWeight: '600' }],
+        'body-lg':    ['0.9375rem',{ lineHeight: '1.65', fontWeight: '400' }],
+        'body':       ['0.875rem', { lineHeight: '1.65', fontWeight: '400' }],
+        'caption':    ['0.75rem',  { lineHeight: '1.5',  fontWeight: '500' }],
+        'micro':      ['0.6875rem',{ lineHeight: '1.4',  fontWeight: '600' }],
       },
       spacing: {
         'micro': '4px',
@@ -34,13 +37,11 @@ export default {
         'pill': '9999px',
       },
       boxShadow: {
-        'elevation-1': '0 1px 3px rgba(0,0,0,0.24), 0 1px 2px rgba(0,0,0,0.32)',
-        'elevation-2': '0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.24)',
-        'elevation-3': '0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.32)',
-        'glow-red': '0 0 24px rgba(239,68,68,0.25), 0 0 8px rgba(239,68,68,0.15)',
-        'glow-amber': '0 0 24px rgba(245,158,11,0.2), 0 0 8px rgba(245,158,11,0.12)',
-        'glow-emerald': '0 0 16px rgba(52,211,153,0.2), 0 0 6px rgba(52,211,153,0.1)',
-        'inner-glow': 'inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.03)',
+        'elevation-1': '0 1px 2px rgba(0,0,0,0.5)',
+        'elevation-2': '0 4px 16px rgba(0,0,0,0.55)',
+        'elevation-3': '0 12px 40px rgba(0,0,0,0.65)',
+        'panel':       '0 0 0 1px rgba(255,255,255,0.07), 0 4px 16px rgba(0,0,0,0.5)',
+        'glow-red':    '0 0 16px rgba(232,23,58,0.20)',
       },
       animation: {
         'pulse-shadow': 'pulse-shadow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',

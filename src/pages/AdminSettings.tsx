@@ -502,21 +502,29 @@ export function AdminSettings() {
                     className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
                   >
                     <option value="end_user">End User</option>
-                    <option value="system_integrator">System Integrator</option>
-                    <option value="head_office">Head Office</option>
-                    <option value="super_admin">Super Admin</option>
+                    {hasRole(["super_admin", "head_office"]) && (
+                      <option value="system_integrator">System Integrator</option>
+                    )}
+                    {hasRole(["super_admin"]) && (
+                      <option value="head_office">Head Office</option>
+                    )}
+                    {hasRole(["super_admin"]) && (
+                      <option value="super_admin">Super Admin</option>
+                    )}
                   </select>
                 </div>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    Company ID
-                  </label>
-                  <input
-                    {...registerUser("companyId")}
-                    placeholder="Optional"
-                    className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
-                  />
-                </div>
+                {hasRole(["super_admin"]) && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Company ID
+                    </label>
+                    <input
+                      {...registerUser("companyId")}
+                      placeholder="Optional"
+                      className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Branch IDs */}
@@ -738,22 +746,30 @@ export function AdminSettings() {
                       disabled={editUserFormLoading}
                     >
                       <option value="end_user">End User</option>
-                      <option value="system_integrator">System Integrator</option>
-                      <option value="head_office">Head Office</option>
-                      <option value="super_admin">Super Admin</option>
+                      {hasRole(["super_admin", "head_office"]) && (
+                        <option value="system_integrator">System Integrator</option>
+                      )}
+                      {hasRole(["super_admin"]) && (
+                        <option value="head_office">Head Office</option>
+                      )}
+                      {hasRole(["super_admin"]) && (
+                        <option value="super_admin">Super Admin</option>
+                      )}
                     </select>
                   </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-300">
-                      Company ID
-                    </label>
-                    <input
-                      {...registerEditUser("companyId")}
-                      placeholder="Optional"
-                      className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
-                      disabled={editUserFormLoading}
-                    />
-                  </div>
+                  {hasRole(["super_admin"]) && (
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-slate-300">
+                        Company ID
+                      </label>
+                      <input
+                        {...registerEditUser("companyId")}
+                        placeholder="Optional"
+                        className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
+                        disabled={editUserFormLoading}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
