@@ -72,7 +72,7 @@ export function Profile() {
     .join(" ") || "End User";
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 animate-fade-in-up">
+    <div className="animate-fade-in p-[32px] mx-auto max-w-3xl space-y-8">
       {/* Profile header with avatar */}
       <section className="surface-panel rounded-[14px] p-6">
         <div className="flex items-center gap-5">
@@ -80,8 +80,8 @@ export function Profile() {
             {userData?.displayName?.charAt(0).toUpperCase() || "U"}
           </div>
           <div>
-            <h1 className="font-display text-display leading-tight text-white text-balance">Your Profile</h1>
-            <p className="mt-1.5 text-body text-slate-400">Manage your personal settings and security</p>
+            <h1 className="font-display text-[22px] font-bold tracking-tight text-[#f0ede8]">Your Profile</h1>
+            <p className="mt-1 text-[13px] text-[#7a7773]">Manage your personal settings and security</p>
           </div>
         </div>
       </section>
@@ -93,7 +93,7 @@ export function Profile() {
             <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-200">
               <UserIcon className="h-[18px] w-[18px]" />
             </div>
-            <h2 className="text-subtitle font-semibold text-white">Personal Details</h2>
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Personal Details</h2>
           </div>
           <form onSubmit={handleSaveProfile} className="space-y-5">
             {profileError && (
@@ -108,44 +108,44 @@ export function Profile() {
             )}
             
             <div>
-              <label className="block text-[13px] font-medium text-slate-300 mb-2">Email</label>
+              <label className="block text-[13px] text-[#7a7773] mb-2">Email</label>
               <input
                 type="text"
                 value={userData?.email || ""}
                 disabled
-                className="control-field w-full rounded-[10px] px-4 py-3 text-[13px] opacity-50 cursor-not-allowed"
+                className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] opacity-50 cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="block text-[13px] font-medium text-slate-300 mb-2">Role</label>
+              <label className="block text-[13px] text-[#7a7773] mb-2">Role</label>
               <div className="flex items-center gap-3">
                 <input
                   type="text"
                   value={roleLabel}
                   disabled
-                  className="control-field w-full rounded-[10px] px-4 py-3 text-[13px] opacity-50 cursor-not-allowed"
+                  className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] opacity-50 cursor-not-allowed"
                 />
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
+                <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-[13px] font-medium text-slate-300 mb-2">Display Name</label>
+              <label className="block text-[13px] text-[#7a7773] mb-2">Display Name</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="control-field w-full rounded-[10px] px-4 py-3 text-[13px]"
+                className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
               />
             </div>
 
             <button
               type="submit"
               disabled={savingProfile}
-              className="btn-primary mt-3 flex items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[13px] font-semibold w-full"
+              className="flex h-[32px] mt-6 w-full items-center justify-center gap-2 rounded-[6px] border border-white/[0.08] bg-white/[0.04] text-[13px] text-[#f0ede8] transition-all hover:bg-white/[0.08] disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               {savingProfile ? "Saving…" : "Save Profile"}
@@ -159,7 +159,7 @@ export function Profile() {
             <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
               <KeyRound className="h-[18px] w-[18px]" />
             </div>
-            <h2 className="text-subtitle font-semibold text-white">Security</h2>
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Security</h2>
           </div>
           <form onSubmit={handleUpdatePassword} className="space-y-5">
             {passwordError && (
@@ -174,23 +174,23 @@ export function Profile() {
             )}
 
             <div>
-              <label className="block text-[13px] font-medium text-slate-300 mb-2">Current Password</label>
+              <label className="block text-[13px] text-[#7a7773] mb-2">Current Password</label>
               <input
                 type="password"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
-                className="control-field w-full rounded-[10px] px-4 py-3 text-[13px]"
+                className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-[13px] font-medium text-slate-300 mb-2">New Password</label>
+              <label className="block text-[13px] text-[#7a7773] mb-2">New Password</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="control-field w-full rounded-[10px] px-4 py-3 text-[13px]"
+                className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
                 required
               />
             </div>
@@ -198,7 +198,7 @@ export function Profile() {
             <button
               type="submit"
               disabled={savingPassword || !oldPassword || !newPassword}
-              className="btn-secondary mt-3 flex items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[13px] font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex h-[32px] mt-6 w-full items-center justify-center gap-2 rounded-[6px] border border-white/[0.08] bg-white/[0.04] text-[13px] text-[#f0ede8] transition-all hover:bg-white/[0.08] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <KeyRound className="h-4 w-4" />
               {savingPassword ? "Updating…" : "Update Password"}

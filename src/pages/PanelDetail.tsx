@@ -205,10 +205,10 @@ export function PanelDetail() {
   const visibleZones = Math.min(normalizedPanel.zoneCount || 0, 8);
 
   return (
-    <div className="animate-fade-in-up space-y-8">
+    <div className="animate-fade-in p-[32px] space-y-8">
       {/* Header card — glows red when alarm is active */}
       <section
-        className={`surface-panel relative overflow-hidden rounded-card p-6 transition-all duration-500 ease-smooth ${
+        className={`surface-panel relative overflow-hidden rounded-[14px] p-6 transition-all duration-500 ease-smooth ${
           hasAlarm ? "shadow-[0_0_60px_rgba(239,68,68,0.15),0_0_20px_rgba(239,68,68,0.1)]" : ""
         }`}
       >
@@ -229,7 +229,7 @@ export function PanelDetail() {
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="font-display truncate text-display text-balance leading-tight text-white">
+                <h1 className="font-display text-[22px] font-bold tracking-tight text-[#f0ede8]">
                   {normalizedPanel.name}
                 </h1>
 
@@ -318,10 +318,10 @@ export function PanelDetail() {
       {/* Zones tab */}
       {activeTab === "zones" && (
         <div className="animate-fade-in space-y-6">
-          <section className="surface-panel rounded-card p-6">
+          <section className="surface-panel rounded-[14px] p-6">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="font-display text-subtitle text-balance text-white">
+                <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
                   Zone Status Grid
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
@@ -409,9 +409,9 @@ export function PanelDetail() {
             </div>
           )}
 
-          <section className="surface-panel rounded-card p-6">
+          <section className="surface-panel rounded-[14px] p-6">
             <div className="mb-6">
-              <h3 className="font-display text-subtitle text-balance text-white">
+              <h3 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
                 Available Commands
               </h3>
               <p className="mt-1.5 text-sm text-slate-500">
@@ -465,7 +465,7 @@ export function PanelDetail() {
         <div className="animate-fade-in space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-display text-subtitle text-balance text-white">
+              <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
                 Event History
               </h2>
               <p className="mt-1 text-sm text-slate-500">Panel event stream</p>
@@ -553,7 +553,7 @@ export function PanelDetail() {
       {activeTab === "contacts" && (
         <div className="animate-fade-in space-y-5">
           <div className="mb-6">
-            <h2 className="font-display text-subtitle text-balance text-white">
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
               Contact Numbers
             </h2>
             <p className="mt-1.5 text-sm text-slate-500">

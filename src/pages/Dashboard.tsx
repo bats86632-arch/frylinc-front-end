@@ -62,22 +62,22 @@ export function Dashboard() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="animate-fade-in p-[32px] space-y-8">
       {/* ── Stats Row ──────────────────────────────────────────────────────── */}
       <div className="grid gap-6">
         {/* Hero Card */}
-        <div className="surface-panel p-[20px] border-t-2 border-[#e53d3d]">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">Active Alarms</p>
-          <p className={`mt-3 font-['Barlow_Condensed'] text-[56px] leading-none tabular-nums ${activeAlarms > 0 ? 'text-[#e53d3d]' : 'text-[#f0ede8]'}`}>
+        <div className="surface-panel p-[20px] border-t-2 border-[#e53d3d] rounded-[14px]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Active Alarms</p>
+          <p className={`mt-2 font-display text-[32px] font-bold leading-none tabular-nums ${activeAlarms > 0 ? 'text-[#e53d3d]' : 'text-[#f0ede8]'}`}>
             {activeAlarms}
           </p>
         </div>
 
         {/* Secondary Stats */}
         <div className="grid gap-6 sm:grid-cols-2">
-          <div className="surface-panel p-[20px] border-t-2 border-[#34d399]">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">Online Panels</p>
-            <p className="mt-2 font-display text-[2rem] font-medium leading-none tabular-nums text-[#f0ede8]">
+          <div className="surface-panel p-[20px] border-t-2 border-[#34d399] rounded-[14px]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Online Panels</p>
+            <p className="mt-2 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
               {onlinePanels}
             </p>
             <div className="mt-5 flex gap-[2px]">
@@ -87,9 +87,9 @@ export function Dashboard() {
             </div>
           </div>
 
-          <div className="surface-panel p-[20px] border-t-2 border-white/10">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">Total Devices</p>
-            <p className="mt-2 font-display text-[2rem] font-medium leading-none tabular-nums text-[#f0ede8]">
+          <div className="surface-panel p-[20px] border-t-2 border-white/10 rounded-[14px]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Total Devices</p>
+            <p className="mt-2 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
               {(panels || []).length}
             </p>
           </div>
