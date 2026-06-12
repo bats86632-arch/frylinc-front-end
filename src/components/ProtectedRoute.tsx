@@ -25,7 +25,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
           </div>
           <div className="flex items-center gap-2.5">
             <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span className="text-sm font-medium text-slate-400">Loading Fyrlinc…</span>
+            <span className="text-[13px] font-medium text-slate-400">Loading Fyrlinc…</span>
           </div>
         </div>
       </div>

@@ -88,9 +88,9 @@ export function AuthLayout() {
                     >
                       <row.icon className={`h-[18px] w-[18px] ${row.tone}`} />
                     </div>
-                    <span className="text-sm font-semibold text-white/80">{row.label}</span>
+                    <span className="text-[13px] font-semibold text-white/80">{row.label}</span>
                   </div>
-                  <span className={`text-sm font-bold tracking-wide ${row.tone}`}>{row.value}</span>
+                  <span className={`text-[13px] font-bold tracking-wide ${row.tone}`}>{row.value}</span>
                 </div>
               ))}
             </div>
@@ -101,7 +101,7 @@ export function AuthLayout() {
               style={{ animationDelay: "300ms" }}
             >
               <div className="mb-5 flex items-center justify-between">
-                <span className="text-sm font-semibold text-white/90">Zone telemetry</span>
+                <span className="text-[13px] font-semibold text-white/90">Zone telemetry</span>
                 <span className="rounded-full bg-white/[0.06] border border-white/[0.08] px-2.5 py-1 text-[10px] font-bold text-white/40 tracking-wider uppercase">8 zones</span>
               </div>
               <div className="grid grid-cols-4 gap-3">
@@ -146,7 +146,7 @@ export function AuthLayout() {
               </div>
               <div>
                 <p className="font-display text-[1.25rem] font-bold tracking-tight text-white leading-none">Fyrlinc</p>
-                <p className="mt-1 text-sm text-white/40 font-medium">Fire Alarm Panel Monitoring</p>
+                <p className="mt-1 text-[13px] text-white/40 font-medium">Fire Alarm Panel Monitoring</p>
               </div>
             </div>
             <Outlet />

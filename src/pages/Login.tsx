@@ -107,7 +107,7 @@ export function Login() {
       {error && (
         <div className="mb-7 flex items-start gap-3 rounded-[12px] border border-[rgba(232,23,58,0.30)] bg-[rgba(232,23,58,0.12)] p-4 animate-fade-in inset-highlight">
           <AlertCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#ff8099]" />
-          <p className="text-sm font-medium leading-6 text-[#ffb3c0]">{error}</p>
+          <p className="text-[13px] font-medium leading-6 text-[#ffb3c0]">{error}</p>
         </div>
       )}
 
@@ -120,7 +120,7 @@ export function Login() {
           <div>
             <label
               htmlFor="email"
-              className="mb-2.5 block text-sm font-semibold text-white/80"
+              className="mb-2.5 block text-[13px] font-semibold text-white/80"
             >
               Email address
             </label>
@@ -129,7 +129,7 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full px-4 py-3.5 text-sm font-medium ${
+                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium ${
                   errors.email ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)] pr-10" : ""
                 }`}
                 placeholder="you@example.com"
@@ -150,7 +150,7 @@ export function Login() {
           <div>
             <label
               htmlFor="password"
-              className="mb-2.5 block text-sm font-semibold text-white/80"
+              className="mb-2.5 block text-[13px] font-semibold text-white/80"
             >
               Password
             </label>
@@ -159,7 +159,7 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full px-4 py-3.5 pr-12 text-sm font-medium ${
+                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium ${
                   errors.password ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)]" : ""
                 }`}
                 placeholder="Enter your password"

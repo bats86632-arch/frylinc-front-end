@@ -56,7 +56,7 @@ export function Dashboard() {
       <div className="surface-panel p-8 text-center animate-fade-in-up">
         <ShieldAlert className="mx-auto h-12 w-12 text-[#e8173a] opacity-80 mb-4" />
         <p className="text-[15px] font-bold text-white drop-shadow-sm">System Error</p>
-        <p className="mt-2 text-sm text-[#ff8099]">{error}</p>
+        <p className="mt-2 text-[13px] text-[#ff8099]">{error}</p>
       </div>
     );
   }
@@ -148,7 +148,7 @@ export function Dashboard() {
         <div className="surface-panel py-20 text-center">
           <Activity className="mx-auto mb-4 h-12 w-12 text-white/20" />
           <p className="text-[16px] font-bold text-white drop-shadow-sm">No panels found</p>
-          <p className="mt-2 text-sm font-medium text-white/40">
+          <p className="mt-2 text-[13px] font-medium text-white/40">
             {searchQuery
               ? "Try adjusting your search query."
               : "No panels match the current filter."}

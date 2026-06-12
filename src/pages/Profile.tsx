@@ -97,34 +97,34 @@ export function Profile() {
           </div>
           <form onSubmit={handleSaveProfile} className="space-y-5">
             {profileError && (
-              <div className="flex items-center gap-2.5 rounded-[10px] text-sm text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
+              <div className="flex items-center gap-2.5 rounded-[10px] text-[13px] text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
                 <AlertCircle className="h-4 w-4 shrink-0" /> {profileError}
               </div>
             )}
             {profileSuccess && (
-              <div className="flex items-center gap-2.5 rounded-[10px] text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
+              <div className="flex items-center gap-2.5 rounded-[10px] text-[13px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
                 <CheckCircle className="h-4 w-4 shrink-0" /> Profile updated successfully
               </div>
             )}
             
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
+              <label className="block text-[13px] font-medium text-slate-300 mb-2">Email</label>
               <input
                 type="text"
                 value={userData?.email || ""}
                 disabled
-                className="control-field w-full rounded-[10px] px-4 py-3 text-sm opacity-50 cursor-not-allowed"
+                className="control-field w-full rounded-[10px] px-4 py-3 text-[13px] opacity-50 cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Role</label>
+              <label className="block text-[13px] font-medium text-slate-300 mb-2">Role</label>
               <div className="flex items-center gap-3">
                 <input
                   type="text"
                   value={roleLabel}
                   disabled
-                  className="control-field w-full rounded-[10px] px-4 py-3 text-sm opacity-50 cursor-not-allowed"
+                  className="control-field w-full rounded-[10px] px-4 py-3 text-[13px] opacity-50 cursor-not-allowed"
                 />
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
                   <ShieldCheck className="h-4 w-4" />
@@ -133,19 +133,19 @@ export function Profile() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Display Name</label>
+              <label className="block text-[13px] font-medium text-slate-300 mb-2">Display Name</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
+                className="control-field w-full rounded-[10px] px-4 py-3 text-[13px]"
               />
             </div>
 
             <button
               type="submit"
               disabled={savingProfile}
-              className="btn-primary mt-3 flex items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-sm font-semibold w-full"
+              className="btn-primary mt-3 flex items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[13px] font-semibold w-full"
             >
               <Save className="h-4 w-4" />
               {savingProfile ? "Saving…" : "Save Profile"}
@@ -163,34 +163,34 @@ export function Profile() {
           </div>
           <form onSubmit={handleUpdatePassword} className="space-y-5">
             {passwordError && (
-              <div className="flex items-center gap-2.5 rounded-[10px] text-sm text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
+              <div className="flex items-center gap-2.5 rounded-[10px] text-[13px] text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
                 <AlertCircle className="h-4 w-4 shrink-0" /> {passwordError}
               </div>
             )}
             {passwordSuccess && (
-              <div className="flex items-center gap-2.5 rounded-[10px] text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
+              <div className="flex items-center gap-2.5 rounded-[10px] text-[13px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
                 <CheckCircle className="h-4 w-4 shrink-0" /> Password updated successfully
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Current Password</label>
+              <label className="block text-[13px] font-medium text-slate-300 mb-2">Current Password</label>
               <input
                 type="password"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
-                className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
+                className="control-field w-full rounded-[10px] px-4 py-3 text-[13px]"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">New Password</label>
+              <label className="block text-[13px] font-medium text-slate-300 mb-2">New Password</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="control-field w-full rounded-[10px] px-4 py-3 text-sm"
+                className="control-field w-full rounded-[10px] px-4 py-3 text-[13px]"
                 required
               />
             </div>
@@ -198,7 +198,7 @@ export function Profile() {
             <button
               type="submit"
               disabled={savingPassword || !oldPassword || !newPassword}
-              className="btn-secondary mt-3 flex items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-sm font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-secondary mt-3 flex items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[13px] font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <KeyRound className="h-4 w-4" />
               {savingPassword ? "Updating…" : "Update Password"}
