@@ -7,18 +7,7 @@ interface PanelCardProps {
   panel: Panel;
 }
 
-const ZONE_NAMES = [
-  "Main Entrance",
-  "Lobby Reception",
-  "Server Room A",
-  "HVAC Control",
-  "Storage B",
-  "Kitchen Area",
-  "Loading Dock",
-  "Emergency Exit"
-];
-
-export function PanelCard({ panel }: PanelCardProps) {
+  export function PanelCard({ panel }: PanelCardProps) {
   const [resolvingZone, setResolvingZone] = useState<number | null>(null);
   const [isResolving, setIsResolving] = useState(false);
 
@@ -38,7 +27,7 @@ export function PanelCard({ panel }: PanelCardProps) {
     const isAlarm = panel.zones && i < panel.zones.length ? Boolean(panel.zones[i]) : false;
     return {
       index: i,
-      name: ZONE_NAMES[i % ZONE_NAMES.length],
+      name: `Zone ${i + 1}`,
       state: getZoneState(isAlarm, i, panel.serial || "A"),
     };
   });
@@ -229,7 +218,7 @@ export function PanelCard({ panel }: PanelCardProps) {
               </div>
               <h3 className="font-display text-lg font-bold text-[#f0ede8]">Resolve Zone Alarm</h3>
               <p className="mt-2 text-[13px] text-[#7a7773]">
-                Zone {resolvingZone + 1} ({ZONE_NAMES[resolvingZone % ZONE_NAMES.length]}) is currently in an alarm state. Have you inspected and resolved the physical issue?
+                Zone {resolvingZone + 1} is currently in an alarm state. Have you inspected and resolved the physical issue?
               </p>
 
               <div className="mt-6 flex items-center justify-end gap-3">
