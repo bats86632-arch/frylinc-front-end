@@ -230,11 +230,11 @@ export function Dashboard() {
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredPanels.map((panel, idx) => (
             <div
-              key={panel.id}
+              key={panel.serial || Math.random().toString()}
               className="animate-fade-in-up"
               style={{ animationDelay: `${idx * 40}ms` }}
             >
-              <Link to={`/panel/${panel.id}`} className="block h-full group">
+              <Link to={`/panel/${panel.serial}`} className="block h-full group">
                 <PanelCard panel={panel} />
               </Link>
             </div>
