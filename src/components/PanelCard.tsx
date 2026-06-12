@@ -16,10 +16,6 @@ interface PanelCardProps {
   
   const getZoneState = (isAlarm: boolean, idx: number, serial: string) => {
     if (isAlarm) return "alarm";
-    // Mock visual states for demonstration purposes
-    const hash = (serial.charCodeAt(serial.length - 1) + idx) % 10;
-    if (hash === 3) return "warning";
-    if (hash === 7) return "offline";
     return "clear";
   };
 
