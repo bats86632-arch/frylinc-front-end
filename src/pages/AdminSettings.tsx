@@ -632,13 +632,14 @@ export function AdminSettings() {
 
       {/* Edit User modal overlay */}
       {editingUserData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setEditingUserData(null)}
           />
-          <div className="animate-slide-up bg-[#141412] relative w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-[14px] border border-white/[0.06] shadow-2xl">
-            <div className="p-7">
+          <div className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2">
+            <div className="animate-slide-up bg-[#141412] relative w-full max-h-[90vh] overflow-y-auto rounded-[14px] border border-white/[0.06] shadow-2xl">
+              <div className="p-7">
               <div className="mb-6 flex items-start justify-between gap-4">
                 <div>
                   <h3 className="font-display text-[18px] font-bold text-[#f0ede8]">Edit User</h3>
@@ -758,6 +759,7 @@ export function AdminSettings() {
                 </div>
               </form>
             </div>
+            </div>
           </div>
         </div>
       )}
@@ -838,13 +840,14 @@ export function AdminSettings() {
 
         {/* Add Panel modal overlay */}
         {panelFormOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50">
             <div
               className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
               onClick={() => setPanelFormOpen(false)}
             />
-            <div className="animate-slide-up bg-[#141412] relative w-full max-w-md overflow-y-auto max-h-[90vh] rounded-[14px] border border-white/[0.06] shadow-2xl">
-              <div className="p-7">
+            <div className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2">
+              <div className="animate-slide-up bg-[#141412] relative w-full max-h-[90vh] overflow-y-auto rounded-[14px] border border-white/[0.06] shadow-2xl">
+                <div className="p-7">
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
                     <h3 className="font-display text-[18px] font-bold text-[#f0ede8]">
@@ -963,6 +966,7 @@ export function AdminSettings() {
                     </button>
                   </div>
                 </form>
+              </div>
               </div>
             </div>
           </div>
