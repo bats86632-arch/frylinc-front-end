@@ -72,7 +72,7 @@ export function Profile() {
     .join(" ") || "End User";
 
   return (
-    <div className="animate-fade-in p-[32px] mx-auto max-w-3xl space-y-8">
+    <div className="animate-fade-in p-[32px] space-y-8">
       {/* Profile header with avatar */}
       <section className="surface-panel rounded-[14px] p-6">
         <div className="flex items-center gap-5">
