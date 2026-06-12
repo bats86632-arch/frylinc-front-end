@@ -637,7 +637,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setEditingUserData(null)}
           />
-          <div className="fixed left-1/2 top-[calc(50%+36px)] sm:top-1/2 z-[101] w-[calc(100%-32px)] max-w-lg -translate-x-1/2 -translate-y-1/2">
+          <div className="fixed left-1/2 top-[calc(60%+36px)] sm:top-1/2 z-[101] w-[calc(100%-32px)] max-w-lg -translate-x-1/2 -translate-y-1/2">
             <div 
               className="animate-slide-up bg-[#141412] relative w-full max-h-[85vh] overflow-y-auto rounded-[16px] border border-white/[0.06] shadow-2xl box-border"
               style={{ WebkitOverflowScrolling: "touch" }}
@@ -848,7 +848,7 @@ export function AdminSettings() {
               className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
               onClick={() => setPanelFormOpen(false)}
             />
-            <div className="fixed left-1/2 top-[calc(50%+36px)] sm:top-1/2 z-[101] w-[calc(100%-32px)] max-w-md -translate-x-1/2 -translate-y-1/2">
+            <div className="fixed left-1/2 top-[calc(60%+36px)] sm:top-1/2 z-[101] w-[calc(100%-32px)] max-w-md -translate-x-1/2 -translate-y-1/2">
               <div 
                 className="animate-slide-up bg-[#141412] relative w-full max-h-[85vh] overflow-y-auto rounded-[16px] border border-white/[0.06] shadow-2xl box-border"
                 style={{ WebkitOverflowScrolling: "touch" }}
