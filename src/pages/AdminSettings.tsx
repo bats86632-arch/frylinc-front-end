@@ -632,15 +632,18 @@ export function AdminSettings() {
 
       {/* Edit User modal overlay */}
       {editingUserData && (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-[100]">
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setEditingUserData(null)}
           />
-          <div className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2">
-            <div className="animate-slide-up bg-[#141412] relative w-full max-h-[90vh] overflow-y-auto rounded-[14px] border border-white/[0.06] shadow-2xl">
-              <div className="p-7">
-              <div className="mb-6 flex items-start justify-between gap-4">
+          <div className="fixed left-1/2 top-1/2 z-[101] w-[calc(100%-32px)] max-w-lg -translate-x-1/2 -translate-y-1/2">
+            <div 
+              className="animate-slide-up bg-[#141412] relative w-full max-h-[85vh] overflow-y-auto rounded-[16px] border border-white/[0.06] shadow-2xl box-border"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
+              <div className="p-[20px] sm:p-7">
+              <div className="mb-5 sm:mb-6 flex items-start justify-between gap-4">
                 <div>
                   <h3 className="font-display text-[18px] font-bold text-[#f0ede8]">Edit User</h3>
                   <p className="mt-1 text-[13px] text-[#7a7773]">
@@ -655,7 +658,7 @@ export function AdminSettings() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmitEditUser(handleEditUser)} className="space-y-5">
+              <form onSubmit={handleSubmitEditUser(handleEditUser)} className="space-y-4 [@media(max-height:380px)]:space-y-3 sm:space-y-5">
                 <div>
                   <label className="mb-2 block text-[13px] text-[#7a7773]">Display Name</label>
                   <input
@@ -669,7 +672,7 @@ export function AdminSettings() {
                   )}
                 </div>
 
-                <div className="grid gap-5 md:grid-cols-2">
+                <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-[13px] text-[#7a7773]">Email</label>
                     <input
@@ -840,15 +843,18 @@ export function AdminSettings() {
 
         {/* Add Panel modal overlay */}
         {panelFormOpen && (
-          <div className="fixed inset-0 z-50">
+          <div className="fixed inset-0 z-[100]">
             <div
               className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
               onClick={() => setPanelFormOpen(false)}
             />
-            <div className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2">
-              <div className="animate-slide-up bg-[#141412] relative w-full max-h-[90vh] overflow-y-auto rounded-[14px] border border-white/[0.06] shadow-2xl">
-                <div className="p-7">
-                <div className="mb-6 flex items-start justify-between gap-4">
+            <div className="fixed left-1/2 top-1/2 z-[101] w-[calc(100%-32px)] max-w-md -translate-x-1/2 -translate-y-1/2">
+              <div 
+                className="animate-slide-up bg-[#141412] relative w-full max-h-[85vh] overflow-y-auto rounded-[16px] border border-white/[0.06] shadow-2xl box-border"
+                style={{ WebkitOverflowScrolling: "touch" }}
+              >
+                <div className="p-[20px] sm:p-7">
+                <div className="mb-5 sm:mb-6 flex items-start justify-between gap-4">
                   <div>
                     <h3 className="font-display text-[18px] font-bold text-[#f0ede8]">
                       Add New Panel
@@ -865,7 +871,7 @@ export function AdminSettings() {
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit(handleCreatePanel)} className="space-y-5">
+                <form onSubmit={handleSubmit(handleCreatePanel)} className="space-y-4 [@media(max-height:380px)]:space-y-3 sm:space-y-5">
                   <div>
                     <label className="mb-2 block text-[13px] text-[#7a7773]">Serial Number</label>
                     <input
