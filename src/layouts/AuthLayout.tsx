@@ -129,8 +129,7 @@ export function AuthLayout() {
             </div>
           </div>
 
-          {/* Bottom hairline */}
-          <div className="absolute inset-x-0 bottom-0 h-px bg-white/[0.04]" />
+
         </section>
 
         {/* ── Right auth panel ────────────────────────────────────────────── */}
