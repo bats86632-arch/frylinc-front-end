@@ -30,23 +30,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadUserProfile = async (user: FirebaseUser) => {
-    const tokenResult = await user.getIdTokenResult(true);
+  const loadUserProfile = async (user: FirebaseUser, forceRefresh = false) => {
+    // Phase 1: Instant load from cached JWT
+    const tokenResult = await user.getIdTokenResult(forceRefresh);
     const customClaims = tokenResult.claims;
-    const response = await apiClient.get('/me');
-    const profile = response.data;
 
-    const userData: User = {
+    const initialUserData: User = {
       uid: user.uid,
-      email: user.email || profile.email || '',
-      displayName: profile.displayName || user.displayName || 'User',
-      role: (customClaims.role as Role) || profile.role || 'end_user',
-      companyId: profile.companyId || customClaims.companyId || undefined,
-      branchIds: (profile.branchIds as string[]) || (customClaims.branchIds as string[]) || []
+      email: user.email || '',
+      displayName: user.displayName || 'User',
+      role: (customClaims.role as Role) || 'end_user',
+      companyId: customClaims.companyId as string | undefined,
+      branchIds: (customClaims.branchIds as string[]) || []
     };
 
-    setUserData(userData);
-    setRole(userData.role);
+    setUserData(initialUserData);
+    setRole(initialUserData.role);
+
+    // Phase 2: Silent background sync
+    apiClient.get('/me')
+      .then(response => {
+        const profile = response.data;
+        setUserData(prev => {
+          if (!prev) return prev;
+          const updatedRole = profile.role || prev.role;
+          setRole(updatedRole); // Keep role state in sync
+          return {
+            ...prev,
+            email: user.email || profile.email || prev.email,
+            displayName: profile.displayName || user.displayName || prev.displayName,
+            role: updatedRole,
+            companyId: profile.companyId || prev.companyId,
+            branchIds: profile.branchIds || prev.branchIds
+          };
+        });
+      })
+      .catch(error => {
+        console.warn('Silent sync failed:', error);
+      });
   };
 
   useEffect(() => {
@@ -74,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUserData = async () => {
     if (!auth.currentUser) return;
-    await loadUserProfile(auth.currentUser);
+    await loadUserProfile(auth.currentUser, true);
   };
 
   const saveDisplayName = async (displayName: string) => {
