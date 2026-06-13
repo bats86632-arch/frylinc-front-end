@@ -1,56 +1,61 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { PanelsProvider } from './contexts/PanelsContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainDashboardLayout } from './layouts/MainDashboardLayout';
-import { Login } from './pages/Login';
-import { Dashboard } from './pages/Dashboard';
-import { PanelDetail } from './pages/PanelDetail';
-import { AdminSettings } from './pages/AdminSettings';
-import { Profile } from './pages/Profile';
-import { PrivacyPolicy } from './pages/PrivacyPolicy';
-import { TermsOfService } from './pages/TermsOfService';
+import { PageLoader } from './components/PageLoader';
+
+const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const PanelDetail = lazy(() => import('./pages/PanelDetail').then(m => ({ default: m.PanelDetail })));
+const AdminSettings = lazy(() => import('./pages/AdminSettings').then(m => ({ default: m.AdminSettings })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
+const TermsOfService = lazy(() => import('./pages/TermsOfService').then(m => ({ default: m.TermsOfService })));
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <PanelsProvider>
-          <Routes>
-            {/* Auth routes */}
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-            </Route>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Auth routes */}
+              <Route element={<AuthLayout />}>
+                <Route path="/login" element={<Login />} />
+              </Route>
 
-            {/* Public Legal routes (Play Store requirement) */}
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsOfService />} />
+              {/* Public Legal routes (Play Store requirement) */}
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
 
-            {/* Protected routes */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <MainDashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/panel/:serial" element={<PanelDetail />} />
-              <Route path="/profile" element={<Profile />} />
+              {/* Protected routes */}
               <Route
-                path="/admin"
                 element={
-                  <ProtectedRoute allowedRoles={['super_admin', 'head_office', 'system_integrator']}>
-                    <AdminSettings />
+                  <ProtectedRoute>
+                    <MainDashboardLayout />
                   </ProtectedRoute>
                 }
-              />
-            </Route>
+              >
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/panel/:serial" element={<PanelDetail />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['super_admin', 'head_office', 'system_integrator']}>
+                      <AdminSettings />
+                    </ProtectedRoute>
+                  }
+                />
+              </Route>
 
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              {/* Catch-all redirect */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </PanelsProvider>
       </AuthProvider>
     </BrowserRouter>
