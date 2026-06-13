@@ -310,7 +310,11 @@ export function MainDashboardLayout() {
                     onClick={() => setUserMenuOpen(false)}
                   />
                   <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-64 rounded-[16px] p-2 animate-scale-in origin-top sm:origin-top-right">
-                    <div className="border-b border-white/[0.06] p-4 mb-2">
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="block border-b border-white/[0.06] p-4 mb-2 rounded-[10px] transition-all duration-150 hover:bg-white/[0.04] text-left"
+                    >
                       <p className="truncate text-[15px] font-bold text-white drop-shadow-sm">
                         {userData?.displayName}
                       </p>
@@ -320,7 +324,7 @@ export function MainDashboardLayout() {
                       <span className="mt-3 inline-flex rounded-full border border-white/[0.10] bg-white/[0.06] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white/70 inset-highlight shadow-sm">
                         {roleLabel}
                       </span>
-                    </div>
+                    </Link>
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2.5 rounded-[10px] px-4 py-3 text-[14px] font-bold text-[#ff8099] transition-all duration-150 hover:bg-[rgba(232,23,58,0.10)]"

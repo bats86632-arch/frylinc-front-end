@@ -463,16 +463,16 @@ export function AdminSettings() {
               {companies.map((company) => (
                 <div
                   key={company.id}
-                  className="group flex flex-col gap-3 rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-3 transition-all hover:border-white/[0.12] sm:flex-row sm:items-center sm:justify-between"
+                  className="flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors gap-3"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-[13px] font-medium text-white/90"
                       style={{ backgroundColor: getAvatarColor(company.name) }}
                     >
                       {company.name.charAt(0).toUpperCase()}
                     </div>
-                    <div className="min-w-0">
+                    <div className="flex flex-col min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate text-[13px] font-medium text-[#f0ede8]">
                           {company.name}
@@ -487,13 +487,13 @@ export function AdminSettings() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 shrink-0 sm:flex-1">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => openEditCompany(company)}
-                      className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f0ede8] opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
+                      className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.04] hover:text-[#f0ede8] transition-colors"
                       aria-label="Edit company"
                     >
-                      <Edit2 className="h-[14px] w-[14px]" />
+                      <Edit2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -639,26 +639,31 @@ export function AdminSettings() {
             {users.map((user) => (
               <div
                 key={user.uid}
-                className="group flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors"
+                className="flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors gap-3"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div
-                    className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full text-[12px] font-medium text-white"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-[13px] font-medium text-white/90"
                     style={{ backgroundColor: getAvatarColor(user.displayName || user.email) }}
                   >
                     {user.displayName?.charAt(0).toUpperCase() || "U"}
                   </div>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-[13px] font-medium text-[#f0ede8] truncate">
-                      {user.displayName?.toLowerCase().includes("damn") ? "Test User" : user.displayName || "Test User"}
-                    </span>
-                    <span className="text-[13px] text-[#7a7773] truncate">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-[13px] font-medium text-[#f0ede8]">
+                        {user.displayName?.toLowerCase().includes("damn") ? "Test User" : user.displayName || "Test User"}
+                      </span>
+                      <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
+                        {roleLabels[user.role as Role] || "User"}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 truncate text-[11px] text-[#7a7773]">
                       {user.email.includes("bats86632") ? "test@example.com" : user.email}
-                    </span>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-1 sm:gap-2 shrink-0 ml-3">
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => openEditUser(user)}
                     className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.04] hover:text-[#f0ede8] transition-colors"
@@ -668,7 +673,7 @@ export function AdminSettings() {
                   </button>
                   <button
                     onClick={() => handleDeleteUser(user.uid)}
-                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] opacity-0 group-hover:opacity-100 hover:bg-white/[0.04] transition-all duration-150"
+                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-[rgba(248,113,113,0.1)] transition-colors"
                     aria-label="Delete user"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -925,38 +930,41 @@ export function AdminSettings() {
               return (
                 <div
                   key={panel.serial || Math.random().toString()}
-                  className="group flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors gap-2"
+                  className="flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors gap-3"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className={`h-[8px] w-[8px] shrink-0 rounded-full ${statusColor}`} />
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[13px] font-medium text-[#f0ede8] truncate">
-                        {panel.name || "Unknown Panel"}
-                      </span>
-                      <span className="text-[12px] text-[#7a7773] shrink-0">
-                        {panel.serial || "No serial"}
-                      </span>
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-white/[0.05]">
+                      <div className={`h-[8px] w-[8px] rounded-full ${statusColor}`} />
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-[13px] font-medium text-[#f0ede8]">
+                          {panel.name || "Unknown Panel"}
+                        </span>
+                        <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
+                          {panel.serial || "No serial"}
+                        </span>
+                      </div>
+                      <div className="mt-0.5 truncate text-[11px] text-[#7a7773]">
+                        Last active: {getPanelHeartbeat(panel.serial)}
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="flex-1 flex justify-center text-[12px] text-[#7a7773] whitespace-nowrap">
-                    {getPanelHeartbeat(panel.serial)}
-                  </div>
 
-                  <div className="flex items-center justify-end gap-2 shrink-0 flex-1">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Link
                       to={`/panel/${panel.serial}`}
-                      className="flex h-[28px] items-center justify-center rounded-[6px] border border-white/[0.08] bg-transparent px-[10px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+                      className="flex h-[30px] items-center justify-center rounded-[6px] border border-white/[0.08] bg-transparent px-[10px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
                     >
                       View
                     </Link>
                     {hasRole(["super_admin", "head_office", "system_integrator"]) && (
                       <button
                         onClick={() => handleDeletePanel(panel.serial)}
-                        className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] opacity-100 sm:opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
+                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-[rgba(248,113,113,0.1)] transition-colors"
                         aria-label="Delete panel"
                       >
-                        <Trash2 className="h-[14px] w-[14px]" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     )}
                   </div>
