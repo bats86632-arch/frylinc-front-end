@@ -19,7 +19,7 @@ export const ZONE_STATUS = {
   ISOLATE: '5',
 } as const;
 
-export function normalizeAllowedCommands(commands: string[] | undefined | null): string[] {
+export function normalizeAllowedCommands(): string[] {
   // Always return the fixed default commands
   return [...DEFAULT_PANEL_COMMANDS];
 }

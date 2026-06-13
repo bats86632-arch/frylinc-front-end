@@ -3,13 +3,13 @@ import { Link } from "react-router-dom";
 import { usePanels } from "../hooks/usePanels";
 import { useCompanies } from "../hooks/useCompanies";
 import { PanelCard } from "../components/PanelCard";
-import { Activity, Flame, Search, ShieldAlert, Users, LayoutDashboard, ArrowLeft, Building2, ChevronRight } from "lucide-react";
+import { Activity, Flame, Search, ShieldAlert, ArrowLeft, Building2, ChevronRight } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 type FilterStatus = "all" | "alarm" | "online" | "offline";
 
 export function Dashboard() {
-  const { userData, hasRole } = useAuth();
+  const { hasRole } = useAuth();
   const { panels, loading: panelsLoading, error } = usePanels();
   const { companies, loading: companiesLoading } = useCompanies();
   const [filter, setFilter] = useState<FilterStatus>("all");
@@ -287,3 +287,4 @@ export function Dashboard() {
     </div>
   );
 }
+

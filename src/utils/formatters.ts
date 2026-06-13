@@ -1,10 +1,10 @@
-export function formatDate(date: any): string {
+export function formatDate(date: unknown): string {
   if (!date) return 'Unknown Date';
   let d: Date;
-  if (typeof date === 'object' && '_seconds' in date) {
-    d = new Date(date._seconds * 1000);
+  if (typeof date === 'object' && date !== null && '_seconds' in date) {
+    d = new Date((date as { _seconds: number })._seconds * 1000);
   } else {
-    d = new Date(date);
+    d = new Date(date as string | number | Date);
   }
   if (isNaN(d.getTime())) return 'Invalid Date';
   return d.toLocaleDateString('en-US', {
@@ -14,13 +14,13 @@ export function formatDate(date: any): string {
   });
 }
 
-export function formatTime(date: any): string {
+export function formatTime(date: unknown): string {
   if (!date) return 'Unknown Time';
   let d: Date;
-  if (typeof date === 'object' && '_seconds' in date) {
-    d = new Date(date._seconds * 1000);
+  if (typeof date === 'object' && date !== null && '_seconds' in date) {
+    d = new Date((date as { _seconds: number })._seconds * 1000);
   } else {
-    d = new Date(date);
+    d = new Date(date as string | number | Date);
   }
   if (isNaN(d.getTime())) return 'Invalid Time';
   return d.toLocaleTimeString('en-US', {
@@ -30,7 +30,7 @@ export function formatTime(date: any): string {
   });
 }
 
-export function formatDateTime(date: any): string {
+export function formatDateTime(date: unknown): string {
   if (!date) return 'Unknown';
   return `${formatDate(date)} ${formatTime(date)}`;
 }

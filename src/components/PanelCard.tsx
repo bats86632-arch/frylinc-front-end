@@ -14,7 +14,7 @@ interface PanelCardProps {
   // Ensure we always have exactly 8 zones (or zoneCount) to render
   const targetCount = panel.zoneCount || 8;
   
-  const getZoneState = (isAlarm: boolean, idx: number, serial: string) => {
+  const getZoneState = (isAlarm: boolean) => {
     if (isAlarm) return "alarm";
     return "clear";
   };
@@ -245,3 +245,4 @@ interface PanelCardProps {
     </>
   );
 }
+

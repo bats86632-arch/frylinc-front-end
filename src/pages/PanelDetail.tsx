@@ -511,7 +511,7 @@ export function PanelDetail() {
                     >
                       <td className="px-5 py-3.5 font-mono text-sm tabular-nums text-slate-300">
                         {formatDateTime(
-                          event.timestamp || (event as any).createdAt,
+                          event.timestamp || (event as { createdAt?: unknown }).createdAt,
                         )}
                       </td>
                       <td className="px-5 py-3.5">

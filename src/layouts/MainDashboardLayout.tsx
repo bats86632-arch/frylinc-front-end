@@ -8,7 +8,7 @@ import {
   LogOut,
   Menu,
   Settings,
-  ShieldCheck,
+  
   User as UserIcon,
   X,
 } from "lucide-react";
@@ -357,3 +357,5 @@ export function MainDashboardLayout() {
     </div>
   );
 }
+
+

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onSnapshot, collection, query, where, doc } from 'firebase/firestore';
+import { onSnapshot, collection, query, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Panel } from '../types';
 import { useAuth } from './AuthContext';
@@ -74,6 +74,7 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePanelsContext() {
   const context = useContext(PanelsContext);
   if (context === undefined) {

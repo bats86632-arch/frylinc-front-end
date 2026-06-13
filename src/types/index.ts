@@ -24,6 +24,7 @@ export interface Panel {
   mqttConnected: boolean;
   allowedCommands: string[];
   manuallyMarkedOffline?: boolean;
+}
 
 export interface CommandLog {
   id: string;

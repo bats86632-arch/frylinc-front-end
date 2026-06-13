@@ -26,8 +26,9 @@ export function Profile() {
       await saveDisplayName(displayName);
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
-    } catch (err: any) {
-      setProfileError(err.message || "Failed to update profile");
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setProfileError(error.message || "Failed to update profile");
     } finally {
       setSavingProfile(false);
     }
@@ -55,8 +56,9 @@ export function Profile() {
       setNewPassword("");
       setPasswordSuccess(true);
       setTimeout(() => setPasswordSuccess(false), 3000);
-    } catch (err: any) {
-      if (err.code === "auth/invalid-credential") {
+    } catch (err: unknown) {
+      const error = err as { code?: string; message?: string };
+      if (error.code === "auth/invalid-credential") {
         setPasswordError("Incorrect old password");
       } else {
         setPasswordError(err.message || "Failed to update password");

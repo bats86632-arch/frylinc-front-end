@@ -5,7 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { UserService } from "../api/UserService";
 import { PanelService } from "../api/PanelService";
-import { Panel, User, Role } from "../types";
+import { usePanels } from "../hooks/usePanels";
+import { usePanels } from "../hooks/usePanels";
+import { User, Role } from "../types";
 import { useAuth } from "../contexts/AuthContext";
 import { useCompanies } from "../hooks/useCompanies";
 import { CompanyService, Company } from "../api/CompanyService";
@@ -21,7 +23,6 @@ import {
   RefreshCw,
   XCircle,
   Trash2,
-  MoreHorizontal,
   Edit2
 } from "lucide-react";
 
@@ -70,12 +71,7 @@ const roleLabels: Record<Role, string> = {
   end_user: "Viewer", // Updated to map End User to "Viewer" per prompt
 };
 
-const roleStyles: Record<Role, React.CSSProperties> = {
-  super_admin: { backgroundColor: "rgba(229,61,61,0.12)", color: "#f87171" },
-  system_integrator: { backgroundColor: "rgba(234,179,8,0.12)", color: "#fbbf24" },
-  head_office: { backgroundColor: "rgba(255,255,255,0.07)", color: "rgba(240,237,232,0.5)" }, // Using Viewer style
-  end_user: { backgroundColor: "rgba(255,255,255,0.07)", color: "rgba(240,237,232,0.5)" },
-};
+
 
 const avatarColors = ["#8B4513", "#6B5B95", "#2E4A6B", "#4A5568", "#7B4F3A"];
 
@@ -99,9 +95,7 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 
 export function AdminSettings() {
   const [users, setUsers] = useState<User[]>([]);
-  const [panels, setPanels] = useState<Panel[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
-  const [panelsLoading, setPanelsLoading] = useState(true);
   const [editingUserData, setEditingUserData] = useState<User | null>(null);
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
@@ -111,7 +105,6 @@ export function AdminSettings() {
   const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
 
   const {
     register,
@@ -146,6 +139,8 @@ export function AdminSettings() {
   } = useForm<EditUserFormData>({ resolver: zodResolver(editUserSchema) });
 
   const { hasRole } = useAuth();
+  const { panels, loading: panelsLoading } = usePanels();
+  const { panels, loading: panelsLoading } = usePanels();
 
   const { companies, reloadCompanies, loading: companiesLoading } = useCompanies();
   const [editingCompanyData, setEditingCompanyData] = useState<Company | null>(null);
@@ -181,7 +176,7 @@ export function AdminSettings() {
       setEditingCompanyData(null);
       resetEditCompany();
       await reloadCompanies();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Failed to update company"));
     } finally {
       setEditCompanyFormLoading(false);
@@ -214,19 +209,43 @@ export function AdminSettings() {
       setSuccess("Company deleted successfully");
       setTimeout(() => setSuccess(null), 3000);
       await reloadCompanies();
-      await loadPanels();
       await loadUsers();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Failed to delete company"));
     } finally {
       setDeleteCompanyModalState(prev => ({ ...prev, isOpen: false }));
     }
   };
-
   useEffect(() => {
     loadUsers();
-    loadPanels();
   }, []);
+
+  useEffect(() => {
+    if (!panels || panels.length === 0 || syncingPanelDefaults) return;
+    const panelsMissingCommands = panels.filter(
+      (panel) =>
+        !Array.isArray(panel.allowedCommands) ||
+        panel.allowedCommands.length === 0,
+    );
+    if (panelsMissingCommands.length > 0) {
+      setSyncingPanelDefaults(true);
+      Promise.all(
+        panelsMissingCommands.map((panel) =>
+          PanelService.updatePanel(panel.serial, {
+            allowedCommands: [...DEFAULT_PANEL_COMMANDS],
+          }),
+        ),
+      ).then(() => {
+        setSuccess(`Applied default controls to ${panelsMissingCommands.length} panel${panelsMissingCommands.length === 1 ? "" : "s"}`);
+        setTimeout(() => setSuccess(null), 3000);
+      }).catch(err => {
+        console.error("Failed to sync default commands", err);
+      }).finally(() => {
+        setSyncingPanelDefaults(false);
+      });
+    }
+  }, [panels, syncingPanelDefaults]);
+
 
   const loadUsers = async () => {
     setUsersLoading(true);
@@ -240,46 +259,8 @@ export function AdminSettings() {
     }
   };
 
-  const loadPanels = async () => {
-    setPanelsLoading(true);
-    try {
-      const data = await PanelService.getPanels();
-      setPanels(data);
-
-      const panelsMissingCommands = data.filter(
-        (panel) =>
-          !Array.isArray(panel.allowedCommands) ||
-          panel.allowedCommands.length === 0,
-      );
-      if (panelsMissingCommands.length > 0 && !syncingPanelDefaults) {
-        setSyncingPanelDefaults(true);
-        try {
-          await Promise.all(
-            panelsMissingCommands.map((panel) =>
-              PanelService.updatePanel(panel.serial, {
-                allowedCommands: [...DEFAULT_PANEL_COMMANDS],
-              }),
-            ),
-          );
-          const refreshedPanels = await PanelService.getPanels();
-          setPanels(refreshedPanels);
-          setSuccess(
-            `Applied default controls to ${panelsMissingCommands.length} panel${panelsMissingCommands.length === 1 ? "" : "s"}`,
-          );
-          setTimeout(() => setSuccess(null), 3000);
-        } finally {
-          setSyncingPanelDefaults(false);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to load panels:", err);
-    } finally {
-      setPanelsLoading(false);
-    }
-  };
-
   const handleGlobalRefresh = async () => {
-    await Promise.all([loadUsers(), loadPanels()]);
+    await loadUsers();
   };
 
   const handleCreateUser = async (data: UserFormData) => {
@@ -356,7 +337,6 @@ export function AdminSettings() {
         : String(user.branchIds || "")
     );
     setEditUserValue("password", "");
-    setActionMenuOpen(null);
   };
 
   const handleCreatePanel = async (data: PanelFormData) => {
@@ -374,7 +354,6 @@ export function AdminSettings() {
       });
       setPanelFormOpen(false);
       reset();
-      await loadPanels();
       setSuccess("Panel created successfully");
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
@@ -385,7 +364,6 @@ export function AdminSettings() {
   };
 
   const handleDeleteUser = async (uid: string) => {
-    setActionMenuOpen(null);
     if (!window.confirm("Delete this user? Their account will be disabled."))
       return;
 
@@ -406,20 +384,11 @@ export function AdminSettings() {
     setError(null);
     try {
       await PanelService.deletePanel(serial);
-      await loadPanels();
       setSuccess("Panel deleted successfully");
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Failed to delete panel"));
     }
-  };
-
-  // Mock function for last active
-  const getLastActive = (uid: string) => {
-    // Generate deterministic mock time based on uid length/chars to keep it stable
-    const hash = uid.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const times = ["Just now", "2h ago", "4h ago", "1 day ago", "3 days ago"];
-    return times[hash % times.length];
   };
 
   // Mock function for panel heartbeat
@@ -952,7 +921,7 @@ export function AdminSettings() {
               Panel Provisioning
             </h2>
             <span className="hidden sm:inline-block text-[12px] text-[#7a7773]">
-              {!panelsLoading && `${panels.filter(p => true).length} of ${panels.length} panels online`}
+              {!panelsLoading && `${panels.filter(Boolean).length} of ${panels.length} panels online`}
             </span>
           </div>
           <button
@@ -1272,3 +1241,5 @@ export function AdminSettings() {
     </div>
   );
 }
+
+
