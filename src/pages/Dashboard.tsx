@@ -16,7 +16,7 @@ export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
 
-  const isSuperAdmin = hasRole("super_admin");
+  const isSuperAdmin = hasRole(["super_admin"]);
   const showCompanyView = isSuperAdmin && !selectedCompanyId;
 
   // Derive stats for Super Admin Company View
