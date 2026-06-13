@@ -65,6 +65,12 @@ const editCompanySchema = z.object({
 });
 type EditCompanyFormData = z.infer<typeof editCompanySchema>;
 
+const companySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+});
+type CompanyFormData = z.infer<typeof companySchema>;
+
 const roleLabels: Record<Role, string> = {
   super_admin: "Super Admin",
   head_office: "Head Office",
@@ -145,6 +151,8 @@ export function AdminSettings() {
   const { companies, reloadCompanies, loading: companiesLoading } = useCompanies();
   const [editingCompanyData, setEditingCompanyData] = useState<Company | null>(null);
   const [editCompanyFormLoading, setEditCompanyFormLoading] = useState(false);
+  const [companyFormOpen, setCompanyFormOpen] = useState(false);
+  const [companyFormLoading, setCompanyFormLoading] = useState(false);
   const [deleteCompanyModalState, setDeleteCompanyModalState] = useState<{
     isOpen: boolean;
     step: 1 | 2;
@@ -166,6 +174,28 @@ export function AdminSettings() {
     setValue: setEditCompanyValue,
     formState: { errors: editCompanyErrors },
   } = useForm<EditCompanyFormData>({ resolver: zodResolver(editCompanySchema) });
+
+  const {
+    register: registerCompany,
+    handleSubmit: handleSubmitCompany,
+    reset: resetCompany,
+    formState: { errors: companyErrors },
+  } = useForm<CompanyFormData>({ resolver: zodResolver(companySchema) });
+
+  const handleCreateCompany = async (data: CompanyFormData) => {
+    setCompanyFormLoading(true);
+    try {
+      await CompanyService.createCompany(data);
+      setSuccess("Company created successfully");
+      setCompanyFormOpen(false);
+      resetCompany();
+      await reloadCompanies();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to create company"));
+    } finally {
+      setCompanyFormLoading(false);
+    }
+  };
 
   const handleEditCompany = async (data: EditCompanyFormData) => {
     if (!editingCompanyData) return;
@@ -460,7 +490,7 @@ export function AdminSettings() {
                 Company Management
               </h2>
               <button
-                onClick={() => alert("Company creation coming soon")}
+                onClick={() => setCompanyFormOpen(true)}
                 className="flex h-[32px] items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
               >
                 <Plus className="h-[14px] w-[14px]" />
@@ -468,6 +498,71 @@ export function AdminSettings() {
               </button>
             </div>
             <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
+
+            {/* Company creation form */}
+            {companyFormOpen && (
+              <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-white/[0.06] p-6">
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className="text-balance text-[15px] font-bold text-[#f0ede8]">Create Company</h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCompanyFormOpen(false);
+                      resetCompany();
+                    }}
+                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] transition-all duration-200 ease-out hover:bg-white/[0.06] hover:text-[#f0ede8]"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmitCompany(handleCreateCompany)} className="space-y-5">
+                  <div>
+                    <label className="mb-2 block text-[13px] text-[#7a7773]">Company Name</label>
+                    <input
+                      {...registerCompany("name")}
+                      placeholder="e.g. Acme Corp"
+                      className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                      disabled={companyFormLoading}
+                    />
+                    {companyErrors.name && (
+                      <p className="mt-1 text-[12px] text-red-400">{companyErrors.name.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-[13px] text-[#7a7773]">Description</label>
+                    <textarea
+                      {...registerCompany("description")}
+                      className="control-field w-full rounded-[6px] px-3 py-2 text-[13px] resize-none"
+                      rows={3}
+                      disabled={companyFormLoading}
+                      placeholder="Optional details about this company"
+                    />
+                    {companyErrors.description && (
+                      <p className="mt-1 text-[12px] text-red-400">{companyErrors.description.message}</p>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      disabled={companyFormLoading}
+                      className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                    >
+                      {companyFormLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        "Create Company"
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
             
             {companiesLoading ? (
             <div className="flex justify-center py-6">

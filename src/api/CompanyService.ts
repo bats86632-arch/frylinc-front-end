@@ -8,6 +8,11 @@ export interface Company {
 }
 
 export const CompanyService = {
+  async createCompany(data: { name: string; description?: string }): Promise<Company> {
+    const response = await apiClient.post('/companies', data);
+    return response.data;
+  },
+  
   async getCompanies(): Promise<Company[]> {
     const response = await apiClient.get('/companies');
     return response.data.companies;
