@@ -59,6 +59,14 @@ type PanelFormData = z.infer<typeof panelSchema>;
 type UserFormData = z.infer<typeof userSchema>;
 type EditUserFormData = z.infer<typeof editUserSchema>;
 
+const editPanelSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  companyId: z.string().optional(),
+  branchId: z.string().optional(),
+  ipAddress: z.string().optional(),
+});
+type EditPanelFormData = z.infer<typeof editPanelSchema>;
+
 const editCompanySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
@@ -147,6 +155,16 @@ export function AdminSettings() {
 
   const { hasRole } = useAuth();
   const { panels, loading: panelsLoading } = usePanels();
+  const [editingPanelData, setEditingPanelData] = useState<Panel | null>(null);
+  const [editPanelFormLoading, setEditPanelFormLoading] = useState(false);
+
+  const {
+    register: registerEditPanel,
+    handleSubmit: handleSubmitEditPanel,
+    reset: resetEditPanel,
+    setValue: setEditPanelValue,
+    formState: { errors: editPanelErrors },
+  } = useForm<EditPanelFormData>({ resolver: zodResolver(editPanelSchema) });
 
   const { companies, reloadCompanies, loading: companiesLoading } = useCompanies();
   const [editingCompanyData, setEditingCompanyData] = useState<Company | null>(null);
@@ -195,6 +213,34 @@ export function AdminSettings() {
     } finally {
       setCompanyFormLoading(false);
     }
+  };
+
+  const handleEditPanel = async (data: EditPanelFormData) => {
+    if (!editingPanelData) return;
+    setEditPanelFormLoading(true);
+    try {
+      await PanelService.updatePanel(editingPanelData.serial, {
+        name: data.name,
+        companyId: data.companyId || undefined,
+        branchId: data.branchId || undefined,
+        ipAddress: data.ipAddress?.trim() || undefined,
+      });
+      setSuccess("Panel updated successfully");
+      setEditingPanelData(null);
+      resetEditPanel();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to update panel"));
+    } finally {
+      setEditPanelFormLoading(false);
+    }
+  };
+
+  const openEditPanel = (panel: Panel) => {
+    setEditingPanelData(panel);
+    setEditPanelValue("name", panel.name || "");
+    setEditPanelValue("companyId", panel.companyId || "");
+    setEditPanelValue("branchId", panel.branchId || "");
+    setEditPanelValue("ipAddress", panel.ipAddress || "");
   };
 
   const handleEditCompany = async (data: EditCompanyFormData) => {
@@ -1015,6 +1061,103 @@ export function AdminSettings() {
         </div>
       )}
 
+      {/* Edit Panel modal overlay */}
+      {editingPanelData && (
+        <div className="fixed inset-0 z-[100]">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setEditingPanelData(null)}
+          />
+          <div className="fixed left-1/2 top-[calc(60%+36px)] sm:top-1/2 z-[101] w-[calc(100%-32px)] max-w-lg -translate-x-1/2 -translate-y-1/2">
+            <div 
+              className="animate-slide-up bg-[#141412] relative w-full max-h-[85vh] overflow-y-auto rounded-[16px] border border-white/[0.06] shadow-2xl box-border"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
+              <div className="p-[20px] sm:p-7">
+                <div className="mb-5 sm:mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-display text-[18px] font-bold text-[#f0ede8]">Edit Panel</h3>
+                    <p className="mt-1 text-[13px] text-[#7a7773]">
+                      Update panel details
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setEditingPanelData(null)}
+                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] transition-all duration-200 hover:bg-white/[0.06] hover:text-[#f0ede8]"
+                  >
+                    <XCircle className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmitEditPanel(handleEditPanel)} className="space-y-4 [@media(max-height:380px)]:space-y-3 sm:space-y-5">
+                  <div>
+                    <label className="mb-2 block text-[13px] text-[#7a7773]">Panel Name</label>
+                    <input
+                      {...registerEditPanel("name")}
+                      placeholder="Building A - Floor 1"
+                      className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                      disabled={editPanelFormLoading}
+                    />
+                    {editPanelErrors.name && (
+                      <p className="mt-1 text-[12px] text-red-400">{editPanelErrors.name.message}</p>
+                    )}
+                  </div>
+
+                  <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-[13px] text-[#7a7773]">Company ID</label>
+                      <input
+                        {...registerEditPanel("companyId")}
+                        placeholder="Optional"
+                        className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                        disabled={editPanelFormLoading}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-[13px] text-[#7a7773]">Branch ID</label>
+                      <input
+                        {...registerEditPanel("branchId")}
+                        placeholder="Optional"
+                        className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                        disabled={editPanelFormLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-[13px] text-[#7a7773]">IP Address</label>
+                    <input
+                      {...registerEditPanel("ipAddress")}
+                      placeholder="e.g., 72.167.225.142"
+                      className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                      disabled={editPanelFormLoading}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 border-t border-white/[0.06] pt-5 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setEditingPanelData(null)}
+                      className="flex h-[32px] items-center rounded-[6px] px-[16px] text-[13px] text-[#7a7773] hover:text-[#f0ede8]"
+                      disabled={editPanelFormLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={editPanelFormLoading}
+                      className="flex h-[32px] items-center rounded-[6px] border border-white/[0.08] bg-white/[0.04] px-[16px] text-[13px] text-[#f0ede8] transition-all hover:bg-white/[0.08] disabled:opacity-50"
+                    >
+                      {editPanelFormLoading ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Panel Provisioning ──────────────────────────────────────────── */}
       <div>
         {/* Section Header */}
@@ -1205,12 +1348,13 @@ export function AdminSettings() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <Link
-                      to={`/panel/${panel.serial}`}
-                      className="flex h-[30px] items-center justify-center rounded-[6px] border border-white/[0.08] bg-transparent px-[10px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+                    <button
+                      onClick={() => openEditPanel(panel)}
+                      className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.04] hover:text-[#f0ede8] transition-colors"
+                      aria-label="Edit panel"
                     >
-                      View
-                    </Link>
+                      <Edit2 className="h-4 w-4" />
+                    </button>
                     {hasRole(["super_admin", "head_office", "system_integrator"]) && (
                       <button
                         onClick={() => handleDeletePanel(panel.serial)}
