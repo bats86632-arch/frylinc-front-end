@@ -1034,10 +1034,142 @@ export function AdminSettings() {
             <Plus className="h-[14px] w-[14px]" />
             Add Panel
           </button>
-        </div>
-        <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
+          </div>
+          <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
 
-        {panelsLoading ? (
+          {/* Panel Provisioning form */}
+          {panelFormOpen && (
+            <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-white/[0.06] p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <h3 className="text-balance text-[15px] font-bold text-[#f0ede8]">Provision Panel</h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPanelFormOpen(false);
+                    reset();
+                  }}
+                  className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] transition-all duration-200 ease-out hover:bg-white/[0.06] hover:text-[#f0ede8]"
+                >
+                  <XCircle className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit(handleCreatePanel)} className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-[13px] text-[#7a7773]">Serial Number</label>
+                  <input
+                    {...register("serial")}
+                    className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                      errors.serial ? "border-red-400/70" : ""
+                    }`}
+                    placeholder="e.g., FP-2024-001"
+                    disabled={panelFormLoading}
+                  />
+                  {errors.serial && (
+                    <p className="mt-1 text-[12px] text-red-400">{errors.serial.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[13px] text-[#7a7773]">Panel Name</label>
+                  <input
+                    {...register("name")}
+                    className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                      errors.name ? "border-red-400/70" : ""
+                    }`}
+                    placeholder="e.g., Building A - Floor 1"
+                    disabled={panelFormLoading}
+                  />
+                  {errors.name && (
+                    <p className="mt-1 text-[12px] text-red-400">{errors.name.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[13px] text-[#7a7773]">Number of Zones (1-8)</label>
+                  <input
+                    type="number"
+                    {...register("zoneCount")}
+                    className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                      errors.zoneCount ? "border-red-400/70" : ""
+                    }`}
+                    placeholder="8"
+                    min={1}
+                    max={8}
+                    disabled={panelFormLoading}
+                  />
+                  {errors.zoneCount && (
+                    <p className="mt-1 text-[12px] text-red-400">{errors.zoneCount.message}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-2 block text-[13px] text-[#7a7773]">Company ID</label>
+                    <input
+                      {...register("companyId")}
+                      className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                        errors.companyId ? "border-red-400/70" : ""
+                      }`}
+                      placeholder="e.g., company-a"
+                      disabled={panelFormLoading}
+                    />
+                    {errors.companyId && (
+                      <p className="mt-1 text-[12px] text-red-400">{errors.companyId.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-[13px] text-[#7a7773]">Branch ID</label>
+                    <input
+                      {...register("branchId")}
+                      className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                        errors.branchId ? "border-red-400/70" : ""
+                      }`}
+                      placeholder="e.g., branch-a"
+                      disabled={panelFormLoading}
+                    />
+                    {errors.branchId && (
+                      <p className="mt-1 text-[12px] text-red-400">{errors.branchId.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-3">
+                  <label className="mb-2 block text-[13px] text-[#7a7773]">IP Address (Default is autofilled)</label>
+                  <input
+                    {...register("ipAddress")}
+                    className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                      errors.ipAddress ? "border-red-400/70" : ""
+                    }`}
+                    placeholder="e.g., 72.167.225.142"
+                    disabled={panelFormLoading}
+                  />
+                  {errors.ipAddress && (
+                    <p className="mt-1 text-[12px] text-red-400">{errors.ipAddress.message}</p>
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={panelFormLoading}
+                    className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                  >
+                    {panelFormLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      "Create Panel"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {panelsLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-[#7a7773]" />
           </div>
@@ -1094,161 +1226,9 @@ export function AdminSettings() {
             })}
           </div>
         )}
-
-        {/* Add Panel modal overlay */}
-        {panelFormOpen && (
-          <div className="fixed inset-0 z-[100]">
-            <div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-              onClick={() => setPanelFormOpen(false)}
-            />
-            <div className="fixed left-1/2 top-[calc(60%+36px)] sm:top-1/2 z-[101] w-[calc(100%-32px)] max-w-md -translate-x-1/2 -translate-y-1/2">
-              <div 
-                className="animate-slide-up bg-[#141412] relative w-full max-h-[85vh] overflow-y-auto rounded-[16px] border border-white/[0.06] shadow-2xl box-border"
-                style={{ WebkitOverflowScrolling: "touch" }}
-              >
-                <div className="p-[20px] sm:p-7">
-                <div className="mb-5 sm:mb-6 flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="font-display text-[18px] font-bold text-[#f0ede8]">
-                      Add New Panel
-                    </h3>
-                    <p className="mt-1 text-[13px] text-[#7a7773]">
-                      Provision a new fire alarm panel
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setPanelFormOpen(false)}
-                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] transition-all duration-200 hover:bg-white/[0.06] hover:text-[#f0ede8]"
-                  >
-                    <XCircle className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <form onSubmit={handleSubmit(handleCreatePanel)} className="space-y-4 [@media(max-height:380px)]:space-y-3 sm:space-y-5">
-                  <div>
-                    <label className="mb-2 block text-[13px] text-[#7a7773]">Serial Number</label>
-                    <input
-                      {...register("serial")}
-                      className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                        errors.serial ? "border-red-400/70" : ""
-                      }`}
-                      placeholder="e.g., FP-2024-001"
-                      disabled={panelFormLoading}
-                    />
-                    {errors.serial && (
-                      <p className="mt-1 text-[12px] text-red-400">{errors.serial.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-[13px] text-[#7a7773]">Panel Name</label>
-                    <input
-                      {...register("name")}
-                      className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                        errors.name ? "border-red-400/70" : ""
-                      }`}
-                      placeholder="e.g., Building A - Floor 1"
-                      disabled={panelFormLoading}
-                    />
-                    {errors.name && (
-                      <p className="mt-1 text-[12px] text-red-400">{errors.name.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-[13px] text-[#7a7773]">Number of Zones (1–8)</label>
-                    <input
-                      type="number"
-                      {...register("zoneCount")}
-                      className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                        errors.zoneCount ? "border-red-400/70" : ""
-                      }`}
-                      placeholder="8"
-                      min={1}
-                      max={8}
-                      disabled={panelFormLoading}
-                    />
-                    {errors.zoneCount && (
-                      <p className="mt-1 text-[12px] text-red-400">{errors.zoneCount.message}</p>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="mb-2 block text-[13px] text-[#7a7773]">Company ID</label>
-                      <input
-                        {...register("companyId")}
-                        className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                          errors.companyId ? "border-red-400/70" : ""
-                        }`}
-                        placeholder="e.g., company-a"
-                        disabled={panelFormLoading}
-                      />
-                      {errors.companyId && (
-                        <p className="mt-1 text-[12px] text-red-400">{errors.companyId.message}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="mb-2 block text-[13px] text-[#7a7773]">Branch ID</label>
-                      <input
-                        {...register("branchId")}
-                        className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                          errors.branchId ? "border-red-400/70" : ""
-                        }`}
-                        placeholder="e.g., branch-a"
-                        disabled={panelFormLoading}
-                      />
-                      {errors.branchId && (
-                        <p className="mt-1 text-[12px] text-red-400">{errors.branchId.message}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-3">
-                    <label className="mb-2 block text-[13px] text-[#7a7773]">IP Address (Default is autofilled)</label>
-                    <input
-                      {...register("ipAddress")}
-                      className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                        errors.ipAddress ? "border-red-400/70" : ""
-                      }`}
-                      placeholder="e.g., 72.167.225.142"
-                      disabled={panelFormLoading}
-                    />
-                    {errors.ipAddress && (
-                      <p className="mt-1 text-[12px] text-red-400">{errors.ipAddress.message}</p>
-                    )}
-                  </div>
-
-                  <div className="flex justify-end gap-3 border-t border-white/[0.06] pt-5 mt-6">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPanelFormOpen(false);
-                        reset();
-                      }}
-                      className="flex h-[32px] items-center rounded-[6px] px-[16px] text-[13px] text-[#7a7773] hover:text-[#f0ede8]"
-                      disabled={panelFormLoading}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={panelFormLoading}
-                      className="flex h-[32px] items-center rounded-[6px] border border-white/[0.08] bg-white/[0.04] px-[16px] text-[13px] text-[#f0ede8] transition-all hover:bg-white/[0.08] disabled:opacity-50"
-                    >
-                      {panelFormLoading ? "Creating..." : "Create Panel"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* 🚮 Delete Company Modal 🚮 */}
+      {/* 🛑 Delete Company Modal 🛑 */}
       {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[12px] border border-white/[0.08] bg-[#1a1917] shadow-2xl">
