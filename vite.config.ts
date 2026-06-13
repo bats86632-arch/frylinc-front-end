@@ -16,8 +16,10 @@ export default defineConfig({
         theme_color: '#0f0f0e',
         background_color: '#0f0f0e',
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
         start_url: '/',
         scope: '/',
+        id: '/',
         icons: [
           {
             src: 'icon-192x192.png',
