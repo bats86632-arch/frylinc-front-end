@@ -11,5 +11,9 @@ export const CompanyService = {
   async getCompanies(): Promise<Company[]> {
     const response = await apiClient.get('/companies');
     return response.data.companies;
+  },
+  
+  async updateCompany(id: string, data: Partial<Company>): Promise<void> {
+    await apiClient.patch(`/companies/${id}`, data);
   }
 };

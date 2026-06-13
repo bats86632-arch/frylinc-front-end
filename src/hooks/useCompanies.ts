@@ -8,27 +8,27 @@ export function useCompanies() {
   const [error, setError] = useState<string | null>(null);
   const { userData } = useAuth();
 
-  useEffect(() => {
-    async function fetchCompanies() {
-      if (!userData) {
-        setCompanies([]);
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        const data = await CompanyService.getCompanies();
-        setCompanies(data);
-        setError(null);
-      } catch (err: any) {
-        setError(err.response?.data?.error || err.message || 'Failed to fetch companies');
-      } finally {
-        setLoading(false);
-      }
+  const fetchCompanies = async () => {
+    if (!userData) {
+      setCompanies([]);
+      setLoading(false);
+      return;
     }
+    try {
+      setLoading(true);
+      const data = await CompanyService.getCompanies();
+      setCompanies(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Failed to fetch companies');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCompanies();
   }, [userData]);
 
-  return { companies, loading, error };
+  return { companies, loading, error, reloadCompanies: fetchCompanies };
 }

@@ -7,6 +7,8 @@ import { UserService } from "../api/UserService";
 import { PanelService } from "../api/PanelService";
 import { Panel, User, Role } from "../types";
 import { useAuth } from "../contexts/AuthContext";
+import { useCompanies } from "../hooks/useCompanies";
+import { CompanyService, Company } from "../api/CompanyService";
 import {
   DEFAULT_PANEL_COMMANDS,
   normalizeAllowedCommands,
@@ -54,6 +56,12 @@ const editUserSchema = z.object({
 type PanelFormData = z.infer<typeof panelSchema>;
 type UserFormData = z.infer<typeof userSchema>;
 type EditUserFormData = z.infer<typeof editUserSchema>;
+
+const editCompanySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+});
+type EditCompanyFormData = z.infer<typeof editCompanySchema>;
 
 const roleLabels: Record<Role, string> = {
   super_admin: "Super Admin",
@@ -138,6 +146,40 @@ export function AdminSettings() {
   } = useForm<EditUserFormData>({ resolver: zodResolver(editUserSchema) });
 
   const { hasRole } = useAuth();
+
+  const { companies, reloadCompanies, loading: companiesLoading } = useCompanies();
+  const [editingCompanyData, setEditingCompanyData] = useState<Company | null>(null);
+  const [editCompanyFormLoading, setEditCompanyFormLoading] = useState(false);
+
+  const {
+    register: registerEditCompany,
+    handleSubmit: handleSubmitEditCompany,
+    reset: resetEditCompany,
+    setValue: setEditCompanyValue,
+    formState: { errors: editCompanyErrors },
+  } = useForm<EditCompanyFormData>({ resolver: zodResolver(editCompanySchema) });
+
+  const handleEditCompany = async (data: EditCompanyFormData) => {
+    if (!editingCompanyData) return;
+    setEditCompanyFormLoading(true);
+    try {
+      await CompanyService.updateCompany(editingCompanyData.id, data);
+      setSuccess("Company updated successfully");
+      setEditingCompanyData(null);
+      resetEditCompany();
+      await reloadCompanies();
+    } catch (err: any) {
+      setError(getApiErrorMessage(err, "Failed to update company"));
+    } finally {
+      setEditCompanyFormLoading(false);
+    }
+  };
+
+  const openEditCompany = (company: Company) => {
+    setEditingCompanyData(company);
+    setEditCompanyValue("name", company.name);
+    setEditCompanyValue("description", company.description || "");
+  };
 
   useEffect(() => {
     loadUsers();
@@ -399,7 +441,69 @@ export function AdminSettings() {
         </div>
       )}
 
-      {/* ── User Management ────────────────────────────────────────────── */}
+      {/* 🏢 Company Management 🏢 */}
+      {hasRole(["super_admin"]) && (
+        <div className="mb-7">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
+              Company Management
+            </h2>
+          </div>
+          
+          {companiesLoading ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-6 w-6 animate-spin text-[#f0ede8] opacity-50" />
+            </div>
+          ) : companies.length === 0 ? (
+            <div className="rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-6 text-center text-[13px] text-[#7a7773]">
+              No companies found.
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {companies.map((company) => (
+                <div
+                  key={company.id}
+                  className="group flex flex-col gap-3 rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-3 transition-all hover:border-white/[0.12] sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-[13px] font-medium text-white/90"
+                      style={{ backgroundColor: getAvatarColor(company.name) }}
+                    >
+                      {company.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-[13px] font-medium text-[#f0ede8]">
+                          {company.name}
+                        </span>
+                        <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
+                          {company.id}
+                        </span>
+                      </div>
+                      <div className="mt-0.5 truncate text-[11px] text-[#7a7773]">
+                        {company.description || "No description"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 shrink-0 sm:flex-1">
+                    <button
+                      onClick={() => openEditCompany(company)}
+                      className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f0ede8] opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
+                      aria-label="Edit company"
+                    >
+                      <Edit2 className="h-[14px] w-[14px]" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 👥 User Management 👥 */}
       <div className="mb-7">
         {/* Section Header */}
         <div className="mb-3 flex items-center justify-between">
@@ -575,6 +679,78 @@ export function AdminSettings() {
           </div>
         )}
       </div>
+
+      {/* Edit Company modal overlay */}
+      {editingCompanyData && (
+        <div className="fixed inset-0 z-[100]">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setEditingCompanyData(null)}
+          />
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="relative w-full max-w-md overflow-hidden rounded-[12px] border border-white/[0.08] bg-[#1a1816] shadow-2xl transition-all">
+              <div className="flex items-center justify-between border-b border-white/[0.05] px-5 py-4 sm:px-6">
+                <div>
+                  <h3 className="font-display text-[18px] font-bold text-[#f0ede8]">Edit Company</h3>
+                  <p className="mt-1 text-[13px] text-[#7a7773]">Update company details</p>
+                </div>
+                <button
+                  onClick={() => setEditingCompanyData(null)}
+                  className="rounded-[6px] p-2 text-[#7a7773] transition-colors hover:bg-white/[0.04] hover:text-[#f0ede8]"
+                >
+                  <XCircle className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmitEditCompany(handleEditCompany)} className="space-y-4 sm:space-y-5 px-5 py-5 sm:p-6">
+                <div>
+                  <label className="mb-2 block text-[13px] text-[#7a7773]">Company Name</label>
+                  <input
+                    {...registerEditCompany("name")}
+                    className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                    disabled={editCompanyFormLoading}
+                  />
+                  {editCompanyErrors.name && (
+                    <p className="mt-1 text-[12px] text-red-400">{editCompanyErrors.name.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[13px] text-[#7a7773]">Description</label>
+                  <textarea
+                    {...registerEditCompany("description")}
+                    className="control-field w-full rounded-[6px] px-3 py-2 text-[13px] resize-none"
+                    rows={3}
+                    disabled={editCompanyFormLoading}
+                    placeholder="Optional details about this company"
+                  />
+                  {editCompanyErrors.description && (
+                    <p className="mt-1 text-[12px] text-red-400">{editCompanyErrors.description.message}</p>
+                  )}
+                </div>
+
+                <div className="mt-6 flex justify-end gap-3 border-t border-white/[0.05] pt-5">
+                  <button
+                    type="button"
+                    onClick={() => setEditingCompanyData(null)}
+                    disabled={editCompanyFormLoading}
+                    className="rounded-[6px] border border-white/[0.08] bg-transparent px-4 py-2 text-[13px] font-medium text-[#f0ede8] transition-colors hover:bg-white/[0.04] disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={editCompanyFormLoading}
+                    className="rounded-[6px] bg-[#f0ede8] px-4 py-2 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50 flex items-center justify-center min-w-[100px]"
+                  >
+                    {editCompanyFormLoading ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit User modal overlay */}
       {editingUserData && (
