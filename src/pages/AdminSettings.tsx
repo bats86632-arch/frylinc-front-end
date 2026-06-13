@@ -19,7 +19,8 @@ import {
   RefreshCw,
   XCircle,
   Trash2,
-  MoreHorizontal
+  MoreHorizontal,
+  Edit2
 } from "lucide-react";
 
 const panelSchema = z.object({
@@ -345,14 +346,11 @@ export function AdminSettings() {
   };
 
   return (
-    <div className="animate-fade-in p-[32px]">
+    <div className="animate-fade-in p-4 sm:p-5 max-w-5xl mx-auto">
       {/* Page header */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <h1 className="font-display text-[22px] font-bold tracking-tight text-[#f0ede8]">
-            Admin Settings
-          </h1>
-          <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-[rgba(34,197,94,0.12)] px-2 py-0.5 text-[10px] font-medium text-[#4ade80]">
+      <div className="flex items-center justify-end sm:justify-between mb-6">
+        <div className="hidden sm:flex items-center gap-3">
+          <div className="flex items-center gap-1.5 rounded-full bg-[rgba(34,197,94,0.12)] px-2 py-0.5 text-[10px] font-medium text-[#4ade80]">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4ade80] opacity-75"></span>
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#4ade80]"></span>
@@ -402,10 +400,10 @@ export function AdminSettings() {
       )}
 
       {/* ── User Management ────────────────────────────────────────────── */}
-      <div className="mb-[40px]">
+      <div className="mb-7">
         {/* Section Header */}
-        <div className="mb-[16px] flex h-[40px] items-center justify-between">
-          <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
             User Management
           </h2>
           <button
@@ -416,7 +414,7 @@ export function AdminSettings() {
             Add User
           </button>
         </div>
-        <div className="h-[0.5px] w-full bg-white/[0.06] mb-5" />
+        <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
 
         {/* User creation form */}
         {userFormOpen && (
@@ -527,105 +525,53 @@ export function AdminSettings() {
           </div>
         )}
 
-        {/* User table */}
+        {/* User list */}
         {usersLoading ? (
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-[#7a7773]" />
           </div>
         ) : (
-          <div className="w-full overflow-x-auto bg-[#1a1917] rounded-[8px] border border-white/[0.06]">
-            <table className="w-full min-w-[820px] text-left">
-              <thead>
-                <tr className="border-b-[0.5px] border-white/[0.06]">
-                  <th className="px-5 py-3 text-[10px] uppercase tracking-[0.1em] text-[rgba(240,237,232,0.4)] font-normal">
-                    User
-                  </th>
-                  <th className="px-5 py-3 text-[10px] uppercase tracking-[0.1em] text-[rgba(240,237,232,0.4)] font-normal">
-                    Email
-                  </th>
-                  <th className="px-5 py-3 text-[10px] uppercase tracking-[0.1em] text-[rgba(240,237,232,0.4)] font-normal">
-                    Role
-                  </th>
-                  <th className="px-5 py-3 text-[10px] uppercase tracking-[0.1em] text-[rgba(240,237,232,0.4)] font-normal">
-                    Last Active
-                  </th>
-                  <th className="px-5 py-3 text-[10px] uppercase tracking-[0.1em] text-[rgba(240,237,232,0.4)] font-normal w-[60px]">
-                    
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[rgba(255,255,255,0.03)]">
-                {users.map((user) => (
-                  <tr
-                    key={user.uid}
-                    className="group h-[48px] transition-all duration-150 hover:bg-white/[0.02]"
+          <div className="flex flex-col gap-2">
+            {users.map((user) => (
+              <div
+                key={user.uid}
+                className="group flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full text-[12px] font-medium text-white"
+                    style={{ backgroundColor: getAvatarColor(user.displayName || user.email) }}
                   >
-                    <td className="px-5">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full text-[11px] font-medium text-white"
-                          style={{ backgroundColor: getAvatarColor(user.displayName || user.email) }}
-                        >
-                          {user.displayName?.charAt(0).toUpperCase() || "U"}
-                        </div>
-                        <span className="text-[13px] text-[#f0ede8]">
-                          {user.displayName?.toLowerCase().includes("damn") ? "Test User" : user.displayName || "Test User"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-5 text-[13px] text-[#7a7773]">
+                    {user.displayName?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[13px] font-medium text-[#f0ede8] truncate">
+                      {user.displayName?.toLowerCase().includes("damn") ? "Test User" : user.displayName || "Test User"}
+                    </span>
+                    <span className="text-[13px] text-[#7a7773] truncate">
                       {user.email.includes("bats86632") ? "test@example.com" : user.email}
-                    </td>
-                    <td className="px-5">
-                      <span
-                        className="inline-block rounded-[4px] px-[8px] py-[2px] text-[10px]"
-                        style={roleStyles[user.role] || roleStyles.end_user}
-                      >
-                        {roleLabels[user.role]}
-                      </span>
-                    </td>
-                    <td className="px-5 text-[12px] text-[#7a7773]">
-                      {getLastActive(user.uid)}
-                    </td>
-                    <td className="px-5 relative">
-                      <div className="flex justify-end opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                        <button
-                          onClick={() => setActionMenuOpen(actionMenuOpen === user.uid ? null : user.uid)}
-                          className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.04] hover:text-[#f0ede8]"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </button>
-                      </div>
-                      
-                      {actionMenuOpen === user.uid && (
-                        <>
-                          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setActionMenuOpen(null)} />
-                          <div className="fixed bottom-4 left-4 right-4 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[320px] z-50 p-2 sm:p-3 rounded-[12px] sm:rounded-[14px] border border-white/[0.08] bg-[#1a1917] shadow-2xl animate-slide-up sm:animate-fade-in-up">
-                            <div className="hidden sm:block mb-3 px-3">
-                              <h4 className="text-[14px] font-semibold text-[#f0ede8]">User Actions</h4>
-                              <p className="text-[12px] text-[#7a7773] mt-0.5">{user.email}</p>
-                            </div>
-                            <button
-                              onClick={() => openEditUser(user)}
-                              className="w-full px-4 py-3.5 sm:py-2.5 text-center sm:text-left text-[14px] sm:text-[13px] font-semibold sm:font-medium text-[#f0ede8] hover:bg-white/[0.04] rounded-[8px] mb-1 sm:mb-1.5"
-                            >
-                              Edit user
-                            </button>
-                            <div className="h-[1px] w-full bg-white/[0.04] sm:hidden" />
-                            <button
-                              onClick={() => handleDeleteUser(user.uid)}
-                              className="w-full px-4 py-3.5 sm:py-2.5 text-center sm:text-left text-[14px] sm:text-[13px] font-semibold sm:font-medium text-[#f87171] hover:bg-white/[0.04] rounded-[8px]"
-                            >
-                              Delete user
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0 ml-3">
+                  <button
+                    onClick={() => openEditUser(user)}
+                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.04] hover:text-[#f0ede8] transition-colors"
+                    aria-label="Edit user"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteUser(user.uid)}
+                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] opacity-0 group-hover:opacity-100 hover:bg-white/[0.04] transition-all duration-150"
+                    aria-label="Delete user"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -770,12 +716,12 @@ export function AdminSettings() {
       {/* ── Panel Provisioning ──────────────────────────────────────────── */}
       <div>
         {/* Section Header */}
-        <div className="mb-[16px] flex h-[40px] items-center justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
               Panel Provisioning
             </h2>
-            <span className="text-[12px] text-[#7a7773]">
+            <span className="hidden sm:inline-block text-[12px] text-[#7a7773]">
               {!panelsLoading && `${panels.filter(p => true).length} of ${panels.length} panels online`}
             </span>
           </div>
@@ -787,7 +733,7 @@ export function AdminSettings() {
             Add Panel
           </button>
         </div>
-        <div className="h-[0.5px] w-full bg-white/[0.06] mb-5" />
+        <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
 
         {panelsLoading ? (
           <div className="flex justify-center py-12">
@@ -796,43 +742,44 @@ export function AdminSettings() {
         ) : panels.length === 0 ? (
           <p className="text-[13px] text-[#7a7773]">No panels provisioned yet.</p>
         ) : (
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
             {(panels || []).filter(Boolean).map((panel) => {
               const isAlarm = panel.zones?.some(z => z);
               const statusColor = isAlarm ? "bg-red-500" : "bg-emerald-500";
               return (
                 <div
                   key={panel.serial || Math.random().toString()}
-                  className="group flex h-[48px] items-center justify-between border-b border-white/[0.03] px-2 hover:bg-white/[0.02] transition-colors"
+                  className="group flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors gap-2"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`h-[8px] w-[8px] rounded-full ${statusColor}`} />
-                    <div className="flex flex-col">
-                      <span className="text-[13px] font-medium text-[#f0ede8] leading-tight">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className={`h-[8px] w-[8px] shrink-0 rounded-full ${statusColor}`} />
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-[13px] font-medium text-[#f0ede8] truncate">
                         {panel.name || "Unknown Panel"}
                       </span>
-                      <span className="text-[11px] text-[#7a7773] leading-tight mt-[2px]">
+                      <span className="text-[12px] text-[#7a7773] shrink-0">
                         {panel.serial || "No serial"}
                       </span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-4">
-                    <span className="text-[12px] text-[#7a7773]">
-                      {getPanelHeartbeat(panel.serial)}
-                    </span>
+                  <div className="flex-1 flex justify-center text-[12px] text-[#7a7773] whitespace-nowrap">
+                    {getPanelHeartbeat(panel.serial)}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 shrink-0 flex-1">
                     <Link
                       to={`/panel/${panel.serial}`}
-                      className="flex h-[30px] items-center justify-center rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+                      className="flex h-[28px] items-center justify-center rounded-[6px] border border-white/[0.08] bg-transparent px-[10px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
                     >
                       View
                     </Link>
                     <button
                       onClick={() => handleDeletePanel(panel.serial)}
-                      className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
+                      className="hidden sm:flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
                       aria-label="Delete panel"
                     >
-                      <Trash2 className="h-[16px] w-[16px]" />
+                      <Trash2 className="h-[14px] w-[14px]" />
                     </button>
                   </div>
                 </div>
