@@ -1,8 +1,14 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onSnapshot, collection, query, where } from 'firebase/firestore';
-import { db } from '../config/firebase';
-import { Panel } from '../types';
-import { useAuth } from './AuthContext';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { onSnapshot, collection, query, where } from "firebase/firestore";
+import { db } from "../config/firebase";
+import { Panel } from "../types";
+import { useAuth } from "./AuthContext";
 
 interface PanelsContextType {
   panels: Panel[];
@@ -20,18 +26,24 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!userData) {
+      // No authenticated user — clear panels and mark as done loading
       setPanels([]);
       setLoading(false);
       return;
     }
 
+    // Reset to loading whenever we (re-)establish a listener for a given user.
+    // This prevents a stale loading=false state from showing an empty dashboard
+    // during the gap between userData becoming available and the first snapshot.
+    setLoading(true);
+
     let q;
-    if (userData.role === 'super_admin') {
-      q = query(collection(db, 'panels'));
-    } else if (userData.role === 'head_office') {
+    if (userData.role === "super_admin") {
+      q = query(collection(db, "panels"));
+    } else if (userData.role === "head_office") {
       q = query(
-        collection(db, 'panels'), 
-        where('companyId', '==', userData.companyId || '')
+        collection(db, "panels"),
+        where("companyId", "==", userData.companyId || ""),
       );
     } else {
       if (!userData.branchIds || userData.branchIds.length === 0) {
@@ -40,8 +52,8 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
         return;
       }
       q = query(
-        collection(db, 'panels'),
-        where('branchId', 'in', userData.branchIds)
+        collection(db, "panels"),
+        where("branchId", "in", userData.branchIds),
       );
     }
 
@@ -56,10 +68,10 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       },
       (err) => {
-        console.error('Error fetching panels:', err);
+        console.error("Error fetching panels:", err);
         setError(err);
         setLoading(false);
-      }
+      },
     );
 
     return () => unsubscribe();
@@ -68,9 +80,7 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
   const value = { panels, loading, error };
 
   return (
-    <PanelsContext.Provider value={value}>
-      {children}
-    </PanelsContext.Provider>
+    <PanelsContext.Provider value={value}>{children}</PanelsContext.Provider>
   );
 }
 
@@ -78,7 +88,7 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
 export function usePanelsContext() {
   const context = useContext(PanelsContext);
   if (context === undefined) {
-    throw new Error('usePanelsContext must be used within a PanelsProvider');
+    throw new Error("usePanelsContext must be used within a PanelsProvider");
   }
   return context;
 }

@@ -1,17 +1,27 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Role } from '../types';
-import { Flame } from 'lucide-react';
+import React, { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { Role } from "../types";
+import { Flame } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: Role[];
 }
 
-export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { currentUser, loading, hasRole } = useAuth();
+export function ProtectedRoute({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) {
+  const { currentUser, userData, loading, hasRole } = useAuth();
   const location = useLocation();
+
+  // Kick off the Dashboard chunk download as soon as this component mounts.
+  // On cache-miss visits this runs during the auth loading phase, so the chunk
+  // is ready (or nearly ready) the moment auth resolves and the router renders it.
+  useEffect(() => {
+    void import("../pages/Dashboard");
+  }, []);
 
   if (loading) {
     return (
@@ -25,14 +35,18 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
           </div>
           <div className="flex items-center gap-2.5">
             <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span className="text-[13px] font-medium text-slate-400">Loading Fyrlinc…</span>
+            <span className="text-[13px] font-medium text-slate-400">
+              Loading Fyrlinc…
+            </span>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!currentUser) {
+  // Neither the Firebase SDK nor the localStorage cache has a user → send to login.
+  // This covers both: clean logouts and first-ever visits with no cache.
+  if (!currentUser && !userData) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
