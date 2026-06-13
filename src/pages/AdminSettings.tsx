@@ -953,7 +953,7 @@ export function AdminSettings() {
                     {hasRole(["super_admin", "head_office", "system_integrator"]) && (
                       <button
                         onClick={() => handleDeletePanel(panel.serial)}
-                        className="hidden sm:flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
+                        className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] opacity-100 sm:opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
                         aria-label="Delete panel"
                       >
                         <Trash2 className="h-[14px] w-[14px]" />
@@ -1074,6 +1074,21 @@ export function AdminSettings() {
                         <p className="mt-1 text-[12px] text-red-400">{errors.branchId.message}</p>
                       )}
                     </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <label className="mb-2 block text-[13px] text-[#7a7773]">IP Address (Default is autofilled)</label>
+                    <input
+                      {...register("ipAddress")}
+                      className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                        errors.ipAddress ? "border-red-400/70" : ""
+                      }`}
+                      placeholder="e.g., 72.167.225.142"
+                      disabled={panelFormLoading}
+                    />
+                    {errors.ipAddress && (
+                      <p className="mt-1 text-[12px] text-red-400">{errors.ipAddress.message}</p>
+                    )}
                   </div>
 
                   <div className="flex justify-end gap-3 border-t border-white/[0.06] pt-5 mt-6">
