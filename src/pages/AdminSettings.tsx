@@ -140,7 +140,6 @@ export function AdminSettings() {
 
   const { hasRole } = useAuth();
   const { panels, loading: panelsLoading } = usePanels();
-  const { panels, loading: panelsLoading } = usePanels();
 
   const { companies, reloadCompanies, loading: companiesLoading } = useCompanies();
   const [editingCompanyData, setEditingCompanyData] = useState<Company | null>(null);
