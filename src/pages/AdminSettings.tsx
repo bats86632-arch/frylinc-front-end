@@ -774,13 +774,15 @@ export function AdminSettings() {
                     >
                       View
                     </Link>
-                    <button
-                      onClick={() => handleDeletePanel(panel.serial)}
-                      className="hidden sm:flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
-                      aria-label="Delete panel"
-                    >
-                      <Trash2 className="h-[14px] w-[14px]" />
-                    </button>
+                    {hasRole(["super_admin", "head_office", "system_integrator"]) && (
+                      <button
+                        onClick={() => handleDeletePanel(panel.serial)}
+                        className="hidden sm:flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-white/[0.04]"
+                        aria-label="Delete panel"
+                      >
+                        <Trash2 className="h-[14px] w-[14px]" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );
