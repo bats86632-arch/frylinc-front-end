@@ -17,7 +17,7 @@ export const CompanyService = {
     await apiClient.patch(`/companies/${id}`, data);
   },
   
-  async deleteCompany(id: string): Promise<void> {
-    await apiClient.delete(`/companies/${id}`);
+  async deleteCompany(id: string, deleteUsers?: boolean): Promise<void> {
+    await apiClient.delete(`/companies/${id}${deleteUsers ? '?deleteUsers=true' : ''}`);
   }
 };

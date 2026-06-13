@@ -150,6 +150,19 @@ export function AdminSettings() {
   const { companies, reloadCompanies, loading: companiesLoading } = useCompanies();
   const [editingCompanyData, setEditingCompanyData] = useState<Company | null>(null);
   const [editCompanyFormLoading, setEditCompanyFormLoading] = useState(false);
+  const [deleteCompanyModalState, setDeleteCompanyModalState] = useState<{
+    isOpen: boolean;
+    step: 1 | 2;
+    company: Company | null;
+    associatedUsers: User[];
+    deleteUsersAlso: boolean;
+  }>({
+    isOpen: false,
+    step: 1,
+    company: null,
+    associatedUsers: [],
+    deleteUsersAlso: false,
+  });
 
   const {
     register: registerEditCompany,
@@ -181,19 +194,32 @@ export function AdminSettings() {
     setEditCompanyValue("description", company.description || "");
   };
 
-  const handleDeleteCompany = async (company: Company) => {
-    const panelsCount = (panels || []).filter(p => p && p.companyId === company.id).length;
-    const confirmMessage = `There are ${panelsCount} panels associated with this company. Are you sure you wish to delete? The panels will be deleted too.`;
-    if (!window.confirm(confirmMessage)) return;
+  const startDeleteCompany = (company: Company) => {
+    const associatedUsers = users.filter(u => u.companyId === company.id);
+    setDeleteCompanyModalState({
+      isOpen: true,
+      step: 1,
+      company,
+      associatedUsers,
+      deleteUsersAlso: false,
+    });
+  };
+
+  const confirmDeleteCompany = async () => {
+    const { company, deleteUsersAlso } = deleteCompanyModalState;
+    if (!company) return;
 
     try {
-      await CompanyService.deleteCompany(company.id);
+      await CompanyService.deleteCompany(company.id, deleteUsersAlso);
       setSuccess("Company deleted successfully");
       setTimeout(() => setSuccess(null), 3000);
       await reloadCompanies();
       await loadPanels();
+      await loadUsers();
     } catch (err: any) {
       setError(getApiErrorMessage(err, "Failed to delete company"));
+    } finally {
+      setDeleteCompanyModalState(prev => ({ ...prev, isOpen: false }));
     }
   };
 
@@ -512,7 +538,7 @@ export function AdminSettings() {
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleDeleteCompany(company)}
+                      onClick={() => startDeleteCompany(company)}
                       className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-[rgba(248,113,113,0.1)] transition-colors"
                       aria-label="Delete company"
                     >
@@ -1149,6 +1175,100 @@ export function AdminSettings() {
           </div>
         )}
       </div>
+
+      {/* 🚮 Delete Company Modal 🚮 */}
+      {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[12px] border border-white/[0.08] bg-[#1a1917] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
+              <h3 className="text-[15px] font-medium text-[#f0ede8]">Delete Company</h3>
+              <button
+                onClick={() => setDeleteCompanyModalState(prev => ({ ...prev, isOpen: false }))}
+                className="text-[#7a7773] hover:text-[#f0ede8] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="px-5 py-5 text-[13px] text-[#f0ede8]">
+              {deleteCompanyModalState.step === 1 ? (
+                <>
+                  <p className="mb-4">
+                    Are you sure you want to delete <span className="font-semibold">{deleteCompanyModalState.company.name}</span>?
+                  </p>
+                  <p className="mb-4 text-[#7a7773]">
+                    There are <span className="text-[#f0ede8] font-medium">{(panels || []).filter(p => p && p.companyId === deleteCompanyModalState.company?.id).length}</span> panels associated with this company that will also be deleted.
+                  </p>
+                  {deleteCompanyModalState.associatedUsers.length > 0 && (
+                    <div className="mt-4 border border-white/[0.08] rounded-[8px] p-4 bg-white/[0.02]">
+                      <p className="mb-3 font-medium">Users</p>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5 rounded-[4px] border-white/[0.2] bg-white/[0.05] text-[#d4a373] focus:ring-[#d4a373] focus:ring-offset-0"
+                          checked={deleteCompanyModalState.deleteUsersAlso}
+                          onChange={(e) => setDeleteCompanyModalState(prev => ({ ...prev, deleteUsersAlso: e.target.checked }))}
+                        />
+                        <span className="text-[#7a7773]">
+                          Also delete all {deleteCompanyModalState.associatedUsers.length} users associated with this company.
+                        </span>
+                      </label>
+                    </div>
+                  )}
+                  <div className="mt-6 flex justify-end gap-3">
+                    <button
+                      onClick={() => setDeleteCompanyModalState(prev => ({ ...prev, isOpen: false }))}
+                      className="px-4 py-2 text-[13px] text-[#7a7773] hover:text-[#f0ede8] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (deleteCompanyModalState.deleteUsersAlso) {
+                          setDeleteCompanyModalState(prev => ({ ...prev, step: 2 }));
+                        } else {
+                          confirmDeleteCompany();
+                        }
+                      }}
+                      className="px-4 py-2 rounded-[6px] bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors font-medium"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="mb-4 text-red-400 font-medium">
+                    Warning: The following users will be permanently deleted:
+                  </p>
+                  <div className="max-h-[200px] overflow-y-auto mb-4 border border-white/[0.08] rounded-[6px] bg-white/[0.02]">
+                    {deleteCompanyModalState.associatedUsers.map(u => (
+                      <div key={u.uid} className="px-3 py-2 border-b border-white/[0.04] last:border-0">
+                        <div className="font-medium">{u.displayName || 'Unknown User'}</div>
+                        <div className="text-[11px] text-[#7a7773]">{u.email}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mb-4">Are you completely sure you wish to proceed?</p>
+                  <div className="mt-6 flex justify-end gap-3">
+                    <button
+                      onClick={() => setDeleteCompanyModalState(prev => ({ ...prev, step: 1 }))}
+                      className="px-4 py-2 text-[13px] text-[#7a7773] hover:text-[#f0ede8] transition-colors"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={confirmDeleteCompany}
+                      className="px-4 py-2 rounded-[6px] bg-red-500 text-white hover:bg-red-600 transition-colors font-medium"
+                    >
+                      Confirm Delete All
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
