@@ -181,6 +181,22 @@ export function AdminSettings() {
     setEditCompanyValue("description", company.description || "");
   };
 
+  const handleDeleteCompany = async (company: Company) => {
+    const panelsCount = (panels || []).filter(p => p && p.companyId === company.id).length;
+    const confirmMessage = `There are ${panelsCount} panels associated with this company. Are you sure you wish to delete? The panels will be deleted too.`;
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      await CompanyService.deleteCompany(company.id);
+      setSuccess("Company deleted successfully");
+      setTimeout(() => setSuccess(null), 3000);
+      await reloadCompanies();
+      await loadPanels();
+    } catch (err: any) {
+      setError(getApiErrorMessage(err, "Failed to delete company"));
+    }
+  };
+
   useEffect(() => {
     loadUsers();
     loadPanels();
@@ -495,6 +511,13 @@ export function AdminSettings() {
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
+                    <button
+                      onClick={() => handleDeleteCompany(company)}
+                      className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-[rgba(248,113,113,0.1)] transition-colors"
+                      aria-label="Delete company"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -651,14 +674,14 @@ export function AdminSettings() {
                   <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-[13px] font-medium text-[#f0ede8]">
-                        {user.displayName?.toLowerCase().includes("damn") ? "Test User" : user.displayName || "Test User"}
+                        {user.displayName || "Unknown User"}
                       </span>
                       <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
                         {roleLabels[user.role as Role] || "User"}
                       </span>
                     </div>
                     <div className="mt-0.5 truncate text-[11px] text-[#7a7773]">
-                      {user.email.includes("bats86632") ? "test@example.com" : user.email}
+                      {user.email || "No email"}
                     </div>
                   </div>
                 </div>

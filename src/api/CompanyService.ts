@@ -15,5 +15,9 @@ export const CompanyService = {
   
   async updateCompany(id: string, data: Partial<Company>): Promise<void> {
     await apiClient.patch(`/companies/${id}`, data);
+  },
+  
+  async deleteCompany(id: string): Promise<void> {
+    await apiClient.delete(`/companies/${id}`);
   }
 };
