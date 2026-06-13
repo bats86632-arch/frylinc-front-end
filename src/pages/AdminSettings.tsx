@@ -23,7 +23,8 @@ import {
   RefreshCw,
   XCircle,
   Trash2,
-  Edit2
+  Edit2,
+  X
 } from "lucide-react";
 
 const panelSchema = z.object({
