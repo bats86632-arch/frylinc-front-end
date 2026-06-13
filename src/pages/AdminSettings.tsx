@@ -454,14 +454,22 @@ export function AdminSettings() {
 
       {/* 🏢 Company Management 🏢 */}
       {hasRole(["super_admin"]) && (
-        <div className="mb-7">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
-              Company Management
-            </h2>
-          </div>
-          
-          {companiesLoading ? (
+          <div className="mb-7">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
+                Company Management
+              </h2>
+              <button
+                onClick={() => alert("Company creation coming soon")}
+                className="flex h-[32px] items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+              >
+                <Plus className="h-[14px] w-[14px]" />
+                Add Company
+              </button>
+            </div>
+            <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
+            
+            {companiesLoading ? (
             <div className="flex justify-center py-6">
               <Loader2 className="h-6 w-6 animate-spin text-[#f0ede8] opacity-50" />
             </div>
