@@ -67,11 +67,9 @@ export function PanelDetail() {
     }
   }, [panel]);
 
-  const canControl = hasRole([
-    "super_admin",
-    "head_office",
-    "system_integrator",
-  ]);
+  const canControl = hasRole(["end_user"]);
+  const canManageContacts = hasRole(["system_integrator"]);
+  const isStrictlyEndUser = hasRole(["end_user"]) && !hasRole(["system_integrator"]);
 
   const loadEvents = useCallback(async () => {
     if (!serial) return;
@@ -413,11 +411,13 @@ export function PanelDetail() {
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {panelCommands.map((command) => (
+              {panelCommands.map((command) => {
+                const isEuRestricted = isStrictlyEndUser && command !== "ZONE OFF";
+                return (
                 <button
                   key={command}
                   onClick={() => handleSendCommand(command)}
-                  disabled={!canControl || commandLoading !== null}
+                  disabled={!canControl || commandLoading !== null || isEuRestricted}
                   className={`rounded-[10px] border p-5 text-left transition-all duration-200 ease-smooth disabled:cursor-not-allowed disabled:opacity-50 ${
                     commandSuccess === command
                       ? "border-emerald-300/30 bg-emerald-400/[0.08] text-emerald-100 shadow-glow-emerald"
@@ -449,7 +449,7 @@ export function PanelDetail() {
                     </div>
                   )}
                 </button>
-              ))}
+              )})}
             </div>
           </section>
         </div>
@@ -588,13 +588,13 @@ export function PanelDetail() {
                             [slot]: e.target.value,
                           }))
                         }
-                        disabled={!canControl || isSyncing}
+                        disabled={!canManageContacts || isSyncing}
                         className="control-field w-full rounded-element py-2.5 pl-10 pr-3 text-sm tabular-nums transition-all duration-200 focus:ring-2 focus:ring-amber-500/40 disabled:opacity-50"
                       />
                     </div>
                     <button
                       onClick={() => handleSyncContact(slot)}
-                      disabled={!canControl || isSyncing}
+                      disabled={!canManageContacts || isSyncing}
                       className={`flex items-center justify-center gap-2 rounded-element px-4 py-2.5 text-sm font-medium transition-all duration-200 ease-smooth disabled:cursor-not-allowed disabled:opacity-50 ${
                         isSuccess
                           ? "bg-emerald-500/15 text-emerald-300 shadow-glow-emerald hover:bg-emerald-500/25"
