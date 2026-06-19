@@ -91,18 +91,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const tokenResult = await user.getIdTokenResult(forceRefresh);
     const customClaims = tokenResult.claims;
 
-    const initialUserData: User = {
+    const initialUserData: Partial<User> = {
       uid: user.uid,
       email: user.email || "",
       displayName: user.displayName || "User",
       role: (customClaims.role as Role) || "end_user",
       companyId: customClaims.companyId as string | undefined,
       branchIds: (customClaims.branchIds as string[]) || [],
+      photoURL: user.photoURL || undefined,
     };
 
-    setUserData(initialUserData);
-    setRole(initialUserData.role);
-    writeCachedUser(initialUserData);
+    setUserData((prev) => {
+      const merged = prev
+        ? {
+            ...prev,
+            ...initialUserData,
+            displayName: prev.displayName ?? initialUserData.displayName,
+            photoURL: prev.photoURL ?? initialUserData.photoURL,
+          }
+        : (initialUserData as User);
+      writeCachedUser(merged);
+      return merged;
+    });
+    setRole(initialUserData.role as Role);
 
     // Phase 2: Silent REST sync — fetches full profile from Firestore
     apiClient
