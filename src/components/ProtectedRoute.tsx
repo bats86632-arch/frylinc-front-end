@@ -28,8 +28,8 @@ export function ProtectedRoute({
       <div className="theme-scope flex min-h-screen items-center justify-center console-bg">
         <div className="flex flex-col items-center gap-5 animate-fade-in">
           <div className="relative">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/40 ring-1 ring-white/10">
-              <Flame className="h-7 w-7 text-white" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/40 ring-1 ring-[var(--border-subtle)]">
+              <Flame className="h-7 w-7 text-[var(--text-primary)]" />
             </div>
             <div className="absolute -inset-2 animate-pulse-ring rounded-[18px] border border-amber-400/20" />
           </div>

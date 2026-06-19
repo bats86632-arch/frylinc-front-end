@@ -13,9 +13,9 @@ import {
   Building2,
   ChevronRight,
   MapPin,
-  Copy,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { CopyButton } from "../components/CopyButton";
 
 type FilterStatus = "all" | "alarm" | "online";
 
@@ -158,7 +158,7 @@ export function Dashboard() {
     return (
       <div className="surface-panel p-8 text-center animate-fade-in-up m-[32px]">
         <ShieldAlert className="mx-auto h-12 w-12 text-[#e8173a] opacity-80 mb-4" />
-        <p className="text-[15px] font-bold text-white drop-shadow-sm">
+        <p className="text-[15px] font-bold text-[var(--text-primary)] drop-shadow-sm">
           System Error
         </p>
         <p className="mt-2 text-[13px] text-[#ff8099]">{error.message}</p>
@@ -181,20 +181,20 @@ export function Dashboard() {
                   setSearchQuery("");
                   setFilter("all");
                 }}
-                className="group flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#7a7773] transition-colors hover:bg-white/10 hover:text-white"
+                className="group flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
               >
                 <ArrowLeft className="h-4 w-4" />
               </button>
             )}
-            <h2 className="text-[16px] font-bold text-white flex items-center gap-2">
+            <h2 className="text-[16px] font-bold text-[var(--text-primary)] flex items-center gap-2">
               {isSuperAdmin ? (
                 <>
-                  <Building2 className="h-4 w-4 text-[#7a7773]" />
+                  <Building2 className="h-4 w-4 text-[var(--text-secondary)]" />
                   {selectedCompanyName || "Branches"}
                 </>
               ) : (
                 <>
-                  <MapPin className="h-4 w-4 text-[#7a7773]" />
+                  <MapPin className="h-4 w-4 text-[var(--text-secondary)]" />
                   Branches
                 </>
               )}
@@ -210,21 +210,21 @@ export function Dashboard() {
                 setSearchQuery("");
                 setFilter("all");
               }}
-              className="group flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#7a7773] transition-colors hover:bg-white/10 hover:text-white"
+              className="group flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <h2 className="text-[16px] font-bold text-white flex items-center gap-2">
+            <h2 className="text-[16px] font-bold text-[var(--text-primary)] flex items-center gap-2">
               {isSuperAdmin && selectedCompanyName && (
                 <>
-                  <Building2 className="h-4 w-4 text-[#7a7773]" />
-                  <span className="text-[#7a7773] font-medium">
+                  <Building2 className="h-4 w-4 text-[var(--text-secondary)]" />
+                  <span className="text-[var(--text-secondary)] font-medium">
                     {selectedCompanyName}
                   </span>
-                  <ChevronRight className="h-3.5 w-3.5 text-[#7a7773]" />
+                  <ChevronRight className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                 </>
               )}
-              <MapPin className="h-4 w-4 text-[#7a7773]" />
+              <MapPin className="h-4 w-4 text-[var(--text-secondary)]" />
               {selectedBranchName || "Branch"}
             </h2>
           </div>
@@ -235,22 +235,22 @@ export function Dashboard() {
           {showCompanyView && (
             <>
               <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[#e53d3d] rounded-[14px]">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   System Alarms
                 </p>
                 <p
                   className={`mt-0.5 font-display text-[28px] font-bold leading-none tabular-nums ${
-                    systemAlarmCount > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"
+                    systemAlarmCount > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"
                   }`}
                 >
                   {systemAlarmCount}
                 </p>
               </div>
-              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-white/10 rounded-[14px]">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[14px]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Total Companies
                 </p>
-                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
+                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {(companies || []).length}
                 </p>
               </div>
@@ -260,22 +260,22 @@ export function Dashboard() {
           {showBranchView && (
             <>
               <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[#e53d3d] rounded-[14px]">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Branch Alarms
                 </p>
                 <p
                   className={`mt-0.5 font-display text-[28px] font-bold leading-none tabular-nums ${
-                    branchAlarmCount > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"
+                    branchAlarmCount > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"
                   }`}
                 >
                   {branchAlarmCount}
                 </p>
               </div>
-              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-white/10 rounded-[14px]">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[14px]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Total Branches
                 </p>
-                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
+                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {viewBranches.length}
                 </p>
               </div>
@@ -285,22 +285,22 @@ export function Dashboard() {
           {showPanelView && (
             <>
               <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[#e53d3d] rounded-[14px]">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Active Alarms
                 </p>
                 <p
                   className={`mt-0.5 font-display text-[28px] font-bold leading-none tabular-nums ${
-                    activeAlarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"
+                    activeAlarms > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"
                   }`}
                 >
                   {activeAlarms}
                 </p>
               </div>
               <div className="flex-1 surface-panel relative overflow-hidden px-5 py-3 pb-4 border-t-2 border-[#34d399] rounded-[14px]">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Online Panels
                 </p>
-                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
+                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {onlinePanels}
                 </p>
                 <div className="absolute bottom-0 left-0 right-0 flex h-[3px] w-full gap-[1px]">
@@ -312,11 +312,11 @@ export function Dashboard() {
                   ))}
                 </div>
               </div>
-              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-white/10 rounded-[14px]">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[14px]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Total Devices
                 </p>
-                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[#f0ede8]">
+                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {activePanels.length}
                 </p>
               </div>
@@ -326,15 +326,15 @@ export function Dashboard() {
       </div>
 
       {/* ── Controls Row ────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-white/[0.06] pb-0 sticky top-[72px] z-20 bg-[#0f0f0e]/90 backdrop-blur-xl pt-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-[var(--border-subtle)] pb-0 sticky top-[72px] z-20 bg-[var(--surface-base)]/90 backdrop-blur-xl pt-4">
         <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
           {showCompanyView && (
-            <div className="whitespace-nowrap pb-3 text-[13px] font-medium border-b-2 border-transparent text-[#f0ede8]">
+            <div className="whitespace-nowrap pb-3 text-[13px] font-medium border-b-2 border-transparent text-[var(--text-primary)]">
               Companies Directory
             </div>
           )}
           {showBranchView && (
-            <div className="whitespace-nowrap pb-3 text-[13px] font-medium border-b-2 border-transparent text-[#f0ede8]">
+            <div className="whitespace-nowrap pb-3 text-[13px] font-medium border-b-2 border-transparent text-[var(--text-primary)]">
               Branches
             </div>
           )}
@@ -344,12 +344,12 @@ export function Dashboard() {
                 onClick={() => setFilter("all")}
                 className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
                   filter === "all"
-                    ? "border-[#e53d3d] text-[#f0ede8]"
-                    : "border-transparent text-[#7a7773] hover:text-[#f0ede8]"
+                    ? "border-[#e53d3d] text-[var(--text-primary)]"
+                    : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 All Panels{" "}
-                <span className="ml-1.5 rounded bg-white/5 px-1.5 py-0.5 text-[10px] tabular-nums">
+                <span className="ml-1.5 rounded bg-[var(--surface-raised)] px-1.5 py-0.5 text-[10px] tabular-nums">
                   {activePanels.length}
                 </span>
               </button>
@@ -357,8 +357,8 @@ export function Dashboard() {
                 onClick={() => setFilter("alarm")}
                 className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
                   filter === "alarm"
-                    ? "border-[#e53d3d] text-[#f0ede8]"
-                    : "border-transparent text-[#7a7773] hover:text-[#f0ede8]"
+                    ? "border-[#e53d3d] text-[var(--text-primary)]"
+                    : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 Alarms{" "}
@@ -370,8 +370,8 @@ export function Dashboard() {
                 onClick={() => setFilter("online")}
                 className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
                   filter === "online"
-                    ? "border-[#e53d3d] text-[#f0ede8]"
-                    : "border-transparent text-[#7a7773] hover:text-[#f0ede8]"
+                    ? "border-[#e53d3d] text-[var(--text-primary)]"
+                    : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 Online{" "}
@@ -384,7 +384,7 @@ export function Dashboard() {
         </div>
 
         <div className="relative mb-[11px] w-full sm:w-72">
-          <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a7773] z-10" />
+          <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)] z-10" />
           <input
             type="text"
             placeholder={
@@ -396,7 +396,7 @@ export function Dashboard() {
             }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent pl-7 pb-1 text-[13px] text-[#f0ede8] placeholder-[#7a7773] border-b border-white/[0.06] focus:border-white/20 focus:outline-none transition-colors"
+            className="w-full bg-transparent pl-7 pb-1 text-[13px] text-[var(--text-primary)] placeholder-[var(--text-secondary)] border-b border-[var(--border-subtle)] focus:border-[var(--border-strong)] focus:outline-none transition-colors"
           />
         </div>
       </div>
@@ -406,11 +406,11 @@ export function Dashboard() {
         // ── COMPANY VIEW ────────────────────────────────────────────────────
         filteredCompanies.length === 0 ? (
           <div className="surface-panel py-20 text-center">
-            <Building2 className="mx-auto mb-4 h-12 w-12 text-white/20" />
-            <p className="text-[16px] font-bold text-white drop-shadow-sm">
+            <Building2 className="mx-auto mb-4 h-12 w-12 text-[var(--text-quaternary)]" />
+            <p className="text-[16px] font-bold text-[var(--text-primary)] drop-shadow-sm">
               No companies found
             </p>
-            <p className="mt-2 text-[13px] font-medium text-white/40">
+            <p className="mt-2 text-[13px] font-medium text-[var(--text-quaternary)]">
               {searchQuery
                 ? "Try adjusting your search query."
                 : "No companies available."}
@@ -427,12 +427,12 @@ export function Dashboard() {
                     setSelectedCompanyId(company.id);
                     setSearchQuery("");
                   }}
-                  className="surface-panel group flex flex-col text-left transition-all hover:border-white/10 hover:bg-white/[0.03] animate-fade-in-up rounded-[14px] overflow-hidden"
+                  className="surface-panel group flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-raised)] animate-fade-in-up rounded-[14px] overflow-hidden"
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
                   <div className="p-5 flex-1 w-full">
                     <div className="flex items-start justify-between mb-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-[#f0ede8] ring-1 ring-white/10 group-hover:bg-white/10 transition-colors">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-raised)] text-[var(--text-primary)] ring-1 ring-[var(--border-subtle)] group-hover:bg-[var(--surface-hover)] transition-colors">
                         <Building2 className="h-5 w-5 opacity-70" />
                       </div>
                       {stats.alarms > 0 && (
@@ -442,26 +442,26 @@ export function Dashboard() {
                         </div>
                       )}
                     </div>
-                    <h3 className="text-[16px] font-bold text-[#f0ede8]">
+                    <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
                       {company.name}
                     </h3>
-                    <p className="mt-1 text-[13px] text-[#7a7773] line-clamp-1">
+                    <p className="mt-1 text-[13px] text-[var(--text-secondary)] line-clamp-1">
                       {company.description || "No description provided"}
                     </p>
                   </div>
-                  <div className="flex flex-col border-t border-white/[0.06] bg-white/[0.01] w-full">
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.04]">
+                  <div className="flex flex-col border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] w-full">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border-subtle)]">
                       <div className="flex items-center gap-4">
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                             Alarms
                           </p>
-                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"}`}>
+                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"}`}>
                             {stats.alarms}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                             Online
                           </p>
                           <p className="text-[13px] font-bold text-[#34d399]">
@@ -469,28 +469,18 @@ export function Dashboard() {
                           </p>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-[#7a7773] transition-transform group-hover:translate-x-1" />
+                      <ChevronRight className="h-4 w-4 text-[var(--text-secondary)] transition-transform group-hover:translate-x-1" />
                     </div>
-                    <div className="flex items-center justify-between px-5 py-2.5 bg-white/[0.02]">
+                    <div className="flex items-center justify-between px-5 py-2.5 bg-[var(--surface-overlay)]">
                       <div className="flex items-center gap-2 overflow-hidden">
-                        <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                        <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                           ID
                         </span>
-                        <span className="font-mono truncate text-[11px] text-[#f0ede8]">
+                        <span className="font-mono truncate text-[11px] text-[var(--text-primary)]">
                           {company.id}
                         </span>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          navigator.clipboard.writeText(company.id);
-                        }}
-                        className="text-[#7a7773] shrink-0 ml-2 hover:text-[#f0ede8] transition-colors"
-                        title="Copy ID"
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </button>
+                      <CopyButton textToCopy={company.id} title="Copy ID" />
                     </div>
                   </div>
                 </button>
@@ -502,11 +492,11 @@ export function Dashboard() {
         // ── BRANCH VIEW ─────────────────────────────────────────────────────
         filteredBranches.length === 0 ? (
           <div className="surface-panel py-20 text-center">
-            <MapPin className="mx-auto mb-4 h-12 w-12 text-white/20" />
-            <p className="text-[16px] font-bold text-white drop-shadow-sm">
+            <MapPin className="mx-auto mb-4 h-12 w-12 text-[var(--text-quaternary)]" />
+            <p className="text-[16px] font-bold text-[var(--text-primary)] drop-shadow-sm">
               No branches found
             </p>
-            <p className="mt-2 text-[13px] font-medium text-white/40">
+            <p className="mt-2 text-[13px] font-medium text-[var(--text-quaternary)]">
               {searchQuery
                 ? "Try adjusting your search query."
                 : "No branches available."}
@@ -524,12 +514,12 @@ export function Dashboard() {
                     setSearchQuery("");
                     setFilter("all");
                   }}
-                  className="surface-panel group flex flex-col text-left transition-all hover:border-white/10 hover:bg-white/[0.03] animate-fade-in-up rounded-[14px] overflow-hidden"
+                  className="surface-panel group flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-raised)] animate-fade-in-up rounded-[14px] overflow-hidden"
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
                   <div className="p-5 flex-1 w-full">
                     <div className="flex items-start justify-between mb-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5 text-[#f0ede8] ring-1 ring-white/10 group-hover:bg-white/10 transition-colors">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-raised)] text-[var(--text-primary)] ring-1 ring-[var(--border-subtle)] group-hover:bg-[var(--surface-hover)] transition-colors">
                         <MapPin className="h-5 w-5 opacity-70" />
                       </div>
                       {stats.alarms > 0 && (
@@ -539,26 +529,26 @@ export function Dashboard() {
                         </div>
                       )}
                     </div>
-                    <h3 className="text-[16px] font-bold text-[#f0ede8]">
+                    <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
                       {branch.name}
                     </h3>
-                    <p className="mt-1 text-[13px] text-[#7a7773] line-clamp-1">
+                    <p className="mt-1 text-[13px] text-[var(--text-secondary)] line-clamp-1">
                       {branch.address || "No address provided"}
                     </p>
                   </div>
-                  <div className="flex flex-col border-t border-white/[0.06] bg-white/[0.01] w-full">
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.04]">
+                  <div className="flex flex-col border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] w-full">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border-subtle)]">
                       <div className="flex items-center gap-4">
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                             Alarms
                           </p>
-                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"}`}>
+                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"}`}>
                             {stats.alarms}
                           </p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                             Online
                           </p>
                           <p className="text-[13px] font-bold text-[#34d399]">
@@ -566,28 +556,18 @@ export function Dashboard() {
                           </p>
                         </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-[#7a7773] transition-transform group-hover:translate-x-1" />
+                      <ChevronRight className="h-4 w-4 text-[var(--text-secondary)] transition-transform group-hover:translate-x-1" />
                     </div>
-                    <div className="flex items-center justify-between px-5 py-2.5 bg-white/[0.02]">
+                    <div className="flex items-center justify-between px-5 py-2.5 bg-[var(--surface-overlay)]">
                       <div className="flex items-center gap-2 overflow-hidden">
-                        <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                        <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                           ID
                         </span>
-                        <span className="font-mono truncate text-[11px] text-[#f0ede8]">
+                        <span className="font-mono truncate text-[11px] text-[var(--text-primary)]">
                           {branch.id}
                         </span>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          navigator.clipboard.writeText(branch.id);
-                        }}
-                        className="text-[#7a7773] shrink-0 ml-2 hover:text-[#f0ede8] transition-colors"
-                        title="Copy ID"
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </button>
+                      <CopyButton textToCopy={branch.id} title="Copy ID" />
                     </div>
                   </div>
                 </button>
@@ -598,11 +578,11 @@ export function Dashboard() {
       ) : // ── PANEL VIEW ──────────────────────────────────────────────────────
       filteredPanels.length === 0 ? (
         <div className="surface-panel py-20 text-center">
-          <Activity className="mx-auto mb-4 h-12 w-12 text-white/20" />
-          <p className="text-[16px] font-bold text-white drop-shadow-sm">
+          <Activity className="mx-auto mb-4 h-12 w-12 text-[var(--text-quaternary)]" />
+          <p className="text-[16px] font-bold text-[var(--text-primary)] drop-shadow-sm">
             No panels found
           </p>
-          <p className="mt-2 text-[13px] font-medium text-white/40">
+          <p className="mt-2 text-[13px] font-medium text-[var(--text-quaternary)]">
             {searchQuery
               ? "Try adjusting your search query."
               : "No panels match the current filter."}

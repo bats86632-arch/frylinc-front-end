@@ -168,7 +168,7 @@ export function PanelDetail() {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[14px] border border-red-400/20 bg-gradient-to-br from-red-500/20 to-red-600/5 text-red-300 shadow-glow-red">
             <AlertTriangle className="h-8 w-8" />
           </div>
-          <h3 className="font-display text-title text-balance text-white">Panel Not Found</h3>
+          <h3 className="font-display text-title text-balance text-[var(--text-primary)]">Panel Not Found</h3>
           <p className="mt-3 text-body leading-relaxed text-slate-400">
             The panel with serial "{serial}" could not be found.
           </p>
@@ -219,7 +219,7 @@ export function PanelDetail() {
           <div className="flex min-w-0 gap-4">
             <Link
               to="/"
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-white/[0.07] bg-white/[0.03] text-slate-300 transition-all duration-200 ease-smooth hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-white hover:-translate-y-0.5"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] text-slate-300 transition-all duration-200 ease-smooth hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] hover:-translate-y-0.5"
               aria-label="Back to dashboard"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -227,7 +227,7 @@ export function PanelDetail() {
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="font-display text-[22px] font-bold tracking-tight text-[#f0ede8]">
+                <h1 className="font-display text-[22px] font-bold tracking-tight text-[var(--text-primary)]">
                   {normalizedPanel.name}
                 </h1>
 
@@ -265,7 +265,7 @@ export function PanelDetail() {
             <div className="surface-muted relative overflow-hidden rounded-[10px] px-4 py-3.5">
               {/* Icon removed */}
               <p className="text-micro uppercase tracking-wider text-slate-500">Total Zones</p>
-              <p className="mt-1.5 text-2xl font-semibold tabular-nums text-white">
+              <p className="mt-1.5 text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
                 {normalizedPanel.zoneCount}
               </p>
             </div>
@@ -290,15 +290,15 @@ export function PanelDetail() {
       </section>
 
       {/* Tab bar - polished underline style */}
-      <div className="flex flex-row gap-0 border-b border-white/[0.07] bg-transparent overflow-x-auto scrollbar-hide">
+      <div className="flex flex-row gap-0 border-b border-[var(--border-subtle)] bg-transparent overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`whitespace-nowrap shrink-0 flex items-center justify-center gap-2 px-5 py-3.5 text-[13px] font-medium transition-all duration-200 ease-smooth ${
               activeTab === tab.id
-                ? "rounded-t-lg border-b-[3px] border-amber-400 bg-amber-400/[0.04] text-white"
-                : "rounded-t-lg border-b-[3px] border-transparent text-slate-400 hover:bg-white/[0.03] hover:text-slate-200"
+                ? "rounded-t-lg border-b-[3px] border-amber-400 bg-amber-400/[0.04] text-[var(--text-primary)]"
+                : "rounded-t-lg border-b-[3px] border-transparent text-slate-400 hover:bg-[var(--surface-raised)] hover:text-slate-200"
             }`}
           >
             <tab.icon className={`h-4 w-4 transition-colors duration-200 ${activeTab === tab.id ? "text-amber-400" : ""}`} />
@@ -313,7 +313,7 @@ export function PanelDetail() {
           <section className="surface-panel rounded-[14px] p-6">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+                <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Zone Status Grid
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
@@ -341,7 +341,7 @@ export function PanelDetail() {
                     className={`aspect-square rounded-[10px] border text-sm font-semibold tabular-nums transition-all duration-200 ease-smooth ${
                       zoneAlarm
                         ? "animate-pulse-shadow border-red-300/40 bg-red-500 text-white shadow-glow-red"
-                        : "border-white/[0.07] bg-white/[0.04] text-slate-400 hover:scale-105 hover:border-white/[0.16] hover:bg-white/[0.08] hover:text-slate-200 hover:shadow-elevation-1"
+                        : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-slate-400 hover:scale-105 hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-slate-200 hover:shadow-elevation-1"
                     } flex cursor-default items-center justify-center`}
                     title={`Zone ${idx + 1}: ${zoneAlarm ? "ALARM" : "Normal"}`}
                   >
@@ -403,7 +403,7 @@ export function PanelDetail() {
 
           <section className="surface-panel rounded-[14px] p-6">
             <div className="mb-6">
-              <h3 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+              <h3 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                 Available Commands
               </h3>
               <p className="mt-1.5 text-sm text-slate-500">
@@ -427,7 +427,7 @@ export function PanelDetail() {
                           ? "border-red-500/25 bg-red-500/[0.02] text-red-200 hover:border-red-400/40 hover:bg-red-500/[0.05] hover:shadow-[0_0_16px_rgba(239,68,68,0.12)] hover:-translate-y-0.5"
                           : command === "ZONE OFF"
                             ? "border-emerald-500/25 bg-emerald-500/[0.02] text-emerald-200 hover:border-emerald-400/40 hover:bg-emerald-500/[0.05] hover:shadow-[0_0_16px_rgba(52,211,153,0.12)] hover:-translate-y-0.5"
-                            : "border-white/[0.07] bg-white/[0.03] text-white hover:border-amber-300/30 hover:bg-amber-400/[0.06] hover:shadow-glow-amber hover:-translate-y-0.5"
+                            : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-amber-300/30 hover:bg-amber-400/[0.06] hover:shadow-glow-amber hover:-translate-y-0.5"
                   }`}
                 >
                   {commandSuccess === command ? (
@@ -451,7 +451,7 @@ export function PanelDetail() {
                           ? "border-red-500/20 bg-red-500/[0.04]"
                           : command === "ZONE OFF"
                             ? "border-emerald-500/20 bg-emerald-500/[0.04]"
-                            : "border-white/[0.07] bg-gradient-to-br from-white/[0.06] to-white/[0.02]"
+                            : "border-[var(--border-subtle)] bg-gradient-to-br from-white/[0.06] to-white/[0.02]"
                       }`}>
                         <Play className={`h-4 w-4 ${
                           command === "ARM"
@@ -475,7 +475,7 @@ export function PanelDetail() {
         <div className="animate-fade-in space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+              <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                 Event History
               </h2>
               <p className="mt-1 text-sm text-slate-500">Panel event stream</p>
@@ -506,7 +506,7 @@ export function PanelDetail() {
           ) : (
             <div className="table-shell overflow-x-auto">
               <table className="w-full min-w-[720px]">
-                <thead className="sticky top-0 border-b border-white/[0.07] bg-slate-950/95 backdrop-blur-lg">
+                <thead className="sticky top-0 border-b border-[var(--border-subtle)] bg-slate-950/95 backdrop-blur-lg">
                   <tr>
                     <th className="px-5 py-3.5 text-left text-micro uppercase tracking-wider text-slate-500">
                       Timestamp
@@ -523,7 +523,7 @@ export function PanelDetail() {
                   {events.map((event) => (
                     <tr
                       key={event.id}
-                      className="transition-all duration-150 ease-smooth hover:bg-white/[0.04]"
+                      className="transition-all duration-150 ease-smooth hover:bg-[var(--surface-raised)]"
                     >
                       <td className="px-5 py-3.5 font-mono text-sm tabular-nums text-slate-300">
                         {formatDateTime(
@@ -537,7 +537,7 @@ export function PanelDetail() {
                               ? "border-red-300/25 bg-red-500/[0.08] text-red-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
                               : event.type.includes("warning")
                                 ? "border-amber-300/25 bg-amber-400/[0.08] text-amber-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-                                : "border-white/[0.07] bg-white/[0.04] text-slate-300"
+                                : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-slate-300"
                           }`}
                         >
                           {event.type}
@@ -563,7 +563,7 @@ export function PanelDetail() {
       {activeTab === "contacts" && (
         <div className="animate-fade-in space-y-5">
           <div className="mb-6">
-            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
               Contact Numbers
             </h2>
             <p className="mt-1.5 text-sm text-slate-500">
@@ -592,7 +592,7 @@ export function PanelDetail() {
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <div className="relative flex-1">
                       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 z-10">
-                        <Phone className="h-4 w-4 text-white/40" />
+                        <Phone className="h-4 w-4 text-[var(--text-quaternary)]" />
                       </div>
                       <input
                         type="text"

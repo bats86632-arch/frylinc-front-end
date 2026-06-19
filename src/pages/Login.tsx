@@ -121,10 +121,10 @@ export function Login() {
             <LockKeyhole className="h-5 w-5 text-[#ff5c73] lg:h-6 lg:w-6" />
           </div>
         </div>
-        <h2 className="font-display text-[2rem] font-bold leading-tight tracking-tight text-white text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
+        <h2 className="font-display text-[2rem] font-bold leading-tight tracking-tight text-[var(--text-primary)] text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
           Welcome back
         </h2>
-        <p className="mt-2 text-body leading-relaxed text-white/50 font-medium lg:mt-3 lg:max-w-sm lg:text-[0.95rem]">
+        <p className="mt-2 text-body leading-relaxed text-[var(--text-tertiary)] font-medium lg:mt-3 lg:max-w-sm lg:text-[0.95rem]">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
@@ -150,7 +150,7 @@ export function Login() {
       )}
 
       {/* Divider */}
-      <div className="mb-8 border-t border-white/[0.06] lg:border-white/[0.10]" />
+      <div className="mb-8 border-t border-[var(--border-subtle)] lg:border-[var(--border-default)]" />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-6">
@@ -158,7 +158,7 @@ export function Login() {
           <div>
             <label
               htmlFor="email"
-              className="mb-2.5 block text-[13px] font-semibold text-white/80"
+              className="mb-2.5 block text-[13px] font-semibold text-[var(--text-primary)]/80"
             >
               Email address
             </label>
@@ -191,7 +191,7 @@ export function Login() {
             <div className="mb-2.5 flex items-center justify-between">
               <label
                 htmlFor="password"
-                className="block text-[13px] font-semibold text-white/80"
+                className="block text-[13px] font-semibold text-[var(--text-primary)]/80"
               >
                 Password
               </label>
@@ -219,7 +219,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[8px] text-white/40 transition-all duration-150 hover:bg-white/[0.08] hover:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[8px] text-[var(--text-quaternary)] transition-all duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-default)]"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (

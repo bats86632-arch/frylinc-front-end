@@ -651,7 +651,7 @@ export function AdminSettings() {
           <span className="text-[11px] text-[var(--text-secondary)]">Synced 12s ago</span>
           <button
             onClick={handleGlobalRefresh}
-            className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--border-subtle)] bg-transparent text-white/50 transition-all duration-150 hover:border-white/[0.15] hover:text-white"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--border-subtle)] bg-transparent text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
           >
             <RefreshCw
               className={`h-[18px] w-[18px] ${usersLoading || panelsLoading ? "animate-spin" : ""}`}
@@ -848,7 +848,7 @@ export function AdminSettings() {
                   </div>
                   <button
                     onClick={() => setCompanyFormOpen(true)}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-white/[0.04]"
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
                   >
                     <Plus className="h-[14px] w-[14px]" />
                     Add
@@ -945,7 +945,7 @@ export function AdminSettings() {
                           <button
                             type="button"
                             onClick={() => appendCreateCompanyBranch({ name: "", address: "", supervisorName: "", contactNumber: "", emailAddress: "" })}
-                            className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:text-white transition-colors"
+                            className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:opacity-80 transition-opacity"
                           >
                             <Plus className="h-3.5 w-3.5" />
                             Add Branch
@@ -1126,7 +1126,7 @@ export function AdminSettings() {
                           <button
                             type="button"
                             onClick={() => appendEditCompanyBranch({ name: "", address: "", supervisorName: "", contactNumber: "", emailAddress: "" })}
-                            className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:text-white transition-colors"
+                            className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:opacity-80 transition-opacity"
                           >
                             <Plus className="h-3.5 w-3.5" />
                             Add Branch
@@ -1222,7 +1222,7 @@ export function AdminSettings() {
                         <button
                           type="submit"
                           disabled={editCompanyFormLoading}
-                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
                         >
                           {editCompanyFormLoading ? (
                             <>
@@ -1252,7 +1252,7 @@ export function AdminSettings() {
                         <div className="p-5 flex-1 w-full relative">
                           <div className="flex items-start justify-between mb-4">
                             <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-white shadow-sm"
+                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-[var(--text-on-accent)] shadow-sm"
                               style={{ backgroundColor: getAvatarColor(company.name) }}
                             >
                               {company.name.charAt(0).toUpperCase()}
@@ -1292,13 +1292,15 @@ export function AdminSettings() {
                               {company.id}
                             </span>
                           </div>
-                          <button
-                            onClick={(e) => handleCopyId(e, company.id)}
+                          <CopyButton
+                            textToCopy={company.id}
                             className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
                             title="Copy ID"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </button>
+                            onCopy={() => {
+                              setSuccess("ID copied to clipboard");
+                              setTimeout(() => setSuccess(null), 3000);
+                            }}
+                          />
                         </div>
                       </div>
                     ))}
@@ -1356,7 +1358,7 @@ export function AdminSettings() {
                   </div>
                   <button
                     onClick={() => setUserFormOpen(true)}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-white/[0.04]"
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
                   >
                     <Plus className="h-[14px] w-[14px]" />
                     Add
@@ -1564,15 +1566,16 @@ export function AdminSettings() {
                                     </span>
                                     <span className="ml-auto font-mono text-[10px] text-[var(--text-secondary)] flex items-center gap-1.5">
                                       {branch.id.slice(0, 8)}…
-                                      <button
-                                        onClick={(e) =>
-                                          handleCopyId(e, branch.id)
-                                        }
+                                      <CopyButton
+                                        textToCopy={branch.id}
                                         className="hover:text-[var(--text-primary)] transition-colors"
                                         title="Copy full ID"
-                                      >
-                                        <Copy className="h-3 w-3" />
-                                      </button>
+                                        iconClassName="h-3 w-3"
+                                        onCopy={() => {
+                                          setSuccess("ID copied to clipboard");
+                                          setTimeout(() => setSuccess(null), 3000);
+                                        }}
+                                      />
                                     </span>
                                   </label>
                                 );
@@ -1587,7 +1590,7 @@ export function AdminSettings() {
                         <button
                           type="submit"
                           disabled={userFormLoading}
-                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
                         >
                           {userFormLoading ? (
                             <>
@@ -1783,15 +1786,16 @@ export function AdminSettings() {
                                     </span>
                                     <span className="ml-auto font-mono text-[10px] text-[var(--text-secondary)] flex items-center gap-1.5">
                                       {branch.id.slice(0, 8)}…
-                                      <button
-                                        onClick={(e) =>
-                                          handleCopyId(e, branch.id)
-                                        }
+                                      <CopyButton
+                                        textToCopy={branch.id}
                                         className="hover:text-[var(--text-primary)] transition-colors"
                                         title="Copy full ID"
-                                      >
-                                        <Copy className="h-3 w-3" />
-                                      </button>
+                                        iconClassName="h-3 w-3"
+                                        onCopy={() => {
+                                          setSuccess("ID copied to clipboard");
+                                          setTimeout(() => setSuccess(null), 3000);
+                                        }}
+                                      />
                                     </span>
                                   </label>
                                 );
@@ -1806,7 +1810,7 @@ export function AdminSettings() {
                         <button
                           type="submit"
                           disabled={editUserFormLoading}
-                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
                         >
                           {editUserFormLoading ? (
                             <>
@@ -1836,7 +1840,7 @@ export function AdminSettings() {
                         <div className="p-5 flex-1 w-full relative">
                           <div className="flex items-start justify-between mb-4">
                             <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-white shadow-sm"
+                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-[var(--text-on-accent)] shadow-sm"
                               style={{ backgroundColor: getAvatarColor(user.displayName || user.email || "U") }}
                             >
                               {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
@@ -1881,13 +1885,15 @@ export function AdminSettings() {
                               {user.uid}
                             </span>
                           </div>
-                          <button
-                            onClick={(e) => handleCopyId(e, user.uid)}
+                          <CopyButton
+                            textToCopy={user.uid}
                             className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
                             title="Copy UID"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </button>
+                            onCopy={() => {
+                              setSuccess("ID copied to clipboard");
+                              setTimeout(() => setSuccess(null), 3000);
+                            }}
+                          />
                         </div>
                       </div>
                     ))}
@@ -1946,7 +1952,7 @@ export function AdminSettings() {
                   </div>
                   <button
                     onClick={() => setPanelFormOpen(true)}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-white/[0.04]"
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
                   >
                     <Plus className="h-[14px] w-[14px]" />
                     Add
@@ -2136,7 +2142,7 @@ export function AdminSettings() {
                         <button
                           type="submit"
                           disabled={panelFormLoading}
-                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
                         >
                           {panelFormLoading ? (
                             <>
@@ -2289,7 +2295,7 @@ export function AdminSettings() {
                         <button
                           type="submit"
                           disabled={editPanelFormLoading}
-                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
                         >
                           {editPanelFormLoading ? (
                             <>
@@ -2365,13 +2371,15 @@ export function AdminSettings() {
                                 {panel.serial || "No serial"}
                               </span>
                             </div>
-                            <button
-                              onClick={(e) => handleCopyId(e, panel.serial)}
+                            <CopyButton
+                              textToCopy={panel.serial}
                               className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
                               title="Copy Serial"
-                            >
-                              <Copy className="h-3.5 w-3.5" />
-                            </button>
+                              onCopy={() => {
+                                setSuccess("ID copied to clipboard");
+                                setTimeout(() => setSuccess(null), 3000);
+                              }}
+                            />
                           </div>
                         </div>
                       );
@@ -2437,12 +2445,12 @@ export function AdminSettings() {
                     deleted.
                   </p>
                   {deleteCompanyModalState.associatedUsers.length > 0 && (
-                    <div className="mt-4 border border-[var(--border-subtle)] rounded-[8px] p-4 bg-white/[0.02]">
-                      <p className="mb-3 font-medium">Users</p>
+                    <div className="mt-4 border border-[var(--border-subtle)] rounded-[8px] p-4 bg-[var(--surface-raised)]">
+                      <p className="mb-3 font-medium text-[var(--text-primary)]">Users</p>
                       <label className="flex items-start gap-3 cursor-pointer">
                         <input
                           type="checkbox"
-                          className="mt-0.5 rounded-[4px] border-white/[0.2] bg-white/[0.05] text-[#d4a373] focus:ring-[#d4a373] focus:ring-offset-0"
+                          className="mt-0.5 rounded-[4px] border-[var(--border-strong)] bg-[var(--surface-base)] text-accent focus:ring-accent focus:ring-offset-0"
                           checked={deleteCompanyModalState.deleteUsersAlso}
                           onChange={(e) =>
                             setDeleteCompanyModalState((prev) => ({
@@ -2493,11 +2501,11 @@ export function AdminSettings() {
                   <p className="mb-4 text-red-400 font-medium">
                     Warning: The following users will be permanently deleted:
                   </p>
-                  <div className="max-h-[200px] overflow-y-auto mb-4 border border-[var(--border-subtle)] rounded-[6px] bg-white/[0.02]">
+                  <div className="max-h-[200px] overflow-y-auto mb-4 border border-[var(--border-subtle)] rounded-[6px] bg-[var(--surface-raised)]">
                     {deleteCompanyModalState.associatedUsers.map((u) => (
                       <div
                         key={u.uid}
-                        className="px-3 py-2 border-b border-white/[0.04] last:border-0"
+                        className="px-3 py-2 border-b border-[var(--border-subtle)] last:border-0"
                       >
                         <div className="font-medium">
                           {u.displayName || "Unknown User"}

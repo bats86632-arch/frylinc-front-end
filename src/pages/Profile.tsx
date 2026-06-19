@@ -32,7 +32,7 @@ const ReadOnlyField = ({
   icon?: React.ReactNode;
 }) => (
   <div>
-    <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
+    <label className="block text-[13px] text-[var(--text-secondary)] mb-2">{label}</label>
     <div className="flex items-center gap-2">
       <input
         type="text"
@@ -67,7 +67,7 @@ const EditableField = ({
   error?: string;
 }) => (
   <div>
-    <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
+    <label className="block text-[13px] text-[var(--text-secondary)] mb-2">{label}</label>
     <input
       type={type}
       value={value}
@@ -299,7 +299,7 @@ export function Profile() {
         <div className="flex items-center gap-5">
           {/* Avatar with camera overlay */}
           <div className="relative inline-block shrink-0">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full overflow-hidden ring-2 ring-white/10 shadow-lg">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full overflow-hidden ring-2 ring-[var(--border-subtle)] shadow-lg">
               {photoPreview ? (
                 <img
                   src={photoPreview}
@@ -307,7 +307,7 @@ export function Profile() {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-500 to-amber-400 text-3xl font-bold text-white">
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-500 to-amber-400 text-3xl font-bold text-[var(--text-primary)]">
                   {(
                     userData?.firstName?.charAt(0) ||
                     userData?.displayName?.charAt(0) ||
@@ -318,7 +318,7 @@ export function Profile() {
             </div>
             <label
               htmlFor="photo-upload"
-              className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-[#1a1816] text-white/70 shadow-md transition-colors hover:bg-white/10 hover:text-white"
+              className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-secondary)] shadow-md transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
               title="Change photo"
             >
               <Camera className="h-4 w-4" />
@@ -334,12 +334,12 @@ export function Profile() {
 
           {/* Name / subtitle */}
           <div>
-            <h1 className="font-display text-[22px] font-bold tracking-tight text-[#f0ede8]">
+            <h1 className="font-display text-[22px] font-bold tracking-tight text-[var(--text-primary)]">
               {firstName || lastName
                 ? `${firstName} ${lastName}`.trim()
                 : userData?.displayName || "Your Profile"}
             </h1>
-            <p className="mt-1 text-[13px] text-[#7a7773]">
+            <p className="mt-1 text-[13px] text-[var(--text-secondary)]">
               Manage your personal settings and security
             </p>
           </div>
@@ -354,7 +354,7 @@ export function Profile() {
             <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-200">
               <UserIcon className="h-[18px] w-[18px]" />
             </div>
-            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
               Personal Details
             </h2>
           </div>
@@ -453,7 +453,7 @@ export function Profile() {
             <button
               type="submit"
               disabled={savingProfile || uploadingPhoto}
-              className="flex h-[32px] mt-6 w-full items-center justify-center gap-2 rounded-[6px] border border-white/[0.08] bg-white/[0.04] text-[13px] text-[#f0ede8] transition-all hover:bg-white/[0.08] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex h-[32px] mt-6 w-full items-center justify-center gap-2 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[13px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-4 w-4" />
               {uploadingPhoto
@@ -471,7 +471,7 @@ export function Profile() {
             <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
               <KeyRound className="h-[18px] w-[18px]" />
             </div>
-            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
               Security
             </h2>
           </div>
@@ -491,7 +491,7 @@ export function Profile() {
             )}
 
             <div>
-              <label className="block text-[13px] text-[#7a7773] mb-2">
+              <label className="block text-[13px] text-[var(--text-secondary)] mb-2">
                 Current Password
               </label>
               <input
@@ -504,7 +504,7 @@ export function Profile() {
             </div>
 
             <div>
-              <label className="block text-[13px] text-[#7a7773] mb-2">
+              <label className="block text-[13px] text-[var(--text-secondary)] mb-2">
                 New Password
               </label>
               <input
@@ -519,16 +519,16 @@ export function Profile() {
             <button
               type="submit"
               disabled={savingPassword || !oldPassword || !newPassword}
-              className="flex h-[32px] mt-6 w-full items-center justify-center gap-2 rounded-[6px] border border-white/[0.08] bg-white/[0.04] text-[13px] text-[#f0ede8] transition-all hover:bg-white/[0.08] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex h-[32px] mt-6 w-full items-center justify-center gap-2 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[13px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <KeyRound className="h-4 w-4" />
               {savingPassword ? "Updating…" : "Update Password"}
             </button>
           </form>
 
-          <div className="pt-6 mt-6 border-t border-white/[0.06]">
-            <h3 className="text-[13px] font-semibold text-[#f0ede8] mb-1">Forgot your password?</h3>
-            <p className="text-[12px] text-[#7a7773] mb-4">
+          <div className="pt-6 mt-6 border-t border-[var(--border-subtle)]">
+            <h3 className="text-[13px] font-semibold text-[var(--text-primary)] mb-1">Forgot your password?</h3>
+            <p className="text-[12px] text-[var(--text-secondary)] mb-4">
               We'll send you an email with a secure link to reset your password.
             </p>
             

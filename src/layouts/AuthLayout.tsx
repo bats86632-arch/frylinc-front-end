@@ -30,7 +30,7 @@ const trustPoints = [
 
 export function AuthLayout() {
   return (
-    <div className="auth-screen relative min-h-screen overflow-hidden bg-[#08080d] text-white lg:bg-[#050507]">
+    <div className="auth-screen relative min-h-screen overflow-hidden bg-[#08080d] text-[var(--text-primary)] lg:bg-[#050507]">
       {/* Mobile keeps the existing dark app lock-screen feel. */}
       <div className="absolute inset-0 console-grid opacity-30 lg:opacity-20" />
 
@@ -39,23 +39,23 @@ export function AuthLayout() {
       <div className="pointer-events-none absolute right-[-18%] top-1/2 hidden h-[860px] w-[860px] -translate-y-1/2 rounded-full bg-[radial-gradient(circle,_rgba(99,57,198,0.22)_0%,_transparent_64%)] blur-2xl lg:block" />
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[1200px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,_rgba(99,57,198,0.18)_0%,_transparent_60%)] lg:bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.06)_0%,_transparent_64%)]" />
 
-      <div className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-[var(--surface-hover)]" />
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
         {/* ── Left info panel (desktop only) ──────────────────────────────── */}
-        <section className="relative hidden h-screen flex-col overflow-hidden border-r border-white/[0.08] px-10 py-10 lg:flex xl:px-16">
+        <section className="relative hidden h-screen flex-col overflow-hidden border-r border-[var(--border-subtle)] px-10 py-10 lg:flex xl:px-16">
           {/* Brand lock-up */}
           <div className="flex shrink-0 items-center gap-3.5">
             <img
               src="/fyrlinc-logo.png"
               alt="Fyrlinc"
-              className="h-11 w-11 rounded-[12px] object-cover ring-1 ring-white/10"
+              className="h-11 w-11 rounded-[12px] object-cover ring-1 ring-[var(--border-subtle)]"
             />
             <div>
-              <p className="font-display text-[1.1rem] font-bold tracking-tight text-white leading-none">
+              <p className="font-display text-[1.1rem] font-bold tracking-tight text-[var(--text-primary)] leading-none">
                 Fyrlinc
               </p>
-              <p className="mt-1 text-[12px] text-white/40 tracking-wide font-medium">
+              <p className="mt-1 text-[12px] text-[var(--text-quaternary)] tracking-wide font-medium">
                 Fire Alarm Panel Monitoring
               </p>
             </div>
@@ -63,14 +63,14 @@ export function AuthLayout() {
 
           {/* Hero - warm, non-techy messaging */}
           <div className="animate-fade-in flex flex-1 flex-col items-start justify-center">
-            <h1 className="font-display max-w-xl text-[3rem] font-bold leading-[1.05] tracking-[-0.04em] text-white text-balance xl:text-[3.75rem] drop-shadow-sm">
+            <h1 className="font-display max-w-xl text-[3rem] font-bold leading-[1.05] tracking-[-0.04em] text-[var(--text-primary)] text-balance xl:text-[3.75rem] drop-shadow-sm">
               Your fire safety,
               <br />
               <span className="bg-gradient-to-r from-[#ff6b35] to-[#e8173a] bg-clip-text text-transparent">
                 always monitored.
               </span>
             </h1>
-            <p className="mt-6 max-w-md text-[1rem] leading-[1.75] text-white/50 font-medium xl:text-[1.05rem]">
+            <p className="mt-6 max-w-md text-[1rem] leading-[1.75] text-[var(--text-tertiary)] font-medium xl:text-[1.05rem]">
               Fyrlinc keeps you connected to every fire alarm panel - so you can
               respond faster when it matters most.
             </p>
@@ -99,10 +99,10 @@ export function AuthLayout() {
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[13px] font-bold text-white/90">
+                    <p className="text-[13px] font-bold text-[var(--text-primary)]">
                       {point.label}
                     </p>
-                    <p className="mt-0.5 text-[12.5px] leading-relaxed text-white/40 font-medium">
+                    <p className="mt-0.5 text-[12.5px] leading-relaxed text-[var(--text-quaternary)] font-medium">
                       {point.description}
                     </p>
                   </div>
@@ -113,14 +113,14 @@ export function AuthLayout() {
 
           {/* Footer */}
           <div className="shrink-0 pt-4">
-            <p className="text-[12px] text-white/25 font-medium">
+            <p className="text-[12px] text-[var(--text-primary)]/25 font-medium">
               © {new Date().getFullYear()} Fyrlinc · All rights reserved
             </p>
           </div>
         </section>
 
         {/* ── Right auth panel ────────────────────────────────────────────── */}
-        <main className="relative z-10 flex min-h-screen items-center justify-center bg-[#0b0b14]/50 px-6 py-12 backdrop-blur-2xl sm:px-8 lg:h-screen lg:min-h-0 lg:border-l lg:border-white/[0.06] lg:bg-[linear-gradient(180deg,rgba(255,255,255,0.075),rgba(255,255,255,0.025))] lg:px-12">
+        <main className="relative z-10 flex min-h-screen items-center justify-center bg-[#0b0b14]/50 px-6 py-12 backdrop-blur-2xl sm:px-8 lg:h-screen lg:min-h-0 lg:border-l lg:border-[var(--border-subtle)] lg:bg-[linear-gradient(180deg,rgba(255,255,255,0.075),rgba(255,255,255,0.025))] lg:px-12">
           <div className="pointer-events-none absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle,_rgba(255,255,255,0.045)_0%,_transparent_70%)]" />
           <div className="pointer-events-none absolute inset-x-8 bottom-10 hidden h-px bg-gradient-to-r from-transparent via-white/20 to-transparent lg:block" />
 
@@ -130,13 +130,13 @@ export function AuthLayout() {
               <img
                 src="/fyrlinc-logo.png"
                 alt="Fyrlinc"
-                className="h-12 w-12 rounded-[12px] object-cover ring-1 ring-white/10"
+                className="h-12 w-12 rounded-[12px] object-cover ring-1 ring-[var(--border-subtle)]"
               />
               <div>
-                <p className="font-display text-[1.25rem] font-bold tracking-tight text-white leading-none">
+                <p className="font-display text-[1.25rem] font-bold tracking-tight text-[var(--text-primary)] leading-none">
                   Fyrlinc
                 </p>
-                <p className="mt-1 text-[13px] text-white/40 font-medium">
+                <p className="mt-1 text-[13px] text-[var(--text-quaternary)] font-medium">
                   Fire Alarm Panel Monitoring
                 </p>
               </div>

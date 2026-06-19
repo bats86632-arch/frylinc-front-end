@@ -127,12 +127,12 @@ export function MainDashboardLayout() {
 
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-full w-[260px] flex-col border-r border-white/[0.06] bg-[#141412] transition-transform duration-300 ease-smooth lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-full w-[260px] flex-col border-r border-[var(--border-subtle)] bg-[#141412] transition-transform duration-300 ease-smooth lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo */}
-        <div className="flex h-[72px] items-center justify-between border-b border-white/[0.06] px-5">
+        <div className="flex h-[72px] items-center justify-between border-b border-[var(--border-subtle)] px-5">
           <Link
             to="/"
             className="flex items-center gap-3.5"
@@ -141,20 +141,20 @@ export function MainDashboardLayout() {
             <img
               src="/fyrlinc-logo.png"
               alt="Fyrlinc"
-              className="h-10 w-10 rounded-[10px] object-cover ring-1 ring-white/10"
+              className="h-10 w-10 rounded-[10px] object-cover ring-1 ring-[var(--border-subtle)]"
             />
             <div>
-              <span className="block font-display text-[1.05rem] font-medium leading-none tracking-tight text-[#f0ede8]">
+              <span className="block font-display text-[1.05rem] font-medium leading-none tracking-tight text-[var(--text-primary)]">
                 Fyrlinc
               </span>
-              <span className="mt-1 block text-[11px] font-medium text-white/40 tracking-wide">
+              <span className="mt-1 block text-[11px] font-medium text-[var(--text-quaternary)] tracking-wide">
                 by AGNi
               </span>
             </div>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-white/[0.08] text-white/50 transition-all duration-150 hover:border-white/[0.15] hover:text-white lg:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--border-subtle)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-default)] hover:text-[var(--text-primary)] lg:hidden"
             aria-label="Close sidebar"
           >
             <X className="h-4 w-4" />
@@ -172,8 +172,8 @@ export function MainDashboardLayout() {
                 to={item.href}
                 className={`group flex items-center gap-3 px-5 py-2.5 transition-all duration-150 ${
                   active
-                    ? "border-l-2 border-[#e53d3d] bg-white/[0.02] text-[#f0ede8]"
-                    : "border-l-2 border-transparent text-[#7a7773] opacity-40 hover:bg-white/[0.01] hover:opacity-80"
+                    ? "border-l-2 border-[#e53d3d] bg-[var(--surface-overlay)] text-[var(--text-primary)]"
+                    : "border-l-2 border-transparent text-[var(--text-secondary)] opacity-40 hover:bg-[var(--surface-overlay)] hover:opacity-80"
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -200,22 +200,22 @@ export function MainDashboardLayout() {
       <div className="lg:pl-[260px] relative z-10">
         {/* Header - Waitlister frosted glass style */}
         <header
-          className={`sticky top-0 z-30 flex h-[72px] items-center justify-between border-b bg-[#0f0f0e]/80 px-4 backdrop-blur-xl transition-colors duration-300 sm:px-6 lg:px-8 ${
+          className={`sticky top-0 z-30 flex h-[72px] items-center justify-between border-b bg-[var(--surface-base)]/80 px-4 backdrop-blur-xl transition-colors duration-300 sm:px-6 lg:px-8 ${
             notificationCount > 0
               ? "border-[rgba(229,61,61,0.20)]"
-              : "border-white/[0.06]"
+              : "border-[var(--border-subtle)]"
           }`}
         >
           <div className="flex min-w-0 items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-white/[0.10] bg-white/[0.03] text-white/60 transition-all duration-150 hover:border-white/[0.18] hover:text-white lg:hidden inset-highlight"
+              className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] lg:hidden inset-highlight"
               aria-label="Open sidebar"
             >
               <Menu className="h-5 w-5" />
             </button>
             <div className="flex items-center gap-3 min-w-0">
-              <h1 className="font-display truncate text-[1.1rem] font-bold tracking-tight text-[#f0ede8]">
+              <h1 className="font-display truncate text-[1.1rem] font-bold tracking-tight text-[var(--text-primary)]">
                 <span className="sm:hidden">{mobilePageTitle}</span>
                 <span className="hidden sm:inline">{pageTitle}</span>
               </h1>
@@ -235,14 +235,14 @@ export function MainDashboardLayout() {
             <div className="relative">
               <button
                 onClick={() => setNotificationOpen((v) => !v)}
-                className="relative flex h-10 w-10 items-center justify-center rounded-[10px] border border-white/[0.10] bg-white/[0.03] text-white/60 transition-all duration-150 hover:border-white/[0.18] hover:bg-white/[0.06] hover:text-white inset-highlight shadow-sm"
+                className="relative flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] inset-highlight shadow-sm"
                 aria-label="Notifications"
                 aria-expanded={notificationOpen}
                 aria-haspopup="menu"
               >
                 <Bell className="h-[18px] w-[18px]" />
                 <span
-                  className={`absolute -right-1.5 -top-1.5 flex h-[20px] min-w-[20px] items-center justify-center rounded-full border-[2.5px] border-[#080810] bg-[#e8173a] px-1 text-[9px] font-bold text-white shadow-sm ${
+                  className={`absolute -right-1.5 -top-1.5 flex h-[20px] min-w-[20px] items-center justify-center rounded-full border-[2.5px] border-[#080810] bg-[#e8173a] px-1 text-[9px] font-bold text-[var(--text-primary)] shadow-sm ${
                     notificationCount > 0 ? "animate-pulse" : ""
                   }`}
                 >
@@ -257,27 +257,27 @@ export function MainDashboardLayout() {
                     onClick={() => setNotificationOpen(false)}
                   />
                   <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-80 rounded-[16px] p-4 animate-scale-in origin-top sm:origin-top-right">
-                    <div className="flex items-center justify-between border-b border-white/[0.06] pb-3.5 mb-3">
+                    <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-3.5 mb-3">
                       <div>
-                        <p className="text-[15px] font-bold text-white">
+                        <p className="text-[15px] font-bold text-[var(--text-primary)]">
                           Notifications
                         </p>
-                        <p className="mt-0.5 text-[12px] font-medium text-white/40">
+                        <p className="mt-0.5 text-[12px] font-medium text-[var(--text-quaternary)]">
                           Live panel alerts
                         </p>
                       </div>
-                      <span className="rounded-full border border-white/[0.10] bg-white/[0.05] px-2.5 py-1 text-[11px] font-bold tabular-nums text-white/70 inset-highlight">
+                      <span className="rounded-full border border-[var(--border-default)] bg-[var(--surface-base)] px-2.5 py-1 text-[11px] font-bold tabular-nums text-[var(--text-secondary)] inset-highlight">
                         {notificationCount}
                       </span>
                     </div>
 
                     {notificationCount === 0 ? (
-                      <div className="rounded-[12px] border border-white/[0.06] bg-white/[0.02] p-6 text-center inset-highlight">
-                        <Bell className="mx-auto mb-3 h-8 w-8 text-white/20" />
-                        <p className="text-[14px] font-bold text-white/90">
+                      <div className="rounded-[12px] border border-[var(--border-subtle)] bg-[var(--surface-overlay)] p-6 text-center inset-highlight">
+                        <Bell className="mx-auto mb-3 h-8 w-8 text-[var(--text-quaternary)]" />
+                        <p className="text-[14px] font-bold text-[var(--text-primary)]">
                           All clear
                         </p>
-                        <p className="mt-1.5 text-[13px] font-medium text-white/40">
+                        <p className="mt-1.5 text-[13px] font-medium text-[var(--text-quaternary)]">
                           You'll see active alarms here when panels report them.
                         </p>
                       </div>
@@ -288,10 +288,10 @@ export function MainDashboardLayout() {
                             key={notification.id}
                             className="animate-pulse rounded-[12px] border border-[rgba(232,23,58,0.25)] bg-gradient-to-br from-[rgba(232,23,58,0.12)] to-[rgba(232,23,58,0.05)] p-4 inset-highlight"
                           >
-                            <p className="text-[14px] font-bold text-white">
+                            <p className="text-[14px] font-bold text-[var(--text-primary)]">
                               {notification.title}
                             </p>
-                            <p className="mt-1 text-[13px] font-medium text-white/60">
+                            <p className="mt-1 text-[13px] font-medium text-[var(--text-tertiary)]">
                               {notification.message}
                             </p>
                           </div>
@@ -307,28 +307,28 @@ export function MainDashboardLayout() {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2.5 rounded-pill border border-white/[0.10] bg-white/[0.03] py-1.5 pl-1.5 pr-4 text-white/80 transition-all duration-150 hover:border-white/[0.18] hover:bg-white/[0.06] inset-highlight shadow-sm"
+                className="flex items-center gap-2.5 rounded-pill border border-[var(--border-default)] bg-[var(--surface-raised)] py-1.5 pl-1.5 pr-4 text-[var(--text-primary)]/80 transition-all duration-150 hover:border-[var(--border-strong)] hover:bg-[var(--surface-hover)] inset-highlight shadow-sm"
               >
                 {displayPhotoURL ? (
                   <img
                     src={displayPhotoURL}
                     alt={userData?.displayName || "User avatar"}
-                    className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-white/10"
+                    className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-[var(--border-subtle)]"
                   />
                 ) : (
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e8173a] to-[#ff6b35] text-[13px] font-bold text-white shadow-sm inset-highlight">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e8173a] to-[#ff6b35] text-[13px] font-bold text-[var(--text-primary)] shadow-sm inset-highlight">
                     {userData?.displayName?.charAt(0).toUpperCase() || "U"}
                   </div>
                 )}
                 <div className="hidden min-w-0 text-left sm:block">
-                  <p className="max-w-[130px] truncate text-[13px] font-bold text-white leading-tight drop-shadow-sm">
+                  <p className="max-w-[130px] truncate text-[13px] font-bold text-[var(--text-primary)] leading-tight drop-shadow-sm">
                     {userData?.displayName}
                   </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-white/40 leading-tight mt-0.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-quaternary)] leading-tight mt-0.5">
                     {roleLabel}
                   </p>
                 </div>
-                <ChevronDown className="h-4 w-4 text-white/40 ml-0.5" />
+                <ChevronDown className="h-4 w-4 text-[var(--text-quaternary)] ml-0.5" />
               </button>
 
               {userMenuOpen && (
@@ -338,36 +338,36 @@ export function MainDashboardLayout() {
                     onClick={() => setUserMenuOpen(false)}
                   />
                   <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-64 rounded-[16px] p-2 animate-scale-in origin-top sm:origin-top-right">
-                    <div className="border-b border-white/[0.06] p-4 mb-1">
+                    <div className="border-b border-[var(--border-subtle)] p-4 mb-1">
                       <div className="flex items-center gap-3">
                         {displayPhotoURL ? (
                           <img
                             src={displayPhotoURL}
                             alt="User"
-                            className="h-10 w-10 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-white/10"
+                            className="h-10 w-10 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-[var(--border-subtle)]"
                           />
                         ) : (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e8173a] to-[#ff6b35] text-[15px] font-bold text-white shadow-sm inset-highlight">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e8173a] to-[#ff6b35] text-[15px] font-bold text-[var(--text-primary)] shadow-sm inset-highlight">
                             {userData?.displayName?.charAt(0).toUpperCase() || "U"}
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="truncate text-[15px] font-bold text-white drop-shadow-sm">
+                          <p className="truncate text-[15px] font-bold text-[var(--text-primary)] drop-shadow-sm">
                             {userData?.displayName}
                           </p>
-                          <p className="mt-0.5 truncate text-[13px] font-medium text-white/50">
+                          <p className="mt-0.5 truncate text-[13px] font-medium text-[var(--text-tertiary)]">
                             {userData?.email}
                           </p>
                         </div>
                       </div>
-                      <span className="mt-4 inline-flex rounded-full border border-white/[0.10] bg-white/[0.06] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white/70 inset-highlight shadow-sm">
+                      <span className="mt-4 inline-flex rounded-full border border-[var(--border-default)] bg-[var(--surface-hover)] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--text-secondary)] inset-highlight shadow-sm">
                         {roleLabel}
                       </span>
                     </div>
                     <Link
                       to="/profile"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex w-full items-center gap-2.5 rounded-[10px] px-4 py-3 text-[14px] font-medium text-[#f0ede8]/80 transition-all duration-150 hover:bg-white/[0.04] hover:text-[#f0ede8]"
+                      className="flex w-full items-center gap-2.5 rounded-[10px] px-4 py-3 text-[14px] font-medium text-[var(--text-primary)]/80 transition-all duration-150 hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)]"
                     >
                       <UserIcon className="h-[18px] w-[18px]" />
                       <span>Profile</span>
