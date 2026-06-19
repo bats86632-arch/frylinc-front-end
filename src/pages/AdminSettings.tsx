@@ -840,7 +840,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2.5vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
@@ -1271,10 +1271,10 @@ export function AdminSettings() {
                 ) : (
                   <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0 -mx-5 sm:-mx-7 -mb-5 sm:-mb-7">
                     {/* ── Left Panel: Company List ── */}
-                    <div className={`${selectedCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[320px] lg:w-[360px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
+                    <div className={`${selectedCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[280px] lg:w-[320px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
                       <div className="flex-1 overflow-y-auto">
                         {filteredCompanies.length === 0 ? (
-                          <div className="p-6 text-center text-[13px] text-[var(--text-secondary)]">
+                          <div className="p-6 text-center text-[12px] text-[var(--text-secondary)]">
                             {companies.length === 0 ? "No companies found." : "No companies match your search."}
                           </div>
                         ) : (
@@ -1286,34 +1286,34 @@ export function AdminSettings() {
                                 <button
                                   key={company.id}
                                   onClick={() => setSelectedCompanyId(company.id)}
-                                  className={`w-full flex items-center gap-3 px-5 sm:px-7 py-4 text-left transition-colors group ${
+                                  className={`w-full flex items-center gap-3 px-4 sm:px-6 py-3 text-left transition-colors group ${
                                     isSelected
                                       ? 'bg-[var(--surface-hover)] border-l-2 border-l-amber-500'
                                       : 'hover:bg-[var(--surface-hover)] border-l-2 border-l-transparent'
                                   }`}
                                 >
                                   <div
-                                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[14px] font-medium text-[var(--text-on-accent)] shadow-sm"
+                                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[13px] font-medium text-[var(--text-on-accent)] shadow-sm"
                                     style={{ backgroundColor: getAvatarColor(company.name) }}
                                   >
                                     {company.name.charAt(0).toUpperCase()}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <span className="text-[14px] font-semibold text-[var(--text-primary)] truncate">
+                                      <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate">
                                         {company.name}
                                       </span>
                                     </div>
-                                    <p className="text-[12px] text-[var(--text-secondary)] truncate mt-0.5">
+                                    <p className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5">
                                       {company.description || "No description"}
                                     </p>
                                   </div>
                                   <div className="flex items-center gap-2 shrink-0">
-                                    <span className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)]">
-                                      <MapPin className="h-3 w-3" />
+                                    <span className="flex items-center gap-1 text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)]">
+                                      <MapPin className="h-[10px] w-[10px]" />
                                       {companyBranches.length}
                                     </span>
-                                    <ChevronRight className="h-4 w-4 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity md:block hidden" />
+                                    <ChevronRight className="h-3.5 w-3.5 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity md:block hidden" />
                                   </div>
                                 </button>
                               );
@@ -1342,29 +1342,29 @@ export function AdminSettings() {
                         return (
                           <div className="flex-1 overflow-y-auto">
                             {/* Company Header */}
-                            <div className="px-5 sm:px-7 pt-5 pb-4 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)] sticky top-0 z-10">
+                            <div className="px-4 sm:px-6 pt-4 pb-3 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)] sticky top-0 z-10">
                               <div className="flex items-start gap-4">
                                 {/* Mobile back button */}
                                 <button
                                   onClick={() => setSelectedCompanyId(null)}
-                                  className="flex md:hidden h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors mt-0.5"
+                                  className="flex md:hidden h-7 w-7 shrink-0 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors mt-0.5"
                                 >
-                                  <ChevronLeft className="h-5 w-5" />
+                                  <ChevronLeft className="h-4 w-4" />
                                 </button>
                                 <div
-                                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-[16px] font-semibold text-[var(--text-on-accent)] shadow-sm"
+                                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-semibold text-[var(--text-on-accent)] shadow-sm"
                                   style={{ backgroundColor: getAvatarColor(selectedCompany.name) }}
                                 >
                                   {selectedCompany.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="text-[16px] font-bold text-[var(--text-primary)] truncate">{selectedCompany.name}</h3>
-                                  <p className="text-[13px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">
+                                  <h3 className="text-[15px] font-bold text-[var(--text-primary)] truncate">{selectedCompany.name}</h3>
+                                  <p className="text-[12px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">
                                     {selectedCompany.description || "No description provided."}
                                   </p>
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">ID</span>
-                                    <span className="font-mono text-[11px] text-[var(--text-primary)] truncate">{selectedCompany.id}</span>
+                                  <div className="flex items-center gap-2 mt-1.5">
+                                    <span className="text-[9px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">ID</span>
+                                    <span className="font-mono text-[10px] text-[var(--text-primary)] truncate">{selectedCompany.id}</span>
                                     <CopyButton
                                       textToCopy={selectedCompany.id}
                                       className="text-[var(--text-secondary)] shrink-0 hover:text-[var(--text-primary)] transition-colors"
@@ -1376,25 +1376,25 @@ export function AdminSettings() {
                                 <div className="flex items-center gap-1 shrink-0">
                                   <button
                                     onClick={() => openEditCompany(selectedCompany)}
-                                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+                                    className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                                     aria-label="Edit company"
                                   >
-                                    <Edit2 className="h-4 w-4" />
+                                    <Edit2 className="h-3.5 w-3.5" />
                                   </button>
                                   <button
                                     onClick={() => startDeleteCompany(selectedCompany)}
-                                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
+                                    className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
                                     aria-label="Delete company"
                                   >
-                                    <Trash2 className="h-4 w-4" />
+                                    <Trash2 className="h-3.5 w-3.5" />
                                   </button>
                                 </div>
                               </div>
                             </div>
 
                             {/* Branches Section */}
-                            <div className="px-5 sm:px-7 py-4">
-                              <div className="flex items-center justify-between mb-4">
+                            <div className="px-4 sm:px-6 py-4">
+                              <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center gap-2">
                                   <MapPin className="h-4 w-4 text-amber-400" />
                                   <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">Branches</h4>
@@ -1486,28 +1486,28 @@ export function AdminSettings() {
                                             </div>
                                           </div>
                                         ) : (
-                                          <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+                                          <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-5 gap-2.5 items-center">
                                             <div className="flex items-center gap-2 overflow-hidden">
-                                              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] bg-amber-500/10 border border-amber-500/15">
-                                                <MapPin className="h-3 w-3 text-amber-400" />
+                                              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] bg-amber-500/10 border border-amber-500/15">
+                                                <MapPin className="h-2.5 w-2.5 text-amber-400" />
                                               </div>
-                                              <span className="text-[13px] font-medium text-[var(--text-primary)] truncate">{branch.name}</span>
+                                              <span className="text-[12px] font-medium text-[var(--text-primary)] truncate">{branch.name}</span>
                                             </div>
                                             <div className="truncate">
-                                              {branch.address ? <span className="text-[12px] text-[var(--text-secondary)]">{branch.address}</span> : <span className="text-[12px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                              {branch.address ? <span className="text-[11px] text-[var(--text-secondary)]">{branch.address}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
                                             </div>
                                             <div className="truncate">
-                                              {branch.supervisorName ? <span className="text-[12px] text-[var(--text-secondary)]">{branch.supervisorName}</span> : <span className="text-[12px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                              {branch.supervisorName ? <span className="text-[11px] text-[var(--text-secondary)]">{branch.supervisorName}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
                                             </div>
                                             <div className="truncate">
-                                              {branch.contactNumber ? <span className="text-[12px] text-[var(--text-secondary)]">{branch.contactNumber}</span> : <span className="text-[12px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                              {branch.contactNumber ? <span className="text-[11px] text-[var(--text-secondary)]">{branch.contactNumber}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
                                             </div>
                                             <div className="truncate flex items-center justify-between">
-                                              {branch.emailAddress ? <span className="text-[12px] text-[var(--text-secondary)] truncate">{branch.emailAddress}</span> : <span className="text-[12px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                              {branch.emailAddress ? <span className="text-[11px] text-[var(--text-secondary)] truncate">{branch.emailAddress}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
                                               <div className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <CopyButton
                                                   textToCopy={branch.id}
-                                                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors h-6 w-6 rounded flex items-center justify-center"
+                                                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors h-5 w-5 rounded flex items-center justify-center"
                                                   title="Copy Branch ID"
                                                   iconClassName="h-3 w-3"
                                                 />
@@ -1581,7 +1581,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2.5vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
@@ -2175,7 +2175,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2.5vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
