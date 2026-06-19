@@ -18,7 +18,8 @@ export const CompanyService = {
   async createCompany(data: { name: string; description?: string }): Promise<Company> {
     const response = await apiClient.post('/companies', data);
     this.invalidateCache();
-    return response.data;
+    const result = response.data;
+    return { id: result.companyId || result.id, name: data.name, description: data.description };
   },
   
   async getCompanies(): Promise<Company[]> {

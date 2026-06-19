@@ -35,4 +35,13 @@ export const BranchService = {
     this.invalidateCache();
     return response.data;
   },
+  async updateBranch(id: string, data: Partial<Branch>): Promise<void> {
+    await apiClient.patch(`/branches/${id}`, data);
+    this.invalidateCache();
+  },
+
+  async deleteBranch(id: string): Promise<void> {
+    await apiClient.delete(`/branches/${id}`);
+    this.invalidateCache();
+  },
 };

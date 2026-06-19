@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
   AlertCircle,
@@ -93,7 +93,7 @@ export function Profile() {
   const [dateOfBirth, setDateOfBirth] = useState(userData?.dateOfBirth || "");
 
   // ── Photo ───────────────────────────────────────────────────────────────────
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+
   const [photoPreview, setPhotoPreview] = useState<string>(
     userData?.photoURL || "",
   );
@@ -124,7 +124,7 @@ export function Profile() {
       .join(" ") || "End User";
 
   // ── Photo handling ───────────────────────────────────────────────────────────
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -137,39 +137,44 @@ export function Profile() {
       return;
     }
 
-    setPhotoFile(file);
+
     const reader = new FileReader();
     reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
-  };
 
-  // ── Debounced auto-save ──────────────────────────────────────────────────────
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handleSaveProfile();
-    }, 1200);
-    return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [firstName, lastName, phoneNumber, companyName, companyRole, employeeId, dateOfBirth, photoFile]);
+    // Immediately upload and save photo
+    if (currentUser) {
+      setUploadingPhoto(true);
+      const photoStorageRef = storageRef(
+        storage,
+        `user-photos/${currentUser.uid}/profile.jpg`,
+      );
+      try {
+        const imageCompression = (await import("browser-image-compression")).default;
+        const options = {
+          maxSizeMB: 0.2, // 200kb
+          maxWidthOrHeight: 800,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        await uploadBytes(photoStorageRef, compressedFile);
+      } catch (error) {
+        console.error("Compression failed, uploading original:", error);
+        await uploadBytes(photoStorageRef, file);
+      }
+      const photoURL = await getDownloadURL(photoStorageRef);
+      await updateProfile({ photoURL });
+      setUploadingPhoto(false);
+      setProfileSuccess(true);
+      setTimeout(() => setProfileSuccess(false), 3000);
+    }
+  };
 
   // ── Save profile ─────────────────────────────────────────────────────────────
   const handleSaveProfile = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (savingProfile) return;
-    
-    const hasChanges = 
-      firstName.trim() !== (userData?.firstName || "") ||
-      lastName.trim() !== (userData?.lastName || "") ||
-      phoneNumber.trim() !== (userData?.phoneNumber || "") ||
-      companyName.trim() !== (userData?.companyName || "") ||
-      companyRole.trim() !== (userData?.companyRole || "") ||
-      employeeId.trim() !== (userData?.employeeId || "") ||
-      dateOfBirth.trim() !== (userData?.dateOfBirth || "") ||
-      photoFile !== null;
 
-    if (!hasChanges) {
-      return;
-    }
 
     const errors: Record<string, string> = {};
     if (firstName.trim().length === 0) {
@@ -197,32 +202,6 @@ export function Profile() {
     setProfileSuccess(false);
 
     try {
-      let photoURL = userData?.photoURL || "";
-
-      if (photoFile && currentUser) {
-        setUploadingPhoto(true);
-        const photoStorageRef = storageRef(
-          storage,
-          `user-photos/${currentUser.uid}/profile.jpg`,
-        );
-        
-        try {
-          const imageCompression = (await import("browser-image-compression")).default;
-          const options = {
-            maxSizeMB: 0.2, // 200kb
-            maxWidthOrHeight: 800,
-            useWebWorker: true,
-          };
-          const compressedFile = await imageCompression(photoFile, options);
-          await uploadBytes(photoStorageRef, compressedFile);
-        } catch (error) {
-          console.error("Compression failed, uploading original:", error);
-          await uploadBytes(photoStorageRef, photoFile);
-        }
-        
-        photoURL = await getDownloadURL(photoStorageRef);
-        setUploadingPhoto(false);
-      }
 
       const displayName =
         `${firstName.trim()} ${lastName.trim()}`.trim() ||
@@ -238,10 +217,10 @@ export function Profile() {
         companyRole: companyRole.trim(),
         employeeId: employeeId.trim(),
         dateOfBirth: dateOfBirth.trim(),
-        photoURL,
+
       });
 
-      setPhotoFile(null);
+
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
     } catch (err: unknown) {
@@ -363,11 +342,6 @@ export function Profile() {
             <p className="mt-1 text-[13px] text-[#7a7773]">
               Manage your personal settings and security
             </p>
-            {photoFile && (
-              <p className="mt-1 text-[12px] text-amber-300/80">
-                New photo selected — save profile to apply
-              </p>
-            )}
           </div>
         </div>
       </section>
