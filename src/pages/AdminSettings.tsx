@@ -35,6 +35,7 @@ import {
   ArrowRight,
   ChevronLeft,
 } from "lucide-react";
+import { CopyButton } from "../components/CopyButton";
 
 const panelSchema = z.object({
   serial: z.string().min(1, "Serial is required"),
