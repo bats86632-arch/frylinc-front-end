@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from 'react-dom';
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -749,7 +750,7 @@ export function AdminSettings() {
       {/* ═══════════════════════════════════════════════════════════════════ */}
 
       {/* ── Company Management Overlay ────────────────────────────────────── */}
-      {activeSection === "companies" && (
+      {activeSection === "companies" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-md admin-overlay-backdrop"
@@ -969,11 +970,11 @@ export function AdminSettings() {
               </div>
             </div>
           </div>
-        </div>
+        </div>, document.body
       )}
 
       {/* ── User Management Overlay ───────────────────────────────────────── */}
-      {activeSection === "users" && (
+      {activeSection === "users" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-md admin-overlay-backdrop"
