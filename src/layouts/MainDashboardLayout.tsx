@@ -8,12 +8,12 @@ import {
   LogOut,
   Menu,
   Settings,
-  
   User as UserIcon,
   X,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { Role } from "../types";
 
 const navigation: Array<{
@@ -107,7 +107,7 @@ export function MainDashboardLayout() {
   };
 
   return (
-    <div className="min-h-screen console-bg text-white relative">
+    <div className="theme-scope min-h-screen console-bg relative text-[var(--text-primary)]">
       {/* Ambient background glow for dashboard */}
       <div className="pointer-events-none fixed top-0 left-[260px] right-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_rgba(99,57,198,0.08)_0%,_transparent_70%)]" />
 
@@ -169,7 +169,13 @@ export function MainDashboardLayout() {
                 onClick={() => setSidebarOpen(false)}
               >
                 <item.icon className="h-[18px] w-[18px]" />
-                <span className={active ? "text-[13px] font-semibold" : "text-[12px] font-medium"}>
+                <span
+                  className={
+                    active
+                      ? "text-[13px] font-semibold"
+                      : "text-[12px] font-medium"
+                  }
+                >
                   {item.name}
                 </span>
               </Link>
@@ -184,8 +190,12 @@ export function MainDashboardLayout() {
               {userData?.displayName?.charAt(0).toUpperCase() || "U"}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-white/90">{userData?.displayName}</p>
-              <p className="truncate text-[11px] font-semibold text-white/40 tracking-wide uppercase mt-0.5">{roleLabel}</p>
+              <p className="truncate text-sm font-bold text-white/90">
+                {userData?.displayName}
+              </p>
+              <p className="truncate text-[11px] font-semibold text-white/40 tracking-wide uppercase mt-0.5">
+                {roleLabel}
+              </p>
             </div>
           </div>
         </div>
@@ -196,7 +206,9 @@ export function MainDashboardLayout() {
         {/* Header - Waitlister frosted glass style */}
         <header
           className={`sticky top-0 z-30 flex h-[72px] items-center justify-between border-b bg-[#0f0f0e]/80 px-4 backdrop-blur-xl transition-colors duration-300 sm:px-6 lg:px-8 ${
-            notificationCount > 0 ? "border-[rgba(229,61,61,0.20)]" : "border-white/[0.06]"
+            notificationCount > 0
+              ? "border-[rgba(229,61,61,0.20)]"
+              : "border-white/[0.06]"
           }`}
         >
           <div className="flex min-w-0 items-center gap-4">
@@ -222,6 +234,7 @@ export function MainDashboardLayout() {
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {/* Notification bell */}
             <div className="relative">
               <button
@@ -250,7 +263,9 @@ export function MainDashboardLayout() {
                   <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-80 rounded-[16px] p-4 animate-scale-in origin-top sm:origin-top-right">
                     <div className="flex items-center justify-between border-b border-white/[0.06] pb-3.5 mb-3">
                       <div>
-                        <p className="text-[15px] font-bold text-white">Notifications</p>
+                        <p className="text-[15px] font-bold text-white">
+                          Notifications
+                        </p>
                         <p className="mt-0.5 text-[12px] font-medium text-white/40">
                           Live panel alerts
                         </p>
@@ -263,7 +278,9 @@ export function MainDashboardLayout() {
                     {notificationCount === 0 ? (
                       <div className="rounded-[12px] border border-white/[0.06] bg-white/[0.02] p-6 text-center inset-highlight">
                         <Bell className="mx-auto mb-3 h-8 w-8 text-white/20" />
-                        <p className="text-[14px] font-bold text-white/90">All clear</p>
+                        <p className="text-[14px] font-bold text-white/90">
+                          All clear
+                        </p>
                         <p className="mt-1.5 text-[13px] font-medium text-white/40">
                           You'll see active alarms here when panels report them.
                         </p>
@@ -275,8 +292,12 @@ export function MainDashboardLayout() {
                             key={notification.id}
                             className="animate-pulse rounded-[12px] border border-[rgba(232,23,58,0.25)] bg-gradient-to-br from-[rgba(232,23,58,0.12)] to-[rgba(232,23,58,0.05)] p-4 inset-highlight"
                           >
-                            <p className="text-[14px] font-bold text-white">{notification.title}</p>
-                            <p className="mt-1 text-[13px] font-medium text-white/60">{notification.message}</p>
+                            <p className="text-[14px] font-bold text-white">
+                              {notification.title}
+                            </p>
+                            <p className="mt-1 text-[13px] font-medium text-white/60">
+                              {notification.message}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -346,8 +367,12 @@ export function MainDashboardLayout() {
                 <Flame className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-[14px] font-bold text-[#f59e0b]">You are currently offline</p>
-                <p className="text-[13px] text-[#f59e0b]/80">Data will sync automatically when your connection is restored.</p>
+                <p className="text-[14px] font-bold text-[#f59e0b]">
+                  You are currently offline
+                </p>
+                <p className="text-[13px] text-[#f59e0b]/80">
+                  Data will sync automatically when your connection is restored.
+                </p>
               </div>
             </div>
           )}
@@ -357,5 +382,3 @@ export function MainDashboardLayout() {
     </div>
   );
 }
-
-

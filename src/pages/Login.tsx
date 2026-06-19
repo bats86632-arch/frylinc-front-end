@@ -88,17 +88,21 @@ export function Login() {
   };
 
   return (
-    <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in">
-
+    <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in lg:rounded-[28px] lg:border-white/[0.14] lg:bg-[linear-gradient(180deg,rgba(18,18,26,0.92),rgba(10,10,15,0.86))] lg:p-11 lg:shadow-[0_30px_110px_rgba(0,0,0,0.48)] lg:backdrop-blur-2xl">
       {/* Header */}
-      <div className="mb-8">
-        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-[12px] border border-[rgba(232,23,58,0.25)] bg-[rgba(232,23,58,0.08)] inset-highlight shadow-sm">
-          <LockKeyhole className="h-5 w-5 text-[#e8173a]" />
+      <div className="mb-8 lg:mb-9">
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[14px] border border-[rgba(232,23,58,0.28)] bg-[rgba(232,23,58,0.10)] inset-highlight shadow-[0_12px_32px_rgba(232,23,58,0.16)] lg:h-14 lg:w-14 lg:rounded-[18px]">
+            <LockKeyhole className="h-5 w-5 text-[#ff5c73] lg:h-6 lg:w-6" />
+          </div>
+          <span className="hidden rounded-full border border-white/[0.10] bg-white/[0.04] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45 inset-highlight lg:inline-flex">
+            Staff access
+          </span>
         </div>
-        <h2 className="font-display text-[2rem] font-bold leading-tight tracking-tight text-white text-balance drop-shadow-sm">
+        <h2 className="font-display text-[2rem] font-bold leading-tight tracking-tight text-white text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
           Welcome back
         </h2>
-        <p className="mt-2 text-body leading-relaxed text-white/50 font-medium">
+        <p className="mt-2 text-body leading-relaxed text-white/50 font-medium lg:mt-3 lg:max-w-sm lg:text-[0.95rem]">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
@@ -107,12 +111,14 @@ export function Login() {
       {error && (
         <div className="mb-7 flex items-start gap-3 rounded-[12px] border border-[rgba(232,23,58,0.30)] bg-[rgba(232,23,58,0.12)] p-4 animate-fade-in inset-highlight">
           <AlertCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#ff8099]" />
-          <p className="text-[13px] font-medium leading-6 text-[#ffb3c0]">{error}</p>
+          <p className="text-[13px] font-medium leading-6 text-[#ffb3c0]">
+            {error}
+          </p>
         </div>
       )}
 
       {/* Divider */}
-      <div className="mb-8 border-t border-white/[0.06]" />
+      <div className="mb-8 border-t border-white/[0.06] lg:border-white/[0.10]" />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-6">
@@ -129,8 +135,10 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium ${
-                  errors.email ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)] pr-10" : ""
+                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium lg:h-[52px] lg:rounded-[14px] ${
+                  errors.email
+                    ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)] pr-10"
+                    : ""
                 }`}
                 placeholder="you@example.com"
                 disabled={isLoading}
@@ -159,8 +167,10 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium ${
-                  errors.password ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)]" : ""
+                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium lg:h-[52px] lg:rounded-[14px] ${
+                  errors.password
+                    ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)]"
+                    : ""
                 }`}
                 placeholder="Enter your password"
                 disabled={isLoading}
@@ -190,7 +200,7 @@ export function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="btn-primary mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-4 text-[15px] font-bold"
+          className="btn-primary mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-4 text-[15px] font-bold lg:h-[54px] lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_16px_36px_rgba(232,23,58,0.28)]"
         >
           {isLoading ? (
             <>

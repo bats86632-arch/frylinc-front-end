@@ -6,6 +6,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { MainDashboardLayout } from "./layouts/MainDashboardLayout";
 import { PageLoader } from "./components/PageLoader";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 const Login = lazy(() =>
   import("./pages/Login").then((m) => ({ default: m.Login })),
@@ -40,54 +41,56 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <PanelsProvider>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Auth routes */}
-              <Route element={<AuthLayout />}>
-                <Route path="/login" element={<Login />} />
-              </Route>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <PanelsProvider>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Auth routes */}
+                <Route element={<AuthLayout />}>
+                  <Route path="/login" element={<Login />} />
+                </Route>
 
-              {/* Public Legal routes (Play Store requirement) */}
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsOfService />} />
+                {/* Public Legal routes (Play Store requirement) */}
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
 
-              {/* Protected routes */}
-              <Route
-                element={
-                  <ProtectedRoute>
-                    <MainDashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/panel/:serial" element={<PanelDetail />} />
-                <Route path="/profile" element={<Profile />} />
+                {/* Protected routes */}
                 <Route
-                  path="/admin"
                   element={
-                    <ProtectedRoute
-                      allowedRoles={[
-                        "super_admin",
-                        "head_office",
-                        "system_integrator",
-                      ]}
-                    >
-                      <AdminSettings />
+                    <ProtectedRoute>
+                      <MainDashboardLayout />
                     </ProtectedRoute>
                   }
-                />
-              </Route>
+                >
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/panel/:serial" element={<PanelDetail />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute
+                        allowedRoles={[
+                          "super_admin",
+                          "head_office",
+                          "system_integrator",
+                        ]}
+                      >
+                        <AdminSettings />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
 
-              {/* Catch-all redirect */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        </PanelsProvider>
-      </AuthProvider>
-    </BrowserRouter>
+                {/* Catch-all redirect */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </PanelsProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
