@@ -184,27 +184,6 @@ export function AdminSettings() {
   } = useForm<EditPanelFormData>({ resolver: zodResolver(editPanelSchema) });
 
   const { branches, loading: branchesLoading, reloadBranches } = useBranches();
-  const [newBranchName, setNewBranchName] = useState("");
-  const [creatingBranch, setCreatingBranch] = useState(false);
-
-  const handleCreateBranch = async (companyId: string) => {
-    if (!newBranchName.trim()) return;
-    setCreatingBranch(true);
-    try {
-      await BranchService.createBranch({
-        name: newBranchName.trim(),
-        companyId,
-      });
-      setNewBranchName("");
-      await reloadBranches();
-      setSuccess("Branch created successfully");
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, "Failed to create branch"));
-    } finally {
-      setCreatingBranch(false);
-    }
-  };
 
   // Watch form values for dependent dropdowns
   const watchedPanelCompanyId = watch("companyId");
@@ -1917,18 +1896,12 @@ export function AdminSettings() {
                           Serial Number
                         </label>
                         <input
-                          {...registerEditPanel("serial")}
-                          className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            editPanelErrors.serial ? "border-red-400/70" : ""
-                          }`}
+                          value={editingPanelData?.serial || ""}
+                          readOnly
+                          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] opacity-50 cursor-not-allowed"
                           placeholder="e.g., FP-2024-001"
                           disabled={true} 
                         />
-                        {editPanelErrors.serial && (
-                          <p className="mt-1 text-[12px] text-red-400">
-                            {editPanelErrors.serial.message}
-                          </p>
-                        )}
                         <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
                           Serial numbers cannot be modified after creation.
                         </p>
@@ -1990,7 +1963,7 @@ export function AdminSettings() {
                             disabled={editPanelFormLoading || branchesLoading}
                           >
                             <option value="">— Select a branch —</option>
-                            {getBranchesForCompany(watchedEditPanelCompanyId).map((b) => (
+                            {getBranchesForCompany(watchedEditPanelCompanyId || "").map((b) => (
                               <option key={b.id} value={b.id}>
                                 {b.name}
                               </option>
