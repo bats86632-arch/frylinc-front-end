@@ -91,7 +91,6 @@ const branchSchema = z.object({
 const editCompanySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  branches: z.array(branchSchema).optional(),
 });
 type EditCompanyFormData = z.infer<typeof editCompanySchema>;
 
@@ -270,15 +269,6 @@ export function AdminSettings() {
     name: "branches",
   });
 
-  const {
-    fields: editCompanyBranches,
-    append: appendEditCompanyBranch,
-    remove: removeEditCompanyBranch,
-  } = useFieldArray({
-    control: controlEditCompany,
-    name: "branches",
-  });
-
   const handleCreateCompany = async (data: CompanyFormData) => {
     setCompanyFormLoading(true);
     try {
@@ -364,39 +354,13 @@ export function AdminSettings() {
         description: data.description,
       });
 
-      // Handle branches
-      if (data.branches) {
-        // Find existing branches for this company
-        const existingBranches = branches.filter(b => b.companyId === editingCompanyData.id);
-
-        const submittedBranchIds = new Set(data.branches.filter(b => b.id).map(b => b.id));
-
-        // Delete branches that were removed
-        const branchesToDelete = existingBranches.filter(b => !submittedBranchIds.has(b.id));
-        await Promise.all(branchesToDelete.map(b => BranchService.deleteBranch(b.id)));
-
-        // Create or update branches
-        await Promise.all(
-          data.branches.map(branch => {
-            if (branch.id) {
-              return BranchService.updateBranch(branch.id, branch);
-            } else {
-              return BranchService.createBranch({
-                ...branch,
-                companyId: editingCompanyData.id
-              });
-            }
-          })
-        );
-      }
-
-      setSuccess("Company and branches updated successfully");
+      await loadCompanies();
+      await loadBranches(); // Reload branches in case anything changed
       setEditingCompanyData(null);
       resetEditCompany();
-      await reloadCompanies();
-      await reloadBranches();
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, "Failed to update company"));
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Failed to update company");
     } finally {
       setEditCompanyFormLoading(false);
     }
@@ -406,8 +370,6 @@ export function AdminSettings() {
     setEditingCompanyData(company);
     setEditCompanyValue("name", company.name);
     setEditCompanyValue("description", company.description || "");
-    const companyBranches = branches.filter((b) => b.companyId === company.id);
-    setEditCompanyValue("branches", companyBranches);
   };
 
   const startDeleteCompany = (company: Company) => {
@@ -1138,109 +1100,6 @@ export function AdminSettings() {
                           <p className="mt-1 text-[12px] text-red-400">
                             {editCompanyErrors.description.message}
                           </p>
-                        )}
-                      </div>
-
-                      <div className="pt-2 border-t border-[var(--border-subtle)]">
-                        <div className="flex items-center justify-between mb-4 mt-2">
-                          <h4 className="text-[13px] font-medium text-[var(--text-primary)]">
-                            Branches
-                            <span className="ml-2 text-[11px] text-[var(--text-secondary)] font-normal">
-                              ({editCompanyBranches.length})
-                            </span>
-                          </h4>
-                          <button
-                            type="button"
-                            onClick={() => appendEditCompanyBranch({ name: "", address: "", supervisorName: "", contactNumber: "", emailAddress: "" })}
-                            className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:opacity-80 transition-opacity"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                            Add Branch
-                          </button>
-                        </div>
-                        
-                        {editCompanyBranches.length === 0 ? (
-                          <p className="text-[12px] text-[var(--text-secondary)] text-center py-4 bg-[var(--surface-base)] rounded-md border border-[var(--border-subtle)]">
-                            No branches for this company. Click "Add Branch" to create one.
-                          </p>
-                        ) : (
-                          <div className="space-y-4">
-                            {editCompanyBranches.map((field, index) => (
-                              <div key={field.id} className="p-4 bg-[var(--surface-base)] border border-[var(--border-subtle)] rounded-lg">
-                                <div className="flex items-center justify-between mb-3">
-                                  <span className="text-[12px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                                    Branch {index + 1}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => removeEditCompanyBranch(index)}
-                                    className="flex items-center gap-1 text-[11px] text-[var(--color-error)] hover:text-red-400 p-1 rounded-md transition-colors"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                    Remove
-                                  </button>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Branch Name *</label>
-                                    <input
-                                      {...registerEditCompany(`branches.${index}.name`)}
-                                      placeholder="e.g. Headquarters"
-                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
-                                      disabled={editCompanyFormLoading}
-                                    />
-                                    {editCompanyErrors.branches?.[index]?.name && (
-                                      <p className="mt-1 text-[11px] text-red-400">
-                                        {editCompanyErrors.branches[index]?.name?.message}
-                                      </p>
-                                    )}
-                                  </div>
-
-                                  <div>
-                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Address</label>
-                                    <input
-                                      {...registerEditCompany(`branches.${index}.address`)}
-                                      placeholder="e.g. 123 Main St, City"
-                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
-                                      disabled={editCompanyFormLoading}
-                                    />
-                                  </div>
-
-                                  <div>
-                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Supervisor Name</label>
-                                    <input
-                                      {...registerEditCompany(`branches.${index}.supervisorName`)}
-                                      placeholder="e.g. John Doe"
-                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
-                                      disabled={editCompanyFormLoading}
-                                    />
-                                  </div>
-
-                                  <div>
-                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Contact Number</label>
-                                    <input
-                                      {...registerEditCompany(`branches.${index}.contactNumber`)}
-                                      placeholder="e.g. +91 9876543210"
-                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
-                                      disabled={editCompanyFormLoading}
-                                    />
-                                  </div>
-
-                                  <div className="sm:col-span-2">
-                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Email Address</label>
-                                    <input
-                                      {...registerEditCompany(`branches.${index}.emailAddress`)}
-                                      placeholder="e.g. branch@company.com"
-                                      type="email"
-                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
-                                      disabled={editCompanyFormLoading}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
                         )}
                       </div>
 
