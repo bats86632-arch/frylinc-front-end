@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../config/firebase";
 import {
   AlertCircle,
@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Loader2,
   LockKeyhole,
+  CheckCircle,
 } from "lucide-react";
 
 const loginSchema = z.object({
@@ -38,6 +39,7 @@ function getAuthErrorCode(error: unknown) {
 export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,6 +50,7 @@ export function Login() {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -87,6 +90,25 @@ export function Login() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    const email = getValues("email");
+    if (!email) {
+      setError("Please enter your email address first to reset your password");
+      setSuccess(null);
+      return;
+    }
+    setError(null);
+    setIsLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setSuccess("Password reset email sent! Check your inbox.");
+    } catch (err: unknown) {
+      setError("Failed to send password reset email. Please ensure your email is correct.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in lg:rounded-[28px] lg:border-white/[0.14] lg:bg-[linear-gradient(180deg,rgba(18,18,26,0.92),rgba(10,10,15,0.86))] lg:p-11 lg:shadow-[0_30px_110px_rgba(0,0,0,0.48)] lg:backdrop-blur-2xl">
       {/* Header */}
@@ -110,6 +132,16 @@ export function Login() {
           <AlertCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#ff8099]" />
           <p className="text-[13px] font-medium leading-6 text-[#ffb3c0]">
             {error}
+          </p>
+        </div>
+      )}
+
+      {/* Success banner */}
+      {success && (
+        <div className="mb-7 flex items-start gap-3 rounded-[12px] border border-[rgba(34,197,94,0.30)] bg-[rgba(34,197,94,0.12)] p-4 animate-fade-in inset-highlight">
+          <CheckCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#4ade80]" />
+          <p className="text-[13px] font-medium leading-6 text-[#86efac]">
+            {success}
           </p>
         </div>
       )}
@@ -153,12 +185,21 @@ export function Login() {
 
           {/* Password */}
           <div>
-            <label
-              htmlFor="password"
-              className="mb-2.5 block text-[13px] font-semibold text-white/80"
-            >
-              Password
-            </label>
+            <div className="mb-2.5 flex items-center justify-between">
+              <label
+                htmlFor="password"
+                className="block text-[13px] font-semibold text-white/80"
+              >
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-[12px] font-medium text-[#ff5c73] hover:text-[#ff8099] transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
             <div className="relative">
               <input
                 id="password"

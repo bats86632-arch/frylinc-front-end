@@ -9,17 +9,17 @@ import {
   ShieldCheck,
   Camera,
 } from "lucide-react";
-import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import {
   ref as storageRef,
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
-import { storage } from "../config/firebase";
+import { storage, auth } from "../config/firebase";
 
 export function Profile() {
   const { userData, currentUser, saveDisplayName, updateProfile } = useAuth();
@@ -51,6 +51,10 @@ export function Profile() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+
+  const [resetPasswordSuccess, setResetPasswordSuccess] = useState(false);
+  const [resetPasswordError, setResetPasswordError] = useState("");
+  const [sendingResetEmail, setSendingResetEmail] = useState(false);
 
   // ── Derived ─────────────────────────────────────────────────────────────────
   const roleLabel =
@@ -164,6 +168,23 @@ export function Profile() {
       }
     } finally {
       setSavingPassword(false);
+    }
+  };
+
+  const handleSendResetEmail = async () => {
+    if (!currentUser || !currentUser.email) return;
+    setSendingResetEmail(true);
+    setResetPasswordError("");
+    setResetPasswordSuccess(false);
+    try {
+      await sendPasswordResetEmail(auth, currentUser.email);
+      setResetPasswordSuccess(true);
+      setTimeout(() => setResetPasswordSuccess(false), 3000);
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setResetPasswordError(error.message || "Failed to send reset email");
+    } finally {
+      setSendingResetEmail(false);
     }
   };
 
@@ -451,6 +472,35 @@ export function Profile() {
               {savingPassword ? "Updating…" : "Update Password"}
             </button>
           </form>
+
+          <div className="pt-6 mt-6 border-t border-white/[0.06]">
+            <h3 className="text-[13px] font-semibold text-[#f0ede8] mb-1">Forgot your password?</h3>
+            <p className="text-[12px] text-[#7a7773] mb-4">
+              We'll send you an email with a secure link to reset your password.
+            </p>
+            
+            {resetPasswordError && (
+              <div className="mb-4 flex items-center gap-2.5 rounded-[10px] text-[13px] text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {resetPasswordError}
+              </div>
+            )}
+            {resetPasswordSuccess && (
+              <div className="mb-4 flex items-center gap-2.5 rounded-[10px] text-[13px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                Password reset email sent successfully
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSendResetEmail}
+              disabled={sendingResetEmail}
+              className="flex h-[32px] w-full items-center justify-center gap-2 rounded-[6px] border border-amber-500/30 bg-amber-500/10 px-4 text-[13px] font-medium text-amber-200 transition-all hover:bg-amber-500/20 disabled:opacity-50"
+            >
+              {sendingResetEmail ? "Sending..." : "Send Password Reset Email"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
