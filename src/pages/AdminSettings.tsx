@@ -1284,17 +1284,84 @@ export function AdminSettings() {
                                     {companyBranches.length}
                                   </span>
                                 </div>
-                                <div className="relative w-48">
-                                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                                  <input
-                                    type="text"
-                                    placeholder="Search branches..."
-                                    className="control-field w-full h-7 pl-8 pr-3 text-[11px] rounded-[6px]"
-                                    value={branchSearchQuery}
-                                    onChange={(e) => setBranchSearchQuery(e.target.value)}
-                                  />
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => setAddingBranchToCompany(selectedCompany.id)}
+                                    className="flex h-7 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] px-2.5 text-[11px] font-medium text-[var(--text-primary)] transition-opacity hover:opacity-80"
+                                  >
+                                    <Plus className="h-3.5 w-3.5" />
+                                    Add
+                                  </button>
+                                  <div className="relative w-48">
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                                    <input
+                                      type="text"
+                                      placeholder="Search branches..."
+                                      className="control-field w-full h-7 pl-8 pr-3 text-[11px] rounded-[6px]"
+                                      value={branchSearchQuery}
+                                      onChange={(e) => setBranchSearchQuery(e.target.value)}
+                                    />
+                                  </div>
                                 </div>
                               </div>
+                              
+                              {addingBranchToCompany === selectedCompany.id && (
+                                <div className="mb-4 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-hover)] p-3 shadow-sm animate-fade-in-up">
+                                  <h5 className="mb-2 text-[12px] font-bold text-[var(--text-primary)]">Create New Branch</h5>
+                                  <div className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.name || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, name: e.target.value }))}
+                                      placeholder="Branch Name *"
+                                    />
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.address || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, address: e.target.value }))}
+                                      placeholder="Address"
+                                    />
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.supervisorName || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, supervisorName: e.target.value }))}
+                                      placeholder="Supervisor Name"
+                                    />
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.contactNumber || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, contactNumber: e.target.value }))}
+                                      placeholder="Phone Number"
+                                    />
+                                    <input
+                                      type="email"
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px] md:col-span-2"
+                                      value={newBranchForm.emailAddress || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, emailAddress: e.target.value }))}
+                                      placeholder="Email Address"
+                                    />
+                                  </div>
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button
+                                      onClick={() => {
+                                        setAddingBranchToCompany(null);
+                                        setNewBranchForm({});
+                                      }}
+                                      disabled={inlineEditBranchLoading}
+                                      className="flex h-8 items-center justify-center rounded-[6px] px-3 text-[12px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-base)] hover:text-[var(--text-primary)]"
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={() => handleInlineBranchCreate(selectedCompany.id)}
+                                      disabled={inlineEditBranchLoading || !newBranchForm.name}
+                                      className="flex h-8 items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-3 text-[12px] font-medium text-[var(--surface-base)] transition-colors hover:opacity-90 disabled:opacity-50"
+                                    >
+                                      {inlineEditBranchLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Create"}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
 
                               {companyBranches.length === 0 ? (
                                 <div className="rounded-[10px] border border-dashed border-[var(--border-subtle)] bg-[var(--surface-base)] p-8 text-center">
