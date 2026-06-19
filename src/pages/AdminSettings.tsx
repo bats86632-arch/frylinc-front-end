@@ -1553,6 +1553,7 @@ export function AdminSettings() {
                                   })}
                                 </div>
                               )}
+                              </div>
                             </div>
                           </div>
                         );
