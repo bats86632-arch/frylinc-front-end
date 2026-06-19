@@ -44,7 +44,7 @@ export function AuthLayout() {
 
       <div className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
 
-      <div className="relative z-10 grid min-h-screen lg:grid-cols-[minmax(0,1.12fr)_minmax(440px,0.88fr)]">
+      <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
         {/* ── Left info panel ────────────────────────────────────────────── */}
         <section className="relative hidden h-screen flex-col overflow-hidden border-r border-white/[0.08] px-10 py-10 lg:flex xl:px-16">
           {/* Brand lock-up */}
@@ -62,26 +62,26 @@ export function AuthLayout() {
             </div>
           </div>
 
-          {/* Hero copy */}
-          <div className="animate-fade-in flex flex-1 flex-col items-start justify-center py-12">
+          {/* Hero copy — vertically centered */}
+          <div className="animate-fade-in flex flex-1 flex-col items-start justify-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.04] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white/55 inset-highlight">
               <span className="h-1.5 w-1.5 rounded-full bg-[#34d399] shadow-[0_0_14px_rgba(52,211,153,0.75)]" />
               Secure operations console
             </div>
-            <h1 className="font-display max-w-2xl text-[3.25rem] font-bold leading-[0.98] tracking-[-0.055em] text-white text-balance xl:text-[4.75rem] drop-shadow-sm">
+            <h1 className="font-display max-w-xl text-[3rem] font-bold leading-[0.98] tracking-[-0.055em] text-white text-balance xl:text-[4rem] drop-shadow-sm">
               Command fire alarm telemetry with confidence.
             </h1>
-            <p className="mt-7 max-w-xl text-[1.05rem] leading-8 text-white/58 font-medium xl:text-[1.12rem]">
+            <p className="mt-7 max-w-md text-[1rem] leading-8 text-white/58 font-medium xl:text-[1.08rem]">
               Fyrlinc brings panel status, alarms, controls, and contact routing
               into one high-trust desktop command center.
             </p>
 
-            {/* Status rows — Waitlister premium card style with inset highlight */}
-            <div className="mt-12 grid max-w-lg gap-3 w-full">
+            {/* Status rows */}
+            <div className="mt-10 grid max-w-md gap-3 w-full">
               {signalRows.map((row, idx) => (
                 <div
                   key={row.label}
-                  className="flex items-center justify-between rounded-[14px] border px-5 py-4 animate-fade-in-up inset-highlight backdrop-blur-md"
+                  className="flex items-center justify-between rounded-[14px] border px-5 py-3.5 animate-fade-in-up inset-highlight backdrop-blur-md"
                   style={{
                     background: row.accentBg,
                     borderColor: row.accentBorder,
@@ -110,45 +110,13 @@ export function AuthLayout() {
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* Zone telemetry demo card — flat surface */}
-            <div
-              className="mt-8 max-w-lg w-full rounded-[22px] border border-white/[0.10] bg-white/[0.045] p-6 animate-fade-in-up inset-highlight backdrop-blur-xl shadow-[0_24px_90px_rgba(0,0,0,0.38)]"
-              style={{ animationDelay: "300ms" }}
-            >
-              <div className="mb-5 flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-white/90">
-                  Zone telemetry
-                </span>
-                <span className="rounded-full bg-white/[0.06] border border-white/[0.08] px-2.5 py-1 text-[10px] font-bold text-white/40 tracking-wider uppercase">
-                  8 zones
-                </span>
-              </div>
-              <div className="grid grid-cols-4 gap-3">
-                {Array.from({ length: 8 }).map((_, index) => {
-                  const active = [2, 5].includes(index);
-                  return (
-                    <div
-                      key={index}
-                      className={`flex h-12 flex-col items-center justify-center gap-0.5 rounded-[10px] text-xs font-semibold border transition-all duration-200 ${
-                        active
-                          ? "zone-alarm animate-pulse-shadow shadow-sm"
-                          : "zone-normal"
-                      }`}
-                    >
-                      <span className={active ? "text-white" : "text-white/50"}>
-                        Z{index + 1}
-                      </span>
-                      {active && (
-                        <span className="text-[8px] font-bold tracking-widest opacity-90 mt-0.5">
-                          ALARM
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          {/* Footer */}
+          <div className="shrink-0 pt-4">
+            <p className="text-[12px] text-white/25 font-medium">
+              © {new Date().getFullYear()} Fyrlinc · All rights reserved
+            </p>
           </div>
         </section>
 
