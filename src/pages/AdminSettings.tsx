@@ -11,6 +11,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useCompanies } from "../hooks/useCompanies";
 import { useBranches } from "../hooks/useBranches";
 import { CompanyService, Company } from "../api/CompanyService";
+import { BranchService } from "../api/BranchService";
 import {
   DEFAULT_PANEL_COMMANDS,
   normalizeAllowedCommands,
@@ -170,7 +171,28 @@ export function AdminSettings() {
     formState: { errors: editPanelErrors },
   } = useForm<EditPanelFormData>({ resolver: zodResolver(editPanelSchema) });
 
-  const { branches, loading: branchesLoading } = useBranches();
+  const { branches, loading: branchesLoading, reloadBranches } = useBranches();
+  const [newBranchName, setNewBranchName] = useState("");
+  const [creatingBranch, setCreatingBranch] = useState(false);
+
+  const handleCreateBranch = async (companyId: string) => {
+    if (!newBranchName.trim()) return;
+    setCreatingBranch(true);
+    try {
+      await BranchService.createBranch({
+        name: newBranchName.trim(),
+        companyId,
+      });
+      setNewBranchName("");
+      await reloadBranches();
+      setSuccess("Branch created successfully");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to create branch"));
+    } finally {
+      setCreatingBranch(false);
+    }
+  };
 
   // Watch form values for dependent dropdowns
   const watchedPanelCompanyId = watch("companyId");
@@ -834,13 +856,20 @@ export function AdminSettings() {
                 {hasRole(["super_admin"]) && (
                   <div>
                     <label className="mb-2 block text-[13px] text-[#7a7773]">
-                      Company ID
+                      Company
                     </label>
-                    <input
+                    <select
                       {...registerUser("companyId")}
-                      placeholder="Optional"
                       className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                    />
+                      disabled={companiesLoading}
+                    >
+                      <option value="">— Select a company —</option>
+                      {companies.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 )}
               </div>
@@ -1045,6 +1074,43 @@ export function AdminSettings() {
                     )}
                   </div>
 
+                  {/* Branches Section */}
+                  <div className="mt-6 pt-5 border-t border-white/[0.06]">
+                    <label className="mb-3 block text-[13px] font-medium text-[#f0ede8]">
+                      Company Branches
+                    </label>
+                    <div className="space-y-2 mb-4 max-h-[150px] overflow-y-auto pr-2">
+                      {getBranchesForCompany(editingCompanyData.id).map((branch) => (
+                        <div key={branch.id} className="flex items-center justify-between rounded-[6px] border border-white/[0.06] bg-[#1a1917] px-3 py-2">
+                          <span className="text-[13px] text-[#f0ede8]">{branch.name}</span>
+                          <span className="text-[10px] text-[#7a7773]">{branch.id.slice(0,8)}...</span>
+                        </div>
+                      ))}
+                      {getBranchesForCompany(editingCompanyData.id).length === 0 && (
+                        <p className="text-[12px] text-[#7a7773]">No branches found for this company.</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="New Branch Name"
+                        value={newBranchName}
+                        onChange={(e) => setNewBranchName(e.target.value)}
+                        className="control-field flex-1 rounded-[6px] px-3 h-[32px] text-[13px]"
+                        disabled={creatingBranch}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleCreateBranch(editingCompanyData.id)}
+                        disabled={!newBranchName.trim() || creatingBranch}
+                        className="flex h-[32px] items-center justify-center rounded-[6px] bg-white/[0.08] px-4 text-[12px] font-medium text-[#f0ede8] transition-colors hover:bg-white/[0.12] disabled:opacity-50"
+                      >
+                        {creatingBranch ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                        <span className="ml-1">Add</span>
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="flex justify-end gap-3 border-t border-white/[0.06] pt-5 mt-6">
                     <button
                       type="button"
@@ -1183,14 +1249,20 @@ export function AdminSettings() {
                     {hasRole(["super_admin"]) && (
                       <div>
                         <label className="mb-2 block text-[13px] text-[#7a7773]">
-                          Company ID
+                          Company
                         </label>
-                        <input
+                        <select
                           {...registerEditUser("companyId")}
-                          placeholder="Optional"
                           className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                          disabled={editUserFormLoading}
-                        />
+                          disabled={editUserFormLoading || companiesLoading}
+                        >
+                          <option value="">— Select a company —</option>
+                          {companies.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     )}
                   </div>
@@ -1332,14 +1404,20 @@ export function AdminSettings() {
                   <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
                     <div>
                       <label className="mb-2 block text-[13px] text-[#7a7773]">
-                        Company ID
+                        Company
                       </label>
-                      <input
+                      <select
                         {...registerEditPanel("companyId")}
-                        placeholder="Optional"
                         className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                        disabled={editPanelFormLoading}
-                      />
+                        disabled={editPanelFormLoading || companiesLoading}
+                      >
+                        <option value="">— Select a company —</option>
+                        {companies.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="mb-2 block text-[13px] text-[#7a7773]">
@@ -1509,16 +1587,22 @@ export function AdminSettings() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-2 block text-[13px] text-[#7a7773]">
-                    Company ID
+                    Company
                   </label>
-                  <input
+                  <select
                     {...register("companyId")}
                     className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
                       errors.companyId ? "border-red-400/70" : ""
                     }`}
-                    placeholder="e.g., company-a"
-                    disabled={panelFormLoading}
-                  />
+                    disabled={panelFormLoading || companiesLoading}
+                  >
+                    <option value="">— Select a company —</option>
+                    {companies.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
                   {errors.companyId && (
                     <p className="mt-1 text-[12px] text-red-400">
                       {errors.companyId.message}
