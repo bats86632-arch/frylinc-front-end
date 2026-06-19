@@ -183,6 +183,20 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+/* Theme transition styles to apply gracefully when toggling themes */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+    transition: background-color 300ms var(--ease-smooth),
+                color 300ms var(--ease-smooth),
+                border-color 300ms var(--ease-smooth),
+                fill 300ms var(--ease-smooth),
+                stroke 300ms var(--ease-smooth),
+                box-shadow 300ms var(--ease-smooth) !important;
+    transition-delay: 0s !important;
+}
+
 button,
 input,
 select,

@@ -17,7 +17,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   const toggleTheme = useCallback(() => {
+    // Apply transition class for smooth visual transition
+    document.documentElement.classList.add("theme-transition");
+    
     setTheme((current) => (current === "dark" ? "light" : "dark"));
+    
+    // Remove the transition class after it completes so hover states are not affected
+    setTimeout(() => {
+      document.documentElement.classList.remove("theme-transition");
+    }, 300); // 300ms matches the transition duration in CSS
   }, []);
 
   const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
