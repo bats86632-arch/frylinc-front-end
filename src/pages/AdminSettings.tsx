@@ -1269,7 +1269,7 @@ export function AdminSettings() {
                     <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
                   </div>
                 ) : (
-                  <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0 -mx-5 sm:-mx-7 -mb-5 sm:-mb-7">
+                  <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
                     {/* ── Left Panel: Company List ── */}
                     <div className={`${selectedCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
                       <div className="flex-1 overflow-y-auto">
