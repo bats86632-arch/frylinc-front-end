@@ -143,6 +143,9 @@ export function AdminSettings() {
   const [userFormOpen, setUserFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
   const [userFormLoading, setUserFormLoading] = useState(false);
+  const [inlineEditingBranchId, setInlineEditingBranchId] = useState<string | null>(null);
+  const [inlineEditBranchForm, setInlineEditBranchForm] = useState<Partial<Branch>>({});
+  const [inlineEditBranchLoading, setInlineEditBranchLoading] = useState(false);
   const [editUserFormLoading, setEditUserFormLoading] = useState(false);
   const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -325,7 +328,26 @@ export function AdminSettings() {
     }
   };
 
-  const openEditPanel = (panel: Panel) => {
+  const handleInlineBranchSave = async (branchId: string) => {
+    if (!inlineEditingBranchId) return;
+    try {
+      setInlineEditBranchLoading(true);
+      await BranchService.updateBranch(branchId, inlineEditBranchForm);
+      setBranches((prev) =>
+        prev.map((b) => (b.id === branchId ? { ...b, ...inlineEditBranchForm } : b))
+      );
+      setSuccess("Branch updated successfully");
+      setTimeout(() => setSuccess(null), 3000);
+      setInlineEditingBranchId(null);
+    } catch (err: any) {
+      setError(err.message || "Failed to update branch");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setInlineEditBranchLoading(false);
+    }
+  };
+
+  const openEditPanel = (panel: ControlPanel) => {
     setEditingPanelData(panel);
     setEditPanelValue("name", panel.name || "");
     setEditPanelValue("companyId", panel.companyId || "");
@@ -818,7 +840,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[5vw] sm:top-[8vh] sm:bottom-[4vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
@@ -1397,55 +1419,146 @@ export function AdminSettings() {
                                   <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Click "Manage Branches" to add branches to this company</p>
                                 </div>
                               ) : (
-                                <div className="space-y-2">
-                                  {companyBranches.map((branch, idx) => (
-                                    <div
-                                      key={branch.id}
-                                      className="surface-panel rounded-[10px] border border-[var(--border-subtle)] p-4 transition-all hover:border-[var(--border-default)] animate-fade-in-up"
-                                      style={{ animationDelay: `${idx * 30}ms` }}
-                                    >
-                                      <div className="flex items-start justify-between gap-3">
-                                        <div className="flex items-start gap-3 min-w-0 flex-1">
-                                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-amber-500/10 border border-amber-500/15 mt-0.5">
-                                            <MapPin className="h-3.5 w-3.5 text-amber-400" />
-                                          </div>
-                                          <div className="min-w-0 flex-1">
-                                            <h5 className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{branch.name}</h5>
-                                            {branch.address && (
-                                              <p className="text-[12px] text-[var(--text-secondary)] truncate mt-0.5">{branch.address}</p>
-                                            )}
-                                            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                                              {branch.supervisorName && (
-                                                <span className="text-[11px] text-[var(--text-secondary)]">
-                                                  <span className="font-medium">Supervisor:</span> {branch.supervisorName}
-                                                </span>
-                                              )}
-                                              {branch.contactNumber && (
-                                                <span className="text-[11px] text-[var(--text-secondary)]">
-                                                  <span className="font-medium">Contact:</span> {branch.contactNumber}
-                                                </span>
-                                              )}
-                                              {branch.emailAddress && (
-                                                <span className="text-[11px] text-[var(--text-secondary)]">
-                                                  <span className="font-medium">Email:</span> {branch.emailAddress}
-                                                </span>
-                                              )}
+                                <div className="space-y-1">
+                                  {companyBranches.map((branch, idx) => {
+                                    const isEditing = inlineEditingBranchId === branch.id;
+                                    return (
+                                      <div
+                                        key={branch.id}
+                                        className={`group rounded-[8px] border transition-all animate-fade-in-up flex flex-col md:flex-row md:items-center p-3 gap-3 ${
+                                          isEditing
+                                            ? 'border-[var(--border-default)] bg-[var(--surface-base)] shadow-sm'
+                                            : 'border-transparent hover:bg-[var(--surface-hover)]'
+                                        }`}
+                                        style={{ animationDelay: `${idx * 20}ms` }}
+                                      >
+                                        {isEditing ? (
+                                          <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-5 gap-3">
+                                            <div>
+                                              <label className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Name</label>
+                                              <input
+                                                type="text"
+                                                className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                value={inlineEditBranchForm.name || ""}
+                                                onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, name: e.target.value }))}
+                                                placeholder="Branch Name"
+                                              />
                                             </div>
-                                            <div className="flex items-center gap-2 mt-2">
-                                              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">ID</span>
-                                              <span className="font-mono text-[10px] text-[var(--text-primary)] truncate">{branch.id}</span>
-                                              <CopyButton
-                                                textToCopy={branch.id}
-                                                className="text-[var(--text-secondary)] shrink-0 hover:text-[var(--text-primary)] transition-colors"
-                                                title="Copy Branch ID"
-                                                iconClassName="h-3 w-3"
+                                            <div>
+                                              <label className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Address</label>
+                                              <input
+                                                type="text"
+                                                className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                value={inlineEditBranchForm.address || ""}
+                                                onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, address: e.target.value }))}
+                                                placeholder="Address"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Supervisor</label>
+                                              <input
+                                                type="text"
+                                                className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                value={inlineEditBranchForm.supervisorName || ""}
+                                                onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, supervisorName: e.target.value }))}
+                                                placeholder="Supervisor Name"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Contact</label>
+                                              <input
+                                                type="text"
+                                                className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                value={inlineEditBranchForm.contactNumber || ""}
+                                                onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, contactNumber: e.target.value }))}
+                                                placeholder="Phone Number"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Email</label>
+                                              <input
+                                                type="email"
+                                                className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                value={inlineEditBranchForm.emailAddress || ""}
+                                                onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, emailAddress: e.target.value }))}
+                                                placeholder="Email Address"
                                               />
                                             </div>
                                           </div>
+                                        ) : (
+                                          <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] bg-amber-500/10 border border-amber-500/15">
+                                                <MapPin className="h-3 w-3 text-amber-400" />
+                                              </div>
+                                              <span className="text-[13px] font-medium text-[var(--text-primary)] truncate">{branch.name}</span>
+                                            </div>
+                                            <div className="truncate">
+                                              {branch.address ? <span className="text-[12px] text-[var(--text-secondary)]">{branch.address}</span> : <span className="text-[12px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                            </div>
+                                            <div className="truncate">
+                                              {branch.supervisorName ? <span className="text-[12px] text-[var(--text-secondary)]">{branch.supervisorName}</span> : <span className="text-[12px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                            </div>
+                                            <div className="truncate">
+                                              {branch.contactNumber ? <span className="text-[12px] text-[var(--text-secondary)]">{branch.contactNumber}</span> : <span className="text-[12px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                            </div>
+                                            <div className="truncate flex items-center justify-between">
+                                              {branch.emailAddress ? <span className="text-[12px] text-[var(--text-secondary)] truncate">{branch.emailAddress}</span> : <span className="text-[12px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                              <div className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <CopyButton
+                                                  textToCopy={branch.id}
+                                                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors h-6 w-6 rounded flex items-center justify-center"
+                                                  title="Copy Branch ID"
+                                                  iconClassName="h-3 w-3"
+                                                />
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+                                        
+                                        <div className="flex items-center gap-2 shrink-0 md:border-l md:border-[var(--border-subtle)] md:pl-3">
+                                          {isEditing ? (
+                                            <>
+                                              <button
+                                                onClick={() => handleInlineBranchSave(branch.id)}
+                                                disabled={inlineEditBranchLoading}
+                                                className="flex h-8 items-center justify-center rounded-[6px] bg-amber-500 px-3 text-[12px] font-medium text-black hover:bg-amber-400 transition-colors disabled:opacity-50"
+                                              >
+                                                {inlineEditBranchLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                                              </button>
+                                              <button
+                                                onClick={() => {
+                                                  setInlineEditingBranchId(null);
+                                                  setInlineEditBranchForm({});
+                                                }}
+                                                disabled={inlineEditBranchLoading}
+                                                className="flex h-8 w-8 items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+                                              >
+                                                <X className="h-4 w-4" />
+                                              </button>
+                                            </>
+                                          ) : (
+                                            <button
+                                              onClick={() => {
+                                                setInlineEditingBranchId(branch.id);
+                                                setInlineEditBranchForm({
+                                                  name: branch.name,
+                                                  address: branch.address,
+                                                  supervisorName: branch.supervisorName,
+                                                  contactNumber: branch.contactNumber,
+                                                  emailAddress: branch.emailAddress,
+                                                });
+                                              }}
+                                              className="flex h-8 w-8 items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors md:opacity-0 group-hover:opacity-100"
+                                              title="Edit branch"
+                                            >
+                                              <Edit2 className="h-4 w-4" />
+                                            </button>
+                                          )}
                                         </div>
                                       </div>
-                                    </div>
-                                  ))}
+                                    );
+                                  })}
                                 </div>
                               )}
                             </div>
@@ -1468,7 +1581,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[5vw] sm:top-[8vh] sm:bottom-[4vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
@@ -2062,7 +2175,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[5vw] sm:top-[8vh] sm:bottom-[4vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
