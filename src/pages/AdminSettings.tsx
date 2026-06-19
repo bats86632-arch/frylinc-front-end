@@ -1188,6 +1188,7 @@ export function AdminSettings() {
                               </div>
                             </div>
                           );
+                        }
                         const companyBranches = branches.filter(b => 
                           b.companyId === selectedCompany.id &&
                           (b.name.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
