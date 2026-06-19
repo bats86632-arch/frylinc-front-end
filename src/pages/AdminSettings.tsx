@@ -840,7 +840,10 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:left-1/2 sm:-translate-x-1/2 sm:w-[95vw] sm:max-w-[1400px] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div 
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[201] flex flex-col admin-overlay-drawer overflow-hidden"
+            style={{ width: 'min(900px, 95vw)', height: 'min(600px, 90vh)' }}
+          >
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
@@ -1394,18 +1397,18 @@ export function AdminSettings() {
 
                             {/* Branches Section */}
                             <div className="px-4 sm:px-6 py-4">
-                              <div className="flex items-center justify-between mb-3 gap-4">
-                                <div className="flex items-center gap-2 min-w-0 shrink">
-                                  <MapPin className="h-4 w-4 text-amber-400 shrink-0" />
-                                  <h4 className="text-[13px] font-semibold text-[var(--text-primary)] truncate">Branches</h4>
-                                  <span className="text-[11px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)] shrink-0">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-amber-400" />
+                                  <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">Branches</h4>
+                                  <span className="text-[11px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)]">
                                     {companyBranches.length}
                                   </span>
                                 </div>
                                 <button
                                   type="button"
                                   onClick={() => openEditCompany(selectedCompany)}
-                                  className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:opacity-80 transition-opacity shrink-0"
+                                  className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:opacity-80 transition-opacity"
                                 >
                                   <Edit2 className="h-3.5 w-3.5" />
                                   Manage Branches
@@ -1486,25 +1489,25 @@ export function AdminSettings() {
                                             </div>
                                           </div>
                                         ) : (
-                                          <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-[1.5fr_1.5fr_1fr_1fr_1.5fr] gap-2.5 items-center">
-                                            <div className="flex items-center gap-2 min-w-0">
+                                          <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-5 gap-2.5 items-center">
+                                            <div className="flex items-center gap-2 overflow-hidden">
                                               <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] bg-amber-500/10 border border-amber-500/15">
                                                 <MapPin className="h-2.5 w-2.5 text-amber-400" />
                                               </div>
-                                              <span className="text-[12px] font-medium text-[var(--text-primary)] truncate block min-w-0">{branch.name}</span>
+                                              <span className="text-[12px] font-medium text-[var(--text-primary)] truncate">{branch.name}</span>
                                             </div>
-                                            <div className="truncate min-w-0">
-                                              {branch.address ? <span className="text-[11px] text-[var(--text-secondary)] truncate block">{branch.address}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                            <div className="truncate">
+                                              {branch.address ? <span className="text-[11px] text-[var(--text-secondary)]">{branch.address}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
                                             </div>
-                                            <div className="truncate min-w-0">
-                                              {branch.supervisorName ? <span className="text-[11px] text-[var(--text-secondary)] truncate block">{branch.supervisorName}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                            <div className="truncate">
+                                              {branch.supervisorName ? <span className="text-[11px] text-[var(--text-secondary)]">{branch.supervisorName}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
                                             </div>
-                                            <div className="truncate min-w-0">
-                                              {branch.contactNumber ? <span className="text-[11px] text-[var(--text-secondary)] truncate block">{branch.contactNumber}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                            <div className="truncate">
+                                              {branch.contactNumber ? <span className="text-[11px] text-[var(--text-secondary)]">{branch.contactNumber}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
                                             </div>
-                                            <div className="flex items-center justify-between min-w-0 gap-2">
-                                              {branch.emailAddress ? <span className="text-[11px] text-[var(--text-secondary)] truncate block min-w-0">{branch.emailAddress}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50 block min-w-0">—</span>}
-                                              <div className="hidden md:flex shrink-0 items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="truncate flex items-center justify-between">
+                                              {branch.emailAddress ? <span className="text-[11px] text-[var(--text-secondary)] truncate">{branch.emailAddress}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50">—</span>}
+                                              <div className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <CopyButton
                                                   textToCopy={branch.id}
                                                   className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors h-5 w-5 rounded flex items-center justify-center"
@@ -1581,7 +1584,10 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:left-1/2 sm:-translate-x-1/2 sm:w-[95vw] sm:max-w-[1400px] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div 
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[201] flex flex-col admin-overlay-drawer overflow-hidden"
+            style={{ width: 'min(900px, 95vw)', height: 'min(600px, 90vh)' }}
+          >
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
@@ -2175,7 +2181,10 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:left-1/2 sm:-translate-x-1/2 sm:w-[95vw] sm:max-w-[1400px] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
+          <div 
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[201] flex flex-col admin-overlay-drawer overflow-hidden"
+            style={{ width: 'min(900px, 95vw)', height: 'min(600px, 90vh)' }}
+          >
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
