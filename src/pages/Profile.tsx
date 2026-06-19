@@ -56,6 +56,7 @@ const EditableField = ({
   onBlur,
   type = "text",
   placeholder,
+  error,
 }: {
   label: string;
   value: string;
@@ -63,6 +64,7 @@ const EditableField = ({
   onBlur?: () => void;
   type?: string;
   placeholder?: string;
+  error?: string;
 }) => (
   <div>
     <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
@@ -72,8 +74,9 @@ const EditableField = ({
       onChange={(e) => onChange(e.target.value)}
       onBlur={onBlur}
       placeholder={placeholder}
-      className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+      className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${error ? "border-red-500/50 focus:border-red-400" : ""}`}
     />
+    {error && <p className="mt-1.5 text-[12px] text-red-400">{error}</p>}
   </div>
 );
 
@@ -83,7 +86,7 @@ export function Profile() {
   // ── Profile fields ──────────────────────────────────────────────────────────
   const [firstName, setFirstName] = useState(userData?.firstName || "");
   const [lastName, setLastName] = useState(userData?.lastName || "");
-  const [phoneNumber, setPhoneNumber] = useState(userData?.phoneNumber || "");
+  const [phoneNumber, setPhoneNumber] = useState(userData?.phoneNumber || "+91 ");
   const [companyName, setCompanyName] = useState(userData?.companyName || "");
   const [companyRole, setCompanyRole] = useState(userData?.companyRole || "");
   const [employeeId, setEmployeeId] = useState(userData?.employeeId || "");
@@ -100,6 +103,7 @@ export function Profile() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // ── Password state ──────────────────────────────────────────────────────────
   const [oldPassword, setOldPassword] = useState("");
@@ -164,6 +168,27 @@ export function Profile() {
       photoFile !== null;
 
     if (!hasChanges) {
+      return;
+    }
+
+    const errors: Record<string, string> = {};
+    if (firstName.trim().length === 0) {
+      errors.firstName = "First name cannot be empty";
+    }
+    if (lastName.trim().length === 0) {
+      errors.lastName = "Last name cannot be empty";
+    }
+    if (phoneNumber.trim().length > 0) {
+      if (!phoneNumber.trim().startsWith("+")) {
+        errors.phoneNumber = "Must include country code (e.g., +91)";
+      } else if (!/^\+\d{6,15}$/.test(phoneNumber.trim().replace(/[\s-]/g, ""))) {
+        errors.phoneNumber = "Invalid phone number format";
+      }
+    }
+    
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setSavingProfile(false);
       return;
     }
 
@@ -381,12 +406,14 @@ export function Profile() {
                 value={firstName}
                 onChange={setFirstName}
                 placeholder="First name"
+                error={fieldErrors.firstName}
               />
               <EditableField
                 label="Last Name"
                 value={lastName}
                 onChange={setLastName}
                 placeholder="Last name"
+                error={fieldErrors.lastName}
               />
             </div>
 
@@ -410,6 +437,7 @@ export function Profile() {
               onChange={setPhoneNumber}
               type="tel"
               placeholder="+1 (555) 000-0000"
+              error={fieldErrors.phoneNumber}
             />
 
             {/* Company Name */}
@@ -418,6 +446,7 @@ export function Profile() {
               value={companyName}
               onChange={setCompanyName}
               placeholder="Your organisation"
+              error={fieldErrors.companyName}
             />
 
             {/* Company Role */}
@@ -426,6 +455,7 @@ export function Profile() {
               value={companyRole}
               onChange={setCompanyRole}
               placeholder="e.g., Fire Safety Manager"
+              error={fieldErrors.companyRole}
             />
 
             {/* Employee ID */}
@@ -434,6 +464,7 @@ export function Profile() {
               value={employeeId}
               onChange={setEmployeeId}
               placeholder="e.g., EMP-00123"
+              error={fieldErrors.employeeId}
             />
 
             {/* Date of Birth */}
@@ -442,6 +473,7 @@ export function Profile() {
               value={dateOfBirth}
               onChange={setDateOfBirth}
               type="date"
+              error={fieldErrors.dateOfBirth}
             />
 
             <button
