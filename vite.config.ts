@@ -8,7 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icon.svg", "icon-192x192.png", "icon-512x512.png"],
+      includeAssets: [
+        "fyrlinc-logo.png",
+        "icon-192x192.png",
+        "icon-512x512.png",
+      ],
       manifest: {
         name: "Fyrlinc - Fire Alarm Panel Monitoring",
         short_name: "Fyrlinc",
@@ -26,17 +30,17 @@ export default defineConfig({
         id: "/",
         icons: [
           {
-            src: "icon-192x192.png",
+            src: "fyrlinc-logo.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "icon-512x512.png",
+            src: "fyrlinc-logo.png",
             sizes: "512x512",
             type: "image/png",
           },
           {
-            src: "icon-512x512.png",
+            src: "fyrlinc-logo.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable",

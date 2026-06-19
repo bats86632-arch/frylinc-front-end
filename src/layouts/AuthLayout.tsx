@@ -59,7 +59,7 @@ export function AuthLayout() {
             </div>
           </div>
 
-          {/* Hero — warm, non-techy messaging */}
+          {/* Hero - warm, non-techy messaging */}
           <div className="animate-fade-in flex flex-1 flex-col items-start justify-center">
             <h1 className="font-display max-w-xl text-[3rem] font-bold leading-[1.05] tracking-[-0.04em] text-white text-balance xl:text-[3.75rem] drop-shadow-sm">
               Your fire safety,
@@ -69,7 +69,7 @@ export function AuthLayout() {
               </span>
             </h1>
             <p className="mt-6 max-w-md text-[1rem] leading-[1.75] text-white/50 font-medium xl:text-[1.05rem]">
-              Fyrlinc keeps you connected to every fire alarm panel — so you can
+              Fyrlinc keeps you connected to every fire alarm panel - so you can
               respond faster when it matters most.
             </p>
 

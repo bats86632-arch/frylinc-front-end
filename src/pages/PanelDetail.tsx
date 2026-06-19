@@ -204,7 +204,7 @@ export function PanelDetail() {
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
-      {/* Header card — glows red when alarm is active */}
+      {/* Header card - glows red when alarm is active */}
       <section
         className={`surface-panel relative overflow-hidden rounded-[14px] p-6 transition-all duration-500 ease-smooth ${
           hasAlarm ? "shadow-[0_0_60px_rgba(239,68,68,0.15),0_0_20px_rgba(239,68,68,0.1)]" : ""
@@ -289,7 +289,7 @@ export function PanelDetail() {
         </div>
       </section>
 
-      {/* Tab bar — polished underline style */}
+      {/* Tab bar - polished underline style */}
       <div className="flex flex-row gap-0 border-b border-white/[0.07] bg-transparent overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button

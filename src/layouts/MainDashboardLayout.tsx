@@ -3,7 +3,6 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
   ChevronDown,
-  Flame,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -18,6 +17,7 @@ import { Role } from "../types";
 
 const navigation: Array<{
   name: string;
+  mobileName?: string;
   href: string;
   icon: typeof LayoutDashboard;
   roles: Role[];
@@ -30,6 +30,7 @@ const navigation: Array<{
   },
   {
     name: "Admin Settings",
+    mobileName: "Settings",
     href: "/admin",
     icon: Settings,
     roles: ["super_admin", "head_office", "system_integrator"],
@@ -81,6 +82,15 @@ export function MainDashboardLayout() {
           ? "Panel Details"
           : "Fire Alarm Panels";
 
+  const mobilePageTitle =
+    location.pathname === "/admin"
+      ? "Settings"
+      : location.pathname === "/profile"
+        ? "Your Profile"
+        : location.pathname.startsWith("/panel")
+          ? "Panel Details"
+          : "Dashboard";
+
   const roleLabel =
     userData?.role
       ?.split("_")
@@ -131,15 +141,17 @@ export function MainDashboardLayout() {
             className="flex items-center gap-3.5"
             onClick={() => setSidebarOpen(false)}
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[#e53d3d] shadow-[inset_0_0_12px_rgba(255,255,255,0.2)] ring-1 ring-white/10">
-              <Flame className="h-[20px] w-[20px] text-white" />
-            </div>
+            <img
+              src="/fyrlinc-logo.png"
+              alt="Fyrlinc"
+              className="h-10 w-10 rounded-[10px] object-cover ring-1 ring-white/10"
+            />
             <div>
               <span className="block font-display text-[1.05rem] font-medium leading-none tracking-tight text-[#f0ede8]">
                 Fyrlinc
               </span>
-              <span className="mt-1 block text-[11px] font-semibold text-white/40 tracking-wider uppercase">
-                Command Console
+              <span className="mt-1 block text-[11px] font-medium text-white/40 tracking-wide">
+                by AGNi
               </span>
             </div>
           </Link>
@@ -176,7 +188,10 @@ export function MainDashboardLayout() {
                       : "text-[12px] font-medium"
                   }
                 >
-                  {item.name}
+                  <span className="lg:hidden">
+                    {item.mobileName ?? item.name}
+                  </span>
+                  <span className="hidden lg:inline">{item.name}</span>
                 </span>
               </Link>
             );
@@ -204,7 +219,8 @@ export function MainDashboardLayout() {
             </button>
             <div className="flex items-center gap-3 min-w-0">
               <h1 className="font-display truncate text-[1.1rem] font-bold tracking-tight text-[#f0ede8]">
-                {pageTitle}
+                <span className="sm:hidden">{mobilePageTitle}</span>
+                <span className="hidden sm:inline">{pageTitle}</span>
               </h1>
               <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-[rgba(34,197,94,0.12)] px-2 py-0.5 text-[10px] font-medium text-[#4ade80]">
                 <span className="relative flex h-[6px] w-[6px]">

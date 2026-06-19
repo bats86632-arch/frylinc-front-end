@@ -26,7 +26,7 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!userData) {
-      // No authenticated user — clear panels and mark as done loading
+      // No authenticated user - clear panels and mark as done loading
       setPanels([]);
       setLoading(false);
       return;

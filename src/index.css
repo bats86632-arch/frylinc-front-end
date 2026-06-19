@@ -4,7 +4,7 @@
 
 /* ─── Design Tokens ────────────────────────────────────────────────────────── */
 :root {
-    /* ── Accent — single red ── */
+    /* ── Accent - single red ── */
     --accent: #e53d3d;
     --accent-hover: #ff4f4f;
     --accent-muted: rgba(229, 61, 61, 0.1);
@@ -13,15 +13,15 @@
     --success-soft: rgba(52, 211, 153, 0.08);
     --neutral-soft: rgba(255, 255, 255, 0.04);
 
-    /* ── Surfaces — deep-black hierarchy, Waitlister-style ── */
+    /* ── Surfaces - deep-black hierarchy, Waitlister-style ── */
     --surface-base: #0f0f0e;
     --surface-raised: #1a1917;
     --surface-elevated: #222120;
     --surface-overlay: #141412;
     --surface-hover: #222120;
 
-    /* ── Borders — Waitlister's "lit edge" approach ── */
-    /* Very subtle white-alpha hairlines — legible but never loud */
+    /* ── Borders - Waitlister's "lit edge" approach ── */
+    /* Very subtle white-alpha hairlines - legible but never loud */
     --border-subtle: rgba(255, 255, 255, 0.06);
     --border-default: rgba(255, 255, 255, 0.1);
     --border-strong: rgba(255, 255, 255, 0.18);
@@ -63,24 +63,24 @@
     --color-neutral-400: #64748b;
     --color-neutral-500: #475569;
 
-    /* ── Elevation — Waitlister's signature: inner ring + outer depth ── */
+    /* ── Elevation - Waitlister's signature: inner ring + outer depth ── */
     --shadow-low:
         0 0 0 1px rgba(255, 255, 255, 0.05), 0 2px 8px rgba(0, 0, 0, 0.5);
     --shadow-mid:
         0 0 0 1px rgba(255, 255, 255, 0.07), 0 8px 32px rgba(0, 0, 0, 0.55);
     --shadow-high:
         0 0 0 1px rgba(255, 255, 255, 0.09), 0 16px 56px rgba(0, 0, 0, 0.65);
-    /* "Panel shadow" — used on cards: inner lit ring + deep outer */
+    /* "Panel shadow" - used on cards: inner lit ring + deep outer */
     --shadow-panel:
         0 0 0 1px rgba(255, 255, 255, 0.07), 0 4px 20px rgba(0, 0, 0, 0.5);
-    /* Inset top highlight — gives cards a "lit from above" chamfer feel */
+    /* Inset top highlight - gives cards a "lit from above" chamfer feel */
     --inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.07);
     --shadow-panel-hover:
         0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.55);
     --overlay-backdrop: rgba(0, 0, 0, 0.8);
 
-    /* ── Radius — Waitlister uses generous rounding ── */
-    --radius-card: 16px; /* Cards — 16px like Waitlister */
+    /* ── Radius - Waitlister uses generous rounding ── */
+    --radius-card: 16px; /* Cards - 16px like Waitlister */
     --radius-element: 10px; /* Inputs, smaller UI */
     --radius-small: 6px;
     --radius-pill: 9999px;
@@ -416,7 +416,7 @@ textarea {
         background-size: 32px 32px;
     }
 
-    /* ── Surface panels — Waitlister's premium dark card ──────────────── */
+    /* ── Surface panels - Waitlister's premium dark card ──────────────── */
     /* Key: inner top-highlight + subtle ring + deep outer shadow */
     .surface-panel {
         background: var(--surface-raised);
@@ -451,7 +451,7 @@ textarea {
         border-color: var(--border-default);
     }
 
-    /* Alarm state — red left rail, muted bg */
+    /* Alarm state - red left rail, muted bg */
     .surface-alarm {
         position: relative;
         background: linear-gradient(
@@ -472,7 +472,7 @@ textarea {
             transform var(--duration-normal) var(--ease-smooth);
     }
 
-    /* ── Form Controls — Waitlister's frosted input ──────────────────── */
+    /* ── Form Controls - Waitlister's frosted input ──────────────────── */
     .control-field {
         background: color-mix(
             in srgb,
@@ -513,7 +513,7 @@ textarea {
 
     /* ── Buttons ────────────────────────────────────────────────────────── */
 
-    /* Primary — solid red pill */
+    /* Primary - solid red pill */
     .btn-primary {
         background: var(--accent);
         color: #ffffff;
@@ -553,7 +553,7 @@ textarea {
         pointer-events: none;
     }
 
-    /* Secondary — ghost pill, Waitlister's "Use Template for Free" button style */
+    /* Secondary - ghost pill, Waitlister's "Use Template for Free" button style */
     .btn-secondary {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.12);
@@ -583,7 +583,7 @@ textarea {
         transform: translateY(0) scale(0.98);
     }
 
-    /* Danger — red pill */
+    /* Danger - red pill */
     .btn-danger {
         background: var(--accent);
         color: #ffffff;
@@ -651,7 +651,7 @@ textarea {
         border-radius: var(--radius-small);
     }
 
-    /* ── Badges — Waitlister's top "pill chip" treatment ────────────────── */
+    /* ── Badges - Waitlister's top "pill chip" treatment ────────────────── */
     /* Key: rounded-pill, frosted bg, thin white ring, inset highlight */
     .badge-alarm {
         display: inline-flex;
@@ -783,7 +783,7 @@ textarea {
         font-variant-numeric: tabular-nums;
     }
 
-    /* Waitlister inset-highlight utility — use on any interactive element */
+    /* Waitlister inset-highlight utility - use on any interactive element */
     .inset-highlight {
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }

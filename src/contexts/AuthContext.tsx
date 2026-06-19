@@ -36,7 +36,7 @@ const roleHierarchy: Record<Role, number> = {
 
 // ─── Lightweight localStorage session cache ──────────────────────────────────
 // Persists user claims across PWA restarts so returning users never see the
-// "Loading Fyrlinc…" screen — Firebase verifies the session silently in the
+// "Loading Fyrlinc…" screen - Firebase verifies the session silently in the
 // background while the dashboard renders immediately with the cached data.
 const CACHE_KEY = "fyrlinc_ucache_v1";
 
@@ -45,7 +45,7 @@ function readCachedUser(): User | null {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const c: User = JSON.parse(raw);
-    // Basic sanity check — uid and role are required
+    // Basic sanity check - uid and role are required
     if (!c?.uid || !c?.role) return null;
     return c;
   } catch {
@@ -72,7 +72,7 @@ function clearCachedUser(): void {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  // Lazy initialisers run once — reads localStorage synchronously at mount
+  // Lazy initialisers run once - reads localStorage synchronously at mount
   const [userData, setUserData] = useState<User | null>(readCachedUser);
   const [role, setRole] = useState<Role | null>(
     () => readCachedUser()?.role ?? null,
@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(initialUserData.role);
     writeCachedUser(initialUserData); // Keep cache fresh after every auth check
 
-    // Phase 2: Silent REST sync — updates display name, role, etc. from the server
+    // Phase 2: Silent REST sync - updates display name, role, etc. from the server
     apiClient
       .get("/me")
       .then((response) => {
@@ -141,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setRole(null);
         }
       } else {
-        // Signed out — clear cache so the next PWA open goes through full auth
+        // Signed out - clear cache so the next PWA open goes through full auth
         clearCachedUser();
         setUserData(null);
         setRole(null);
