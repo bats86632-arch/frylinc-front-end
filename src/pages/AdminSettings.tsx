@@ -840,10 +840,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div 
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[201] flex flex-col admin-overlay-drawer overflow-hidden"
-            style={{ width: 'min(900px, 95vw)', height: 'min(600px, 90vh)' }}
-          >
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2.5vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
@@ -1584,10 +1581,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div 
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[201] flex flex-col admin-overlay-drawer overflow-hidden"
-            style={{ width: 'min(900px, 95vw)', height: 'min(600px, 90vh)' }}
-          >
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2.5vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
@@ -2181,10 +2175,7 @@ export function AdminSettings() {
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
-          <div 
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[201] flex flex-col admin-overlay-drawer overflow-hidden"
-            style={{ width: 'min(900px, 95vw)', height: 'min(600px, 90vh)' }}
-          >
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2.5vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
               className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
