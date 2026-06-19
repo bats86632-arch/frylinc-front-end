@@ -178,10 +178,13 @@ export function Profile() {
     setResetPasswordError("");
     setResetPasswordSuccess(false);
     try {
+      console.log(`[DEBUG] Attempting to send password reset email to: ${currentUser.email}`);
       await sendPasswordResetEmail(auth, currentUser.email);
+      console.log(`[DEBUG] Firebase confirmed password reset email sent successfully to: ${currentUser.email}`);
       setResetPasswordSuccess(true);
       setTimeout(() => setResetPasswordSuccess(false), 3000);
     } catch (err: unknown) {
+      console.error("[DEBUG] Error sending password reset email:", err);
       const error = err as { message?: string };
       setResetPasswordError(error.message || "Failed to send reset email");
     } finally {

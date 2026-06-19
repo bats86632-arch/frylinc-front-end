@@ -100,9 +100,12 @@ export function Login() {
     setError(null);
     setIsLoading(true);
     try {
+      console.log(`[DEBUG] Attempting to send password reset email to: ${email}`);
       await sendPasswordResetEmail(auth, email);
+      console.log(`[DEBUG] Firebase confirmed password reset email sent successfully to: ${email}`);
       setSuccess("Password reset email sent! Check your inbox.");
     } catch (err: unknown) {
+      console.error("[DEBUG] Error sending password reset email:", err);
       setError("Failed to send password reset email. Please ensure your email is correct.");
     } finally {
       setIsLoading(false);
