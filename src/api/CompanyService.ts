@@ -26,9 +26,9 @@ export const CompanyService = {
       return cachedCompanies;
     }
     const response = await apiClient.get('/companies');
-    cachedCompanies = response.data.companies;
+    cachedCompanies = response.data.companies || [];
     lastFetchTime = Date.now();
-    return cachedCompanies;
+    return cachedCompanies as Company[];
   },
   
   async updateCompany(id: string, data: Partial<Company>): Promise<void> {

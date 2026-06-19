@@ -15,9 +15,9 @@ export const UserService = {
       return cachedUsers;
     }
     const response = await apiClient.get("/users");
-    cachedUsers = response.data.users;
+    cachedUsers = response.data.users || [];
     lastFetchTime = Date.now();
-    return cachedUsers;
+    return cachedUsers as User[];
   },
 
   async updateUserRole(uid: string, role: Role): Promise<User> {

@@ -27,6 +27,7 @@ import {
   Edit2,
   X,
   Copy,
+  Search,
 } from "lucide-react";
 
 const panelSchema = z.object({
@@ -113,6 +114,9 @@ export function AdminSettings() {
   const [users, setUsers] = useState<User[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [editingUserData, setEditingUserData] = useState<User | null>(null);
+  const [companySearchQuery, setCompanySearchQuery] = useState("");
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [panelSearchQuery, setPanelSearchQuery] = useState("");
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
@@ -545,6 +549,26 @@ export function AdminSettings() {
     return times[hash % times.length];
   };
 
+  const filteredCompanies = (companies || []).filter(
+    (c) =>
+      c.name.toLowerCase().includes(companySearchQuery.toLowerCase()) ||
+      (c.description || "").toLowerCase().includes(companySearchQuery.toLowerCase())
+  );
+
+  const filteredUsers = (users || []).filter(
+    (u) =>
+      (u.displayName || "").toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      (u.email || "").toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      (u.role || "").toLowerCase().includes(userSearchQuery.toLowerCase())
+  );
+
+  const filteredPanels = (panels || []).filter(
+    (p) =>
+      (p.name || "").toLowerCase().includes(panelSearchQuery.toLowerCase()) ||
+      (p.serial || "").toLowerCase().includes(panelSearchQuery.toLowerCase()) ||
+      (p.ipAddress || "").toLowerCase().includes(panelSearchQuery.toLowerCase())
+  );
+
   return (
     <div className="animate-fade-in p-4 sm:p-5 max-w-5xl mx-auto">
       {/* Page header */}
@@ -604,17 +628,34 @@ export function AdminSettings() {
       {/* 🏢 Company Management 🏢 */}
       {hasRole(["super_admin"]) && (
         <div className="mb-7">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
-              Company Management
-            </h2>
-            <button
-              onClick={() => setCompanyFormOpen(true)}
-              className="flex h-[32px] items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
-            >
-              <Plus className="h-[14px] w-[14px]" />
-              Add Company
-            </button>
+          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
+                Company Management
+              </h2>
+              <span className="hidden sm:inline-block text-[12px] text-[#7a7773]">
+                {!companiesLoading && `${companies.length} companies`}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 sm:flex-none">
+                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+                <input
+                  type="text"
+                  placeholder="Search companies..."
+                  value={companySearchQuery}
+                  onChange={(e) => setCompanySearchQuery(e.target.value)}
+                  className="control-field h-[32px] w-full sm:w-[200px] rounded-[6px] pl-8 pr-3 text-[12px]"
+                />
+              </div>
+              <button
+                onClick={() => setCompanyFormOpen(true)}
+                className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+              >
+                <Plus className="h-[14px] w-[14px]" />
+                Add Company
+              </button>
+            </div>
           </div>
           <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
 
@@ -700,85 +741,108 @@ export function AdminSettings() {
             <div className="flex justify-center py-6">
               <Loader2 className="h-6 w-6 animate-spin text-[#f0ede8] opacity-50" />
             </div>
-          ) : companies.length === 0 ? (
-            <div className="rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-6 text-center text-[13px] text-[#7a7773]">
-              No companies found.
-            </div>
           ) : (
-            <div className="flex flex-col gap-2">
-              {companies.map((company) => (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredCompanies.map((company) => (
                 <div
                   key={company.id}
-                  className="flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors gap-3"
+                  className="surface-panel flex flex-col text-left transition-all hover:border-white/10 hover:bg-white/[0.03] animate-fade-in-up rounded-[14px] overflow-hidden"
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-[13px] font-medium text-white/90"
-                      style={{ backgroundColor: getAvatarColor(company.name) }}
-                    >
-                      {company.name.charAt(0).toUpperCase()}
+                  <div className="p-5 flex-1 w-full relative">
+                    <div className="flex items-start justify-between mb-4">
+                      <div
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-white/90"
+                        style={{ backgroundColor: getAvatarColor(company.name) }}
+                      >
+                        {company.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => openEditCompany(company)}
+                          className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                          aria-label="Edit company"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => startDeleteCompany(company)}
+                          className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-red-500/10 transition-colors"
+                          aria-label="Delete company"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-[13px] font-medium text-[#f0ede8]">
-                          {company.name}
-                        </span>
-                        <span className="shrink-0 flex items-center gap-1.5 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
-                          {company.id}
-                          <button
-                            onClick={(e) => handleCopyId(e, company.id)}
-                            className="hover:text-white transition-colors"
-                            title="Copy ID"
-                          >
-                            <Copy className="h-3 w-3" />
-                          </button>
-                        </span>
-                      </div>
-                      <div className="mt-0.5 truncate text-[11px] text-[#7a7773]">
-                        {company.description || "No description"}
-                      </div>
+                    <div>
+                      <h3 className="text-[15px] font-bold text-[#f0ede8] mb-1 truncate">
+                        {company.name}
+                      </h3>
+                      <p className="text-[13px] text-[#7a7773] line-clamp-2 min-h-[39px]">
+                        {company.description || "No description provided."}
+                      </p>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center justify-between border-t border-white/[0.06] bg-white/[0.01] px-5 py-3 w-full">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                        ID
+                      </span>
+                      <span className="font-mono truncate text-[11px] text-[#f0ede8]">
+                        {company.id}
+                      </span>
+                    </div>
                     <button
-                      onClick={() => openEditCompany(company)}
-                      className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.04] hover:text-[#f0ede8] transition-colors"
-                      aria-label="Edit company"
+                      onClick={(e) => handleCopyId(e, company.id)}
+                      className="text-[#7a7773] shrink-0 ml-2 hover:text-white transition-colors"
+                      title="Copy ID"
                     >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => startDeleteCompany(company)}
-                      className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-[rgba(248,113,113,0.1)] transition-colors"
-                      aria-label="Delete company"
-                    >
-                      <Trash2 className="h-4 w-4" />
+                      <Copy className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
               ))}
+              {filteredCompanies.length === 0 && (
+                <div className="col-span-full rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-6 text-center text-[13px] text-[#7a7773]">
+                  {companies.length === 0 ? "No companies found." : "No companies match your search."}
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* 👥 User Management 👥 */}
-      <div className="mb-7">
-        {/* Section Header */}
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
-            User Management
-          </h2>
-          <button
-            onClick={() => setUserFormOpen(true)}
-            className="flex h-[32px] items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
-          >
-            <Plus className="h-[14px] w-[14px]" />
-            Add User
-          </button>
+      {/* ── User Management ───────────────────────────────────────────────── */}
+      <div className="mb-10">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
+              User Management
+            </h2>
+            <span className="hidden sm:inline-block text-[12px] text-[#7a7773]">
+              {!usersLoading && `${users.length} users`}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 sm:flex-none">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={userSearchQuery}
+                onChange={(e) => setUserSearchQuery(e.target.value)}
+                className="control-field h-[32px] w-full sm:w-[200px] rounded-[6px] pl-8 pr-3 text-[12px]"
+              />
+            </div>
+            <button
+              onClick={() => setUserFormOpen(true)}
+              className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+            >
+              <Plus className="h-[14px] w-[14px]" />
+              Add User
+            </button>
+          </div>
         </div>
-        <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
+        <div className="h-[0.5px] w-full bg-white/[0.06] mb-5" />
 
         {/* User creation form */}
         {userFormOpen && (
@@ -977,60 +1041,69 @@ export function AdminSettings() {
 
         {/* User list */}
         {usersLoading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-[#7a7773]" />
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-6 w-6 animate-spin text-[#f0ede8] opacity-50" />
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            {users.map((user) => (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredUsers.map((user) => (
               <div
                 key={user.uid}
-                className="flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors gap-3"
+                className="surface-panel flex flex-col text-left transition-all hover:border-white/10 hover:bg-white/[0.03] animate-fade-in-up rounded-[14px] overflow-hidden"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-[13px] font-medium text-white/90"
-                    style={{
-                      backgroundColor: getAvatarColor(
-                        user.displayName || user.email,
-                      ),
-                    }}
-                  >
-                    {user.displayName?.charAt(0).toUpperCase() || "U"}
+                <div className="p-5 flex-1 w-full relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-white/90"
+                      style={{
+                        backgroundColor: getAvatarColor(user.displayName || user.email),
+                      }}
+                    >
+                      {user.displayName?.charAt(0).toUpperCase() || "U"}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => openEditUser(user)}
+                        className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                        aria-label="Edit user"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteUser(user.uid)}
+                        className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-red-500/10 transition-colors"
+                        aria-label="Delete user"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="truncate text-[13px] font-medium text-[#f0ede8]">
-                        {user.displayName || "Unknown User"}
-                      </span>
-                      <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
-                        {roleLabels[user.role as Role] || "User"}
-                      </span>
-                    </div>
-                    <div className="mt-0.5 truncate text-[11px] text-[#7a7773]">
-                      {user.email || "No email"}
-                    </div>
+                  <div>
+                    <h3 className="text-[15px] font-bold text-[#f0ede8] mb-1 truncate">
+                      {user.displayName || "Unknown User"}
+                    </h3>
+                    <p className="text-[13px] text-[#7a7773] truncate">
+                      {user.email || "No email provided."}
+                    </p>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => openEditUser(user)}
-                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.04] hover:text-[#f0ede8] transition-colors"
-                    aria-label="Edit user"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteUser(user.uid)}
-                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-[rgba(248,113,113,0.1)] transition-colors"
-                    aria-label="Delete user"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                <div className="flex items-center justify-between border-t border-white/[0.06] bg-white/[0.01] px-5 py-3 w-full">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                      Role
+                    </span>
+                    <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#f0ede8]">
+                      {roleLabels[user.role as Role] || "User"}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
+            {filteredUsers.length === 0 && (
+              <div className="col-span-full rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-6 text-center text-[13px] text-[#7a7773]">
+                {users.length === 0 ? "No users found." : "No users match your search."}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1526,8 +1599,7 @@ export function AdminSettings() {
 
       {/* ── Panel Provisioning ──────────────────────────────────────────── */}
       <div>
-        {/* Section Header */}
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50 font-medium whitespace-nowrap">
               Panel Provisioning
@@ -1537,15 +1609,27 @@ export function AdminSettings() {
                 `${panels.filter(Boolean).length} of ${panels.length} panels online`}
             </span>
           </div>
-          <button
-            onClick={() => setPanelFormOpen(true)}
-            className="flex h-[32px] items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
-          >
-            <Plus className="h-[14px] w-[14px]" />
-            Add Panel
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 sm:flex-none">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+              <input
+                type="text"
+                placeholder="Search panels..."
+                value={panelSearchQuery}
+                onChange={(e) => setPanelSearchQuery(e.target.value)}
+                className="control-field h-[32px] w-full sm:w-[200px] rounded-[6px] pl-8 pr-3 text-[12px]"
+              />
+            </div>
+            <button
+              onClick={() => setPanelFormOpen(true)}
+              className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+            >
+              <Plus className="h-[14px] w-[14px]" />
+              Add Panel
+            </button>
+          </div>
         </div>
-        <div className="h-[0.5px] w-full bg-white/[0.06] mb-4" />
+        <div className="h-[0.5px] w-full bg-white/[0.06] mb-5" />
 
         {/* Panel Provisioning form */}
         {panelFormOpen && (
@@ -1726,69 +1810,85 @@ export function AdminSettings() {
         )}
 
         {panelsLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-[#7a7773]" />
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-6 w-6 animate-spin text-[#f0ede8] opacity-50" />
           </div>
-        ) : panels.length === 0 ? (
-          <p className="text-[13px] text-[#7a7773]">
-            No panels provisioned yet.
-          </p>
         ) : (
-          <div className="flex flex-col gap-2">
-            {(panels || []).filter(Boolean).map((panel) => {
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredPanels.map((panel) => {
               const isAlarm = panel.zones?.some((z) => z);
               const statusColor = isAlarm ? "bg-red-500" : "bg-emerald-500";
               return (
                 <div
                   key={panel.serial || Math.random().toString()}
-                  className="flex items-center justify-between bg-[#1a1917] rounded-[8px] border border-white/[0.06] p-3 hover:bg-white/[0.02] transition-colors gap-3"
+                  className="surface-panel flex flex-col text-left transition-all hover:border-white/10 hover:bg-white/[0.03] animate-fade-in-up rounded-[14px] overflow-hidden"
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-white/[0.05]">
-                      <div
-                        className={`h-[8px] w-[8px] rounded-full ${statusColor}`}
-                      />
+                  <div className="p-5 flex-1 w-full relative">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-white/[0.05]">
+                        <div
+                          className={`h-[10px] w-[10px] rounded-full ${statusColor}`}
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => openEditPanel(panel)}
+                          className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                          aria-label="Edit panel"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        {hasRole([
+                          "super_admin",
+                          "head_office",
+                          "system_integrator",
+                        ]) && (
+                          <button
+                            onClick={() => handleDeletePanel(panel.serial)}
+                            className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-red-500/10 transition-colors"
+                            aria-label="Delete panel"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-[13px] font-medium text-[#f0ede8]">
-                          {panel.name || "Unknown Panel"}
-                        </span>
-                        <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
-                          {panel.serial || "No serial"}
-                        </span>
-                      </div>
-                      <div className="mt-0.5 truncate text-[11px] text-[#7a7773]">
+                    <div>
+                      <h3 className="text-[15px] font-bold text-[#f0ede8] mb-1 truncate">
+                        {panel.name || "Unknown Panel"}
+                      </h3>
+                      <p className="text-[13px] text-[#7a7773] truncate">
                         Last active: {getPanelHeartbeat(panel.serial)}
-                      </div>
+                      </p>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center justify-between border-t border-white/[0.06] bg-white/[0.01] px-5 py-3 w-full">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                        Serial
+                      </span>
+                      <span className="font-mono truncate text-[11px] text-[#f0ede8]">
+                        {panel.serial || "No serial"}
+                      </span>
+                    </div>
                     <button
-                      onClick={() => openEditPanel(panel)}
-                      className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.04] hover:text-[#f0ede8] transition-colors"
-                      aria-label="Edit panel"
+                      onClick={(e) => handleCopyId(e, panel.serial)}
+                      className="text-[#7a7773] shrink-0 ml-2 hover:text-white transition-colors"
+                      title="Copy Serial"
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Copy className="h-3.5 w-3.5" />
                     </button>
-                    {hasRole([
-                      "super_admin",
-                      "head_office",
-                      "system_integrator",
-                    ]) && (
-                      <button
-                        onClick={() => handleDeletePanel(panel.serial)}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-[rgba(248,113,113,0.1)] transition-colors"
-                        aria-label="Delete panel"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
                   </div>
                 </div>
               );
             })}
+            {filteredPanels.length === 0 && (
+              <div className="col-span-full rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-6 text-center text-[13px] text-[#7a7773]">
+                {(panels || []).filter(Boolean).length === 0
+                  ? "No panels provisioned yet."
+                  : "No panels match your search."}
+              </div>
+            )}
           </div>
         )}
       </div>

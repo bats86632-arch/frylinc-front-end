@@ -24,7 +24,7 @@ interface PanelCardProps {
     return {
       index: i,
       name: `Zone ${i + 1}`,
-      state: getZoneState(isAlarm, i, panel.serial || "A"),
+      state: getZoneState(isAlarm),
     };
   });
 

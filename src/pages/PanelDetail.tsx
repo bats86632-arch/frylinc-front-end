@@ -189,7 +189,7 @@ export function PanelDetail() {
     allowedCommands: Array.isArray(panel.allowedCommands)
       ? panel.allowedCommands
       : [],
-    groupId: panel.groupId || "",
+    groupId: (panel as any).groupId || "",
   };
 
   const panelCommands =

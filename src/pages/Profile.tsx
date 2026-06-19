@@ -23,7 +23,7 @@ import {
 import { storage, auth } from "../config/firebase";
 
 export function Profile() {
-  const { userData, currentUser, saveDisplayName, updateProfile } = useAuth();
+  const { userData, currentUser, updateProfile } = useAuth();
 
   // ── Profile fields ──────────────────────────────────────────────────────────
   const [firstName, setFirstName] = useState(userData?.firstName || "");

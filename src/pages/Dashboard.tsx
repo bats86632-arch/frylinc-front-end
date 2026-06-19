@@ -160,7 +160,7 @@ export function Dashboard() {
         <p className="text-[15px] font-bold text-white drop-shadow-sm">
           System Error
         </p>
-        <p className="mt-2 text-[13px] text-[#ff8099]">{error}</p>
+        <p className="mt-2 text-[13px] text-[#ff8099]">{error.message}</p>
       </div>
     );
   }
@@ -452,10 +452,10 @@ export function Dashboard() {
                     <div className="flex items-center gap-4">
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
-                          Panels
+                          Alarms
                         </p>
-                        <p className="text-[13px] font-bold text-[#f0ede8]">
-                          {stats.total}
+                        <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"}`}>
+                          {stats.alarms}
                         </p>
                       </div>
                       <div>
@@ -526,10 +526,10 @@ export function Dashboard() {
                     <div className="flex items-center gap-4">
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
-                          Panels
+                          Alarms
                         </p>
-                        <p className="text-[13px] font-bold text-[#f0ede8]">
-                          {stats.total}
+                        <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"}`}>
+                          {stats.alarms}
                         </p>
                       </div>
                       <div>
