@@ -13,6 +13,7 @@ import {
   Building2,
   ChevronRight,
   MapPin,
+  Copy,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -448,26 +449,49 @@ export function Dashboard() {
                       {company.description || "No description provided"}
                     </p>
                   </div>
-                  <div className="flex items-center justify-between border-t border-white/[0.06] bg-white/[0.01] px-5 py-3 w-full">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
-                          Alarms
-                        </p>
-                        <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"}`}>
-                          {stats.alarms}
-                        </p>
+                  <div className="flex flex-col border-t border-white/[0.06] bg-white/[0.01] w-full">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.04]">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                            Alarms
+                          </p>
+                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"}`}>
+                            {stats.alarms}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                            Online
+                          </p>
+                          <p className="text-[13px] font-bold text-[#34d399]">
+                            {stats.online}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
-                          Online
-                        </p>
-                        <p className="text-[13px] font-bold text-[#34d399]">
-                          {stats.online}
-                        </p>
-                      </div>
+                      <ChevronRight className="h-4 w-4 text-[#7a7773] transition-transform group-hover:translate-x-1" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-[#7a7773] transition-transform group-hover:translate-x-1" />
+                    <div className="flex items-center justify-between px-5 py-2.5 bg-white/[0.02]">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                          ID
+                        </span>
+                        <span className="font-mono truncate text-[11px] text-[#f0ede8]">
+                          {company.id}
+                        </span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(company.id);
+                        }}
+                        className="text-[#7a7773] shrink-0 ml-2 hover:text-[#f0ede8] transition-colors"
+                        title="Copy ID"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </button>
               );
@@ -522,26 +546,49 @@ export function Dashboard() {
                       {branch.address || "No address provided"}
                     </p>
                   </div>
-                  <div className="flex items-center justify-between border-t border-white/[0.06] bg-white/[0.01] px-5 py-3 w-full">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
-                          Alarms
-                        </p>
-                        <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"}`}>
-                          {stats.alarms}
-                        </p>
+                  <div className="flex flex-col border-t border-white/[0.06] bg-white/[0.01] w-full">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.04]">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                            Alarms
+                          </p>
+                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[#f0ede8]"}`}>
+                            {stats.alarms}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                            Online
+                          </p>
+                          <p className="text-[13px] font-bold text-[#34d399]">
+                            {stats.online}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
-                          Online
-                        </p>
-                        <p className="text-[13px] font-bold text-[#34d399]">
-                          {stats.online}
-                        </p>
-                      </div>
+                      <ChevronRight className="h-4 w-4 text-[#7a7773] transition-transform group-hover:translate-x-1" />
                     </div>
-                    <ChevronRight className="h-4 w-4 text-[#7a7773] transition-transform group-hover:translate-x-1" />
+                    <div className="flex items-center justify-between px-5 py-2.5 bg-white/[0.02]">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                          ID
+                        </span>
+                        <span className="font-mono truncate text-[11px] text-[#f0ede8]">
+                          {branch.id}
+                        </span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          navigator.clipboard.writeText(branch.id);
+                        }}
+                        className="text-[#7a7773] shrink-0 ml-2 hover:text-[#f0ede8] transition-colors"
+                        title="Copy ID"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </button>
               );
