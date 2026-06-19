@@ -40,6 +40,7 @@ import {
   Building,
 } from "lucide-react";
 import { CopyButton } from "../components/CopyButton";
+import { CreateUserModal } from "../components/CreateUserModal";
 
 const panelSchema = z.object({
   serial: z.string().min(1, "Serial is required"),
@@ -51,29 +52,9 @@ const panelSchema = z.object({
   allowedCommands: z.string().optional(),
 });
 
-const userSchema = z.object({
-  email: z.string().email("Valid email is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  displayName: z.string().min(1, "Display name is required"),
-  role: z.enum(["super_admin", "head_office", "system_integrator", "end_user"]),
-  companyId: z.string().optional(),
-  branchIds: z.string().optional(),
-  assignments: z.record(z.array(z.string())).optional(),
-});
-
-const editUserSchema = z.object({
-  email: z.string().email("Valid email is required"),
-  password: z.string().optional(),
-  displayName: z.string().min(1, "Display name is required"),
-  role: z.enum(["super_admin", "head_office", "system_integrator", "end_user"]),
-  companyId: z.string().optional(),
-  branchIds: z.string().optional(),
-  assignments: z.record(z.array(z.string())).optional(),
-});
-
 type PanelFormData = z.infer<typeof panelSchema>;
-type UserFormData = z.infer<typeof userSchema>;
-type EditUserFormData = z.infer<typeof editUserSchema>;
+
+// User form schemas moved to CreateUserModal component
 
 const editPanelSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -195,24 +176,6 @@ export function AdminSettings() {
     },
   });
 
-  const {
-    register: registerUser,
-    handleSubmit: handleSubmitUser,
-    reset: resetUser,
-    watch: watchUser,
-    setValue: setUserValue,
-    formState: { errors: userErrors },
-  } = useForm<UserFormData>({ resolver: zodResolver(userSchema) });
-
-  const {
-    register: registerEditUser,
-    handleSubmit: handleSubmitEditUser,
-    reset: resetEditUser,
-    setValue: setEditUserValue,
-    watch: watchEditUser,
-    formState: { errors: editUserErrors },
-  } = useForm<EditUserFormData>({ resolver: zodResolver(editUserSchema) });
-
   const { hasRole } = useAuth();
   const { panels, loading: panelsLoading } = usePanels();
   const [editingPanelData, setEditingPanelData] = useState<Panel | null>(null);
@@ -229,15 +192,8 @@ export function AdminSettings() {
 
   const { branches, loading: branchesLoading, reloadBranches } = useBranches();
 
-  // Watch form values for dependent dropdowns
-    const watchedPanelCompanyId = watch("companyId");
-    const watchedEditPanelCompanyId = watchEditPanel("companyId");
-    const watchedUserCompanyId = watchUser("companyId") || "";
-    const watchedUserBranchIds = watchUser("branchIds") || "";
-    const watchedUserRole = watchUser("role");
-    const watchedEditUserRole = watchEditUser("role");
-    const watchedEditUserBranchIds = watchEditUser("branchIds") || "";
-    const watchedEditUserCompanyId = watchEditUser("companyId") || "";
+  const watchedPanelCompanyId = watch("companyId");
+  const watchedEditPanelCompanyId = watchEditPanel("companyId");
 
   // Helper: get branches filtered by company, or all if no company specified
   const getBranchesForCompany = (companyId: string): Branch[] => {
@@ -308,7 +264,7 @@ export function AdminSettings() {
         await Promise.all(
           data.branches.map(branch => 
             BranchService.createBranch({
-              ...branch,
+              ...branch, name: branch.name as string,
               companyId: company.id
             })
           )
@@ -382,7 +338,7 @@ export function AdminSettings() {
     }
   };
 
-  const openEditPanel = (panel: ControlPanel) => {
+  const openEditPanel = (panel: Panel) => {
     setEditingPanelData(panel);
     setEditPanelValue("name", panel.name || "");
     setEditPanelValue("companyId", panel.companyId || "");
@@ -511,119 +467,9 @@ export function AdminSettings() {
     setTimeout(() => setSuccess(null), 3000);
   };
 
-  const handleCreateUser = async (data: UserFormData) => {
-    setUserFormLoading(true);
-    setError(null);
-    try {
-      let finalCompanyId: string | undefined = data.companyId;
-      let finalBranchIds: string[] = data.branchIds
-        ? data.branchIds.split(",").map((id) => id.trim()).filter(Boolean)
-        : [];
-      let finalAssignments: Record<string, string[]> | undefined = undefined;
-
-      if (data.role === "super_admin") {
-        finalCompanyId = undefined;
-        finalBranchIds = [];
-      } else if (data.role === "head_office") {
-        finalBranchIds = [];
-      } else if (data.role === "system_integrator") {
-        finalAssignments = userAssignments;
-        const firstCompany = Object.keys(userAssignments)[0];
-        if (firstCompany) {
-          finalCompanyId = firstCompany;
-          finalBranchIds = userAssignments[firstCompany];
-        } else {
-          finalCompanyId = undefined;
-          finalBranchIds = [];
-        }
-      }
-
-      await UserService.createUser({
-        displayName: data.displayName,
-        email: data.email,
-        password: data.password,
-        role: data.role,
-        companyId: finalCompanyId,
-        branchIds: finalBranchIds,
-        assignments: finalAssignments,
-      });
-      setUserFormOpen(false);
-      resetUser();
-      setUserAssignments({});
-      await loadUsers();
-      setSuccess("User created successfully");
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, "Failed to create user"));
-    } finally {
-      setUserFormLoading(false);
-    }
-  };
-
-  const handleEditUser = async (data: EditUserFormData) => {
-    if (!editingUserData) return;
-    setEditUserFormLoading(true);
-    setError(null);
-    try {
-      let finalCompanyId: string | undefined = data.companyId;
-      let finalBranchIds: string[] = data.branchIds
-        ? data.branchIds.split(",").map((id) => id.trim()).filter(Boolean)
-        : [];
-      let finalAssignments: Record<string, string[]> | undefined = undefined;
-
-      if (data.role === "super_admin") {
-        finalCompanyId = undefined;
-        finalBranchIds = [];
-      } else if (data.role === "head_office") {
-        finalBranchIds = [];
-      } else if (data.role === "system_integrator") {
-        finalAssignments = userAssignments;
-        const firstCompany = Object.keys(userAssignments)[0];
-        if (firstCompany) {
-          finalCompanyId = firstCompany;
-          finalBranchIds = userAssignments[firstCompany];
-        } else {
-          finalCompanyId = undefined;
-          finalBranchIds = [];
-        }
-      }
-
-      await UserService.updateUser(editingUserData.uid, {
-        displayName: data.displayName,
-        email: data.email,
-        password: data.password || undefined,
-        role: data.role,
-        companyId: finalCompanyId,
-        branchIds: finalBranchIds,
-        assignments: finalAssignments,
-      });
-      setEditingUserData(null);
-      resetEditUser();
-      setUserAssignments({});
-      await loadUsers();
-      setSuccess("User updated successfully");
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, "Failed to update user"));
-    } finally {
-      setEditUserFormLoading(false);
-    }
-  };
-
   const openEditUser = (user: User) => {
     setEditingUserData(user);
-    setEditUserValue("displayName", user.displayName || "");
-    setEditUserValue("email", user.email || "");
-    setEditUserValue("role", user.role);
-    setEditUserValue("companyId", user.companyId || "");
-    setEditUserValue(
-      "branchIds",
-      Array.isArray(user.branchIds)
-        ? user.branchIds.join(", ")
-        : String(user.branchIds || ""),
-    );
-    setEditUserValue("password", "");
-    setUserAssignments(user.assignments || {});
+    setUserFormOpen(true);
   };
 
   const handleCreatePanel = async (data: PanelFormData) => {
@@ -707,190 +553,6 @@ export function AdminSettings() {
       (p.ipAddress || "").toLowerCase().includes(panelSearchQuery.toLowerCase())
   );
 
-  const renderUserAssignmentsUI = (
-    watchedRole: Role | undefined,
-    watchedCompanyId: string,
-    watchedBranchIds: string,
-    registerFn: any,
-    setValueFn: any,
-    formLoading: boolean,
-    isEdit: boolean
-  ) => {
-    return (
-      <>
-        {watchedRole === 'super_admin' && (
-          <div className="md:col-span-2">
-            <div className="rounded-[6px] bg-[var(--surface-hover)] border border-[var(--border-subtle)] p-3 flex items-start gap-2.5">
-              <ShieldAlert className="h-4 w-4 text-orange-500 mt-0.5" />
-              <p className="text-[12px] text-[var(--text-secondary)]">
-                Super Admins have unrestricted global access to all companies, branches, and panels.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {watchedRole !== 'super_admin' && watchedRole !== 'system_integrator' && hasRole(['super_admin']) && (
-          <div>
-            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-              Company
-            </label>
-            <select
-              {...registerFn('companyId')}
-              className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-              disabled={formLoading || companiesLoading}
-            >
-              <option value="">— Select a company —</option>
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {watchedRole === 'head_office' && (
-          <div className="md:col-span-2">
-            <div className="rounded-[6px] bg-[var(--surface-hover)] border border-[var(--border-subtle)] p-3 flex items-start gap-2.5">
-              <Building className="h-4 w-4 text-blue-500 mt-0.5" />
-              <p className="text-[12px] text-[var(--text-secondary)]">
-                Head Office personnel automatically receive access to all branches within their assigned company.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {watchedRole === 'end_user' && (
-          <div className="md:col-span-2">
-            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-              Branch Access
-            </label>
-            {branchesLoading ? (
-              <p className="text-[12px] text-[var(--text-secondary)]">Loading branches...</p>
-            ) : branches.length === 0 ? (
-              <p className="text-[11px] text-[var(--text-secondary)]">No branches available.</p>
-            ) : (
-              <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-2">
-                {getBranchesForCompany(watchedCompanyId).map((branch) => {
-                  const currentIds = (watchedBranchIds || '').split(',').map((s) => s.trim()).filter(Boolean);
-                  const isChecked = currentIds.includes(branch.id);
-                  return (
-                    <label key={branch.id} className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-[var(--surface-hover)]" style={{ opacity: formLoading ? 0.5 : 1 }}>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        disabled={formLoading}
-                        onChange={(e) => {
-                          const prev = (watchedBranchIds || '').split(',').map((s) => s.trim()).filter(Boolean);
-                          const next = e.target.checked ? [...prev, branch.id] : prev.filter((id) => id !== branch.id);
-                          setValueFn('branchIds', next.join(', '));
-                        }}
-                        className="h-4 w-4 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
-                      />
-                      <span className="text-[13px] text-[var(--text-primary)]">{branch.name}</span>
-                      <span className="ml-auto font-mono text-[10px] text-[var(--text-secondary)] flex items-center gap-1.5">
-                        {branch.id.slice(0, 8)}…
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {watchedRole === 'system_integrator' && (
-          <div className="md:col-span-2 space-y-3">
-            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-              System Integrator Assignments
-            </label>
-            <div className="rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-3">
-              <div className="flex gap-2 mb-4">
-                <select 
-                  id={isEdit ? 'si-edit-company-select' : 'si-company-select'}
-                  className="control-field flex-1 rounded-[6px] px-3 h-[32px] text-[12px]"
-                >
-                  <option value="">— Add a Company —</option>
-                  {companies.map((c) => (
-                    <option key={c.id} value={c.id} disabled={!!userAssignments[c.id]}>{c.name}</option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const select = document.getElementById(isEdit ? 'si-edit-company-select' : 'si-company-select') as HTMLSelectElement;
-                    if (select && select.value && !userAssignments[select.value]) {
-                      setUserAssignments(prev => ({ ...prev, [select.value]: [] }));
-                      select.value = '';
-                    }
-                  }}
-                  className="h-[32px] px-3 bg-[var(--surface-hover)] border border-[var(--border-subtle)] rounded-[6px] text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--surface-overlay)] transition-colors"
-                >
-                  Add
-                </button>
-              </div>
-              
-              {Object.keys(userAssignments).length === 0 ? (
-                <p className="text-[11px] text-[var(--text-secondary)] text-center py-2">No companies assigned yet.</p>
-              ) : (
-                <div className="space-y-4">
-                  {Object.entries(userAssignments).map(([compId, assignedBranchIds]) => {
-                    const company = companies.find(c => c.id === compId);
-                    const compBranches = getBranchesForCompany(compId);
-                    return (
-                      <div key={compId} className="border border-[var(--border-subtle)] rounded-[6px] overflow-hidden">
-                        <div className="bg-[var(--surface-hover)] px-3 py-2 flex items-center justify-between border-b border-[var(--border-subtle)]">
-                          <span className="text-[12px] font-semibold text-[var(--text-primary)]">{company?.name || compId}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const next = { ...userAssignments };
-                              delete next[compId];
-                              setUserAssignments(next);
-                            }}
-                            className="text-[var(--text-secondary)] hover:text-red-500 transition-colors"
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <div className="p-2 space-y-1 max-h-[120px] overflow-y-auto bg-[var(--surface-base)]">
-                          {compBranches.length === 0 ? (
-                            <p className="text-[10px] text-[var(--text-secondary)] px-1">No branches found.</p>
-                          ) : (
-                            compBranches.map(b => (
-                              <label key={b.id} className="flex cursor-pointer items-center gap-2 rounded-[4px] px-2 py-1 hover:bg-[var(--surface-hover)]">
-                                <input
-                                  type="checkbox"
-                                  checked={assignedBranchIds.includes(b.id)}
-                                  onChange={(e) => {
-                                    setUserAssignments(prev => {
-                                      const next = { ...prev };
-                                      if (e.target.checked) {
-                                        next[compId] = [...(next[compId] || []), b.id];
-                                      } else {
-                                        next[compId] = (next[compId] || []).filter(id => id !== b.id);
-                                      }
-                                      return next;
-                                    });
-                                  }}
-                                  className="h-3.5 w-3.5 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
-                                />
-                                <span className="text-[11px] text-[var(--text-primary)]">{b.name}</span>
-                              </label>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </>
-    );
-  };
 
   return (
     <div className="animate-fade-in p-4 sm:p-5 max-w-5xl mx-auto">
@@ -941,7 +603,7 @@ export function AdminSettings() {
         </div>
       )}
 
-      {/* ── Hero Cards Grid ──────────────────────────────────────────────── */}
+      {/* ââ Hero Cards Grid ââââââââââââââââââââââââââââââââââââââââââââââââ */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {/* Company Management Card */}
         {hasRole(["super_admin"]) && (
@@ -970,11 +632,11 @@ export function AdminSettings() {
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
                   </span>
                   <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
-                    {companiesLoading ? "—" : companies.length}
+                    {companiesLoading ? "â" : companies.length}
                   </span>
                 </div>
                 <span className="text-[12px] text-[var(--text-secondary)]">
-                  {companiesLoading ? "Loading…" : "companies registered"}
+                  {companiesLoading ? "Loadingâ¦" : "companies registered"}
                 </span>
               </div>
             </div>
@@ -1007,11 +669,11 @@ export function AdminSettings() {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-400" />
                 </span>
                 <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
-                  {usersLoading ? "—" : users.length}
+                  {usersLoading ? "â" : users.length}
                 </span>
               </div>
               <span className="text-[12px] text-[var(--text-secondary)]">
-                {usersLoading ? "Loading…" : "users active"}
+                {usersLoading ? "Loadingâ¦" : "users active"}
               </span>
             </div>
           </div>
@@ -1043,22 +705,22 @@ export function AdminSettings() {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                 </span>
                 <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
-                  {panelsLoading ? "—" : panels.length}
+                  {panelsLoading ? "â" : panels.length}
                 </span>
               </div>
               <span className="text-[12px] text-[var(--text-secondary)]">
-                {panelsLoading ? "Loading…" : `panels provisioned`}
+                {panelsLoading ? "Loadingâ¦" : `panels provisioned`}
               </span>
             </div>
           </div>
         </button>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
       {/* OVERLAY DRAWERS                                                    */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
 
-      {/* ── Company Management Overlay ────────────────────────────────────── */}
+      {/* ââ Company Management Overlay ââââââââââââââââââââââââââââââââââââââ */}
       {activeSection === "companies" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
@@ -1392,7 +1054,7 @@ export function AdminSettings() {
                   </div>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
-                    {/* ── Left Panel: Company List ── */}
+                    {/* ââ Left Panel: Company List ââ */}
                     <div className={`${selectedCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
                       <div className="flex-1 overflow-y-auto">
                         {filteredCompanies.length === 0 ? (
@@ -1445,7 +1107,7 @@ export function AdminSettings() {
                       </div>
                     </div>
 
-                    {/* ── Right Panel: Company Detail ── */}
+                    {/* ââ Right Panel: Company Detail ââ */}
                     <div className={`${selectedCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
                       {(() => {
                         const selectedCompany = companies.find(c => c.id === selectedCompanyId);
@@ -1795,7 +1457,7 @@ export function AdminSettings() {
         </div>, document.body
       )}
 
-      {/* ── User Management Overlay ───────────────────────────────────────── */}
+      {/* ââ User Management Overlay âââââââââââââââââââââââââââââââââââââââââ */}
       {activeSection === "users" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
@@ -1864,453 +1526,13 @@ export function AdminSettings() {
               </div>
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto p-5 sm:p-7">
-                {/* User creation form */}
-                {userFormOpen && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
-                    <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
-                        Create User
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUserFormOpen(false);
-                          resetUser();
-                        }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                      >
-                        <XCircle className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    <form
-                      onSubmit={handleSubmitUser(handleCreateUser)}
-                      className="space-y-5"
-                    >
-                      <div>
-                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Display Name
-                        </label>
-                        <input
-                          {...registerUser("displayName")}
-                          placeholder="Full name"
-                          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                          disabled={userFormLoading}
-                        />
-                        {userErrors.displayName && (
-                          <p className="mt-1 text-[12px] text-red-400">
-                            {userErrors.displayName.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="grid gap-5 md:grid-cols-2">
-                        <div>
-                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                            Email
-                          </label>
-                          <input
-                            {...registerUser("email")}
-                            placeholder="user@example.com"
-                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                            disabled={userFormLoading}
-                          />
-                          {userErrors.email && (
-                            <p className="mt-1 text-[12px] text-red-400">
-                              {userErrors.email.message}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                            Password
-                          </label>
-                          <input
-                            {...registerUser("password")}
-                            type="password"
-                            placeholder="Min 6 characters"
-                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                            disabled={userFormLoading}
-                          />
-                          {userErrors.password && (
-                            <p className="mt-1 text-[12px] text-red-400">
-                              {userErrors.password.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="grid gap-5 md:grid-cols-2">
-                        <div>
-                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                            Role
-                          </label>
-                          <select
-                            {...registerUser("role")}
-                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                            disabled={userFormLoading}
-                          >
-                            <option value="end_user">End User</option>
-                            {hasRole(["super_admin", "head_office"]) && (
-                              <option value="system_integrator">
-                                System Integrator
-                              </option>
-                            )}
-                            {hasRole(["super_admin"]) && (
-                              <option value="head_office">Head Office</option>
-                            )}
-                            {hasRole(["super_admin"]) && (
-                              <option value="super_admin">Super Admin</option>
-                            )}
-                          </select>
-                        </div>
-                        {hasRole(["super_admin"]) && (
-                          <div>
-                            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                              Company
-                            </label>
-                            <select
-                              {...registerUser("companyId")}
-                              className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                              disabled={userFormLoading || companiesLoading}
-                            >
-                              <option value="">— Select a company —</option>
-                              {companies.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                  {c.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Branch Access
-                        </label>
-                        {branchesLoading ? (
-                          <p className="text-[12px] text-[var(--text-secondary)]">
-                            Loading branches...
-                          </p>
-                        ) : branches.length === 0 ? (
-                          <p className="text-[11px] text-[var(--text-secondary)]">
-                            No branches available.
-                          </p>
-                        ) : (
-                          <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-2">
-                            {getBranchesForCompany(watchedUserCompanyId).map(
-                              (branch) => {
-                                const currentIds = (watchedUserBranchIds || "")
-                                  .split(",")
-                                  .map((s) => s.trim())
-                                  .filter(Boolean);
-                                const isChecked = currentIds.includes(
-                                  branch.id,
-                                );
-                                return (
-                                  <label
-                                    key={branch.id}
-                                    className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-[var(--surface-hover)]"
-                                    style={{
-                                      opacity: userFormLoading ? 0.5 : 1,
-                                    }}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      disabled={userFormLoading}
-                                      onChange={(e) => {
-                                        const prev = (
-                                          watchedUserBranchIds || ""
-                                        )
-                                          .split(",")
-                                          .map((s) => s.trim())
-                                          .filter(Boolean);
-                                        const next = e.target.checked
-                                          ? [...prev, branch.id]
-                                          : prev.filter(
-                                              (id) => id !== branch.id,
-                                            );
-                                        setUserValue(
-                                          "branchIds",
-                                          next.join(", "),
-                                        );
-                                      }}
-                                      className="h-4 w-4 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
-                                    />
-                                    <span className="text-[13px] text-[var(--text-primary)]">
-                                      {branch.name}
-                                    </span>
-                                    <span className="ml-auto font-mono text-[10px] text-[var(--text-secondary)] flex items-center gap-1.5">
-                                      {branch.id.slice(0, 8)}…
-                                      <CopyButton
-                                        textToCopy={branch.id}
-                                        className="hover:text-[var(--text-primary)] transition-colors"
-                                        title="Copy full ID"
-                                        iconClassName="h-3 w-3"
-                                        onCopy={() => {
-                                          setSuccess("ID copied to clipboard");
-                                          setTimeout(() => setSuccess(null), 3000);
-                                        }}
-                                      />
-                                    </span>
-                                  </label>
-                                );
-                              },
-                            )}
-                          </div>
-                        )}
-                        <input type="hidden" {...registerUser("branchIds")} />
-                      </div>
-
-                      <div className="flex justify-end pt-2">
-                        <button
-                          type="submit"
-                          disabled={userFormLoading}
-                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
-                        >
-                          {userFormLoading ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Creating...
-                            </>
-                          ) : (
-                            "Create User"
-                          )}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
-
-                {/* User edit form */}
-                {editingUserData && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
-                    <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
-                        Edit User
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingUserData(null);
-                          resetEditUser();
-                        }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                      >
-                        <XCircle className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    <form
-                      onSubmit={handleSubmitEditUser(handleEditUser)}
-                      className="space-y-5"
-                    >
-                      <div>
-                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Display Name
-                        </label>
-                        <input
-                          {...registerEditUser("displayName")}
-                          placeholder="Full name"
-                          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                          disabled={editUserFormLoading}
-                        />
-                        {editUserErrors.displayName && (
-                          <p className="mt-1 text-[12px] text-red-400">
-                            {editUserErrors.displayName.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="grid gap-5 md:grid-cols-2">
-                        <div>
-                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                            Email
-                          </label>
-                          <input
-                            {...registerEditUser("email")}
-                            placeholder="user@example.com"
-                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                            disabled={editUserFormLoading}
-                          />
-                          {editUserErrors.email && (
-                            <p className="mt-1 text-[12px] text-red-400">
-                              {editUserErrors.email.message}
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                            Password (leave blank to keep current)
-                          </label>
-                          <input
-                            {...registerEditUser("password")}
-                            type="password"
-                            placeholder="New password (optional)"
-                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                            disabled={editUserFormLoading}
-                          />
-                          {editUserErrors.password && (
-                            <p className="mt-1 text-[12px] text-red-400">
-                              {editUserErrors.password.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="grid gap-5 md:grid-cols-2">
-                        <div>
-                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                            Role
-                          </label>
-                          <select
-                            {...registerEditUser("role")}
-                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                            disabled={editUserFormLoading}
-                          >
-                            <option value="end_user">End User</option>
-                            {hasRole(["super_admin", "head_office"]) && (
-                              <option value="system_integrator">
-                                System Integrator
-                              </option>
-                            )}
-                            {hasRole(["super_admin"]) && (
-                              <option value="head_office">Head Office</option>
-                            )}
-                            {hasRole(["super_admin"]) && (
-                              <option value="super_admin">Super Admin</option>
-                            )}
-                          </select>
-                        </div>
-                        {hasRole(["super_admin"]) && (
-                          <div>
-                            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                              Company
-                            </label>
-                            <select
-                              {...registerEditUser("companyId")}
-                              className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                              disabled={editUserFormLoading || companiesLoading}
-                            >
-                              <option value="">— Select a company —</option>
-                              {companies.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                  {c.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Branch Access
-                        </label>
-                        {branchesLoading ? (
-                          <p className="text-[12px] text-[var(--text-secondary)]">
-                            Loading branches...
-                          </p>
-                        ) : branches.length === 0 ? (
-                          <p className="text-[11px] text-[var(--text-secondary)]">
-                            No branches available.
-                          </p>
-                        ) : (
-                          <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-2">
-                            {getBranchesForCompany(watchedEditUserCompanyId).map(
-                              (branch) => {
-                                const currentIds = (watchedEditUserBranchIds || "")
-                                  .split(",")
-                                  .map((s) => s.trim())
-                                  .filter(Boolean);
-                                const isChecked = currentIds.includes(
-                                  branch.id,
-                                );
-                                return (
-                                  <label
-                                    key={branch.id}
-                                    className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-[var(--surface-hover)]"
-                                    style={{
-                                      opacity: editUserFormLoading ? 0.5 : 1,
-                                    }}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      disabled={editUserFormLoading}
-                                      onChange={(e) => {
-                                        const prev = (
-                                          watchedEditUserBranchIds || ""
-                                        )
-                                          .split(",")
-                                          .map((s) => s.trim())
-                                          .filter(Boolean);
-                                        const next = e.target.checked
-                                          ? [...prev, branch.id]
-                                          : prev.filter(
-                                              (id) => id !== branch.id,
-                                            );
-                                        setEditUserValue(
-                                          "branchIds",
-                                          next.join(", "),
-                                        );
-                                      }}
-                                      className="h-4 w-4 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
-                                    />
-                                    <span className="text-[13px] text-[var(--text-primary)]">
-                                      {branch.name}
-                                    </span>
-                                    <span className="ml-auto font-mono text-[10px] text-[var(--text-secondary)] flex items-center gap-1.5">
-                                      {branch.id.slice(0, 8)}…
-                                      <CopyButton
-                                        textToCopy={branch.id}
-                                        className="hover:text-[var(--text-primary)] transition-colors"
-                                        title="Copy full ID"
-                                        iconClassName="h-3 w-3"
-                                        onCopy={() => {
-                                          setSuccess("ID copied to clipboard");
-                                          setTimeout(() => setSuccess(null), 3000);
-                                        }}
-                                      />
-                                    </span>
-                                  </label>
-                                );
-                              },
-                            )}
-                          </div>
-                        )}
-                        <input type="hidden" {...registerEditUser("branchIds")} />
-                      </div>
-
-                      <div className="flex justify-end pt-2">
-                        <button
-                          type="submit"
-                          disabled={editUserFormLoading}
-                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
-                        >
-                          {editUserFormLoading ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Updating...
-                            </>
-                          ) : (
-                            "Update User"
-                          )}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
-
                 {usersLoading ? (
                   <div className="flex justify-center py-6">
                     <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
                   </div>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
-  {/* ── Left Panel: Company List ── */}
+  {/* ââ Left Panel: Company List ââ */}
   <div className={`${selectedUserCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
     <div className="flex-1 overflow-y-auto">
       <div className="divide-y divide-[var(--border-subtle)]">
@@ -2361,7 +1583,7 @@ export function AdminSettings() {
     </div>
   </div>
 
-  {/* ── Right Panel: Company Detail & Branches ── */}
+  {/* ââ Right Panel: Company Detail & Branches ââ */}
   <div className={`${selectedUserCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
     {(() => {
       if (!selectedUserCompanyId) {
@@ -2542,7 +1764,7 @@ export function AdminSettings() {
         document.body
       )}
 
-      {/* ── Panel Provisioning Overlay ─────────────────────────────────────── */}
+      {/* ââ Panel Provisioning Overlay âââââââââââââââââââââââââââââââââââââââ */}
       {activeSection === "panels" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
@@ -2706,7 +1928,7 @@ export function AdminSettings() {
                             }`}
                             disabled={panelFormLoading || companiesLoading}
                           >
-                            <option value="">— Select a company —</option>
+                            <option value="">â Select a company â</option>
                             {companies.map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}
@@ -2730,7 +1952,7 @@ export function AdminSettings() {
                             }`}
                             disabled={panelFormLoading || branchesLoading}
                           >
-                            <option value="">— Select a branch —</option>
+                            <option value="">â Select a branch â</option>
                             {getBranchesForCompany(watchedPanelCompanyId).map((b) => (
                               <option key={b.id} value={b.id}>
                                 {b.name}
@@ -2859,7 +2081,7 @@ export function AdminSettings() {
                             }`}
                             disabled={editPanelFormLoading || companiesLoading}
                           >
-                            <option value="">— Select a company —</option>
+                            <option value="">â Select a company â</option>
                             {companies.map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}
@@ -2883,7 +2105,7 @@ export function AdminSettings() {
                             }`}
                             disabled={editPanelFormLoading || branchesLoading}
                           >
-                            <option value="">— Select a branch —</option>
+                            <option value="">â Select a branch â</option>
                             {getBranchesForCompany(watchedEditPanelCompanyId || "").map((b) => (
                               <option key={b.id} value={b.id}>
                                 {b.name}
@@ -2948,7 +2170,7 @@ export function AdminSettings() {
                   </div>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
-  {/* ── Left Panel: Company List ── */}
+  {/* ââ Left Panel: Company List ââ */}
   <div className={`${selectedPanelCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
     <div className="flex-1 overflow-y-auto">
       <div className="divide-y divide-[var(--border-subtle)]">
@@ -2999,7 +2221,7 @@ export function AdminSettings() {
     </div>
   </div>
 
-  {/* ── Right Panel: Company Detail & Branches ── */}
+  {/* ââ Right Panel: Company Detail & Branches ââ */}
   <div className={`${selectedPanelCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
     {(() => {
       if (!selectedPanelCompanyId) {
@@ -3162,7 +2384,7 @@ export function AdminSettings() {
         document.body
       )}
 
-      {/* 🛑 Delete Company Modal 🛑 */}
+      {/* ð Delete Company Modal ð */}
       {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
@@ -3306,7 +2528,13 @@ export function AdminSettings() {
           </div>
         </div>
       )}
+      <CreateUserModal
+        isOpen={userFormOpen}
+        onClose={() => { setUserFormOpen(false); setEditingUserData(null); }}
+        onSuccess={(msg) => { setSuccess(msg); loadUsers(); setTimeout(() => setSuccess(null), 3000); }}
+        onError={(msg) => { setError(msg); }}
+        editingUser={editingUserData}
+      />
     </div>
   );
 }
-
