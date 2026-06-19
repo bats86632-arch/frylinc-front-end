@@ -6,9 +6,10 @@ import { z } from "zod";
 import { UserService } from "../api/UserService";
 import { PanelService } from "../api/PanelService";
 import { usePanels } from "../hooks/usePanels";
-import { User, Role, Panel } from "../types";
+import { User, Role, Panel, Branch } from "../types";
 import { useAuth } from "../contexts/AuthContext";
 import { useCompanies } from "../hooks/useCompanies";
+import { useBranches } from "../hooks/useBranches";
 import { CompanyService, Company } from "../api/CompanyService";
 import {
   DEFAULT_PANEL_COMMANDS,
@@ -123,6 +124,7 @@ export function AdminSettings() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<PanelFormData>({
     resolver: zodResolver(panelSchema),
@@ -140,6 +142,8 @@ export function AdminSettings() {
     register: registerUser,
     handleSubmit: handleSubmitUser,
     reset: resetUser,
+    watch: watchUser,
+    setValue: setUserValue,
     formState: { errors: userErrors },
   } = useForm<UserFormData>({ resolver: zodResolver(userSchema) });
 
@@ -148,6 +152,7 @@ export function AdminSettings() {
     handleSubmit: handleSubmitEditUser,
     reset: resetEditUser,
     setValue: setEditUserValue,
+    watch: watchEditUser,
     formState: { errors: editUserErrors },
   } = useForm<EditUserFormData>({ resolver: zodResolver(editUserSchema) });
 
@@ -161,8 +166,24 @@ export function AdminSettings() {
     handleSubmit: handleSubmitEditPanel,
     reset: resetEditPanel,
     setValue: setEditPanelValue,
+    watch: watchEditPanel,
     formState: { errors: editPanelErrors },
   } = useForm<EditPanelFormData>({ resolver: zodResolver(editPanelSchema) });
+
+  const { branches, loading: branchesLoading } = useBranches();
+
+  // Watch form values for dependent dropdowns
+  const watchedPanelCompanyId = watch("companyId");
+  const watchedEditPanelCompanyId = watchEditPanel("companyId");
+  const watchedUserCompanyId = watchUser("companyId") || "";
+  const watchedUserBranchIds = watchUser("branchIds") || "";
+  const watchedEditUserBranchIds = watchEditUser("branchIds") || "";
+
+  // Helper: get branches filtered by company, or all if no company specified
+  const getBranchesForCompany = (companyId: string): Branch[] => {
+    if (!companyId) return branches;
+    return branches.filter((b) => b.companyId === companyId);
+  };
 
   const {
     companies,
@@ -826,13 +847,60 @@ export function AdminSettings() {
 
               <div>
                 <label className="mb-2 block text-[13px] text-[#7a7773]">
-                  Branch IDs
+                  Branch Access
                 </label>
-                <input
-                  {...registerUser("branchIds")}
-                  placeholder="Comma separated, e.g. branch-1, branch-2"
-                  className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                />
+                {branchesLoading ? (
+                  <p className="text-[12px] text-[#7a7773]">
+                    Loading branches...
+                  </p>
+                ) : getBranchesForCompany(watchedUserCompanyId).length === 0 ? (
+                  <p className="text-[11px] text-[#7a7773] mt-1">
+                    {watchedUserCompanyId
+                      ? "No branches found for this company."
+                      : "Enter a Company ID above to see available branches."}
+                  </p>
+                ) : (
+                  <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-white/[0.08] bg-[#0f0f0e] p-2">
+                    {getBranchesForCompany(watchedUserCompanyId).map(
+                      (branch) => {
+                        const currentIds = watchedUserBranchIds
+                          .split(",")
+                          .map((s) => s.trim())
+                          .filter(Boolean);
+                        const isChecked = currentIds.includes(branch.id);
+                        return (
+                          <label
+                            key={branch.id}
+                            className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-white/[0.04]"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const prev = watchedUserBranchIds
+                                  .split(",")
+                                  .map((s) => s.trim())
+                                  .filter(Boolean);
+                                const next = e.target.checked
+                                  ? [...prev, branch.id]
+                                  : prev.filter((id) => id !== branch.id);
+                                setUserValue("branchIds", next.join(", "));
+                              }}
+                              className="h-4 w-4 rounded border-white/20 bg-white/5 accent-[#e53d3d]"
+                            />
+                            <span className="text-[13px] text-[#f0ede8]">
+                              {branch.name}
+                            </span>
+                            <span className="ml-auto font-mono text-[10px] text-[#7a7773]">
+                              {branch.id.slice(0, 8)}…
+                            </span>
+                          </label>
+                        );
+                      },
+                    )}
+                  </div>
+                )}
+                <input type="hidden" {...registerUser("branchIds")} />
               </div>
 
               <div className="flex gap-3 pt-3">
@@ -1129,14 +1197,61 @@ export function AdminSettings() {
 
                   <div>
                     <label className="mb-2 block text-[13px] text-[#7a7773]">
-                      Branch IDs
+                      Branch Access
                     </label>
-                    <input
-                      {...registerEditUser("branchIds")}
-                      placeholder="Comma separated"
-                      className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                      disabled={editUserFormLoading}
-                    />
+                    {branchesLoading ? (
+                      <p className="text-[12px] text-[#7a7773]">
+                        Loading branches...
+                      </p>
+                    ) : branches.length === 0 ? (
+                      <p className="text-[11px] text-[#7a7773]">
+                        No branches available.
+                      </p>
+                    ) : (
+                      <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-white/[0.08] bg-[#0f0f0e] p-2">
+                        {branches.map((branch) => {
+                          const currentIds = watchedEditUserBranchIds
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter(Boolean);
+                          const isChecked = currentIds.includes(branch.id);
+                          return (
+                            <label
+                              key={branch.id}
+                              className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-white/[0.04]"
+                              style={{ opacity: editUserFormLoading ? 0.5 : 1 }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                disabled={editUserFormLoading}
+                                onChange={(e) => {
+                                  const prev = watchedEditUserBranchIds
+                                    .split(",")
+                                    .map((s) => s.trim())
+                                    .filter(Boolean);
+                                  const next = e.target.checked
+                                    ? [...prev, branch.id]
+                                    : prev.filter((id) => id !== branch.id);
+                                  setEditUserValue(
+                                    "branchIds",
+                                    next.join(", "),
+                                  );
+                                }}
+                                className="h-4 w-4 rounded border-white/20 bg-white/5 accent-[#e53d3d]"
+                              />
+                              <span className="text-[13px] text-[#f0ede8]">
+                                {branch.name}
+                              </span>
+                              <span className="ml-auto font-mono text-[10px] text-[#7a7773]">
+                                {branch.id.slice(0, 8)}…
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <input type="hidden" {...registerEditUser("branchIds")} />
                   </div>
 
                   <div className="flex justify-end gap-3 border-t border-white/[0.06] pt-5 mt-6">
@@ -1228,14 +1343,24 @@ export function AdminSettings() {
                     </div>
                     <div>
                       <label className="mb-2 block text-[13px] text-[#7a7773]">
-                        Branch ID
+                        Branch
                       </label>
-                      <input
+                      <select
                         {...registerEditPanel("branchId")}
-                        placeholder="Optional"
                         className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                        disabled={editPanelFormLoading}
-                      />
+                        disabled={editPanelFormLoading || branchesLoading}
+                      >
+                        <option value="">— Select a branch —</option>
+                        {getBranchesForCompany(
+                          watchedEditPanelCompanyId ||
+                            editingPanelData?.companyId ||
+                            "",
+                        ).map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -1402,19 +1527,30 @@ export function AdminSettings() {
                 </div>
                 <div>
                   <label className="mb-2 block text-[13px] text-[#7a7773]">
-                    Branch ID
+                    Branch
                   </label>
-                  <input
+                  <select
                     {...register("branchId")}
                     className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
                       errors.branchId ? "border-red-400/70" : ""
                     }`}
-                    placeholder="e.g., branch-a"
-                    disabled={panelFormLoading}
-                  />
+                    disabled={panelFormLoading || branchesLoading}
+                  >
+                    <option value="">— Select a branch —</option>
+                    {getBranchesForCompany(watchedPanelCompanyId).map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
                   {errors.branchId && (
                     <p className="mt-1 text-[12px] text-red-400">
                       {errors.branchId.message}
+                    </p>
+                  )}
+                  {!watchedPanelCompanyId && (
+                    <p className="mt-1 text-[11px] text-[#7a7773]">
+                      Enter a Company ID above to filter branches
                     </p>
                   )}
                 </div>

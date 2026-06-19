@@ -1,21 +1,85 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { AlertCircle, CheckCircle, Save, KeyRound, User as UserIcon, ShieldCheck } from "lucide-react";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
+import {
+  AlertCircle,
+  CheckCircle,
+  Save,
+  KeyRound,
+  User as UserIcon,
+  ShieldCheck,
+  Camera,
+} from "lucide-react";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+} from "firebase/auth";
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+import { storage } from "../config/firebase";
 
 export function Profile() {
-  const { userData, currentUser, saveDisplayName } = useAuth();
-  const [displayName, setDisplayName] = useState(userData?.displayName || "");
+  const { userData, currentUser, saveDisplayName, updateProfile } = useAuth();
+
+  // ── Profile fields ──────────────────────────────────────────────────────────
+  const [firstName, setFirstName] = useState(userData?.firstName || "");
+  const [lastName, setLastName] = useState(userData?.lastName || "");
+  const [phoneNumber, setPhoneNumber] = useState(userData?.phoneNumber || "");
+  const [companyName, setCompanyName] = useState(userData?.companyName || "");
+  const [companyRole, setCompanyRole] = useState(userData?.companyRole || "");
+  const [employeeId, setEmployeeId] = useState(userData?.employeeId || "");
+  const [dateOfBirth, setDateOfBirth] = useState(userData?.dateOfBirth || "");
+
+  // ── Photo ───────────────────────────────────────────────────────────────────
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>(
+    userData?.photoURL || "",
+  );
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  // ── Profile save state ──────────────────────────────────────────────────────
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState("");
 
+  // ── Password state ──────────────────────────────────────────────────────────
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
+  // ── Derived ─────────────────────────────────────────────────────────────────
+  const roleLabel =
+    userData?.role
+      ?.split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ") || "End User";
+
+  // ── Photo handling ───────────────────────────────────────────────────────────
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setProfileError("Please select an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileError("Image must be less than 5MB");
+      return;
+    }
+
+    setPhotoFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  // ── Save profile ─────────────────────────────────────────────────────────────
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingProfile(true);
@@ -23,10 +87,41 @@ export function Profile() {
     setProfileSuccess(false);
 
     try {
-      await saveDisplayName(displayName);
+      let photoURL = userData?.photoURL || "";
+
+      if (photoFile && currentUser) {
+        setUploadingPhoto(true);
+        const photoStorageRef = storageRef(
+          storage,
+          `user-photos/${currentUser.uid}/profile.jpg`,
+        );
+        await uploadBytes(photoStorageRef, photoFile);
+        photoURL = await getDownloadURL(photoStorageRef);
+        setUploadingPhoto(false);
+      }
+
+      const displayName =
+        `${firstName.trim()} ${lastName.trim()}`.trim() ||
+        userData?.displayName ||
+        "";
+
+      await updateProfile({
+        displayName,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phoneNumber: phoneNumber.trim(),
+        companyName: companyName.trim(),
+        companyRole: companyRole.trim(),
+        employeeId: employeeId.trim(),
+        dateOfBirth: dateOfBirth.trim(),
+        photoURL,
+      });
+
+      setPhotoFile(null);
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
     } catch (err: unknown) {
+      setUploadingPhoto(false);
       const error = err as { message?: string };
       setProfileError(error.message || "Failed to update profile");
     } finally {
@@ -34,6 +129,7 @@ export function Profile() {
     }
   };
 
+  // ── Update password ──────────────────────────────────────────────────────────
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser || !currentUser.email) return;
@@ -48,7 +144,10 @@ export function Profile() {
     setPasswordSuccess(false);
 
     try {
-      const credential = EmailAuthProvider.credential(currentUser.email, oldPassword);
+      const credential = EmailAuthProvider.credential(
+        currentUser.email,
+        oldPassword,
+      );
       await reauthenticateWithCredential(currentUser, credential);
       await updatePassword(currentUser, newPassword);
 
@@ -61,122 +160,266 @@ export function Profile() {
       if (error.code === "auth/invalid-credential") {
         setPasswordError("Incorrect old password");
       } else {
-        setPasswordError(err.message || "Failed to update password");
+        setPasswordError(error.message || "Failed to update password");
       }
     } finally {
       setSavingPassword(false);
     }
   };
 
-  const roleLabel = userData?.role
-    ?.split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ") || "End User";
+  // ── Reusable field components ────────────────────────────────────────────────
+  const ReadOnlyField = ({
+    label,
+    value,
+    icon,
+  }: {
+    label: string;
+    value: string;
+    icon?: React.ReactNode;
+  }) => (
+    <div>
+      <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={value}
+          disabled
+          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] opacity-50 cursor-not-allowed"
+        />
+        {icon && (
+          <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
+            {icon}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const EditableField = ({
+    label,
+    value,
+    onChange,
+    type = "text",
+    placeholder,
+  }: {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    type?: string;
+    placeholder?: string;
+  }) => (
+    <div>
+      <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+      />
+    </div>
+  );
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
-      {/* Profile header with avatar */}
+      {/* ── Profile header ──────────────────────────────────────────────────── */}
       <section className="surface-panel rounded-[14px] p-6">
         <div className="flex items-center gap-5">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-red-500 to-amber-400 text-xl font-bold text-white shadow-lg shadow-red-950/40 ring-1 ring-white/10">
-            {userData?.displayName?.charAt(0).toUpperCase() || "U"}
+          {/* Avatar with camera overlay */}
+          <div className="relative inline-block shrink-0">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full overflow-hidden ring-2 ring-white/10 shadow-lg">
+              {photoPreview ? (
+                <img
+                  src={photoPreview}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-500 to-amber-400 text-3xl font-bold text-white">
+                  {(
+                    userData?.firstName?.charAt(0) ||
+                    userData?.displayName?.charAt(0) ||
+                    "U"
+                  ).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <label
+              htmlFor="photo-upload"
+              className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-[#1a1816] text-white/70 shadow-md transition-colors hover:bg-white/10 hover:text-white"
+              title="Change photo"
+            >
+              <Camera className="h-4 w-4" />
+            </label>
+            <input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={handlePhotoChange}
+            />
           </div>
+
+          {/* Name / subtitle */}
           <div>
-            <h1 className="font-display text-[22px] font-bold tracking-tight text-[#f0ede8]">Your Profile</h1>
-            <p className="mt-1 text-[13px] text-[#7a7773]">Manage your personal settings and security</p>
+            <h1 className="font-display text-[22px] font-bold tracking-tight text-[#f0ede8]">
+              {firstName || lastName
+                ? `${firstName} ${lastName}`.trim()
+                : userData?.displayName || "Your Profile"}
+            </h1>
+            <p className="mt-1 text-[13px] text-[#7a7773]">
+              Manage your personal settings and security
+            </p>
+            {photoFile && (
+              <p className="mt-1 text-[12px] text-amber-300/80">
+                New photo selected — save profile to apply
+              </p>
+            )}
           </div>
         </div>
       </section>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile Info */}
+      {/* ── Main content ────────────────────────────────────────────────────── */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+        {/* Personal Details */}
         <div className="surface-panel rounded-[14px] p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-cyan-400/20 bg-cyan-400/10 text-cyan-200">
               <UserIcon className="h-[18px] w-[18px]" />
             </div>
-            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Personal Details</h2>
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+              Personal Details
+            </h2>
           </div>
+
           <form onSubmit={handleSaveProfile} className="space-y-5">
             {profileError && (
               <div className="flex items-center gap-2.5 rounded-[10px] text-[13px] text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
-                <AlertCircle className="h-4 w-4 shrink-0" /> {profileError}
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {profileError}
               </div>
             )}
             {profileSuccess && (
               <div className="flex items-center gap-2.5 rounded-[10px] text-[13px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
-                <CheckCircle className="h-4 w-4 shrink-0" /> Profile updated successfully
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                Profile updated successfully
               </div>
             )}
-            
-            <div>
-              <label className="block text-[13px] text-[#7a7773] mb-2">Email</label>
-              <input
-                type="text"
-                value={userData?.email || ""}
-                disabled
-                className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] opacity-50 cursor-not-allowed"
+
+            {/* First Name + Last Name — two columns */}
+            <div className="grid grid-cols-2 gap-4">
+              <EditableField
+                label="First Name"
+                value={firstName}
+                onChange={setFirstName}
+                placeholder="First name"
+              />
+              <EditableField
+                label="Last Name"
+                value={lastName}
+                onChange={setLastName}
+                placeholder="Last name"
               />
             </div>
 
-            <div>
-              <label className="block text-[13px] text-[#7a7773] mb-2">Role</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={roleLabel}
-                  disabled
-                  className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] opacity-50 cursor-not-allowed"
-                />
-                <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
-                  <ShieldCheck className="h-4 w-4" />
-                </div>
-              </div>
-            </div>
+            {/* Role (read-only) */}
+            <ReadOnlyField
+              label="Role"
+              value={roleLabel}
+              icon={<ShieldCheck className="h-4 w-4" />}
+            />
 
-            <div>
-              <label className="block text-[13px] text-[#7a7773] mb-2">Display Name</label>
-              <input
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-              />
-            </div>
+            {/* Email (read-only) */}
+            <ReadOnlyField
+              label="Email Address"
+              value={userData?.email || ""}
+            />
+
+            {/* Phone Number */}
+            <EditableField
+              label="Phone Number"
+              value={phoneNumber}
+              onChange={setPhoneNumber}
+              type="tel"
+              placeholder="+1 (555) 000-0000"
+            />
+
+            {/* Company Name */}
+            <EditableField
+              label="Company Name"
+              value={companyName}
+              onChange={setCompanyName}
+              placeholder="Your organisation"
+            />
+
+            {/* Company Role */}
+            <EditableField
+              label="Company Role"
+              value={companyRole}
+              onChange={setCompanyRole}
+              placeholder="e.g., Fire Safety Manager"
+            />
+
+            {/* Employee ID */}
+            <EditableField
+              label="Employee ID"
+              value={employeeId}
+              onChange={setEmployeeId}
+              placeholder="e.g., EMP-00123"
+            />
+
+            {/* Date of Birth */}
+            <EditableField
+              label="Date of Birth"
+              value={dateOfBirth}
+              onChange={setDateOfBirth}
+              type="date"
+            />
 
             <button
               type="submit"
-              disabled={savingProfile}
-              className="flex h-[32px] mt-6 w-full items-center justify-center gap-2 rounded-[6px] border border-white/[0.08] bg-white/[0.04] text-[13px] text-[#f0ede8] transition-all hover:bg-white/[0.08] disabled:opacity-50"
+              disabled={savingProfile || uploadingPhoto}
+              className="flex h-[32px] mt-6 w-full items-center justify-center gap-2 rounded-[6px] border border-white/[0.08] bg-white/[0.04] text-[13px] text-[#f0ede8] transition-all hover:bg-white/[0.08] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="h-4 w-4" />
-              {savingProfile ? "Saving…" : "Save Profile"}
+              {uploadingPhoto
+                ? "Uploading photo…"
+                : savingProfile
+                  ? "Saving…"
+                  : "Save Profile"}
             </button>
           </form>
         </div>
 
-        {/* Password */}
-        <div className="surface-panel rounded-[14px] p-6">
+        {/* Security / Password */}
+        <div className="surface-panel rounded-[14px] p-6 self-start">
           <div className="flex items-center gap-3 mb-6">
             <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
               <KeyRound className="h-[18px] w-[18px]" />
             </div>
-            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">Security</h2>
+            <h2 className="text-[10px] uppercase tracking-[0.1em] text-[#f0ede8] opacity-50">
+              Security
+            </h2>
           </div>
+
           <form onSubmit={handleUpdatePassword} className="space-y-5">
             {passwordError && (
               <div className="flex items-center gap-2.5 rounded-[10px] text-[13px] text-red-300 bg-red-500/10 border border-red-400/20 p-3.5 animate-fade-in">
-                <AlertCircle className="h-4 w-4 shrink-0" /> {passwordError}
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {passwordError}
               </div>
             )}
             {passwordSuccess && (
               <div className="flex items-center gap-2.5 rounded-[10px] text-[13px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/20 p-3.5 animate-fade-in">
-                <CheckCircle className="h-4 w-4 shrink-0" /> Password updated successfully
+                <CheckCircle className="h-4 w-4 shrink-0" />
+                Password updated successfully
               </div>
             )}
 
             <div>
-              <label className="block text-[13px] text-[#7a7773] mb-2">Current Password</label>
+              <label className="block text-[13px] text-[#7a7773] mb-2">
+                Current Password
+              </label>
               <input
                 type="password"
                 value={oldPassword}
@@ -187,7 +430,9 @@ export function Profile() {
             </div>
 
             <div>
-              <label className="block text-[13px] text-[#7a7773] mb-2">New Password</label>
+              <label className="block text-[13px] text-[#7a7773] mb-2">
+                New Password
+              </label>
               <input
                 type="password"
                 value={newPassword}

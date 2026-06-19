@@ -423,7 +423,11 @@ export function PanelDetail() {
                       ? "border-emerald-300/30 bg-emerald-400/[0.08] text-emerald-100 shadow-glow-emerald"
                       : commandLoading === command
                         ? "border-amber-300/30 bg-amber-400/[0.08] text-amber-100 shadow-glow-amber"
-                        : "border-white/[0.07] bg-white/[0.03] text-white hover:border-amber-300/30 hover:bg-amber-400/[0.06] hover:shadow-glow-amber hover:-translate-y-0.5"
+                        : command === "ARM"
+                          ? "border-red-500/25 bg-red-500/[0.02] text-red-200 hover:border-red-400/40 hover:bg-red-500/[0.05] hover:shadow-[0_0_16px_rgba(239,68,68,0.12)] hover:-translate-y-0.5"
+                          : command === "ZONE OFF"
+                            ? "border-emerald-500/25 bg-emerald-500/[0.02] text-emerald-200 hover:border-emerald-400/40 hover:bg-emerald-500/[0.05] hover:shadow-[0_0_16px_rgba(52,211,153,0.12)] hover:-translate-y-0.5"
+                            : "border-white/[0.07] bg-white/[0.03] text-white hover:border-amber-300/30 hover:bg-amber-400/[0.06] hover:shadow-glow-amber hover:-translate-y-0.5"
                   }`}
                 >
                   {commandSuccess === command ? (
@@ -442,8 +446,20 @@ export function PanelDetail() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-white/[0.07] bg-gradient-to-br from-white/[0.06] to-white/[0.02]">
-                        <Play className="h-4 w-4 text-amber-300/70" />
+                      <span className={`flex h-10 w-10 items-center justify-center rounded-[10px] border ${
+                        command === "ARM"
+                          ? "border-red-500/20 bg-red-500/[0.04]"
+                          : command === "ZONE OFF"
+                            ? "border-emerald-500/20 bg-emerald-500/[0.04]"
+                            : "border-white/[0.07] bg-gradient-to-br from-white/[0.06] to-white/[0.02]"
+                      }`}>
+                        <Play className={`h-4 w-4 ${
+                          command === "ARM"
+                            ? "text-red-400/80"
+                            : command === "ZONE OFF"
+                              ? "text-emerald-400/80"
+                              : "text-amber-300/70"
+                        }`} />
                       </span>
                       <span className="text-sm font-semibold">{command}</span>
                     </div>

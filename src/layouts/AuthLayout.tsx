@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { Bell, Clock, Flame, BarChart3 } from "lucide-react";
+import { Bell, Clock, BarChart3 } from "lucide-react";
 
 const trustPoints = [
   {
@@ -46,9 +46,11 @@ export function AuthLayout() {
         <section className="relative hidden h-screen flex-col overflow-hidden border-r border-white/[0.08] px-10 py-10 lg:flex xl:px-16">
           {/* Brand lock-up */}
           <div className="flex shrink-0 items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#e8173a] to-[#ff6b35] shadow-lg inset-highlight ring-1 ring-white/10">
-              <Flame className="h-5 w-5 text-white drop-shadow-sm" />
-            </div>
+            <img
+              src="/fyrlinc-logo.png"
+              alt="Fyrlinc"
+              className="h-11 w-11 rounded-[12px] object-cover ring-1 ring-white/10"
+            />
             <div>
               <p className="font-display text-[1.1rem] font-bold tracking-tight text-white leading-none">
                 Fyrlinc
@@ -125,9 +127,11 @@ export function AuthLayout() {
           <div className="relative z-10 w-full max-w-md animate-fade-in-up lg:max-w-[460px]">
             {/* Mobile brand */}
             <div className="mb-10 flex items-center justify-center gap-3 lg:hidden">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#e8173a] to-[#ff6b35] shadow-lg inset-highlight ring-1 ring-white/10">
-                <Flame className="h-6 w-6 text-white" />
-              </div>
+              <img
+                src="/fyrlinc-logo.png"
+                alt="Fyrlinc"
+                className="h-12 w-12 rounded-[12px] object-cover ring-1 ring-white/10"
+              />
               <div>
                 <p className="font-display text-[1.25rem] font-bold tracking-tight text-white leading-none">
                   Fyrlinc

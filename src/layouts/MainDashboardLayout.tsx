@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
   ChevronDown,
+  Flame,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -34,12 +35,6 @@ const navigation: Array<{
     href: "/admin",
     icon: Settings,
     roles: ["super_admin", "head_office", "system_integrator"],
-  },
-  {
-    name: "Profile",
-    href: "/profile",
-    icon: UserIcon,
-    roles: ["super_admin", "head_office", "system_integrator", "end_user"],
   },
 ];
 
@@ -333,11 +328,7 @@ export function MainDashboardLayout() {
                     onClick={() => setUserMenuOpen(false)}
                   />
                   <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-64 rounded-[16px] p-2 animate-scale-in origin-top sm:origin-top-right">
-                    <Link
-                      to="/profile"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="block border-b border-white/[0.06] p-4 mb-2 rounded-[10px] transition-all duration-150 hover:bg-white/[0.04] text-left"
-                    >
+                    <div className="border-b border-white/[0.06] p-4 mb-1">
                       <p className="truncate text-[15px] font-bold text-white drop-shadow-sm">
                         {userData?.displayName}
                       </p>
@@ -347,6 +338,14 @@ export function MainDashboardLayout() {
                       <span className="mt-3 inline-flex rounded-full border border-white/[0.10] bg-white/[0.06] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white/70 inset-highlight shadow-sm">
                         {roleLabel}
                       </span>
+                    </div>
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex w-full items-center gap-2.5 rounded-[10px] px-4 py-3 text-[14px] font-medium text-[#f0ede8]/80 transition-all duration-150 hover:bg-white/[0.04] hover:text-[#f0ede8]"
+                    >
+                      <UserIcon className="h-[18px] w-[18px]" />
+                      <span>Profile</span>
                     </Link>
                     <button
                       onClick={handleLogout}

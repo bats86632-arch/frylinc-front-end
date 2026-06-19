@@ -14,6 +14,18 @@ import { auth } from "../config/firebase";
 import { User, Role } from "../types";
 import apiClient from "../api/axios";
 
+interface ProfileUpdateData {
+  displayName?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  companyName?: string;
+  companyRole?: string;
+  employeeId?: string;
+  dateOfBirth?: string;
+  photoURL?: string;
+}
+
 interface AuthContextType {
   currentUser: FirebaseUser | null;
   userData: User | null;
@@ -22,6 +34,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshUserData: () => Promise<void>;
   saveDisplayName: (displayName: string) => Promise<void>;
+  updateProfile: (data: ProfileUpdateData) => Promise<void>;
   hasRole: (allowedRoles: Role[]) => boolean;
 }
 
@@ -35,9 +48,6 @@ const roleHierarchy: Record<Role, number> = {
 };
 
 // ─── Lightweight localStorage session cache ──────────────────────────────────
-// Persists user claims across PWA restarts so returning users never see the
-// "Loading Fyrlinc…" screen - Firebase verifies the session silently in the
-// background while the dashboard renders immediately with the cached data.
 const CACHE_KEY = "fyrlinc_ucache_v1";
 
 function readCachedUser(): User | null {
@@ -45,7 +55,6 @@ function readCachedUser(): User | null {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const c: User = JSON.parse(raw);
-    // Basic sanity check - uid and role are required
     if (!c?.uid || !c?.role) return null;
     return c;
   } catch {
@@ -57,7 +66,7 @@ function writeCachedUser(user: User): void {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(user));
   } catch {
-    /* storage full or unavailable (private mode) */
+    /* storage full or unavailable */
   }
 }
 
@@ -72,17 +81,13 @@ function clearCachedUser(): void {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  // Lazy initialisers run once - reads localStorage synchronously at mount
   const [userData, setUserData] = useState<User | null>(readCachedUser);
   const [role, setRole] = useState<Role | null>(
     () => readCachedUser()?.role ?? null,
   );
-  // Skip the loading screen entirely if we have a cached user; Firebase will
-  // verify and update in the background via onAuthStateChanged.
   const [loading, setLoading] = useState(() => readCachedUser() === null);
 
   const loadUserProfile = async (user: FirebaseUser, forceRefresh = false) => {
-    // Phase 1: Instant resolution from the cached JWT (no network required when fresh)
     const tokenResult = await user.getIdTokenResult(forceRefresh);
     const customClaims = tokenResult.claims;
 
@@ -97,9 +102,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setUserData(initialUserData);
     setRole(initialUserData.role);
-    writeCachedUser(initialUserData); // Keep cache fresh after every auth check
+    writeCachedUser(initialUserData);
 
-    // Phase 2: Silent REST sync - updates display name, role, etc. from the server
+    // Phase 2: Silent REST sync — fetches full profile from Firestore
     apiClient
       .get("/me")
       .then((response) => {
@@ -116,8 +121,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role: updatedRole,
             companyId: profile.companyId || prev.companyId,
             branchIds: profile.branchIds || prev.branchIds,
+            // Extended profile fields from Firestore
+            firstName: profile.firstName ?? prev.firstName,
+            lastName: profile.lastName ?? prev.lastName,
+            phoneNumber: profile.phoneNumber ?? prev.phoneNumber,
+            companyName: profile.companyName ?? prev.companyName,
+            companyRole: profile.companyRole ?? prev.companyRole,
+            employeeId: profile.employeeId ?? prev.employeeId,
+            dateOfBirth: profile.dateOfBirth ?? prev.dateOfBirth,
+            photoURL: profile.photoURL ?? prev.photoURL,
           };
-          writeCachedUser(updated); // Persist freshest data for the next cold start
+          writeCachedUser(updated);
           return updated;
         });
       })
@@ -135,13 +149,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await loadUserProfile(user);
         } catch (error) {
           console.error("Error loading user profile:", error);
-          // If Firebase rejects the session, evict the stale cache immediately
           clearCachedUser();
           setUserData(null);
           setRole(null);
         }
       } else {
-        // Signed out - clear cache so the next PWA open goes through full auth
         clearCachedUser();
         setUserData(null);
         setRole(null);
@@ -159,15 +171,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loadUserProfile(auth.currentUser, true);
   };
 
-  const saveDisplayName = async (displayName: string) => {
-    const trimmed = displayName.trim();
-    if (!trimmed) return;
-    await apiClient.patch("/me/profile", { displayName: trimmed });
+  const updateProfile = async (data: ProfileUpdateData) => {
+    await apiClient.patch("/me/profile", data);
     await refreshUserData();
   };
 
+  const saveDisplayName = async (displayName: string) => {
+    const trimmed = displayName.trim();
+    if (!trimmed) return;
+    await updateProfile({ displayName: trimmed });
+  };
+
   const logout = async () => {
-    clearCachedUser(); // Evict before signOut so next mount starts clean
+    clearCachedUser();
     await signOut(auth);
     setCurrentUser(null);
     setUserData(null);
@@ -190,6 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logout,
     refreshUserData,
     saveDisplayName,
+    updateProfile,
     hasRole,
   };
 

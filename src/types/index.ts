@@ -1,4 +1,8 @@
-export type Role = 'super_admin' | 'head_office' | 'system_integrator' | 'end_user';
+export type Role =
+  | "super_admin"
+  | "head_office"
+  | "system_integrator"
+  | "end_user";
 
 export interface User {
   uid: string;
@@ -7,6 +11,27 @@ export interface User {
   role: Role;
   companyId?: string;
   branchIds?: string[];
+  // Extended profile fields
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  companyName?: string;
+  companyRole?: string;
+  employeeId?: string;
+  dateOfBirth?: string;
+  photoURL?: string;
+}
+
+export interface Branch {
+  id: string; // Firestore document ID (used as the unique identifier)
+  branchId: string; // Same as id; stored explicitly in the document
+  name: string; // Human-readable branch name (SEPARATE from ID)
+  companyId: string;
+  address?: string;
+  supervisorName?: string;
+  contactNumber?: string;
+  emailAddress?: string;
+  enabled?: boolean;
 }
 
 export interface Panel {
@@ -29,8 +54,8 @@ export interface Panel {
 export interface CommandLog {
   id: string;
   command: string;
-  status: 'queued' | 'sent' | 'failed';
-  ackStatus: 'not_requested' | 'pending' | 'acknowledged';
+  status: "queued" | "sent" | "failed";
+  ackStatus: "not_requested" | "pending" | "acknowledged";
 }
 
 export interface Event {

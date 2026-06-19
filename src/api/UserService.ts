@@ -41,10 +41,18 @@ export const UserService = {
     return response.data;
   },
 
-  async updateProfile(
-    displayName: string,
-  ): Promise<{ ok: boolean; uid: string; displayName: string }> {
-    const response = await apiClient.patch("/me/profile", { displayName });
+  async updateProfile(data: {
+    displayName?: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    companyName?: string;
+    companyRole?: string;
+    employeeId?: string;
+    dateOfBirth?: string;
+    photoURL?: string;
+  }): Promise<{ ok: boolean; uid: string }> {
+    const response = await apiClient.patch("/me/profile", data);
     return response.data;
   },
 };
