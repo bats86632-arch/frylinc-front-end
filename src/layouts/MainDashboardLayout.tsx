@@ -42,11 +42,13 @@ export function MainDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const { userData, logout, hasRole } = useAuth();
+  const { userData, currentUser, logout, hasRole } = useAuth();
   const { panels } = usePanels();
   const location = useLocation();
   const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  const displayPhotoURL = userData?.photoURL || currentUser?.photoURL;
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -307,10 +309,10 @@ export function MainDashboardLayout() {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2.5 rounded-pill border border-white/[0.10] bg-white/[0.03] py-1.5 pl-1.5 pr-4 text-white/80 transition-all duration-150 hover:border-white/[0.18] hover:bg-white/[0.06] inset-highlight shadow-sm"
               >
-                {userData?.photoURL ? (
+                {displayPhotoURL ? (
                   <img
-                    src={userData.photoURL}
-                    alt={userData.displayName || "User avatar"}
+                    src={displayPhotoURL}
+                    alt={userData?.displayName || "User avatar"}
                     className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-white/10"
                   />
                 ) : (
@@ -338,9 +340,9 @@ export function MainDashboardLayout() {
                   <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-64 rounded-[16px] p-2 animate-scale-in origin-top sm:origin-top-right">
                     <div className="border-b border-white/[0.06] p-4 mb-1">
                       <div className="flex items-center gap-3">
-                        {userData?.photoURL ? (
+                        {displayPhotoURL ? (
                           <img
-                            src={userData.photoURL}
+                            src={displayPhotoURL}
                             alt="User"
                             className="h-10 w-10 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-white/10"
                           />

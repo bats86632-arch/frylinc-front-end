@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
   AlertCircle,
@@ -21,6 +21,61 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { storage, auth } from "../config/firebase";
+// ── Reusable field components ────────────────────────────────────────────────
+const ReadOnlyField = ({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+}) => (
+  <div>
+    <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
+    <div className="flex items-center gap-2">
+      <input
+        type="text"
+        value={value}
+        disabled
+        className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] opacity-50 cursor-not-allowed"
+      />
+      {icon && (
+        <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
+          {icon}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const EditableField = ({
+  label,
+  value,
+  onChange,
+  onBlur,
+  type = "text",
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  onBlur?: () => void;
+  type?: string;
+  placeholder?: string;
+}) => (
+  <div>
+    <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onBlur={onBlur}
+      placeholder={placeholder}
+      className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+    />
+  </div>
+);
 
 export function Profile() {
   const { userData, currentUser, updateProfile } = useAuth();
@@ -83,6 +138,15 @@ export function Profile() {
     reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
   };
+
+  // ── Debounced auto-save ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSaveProfile();
+    }, 1200);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstName, lastName, phoneNumber, companyName, companyRole, employeeId, dateOfBirth, photoFile]);
 
   // ── Save profile ─────────────────────────────────────────────────────────────
   const handleSaveProfile = async (e?: React.FormEvent) => {
@@ -222,59 +286,7 @@ export function Profile() {
     }
   };
 
-  // ── Reusable field components ────────────────────────────────────────────────
-  const ReadOnlyField = ({
-    label,
-    value,
-    icon,
-  }: {
-    label: string;
-    value: string;
-    icon?: React.ReactNode;
-  }) => (
-    <div>
-      <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          value={value}
-          disabled
-          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] opacity-50 cursor-not-allowed"
-        />
-        {icon && (
-          <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[6px] border border-amber-300/20 bg-amber-400/10 text-amber-200">
-            {icon}
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
-  const EditableField = ({
-    label,
-    value,
-    onChange,
-    type = "text",
-    placeholder,
-  }: {
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-    type?: string;
-    placeholder?: string;
-  }) => (
-    <div>
-      <label className="block text-[13px] text-[#7a7773] mb-2">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={() => handleSaveProfile()}
-        placeholder={placeholder}
-        className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-      />
-    </div>
-  );
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
