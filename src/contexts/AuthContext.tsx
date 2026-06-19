@@ -91,6 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const tokenResult = await user.getIdTokenResult(forceRefresh);
     const customClaims = tokenResult.claims;
 
+    let assignments = (customClaims.assignments as Record<string, string[]>) || {};
+    if (Object.keys(assignments).length === 0 && customClaims.companyId) {
+      assignments = { [customClaims.companyId as string]: (customClaims.branchIds as string[]) || [] };
+    }
+
     const initialUserData: Partial<User> = {
       uid: user.uid,
       email: user.email || "",
@@ -98,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: (customClaims.role as Role) || "end_user",
       companyId: customClaims.companyId as string | undefined,
       branchIds: (customClaims.branchIds as string[]) || [],
+      assignments,
       photoURL: user.photoURL || undefined,
     };
 
@@ -132,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role: updatedRole,
             companyId: profile.companyId || prev.companyId,
             branchIds: profile.branchIds || prev.branchIds,
+            assignments: profile.assignments || prev.assignments,
             // Extended profile fields from Firestore
             firstName: profile.firstName ?? prev.firstName,
             lastName: profile.lastName ?? prev.lastName,

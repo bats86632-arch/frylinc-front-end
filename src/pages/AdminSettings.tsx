@@ -56,6 +56,7 @@ const userSchema = z.object({
   role: z.enum(["super_admin", "head_office", "system_integrator", "end_user"]),
   companyId: z.string().optional(),
   branchIds: z.string().optional(),
+  assignments: z.record(z.array(z.string())).optional(),
 });
 
 const editUserSchema = z.object({
@@ -65,6 +66,7 @@ const editUserSchema = z.object({
   role: z.enum(["super_admin", "head_office", "system_integrator", "end_user"]),
   companyId: z.string().optional(),
   branchIds: z.string().optional(),
+  assignments: z.record(z.array(z.string())).optional(),
 });
 
 type PanelFormData = z.infer<typeof panelSchema>;
@@ -137,6 +139,10 @@ export function AdminSettings() {
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [panelSearchQuery, setPanelSearchQuery] = useState("");
   const [branchSearchQuery, setBranchSearchQuery] = useState("");
+  const [addingBranchToCompany, setAddingBranchToCompany] = useState<string | null>(null);
+  const [newBranchForm, setNewBranchForm] = useState<Partial<Branch>>({});
+  const [userAssignments, setUserAssignments] = useState<Record<string, string[]>>({});
+
   const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [panelFormOpen, setPanelFormOpen] = useState(false);
@@ -316,6 +322,24 @@ export function AdminSettings() {
       setError(getApiErrorMessage(err, "Failed to update panel"));
     } finally {
       setEditPanelFormLoading(false);
+    }
+  };
+
+
+  const handleInlineBranchCreate = async (companyId: string) => {
+    try {
+      setInlineEditBranchLoading(true);
+      await BranchService.createBranch({ ...newBranchForm, companyId } as any);
+      await reloadBranches();
+      setSuccess("Branch created successfully");
+      setTimeout(() => setSuccess(null), 3000);
+      setAddingBranchToCompany(null);
+      setNewBranchForm({});
+    } catch (err: any) {
+      setError(err.message || "Failed to create branch");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setInlineEditBranchLoading(false);
     }
   };
 

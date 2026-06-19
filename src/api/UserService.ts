@@ -33,6 +33,7 @@ export const UserService = {
     role: Role;
     companyId?: string;
     branchIds?: string[];
+    assignments?: Record<string, string[]>;
   }): Promise<User> {
     const response = await apiClient.post("/users", data);
     this.invalidateCache();

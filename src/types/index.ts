@@ -11,6 +11,7 @@ export interface User {
   role: Role;
   companyId?: string;
   branchIds?: string[];
+  assignments?: Record<string, string[]>;
   // Extended profile fields
   firstName?: string;
   lastName?: string;
