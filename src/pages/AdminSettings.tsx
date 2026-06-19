@@ -905,12 +905,12 @@ export function AdminSettings() {
                     {filteredCompanies.map((company) => (
                       <div
                         key={company.id}
-                        className="surface-panel flex flex-col text-left transition-all hover:border-white/10 hover:bg-white/[0.03] animate-fade-in-up rounded-[14px] overflow-hidden"
+                        className="surface-panel flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] animate-fade-in-up rounded-[14px] overflow-hidden"
                       >
                         <div className="p-5 flex-1 w-full relative">
                           <div className="flex items-start justify-between mb-4">
                             <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-white/90"
+                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-white shadow-sm"
                               style={{ backgroundColor: getAvatarColor(company.name) }}
                             >
                               {company.name.charAt(0).toUpperCase()}
@@ -925,7 +925,7 @@ export function AdminSettings() {
                               </button>
                               <button
                                 onClick={() => startDeleteCompany(company)}
-                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-red-500/10 transition-colors"
+                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
                                 aria-label="Delete company"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -941,7 +941,7 @@ export function AdminSettings() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-white/[0.01] px-5 py-3 w-full">
+                        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-[var(--surface-base)] px-5 py-3 w-full">
                           <div className="flex items-center gap-2 overflow-hidden">
                             <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                               ID
@@ -952,7 +952,7 @@ export function AdminSettings() {
                           </div>
                           <button
                             onClick={(e) => handleCopyId(e, company.id)}
-                            className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-white transition-colors"
+                            className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
                             title="Copy ID"
                           >
                             <Copy className="h-3.5 w-3.5" />
@@ -1270,51 +1270,63 @@ export function AdminSettings() {
                     {filteredUsers.map((user) => (
                       <div
                         key={user.uid}
-                        className="surface-panel flex flex-col text-left transition-all hover:border-white/10 hover:bg-white/[0.03] animate-fade-in-up rounded-[14px] overflow-hidden"
+                        className="surface-panel flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] animate-fade-in-up rounded-[14px] overflow-hidden"
                       >
                         <div className="p-5 flex-1 w-full relative">
                           <div className="flex items-start justify-between mb-4">
                             <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-white/90"
+                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-white shadow-sm"
                               style={{ backgroundColor: getAvatarColor(user.displayName || user.email || "U") }}
                             >
                               {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
                             </div>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => openEditUser(user)}
-                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
-                                aria-label="Edit user"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteUser(user.uid)}
-                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-red-500/10 transition-colors"
-                                aria-label="Delete user"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                            <div className="flex items-center gap-2">
+                              <span className="shrink-0 rounded-[4px] bg-[var(--surface-muted)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-primary)] mr-1 border border-[var(--border-subtle)]">
+                                {roleLabels[user.role as Role] || "User"}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => openEditUser(user)}
+                                  className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+                                  aria-label="Edit user"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteUser(user.uid)}
+                                  className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
+                                  aria-label="Delete user"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                           <div>
                             <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 truncate">
                               {user.displayName || "Unknown User"}
                             </h3>
-                            <p className="text-[13px] text-[var(--text-secondary)] truncate">
+                            <p className="text-[13px] text-[var(--text-secondary)] line-clamp-2 min-h-[39px]">
                               {user.email || "No email provided."}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-white/[0.01] px-5 py-3 w-full">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
-                              Role
+                        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-[var(--surface-base)] px-5 py-3 w-full">
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
+                              UID
                             </span>
-                            <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-primary)]">
-                              {roleLabels[user.role as Role] || "User"}
+                            <span className="font-mono truncate text-[11px] text-[var(--text-primary)]">
+                              {user.uid}
                             </span>
                           </div>
+                          <button
+                            onClick={(e) => handleCopyId(e, user.uid)}
+                            className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
+                            title="Copy UID"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -1586,18 +1598,16 @@ export function AdminSettings() {
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {filteredPanels.map((panel) => {
                       const isAlarm = panel.zones?.some((z) => z);
-                      const statusColor = isAlarm ? "bg-red-500" : "bg-emerald-500";
+                      const statusColor = isAlarm ? "bg-[var(--color-error)]" : "bg-[var(--color-success)]";
                       return (
                         <div
                           key={panel.serial || Math.random().toString()}
-                          className="surface-panel flex flex-col text-left transition-all hover:border-white/10 hover:bg-white/[0.03] animate-fade-in-up rounded-[14px] overflow-hidden"
+                          className="surface-panel flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] animate-fade-in-up rounded-[14px] overflow-hidden"
                         >
                           <div className="p-5 flex-1 w-full relative">
                             <div className="flex items-start justify-between mb-4">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-white/[0.05]">
-                                <div
-                                  className={`h-[10px] w-[10px] rounded-full ${statusColor}`}
-                                />
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface-muted)] border border-[var(--border-subtle)]">
+                                <div className={`h-[10px] w-[10px] rounded-full ${statusColor} shadow-sm`} />
                               </div>
                               <div className="flex items-center gap-1">
                                 <button
@@ -1614,7 +1624,7 @@ export function AdminSettings() {
                                 ]) && (
                                   <button
                                     onClick={() => handleDeletePanel(panel.serial)}
-                                    className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#f87171] hover:bg-red-500/10 transition-colors"
+                                    className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
                                     aria-label="Delete panel"
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -1626,12 +1636,12 @@ export function AdminSettings() {
                               <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 truncate">
                                 {panel.name || "Unknown Panel"}
                               </h3>
-                              <p className="text-[13px] text-[var(--text-secondary)] truncate">
+                              <p className="text-[13px] text-[var(--text-secondary)] line-clamp-2 min-h-[39px]">
                                 Last active: {getPanelHeartbeat(panel.serial)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-white/[0.01] px-5 py-3 w-full">
+                          <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-[var(--surface-base)] px-5 py-3 w-full">
                             <div className="flex items-center gap-2 overflow-hidden">
                               <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                                 Serial
@@ -1642,7 +1652,7 @@ export function AdminSettings() {
                             </div>
                             <button
                               onClick={(e) => handleCopyId(e, panel.serial)}
-                              className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-white transition-colors"
+                              className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
                               title="Copy Serial"
                             >
                               <Copy className="h-3.5 w-3.5" />
