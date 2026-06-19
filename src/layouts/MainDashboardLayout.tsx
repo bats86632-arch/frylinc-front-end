@@ -182,23 +182,6 @@ export function MainDashboardLayout() {
             );
           })}
         </nav>
-
-        {/* User info at bottom */}
-        <div className="border-t border-white/[0.06] px-4 py-5">
-          <div className="flex items-center gap-3.5 rounded-[10px] px-3 py-2.5 border border-white/[0.04] bg-white/[0.02] inset-highlight shadow-sm">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] bg-gradient-to-br from-[#e8173a] to-[#ff6b35] text-[13px] font-bold text-white shadow-sm inset-highlight">
-              {userData?.displayName?.charAt(0).toUpperCase() || "U"}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-white/90">
-                {userData?.displayName}
-              </p>
-              <p className="truncate text-[11px] font-semibold text-white/40 tracking-wide uppercase mt-0.5">
-                {roleLabel}
-              </p>
-            </div>
-          </div>
-        </div>
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
@@ -319,6 +302,9 @@ export function MainDashboardLayout() {
                 <div className="hidden min-w-0 text-left sm:block">
                   <p className="max-w-[130px] truncate text-[13px] font-bold text-white leading-tight drop-shadow-sm">
                     {userData?.displayName}
+                  </p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-white/40 leading-tight mt-0.5">
+                    {roleLabel}
                   </p>
                 </div>
                 <ChevronDown className="h-4 w-4 text-white/40 ml-0.5" />
