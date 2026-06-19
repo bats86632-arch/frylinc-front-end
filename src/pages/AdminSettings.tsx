@@ -136,6 +136,7 @@ export function AdminSettings() {
   const [companySearchQuery, setCompanySearchQuery] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [panelSearchQuery, setPanelSearchQuery] = useState("");
+  const [branchSearchQuery, setBranchSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [panelFormOpen, setPanelFormOpen] = useState(false);
@@ -323,9 +324,7 @@ export function AdminSettings() {
     try {
       setInlineEditBranchLoading(true);
       await BranchService.updateBranch(branchId, inlineEditBranchForm);
-      setBranches((prev) =>
-        prev.map((b) => (b.id === branchId ? { ...b, ...inlineEditBranchForm } : b))
-      );
+      await reloadBranches();
       setSuccess("Branch updated successfully");
       setTimeout(() => setSuccess(null), 3000);
       setInlineEditingBranchId(null);
@@ -354,8 +353,8 @@ export function AdminSettings() {
         description: data.description,
       });
 
-      await loadCompanies();
-      await loadBranches(); // Reload branches in case anything changed
+      await reloadCompanies();
+      await reloadBranches(); // Reload branches in case anything changed
       setEditingCompanyData(null);
       resetEditCompany();
     } catch (err: any) {
@@ -1189,8 +1188,14 @@ export function AdminSettings() {
                               </div>
                             </div>
                           );
-                        }
-                        const companyBranches = branches.filter(b => b.companyId === selectedCompany.id);
+                        const companyBranches = branches.filter(b => 
+                          b.companyId === selectedCompany.id &&
+                          (b.name.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
+                           (b.address && b.address.toLowerCase().includes(branchSearchQuery.toLowerCase())) ||
+                           (b.supervisorName && b.supervisorName.toLowerCase().includes(branchSearchQuery.toLowerCase())) ||
+                           (b.contactNumber && b.contactNumber.toLowerCase().includes(branchSearchQuery.toLowerCase())) ||
+                           (b.emailAddress && b.emailAddress.toLowerCase().includes(branchSearchQuery.toLowerCase())))
+                        );
                         return (
                           <div className="flex-1 overflow-y-auto">
                             {/* Company Header */}
@@ -1254,21 +1259,23 @@ export function AdminSettings() {
                                     {companyBranches.length}
                                   </span>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => openEditCompany(selectedCompany)}
-                                  className="flex items-center gap-1 text-[11px] font-medium text-[var(--text-primary)] hover:opacity-80 transition-opacity"
-                                >
-                                  <Edit2 className="h-3 w-3" />
-                                  Manage Branches
-                                </button>
+                                <div className="relative w-48">
+                                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                                  <input
+                                    type="text"
+                                    placeholder="Search branches..."
+                                    className="control-field w-full h-7 pl-8 pr-3 text-[11px] rounded-[6px]"
+                                    value={branchSearchQuery}
+                                    onChange={(e) => setBranchSearchQuery(e.target.value)}
+                                  />
+                                </div>
                               </div>
 
                               {companyBranches.length === 0 ? (
                                 <div className="rounded-[10px] border border-dashed border-[var(--border-subtle)] bg-[var(--surface-base)] p-8 text-center">
                                   <MapPin className="mx-auto h-8 w-8 text-[var(--text-secondary)] opacity-30 mb-2" />
                                   <p className="text-[13px] font-medium text-[var(--text-secondary)]">No branches yet</p>
-                                  <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Click "Manage Branches" to add branches to this company</p>
+                                  <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Use the edit button on the company to add branches</p>
                                 </div>
                               ) : (
                                 <div className="space-y-1">
