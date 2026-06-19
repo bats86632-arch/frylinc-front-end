@@ -85,8 +85,24 @@ export function Profile() {
   };
 
   // ── Save profile ─────────────────────────────────────────────────────────────
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveProfile = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (savingProfile) return;
+    
+    const hasChanges = 
+      firstName.trim() !== (userData?.firstName || "") ||
+      lastName.trim() !== (userData?.lastName || "") ||
+      phoneNumber.trim() !== (userData?.phoneNumber || "") ||
+      companyName.trim() !== (userData?.companyName || "") ||
+      companyRole.trim() !== (userData?.companyRole || "") ||
+      employeeId.trim() !== (userData?.employeeId || "") ||
+      dateOfBirth.trim() !== (userData?.dateOfBirth || "") ||
+      photoFile !== null;
+
+    if (!hasChanges) {
+      return;
+    }
+
     setSavingProfile(true);
     setProfileError("");
     setProfileSuccess(false);
@@ -253,6 +269,7 @@ export function Profile() {
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={() => handleSaveProfile()}
         placeholder={placeholder}
         className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
       />
