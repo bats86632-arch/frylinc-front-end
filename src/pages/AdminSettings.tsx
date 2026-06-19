@@ -390,7 +390,14 @@ export function AdminSettings() {
   };
 
   const handleGlobalRefresh = async () => {
-    await loadUsers();
+    UserService.invalidateCache();
+    CompanyService.invalidateCache();
+    BranchService.invalidateCache();
+    await Promise.all([
+      loadUsers(),
+      reloadCompanies(),
+      reloadBranches(),
+    ]);
   };
 
   const handleCopyId = (e: React.MouseEvent, id: string) => {
