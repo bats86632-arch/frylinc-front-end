@@ -145,6 +145,10 @@ export function AdminSettings() {
 
   const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [selectedUserCompanyId, setSelectedUserCompanyId] = useState<string | null>(null);
+  const [selectedPanelCompanyId, setSelectedPanelCompanyId] = useState<string | null>(null);
+  const [expandedUserBranches, setExpandedUserBranches] = useState<Record<string, boolean>>({});
+
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
@@ -2039,78 +2043,231 @@ export function AdminSettings() {
                     <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
                   </div>
                 ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredUsers.map((user) => (
-                      <div
-                        key={user.uid}
-                        className="surface-panel flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] animate-fade-in-up rounded-[14px] overflow-hidden"
-                      >
-                        <div className="p-5 flex-1 w-full relative">
-                          <div className="flex items-start justify-between mb-4">
-                            <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-[var(--text-on-accent)] shadow-sm"
-                              style={{ backgroundColor: getAvatarColor(user.displayName || user.email || "U") }}
+                  <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
+  {/* ── Left Panel: Company List ── */}
+  <div className={`${selectedUserCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
+    <div className="flex-1 overflow-y-auto">
+      <div className="divide-y divide-[var(--border-subtle)]">
+        {[{ id: 'unassigned', name: 'Unassigned', description: 'Users without a company' }, ...filteredCompanies].map((company) => {
+          const isUnassigned = company.id === 'unassigned';
+          const isSelected = selectedUserCompanyId === company.id;
+          const userCount = isUnassigned 
+            ? filteredUsers.filter(u => !u.companyId).length 
+            : filteredUsers.filter(u => u.companyId === company.id).length;
+          
+          return (
+            <button
+              key={company.id}
+              onClick={() => setSelectedUserCompanyId(company.id)}
+              className={`w-full flex items-center gap-2.5 px-3 sm:px-4 py-2.5 text-left transition-colors group ${
+                isSelected
+                  ? 'bg-[var(--surface-hover)] border-l-2 border-l-sky-500'
+                  : 'hover:bg-[var(--surface-hover)] border-l-2 border-l-transparent'
+              }`}
+            >
+              <div
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[12px] font-medium text-[var(--text-on-accent)] shadow-sm"
+                style={{ backgroundColor: isUnassigned ? '#64748b' : getAvatarColor(company.name) }}
+              >
+                {isUnassigned ? <Users className="h-3.5 w-3.5 text-white" /> : company.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[12px] font-semibold text-[var(--text-primary)] truncate">
+                    {company.name}
+                  </span>
+                </div>
+                <p className="text-[10px] text-[var(--text-secondary)] truncate mt-0.5">
+                  {company.description || "No description"}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="flex items-center gap-1 text-[9px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
+                  <Users className="h-[9px] w-[9px]" />
+                  {userCount}
+                </span>
+                <ChevronRight className="h-3 w-3 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity md:block hidden" />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+
+  {/* ── Right Panel: Company Detail & Branches ── */}
+  <div className={`${selectedUserCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
+    {(() => {
+      if (!selectedUserCompanyId) {
+        return (
+          <div className="flex-1 flex items-center justify-center p-8">
+            <div className="text-center">
+              <Users className="mx-auto h-12 w-12 text-[var(--text-secondary)] opacity-30 mb-3" />
+              <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select a company</p>
+              <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose a company from the list to view its users</p>
+            </div>
+          </div>
+        );
+      }
+
+      const isUnassigned = selectedUserCompanyId === 'unassigned';
+      const selectedCompany = isUnassigned 
+        ? { id: 'unassigned', name: 'Unassigned', description: 'Users without a company' } 
+        : companies.find(c => c.id === selectedUserCompanyId);
+      
+      if (!selectedCompany) return null;
+
+      const companyUsers = isUnassigned 
+        ? filteredUsers.filter(u => !u.companyId)
+        : filteredUsers.filter(u => u.companyId === selectedCompany.id);
+
+      const companyBranches = isUnassigned ? [] : branches.filter(b => b.companyId === selectedCompany.id);
+      
+      const renderUserBtn = (user: User) => (
+        <button
+          key={user.uid}
+          onClick={() => openEditUser(user)}
+          className="flex items-center gap-2 p-2 rounded-[6px] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition-colors text-left group min-w-0"
+        >
+          <div
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] text-[10px] font-medium text-[var(--text-on-accent)] shadow-sm"
+            style={{ backgroundColor: getAvatarColor(user.displayName || user.email || "U") }}
+          >
+            {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate">{user.displayName || "Unknown User"}</p>
+            <p className="text-[9px] text-[var(--text-secondary)] truncate">{roleLabels[user.role as Role] || "User"}</p>
+          </div>
+          <div
+            onClick={(e) => { e.stopPropagation(); handleDeleteUser(user.uid); }}
+            className="h-5 w-5 flex items-center justify-center rounded text-[var(--color-error)] opacity-0 group-hover:opacity-100 hover:bg-[var(--status-danger-bg)] transition-all shrink-0"
+          >
+            <Trash2 className="h-3 w-3" />
+          </div>
+        </button>
+      );
+
+      return (
+        <div className="flex-1 overflow-y-auto">
+          {/* Header */}
+          <div className="px-3 sm:px-5 pt-3 pb-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)] sticky top-0 z-10">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedUserCompanyId(null)}
+                className="flex md:hidden h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+              <div
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[14px] font-semibold text-[var(--text-on-accent)] shadow-sm"
+                style={{ backgroundColor: isUnassigned ? '#64748b' : getAvatarColor(selectedCompany.name) }}
+              >
+                {isUnassigned ? <Users className="h-4 w-4 text-white" /> : selectedCompany.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-[14px] font-bold text-[var(--text-primary)] truncate">{selectedCompany.name}</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 truncate">{companyUsers.length} total users</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="px-3 sm:px-5 py-3">
+            {isUnassigned ? (
+               <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                 {companyUsers.map(renderUserBtn)}
+                 {companyUsers.length === 0 && (
+                   <p className="text-[12px] text-[var(--text-secondary)] col-span-full text-center py-4">No unassigned users.</p>
+                 )}
+               </div>
+            ) : (
+              <div className="space-y-4">
+                {companyBranches.map(branch => {
+                  const assignedUsers = companyUsers.filter(u => u.branchIds?.includes(branch.id));
+                  const isExpanded = expandedUserBranches[`${selectedCompany.id}-${branch.id}`];
+                  const displayedUsers = isExpanded ? assignedUsers : assignedUsers.slice(0, 5);
+
+                  return (
+                    <div key={branch.id} className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
+                      <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                          <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">{branch.name}</h4>
+                        </div>
+                        <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
+                          {assignedUsers.length} users
+                        </span>
+                      </div>
+                      <div className="p-3">
+                        {assignedUsers.length === 0 ? (
+                          <p className="text-[11px] text-[var(--text-secondary)] text-center py-2">No users assigned to this branch.</p>
+                        ) : (
+                          <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                            {displayedUsers.map(renderUserBtn)}
+                          </div>
+                        )}
+                        {assignedUsers.length > 5 && (
+                          <div className="mt-3 text-center border-t border-[var(--border-subtle)] pt-2">
+                            <button
+                              onClick={() => setExpandedUserBranches(prev => ({ ...prev, [`${selectedCompany.id}-${branch.id}`]: !isExpanded }))}
+                              className="text-[11px] font-medium text-sky-500 hover:text-sky-400 transition-colors"
                             >
-                              {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="shrink-0 rounded-[4px] bg-[var(--surface-muted)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-primary)] mr-1 border border-[var(--border-subtle)]">
-                                {roleLabels[user.role as Role] || "User"}
-                              </span>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => openEditUser(user)}
-                                  className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
-                                  aria-label="Edit user"
-                                >
-                                  <Edit2 className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteUser(user.uid)}
-                                  className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
-                                  aria-label="Delete user"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </div>
+                              {isExpanded ? "Show less" : `See all ${assignedUsers.length} users`}
+                            </button>
                           </div>
-                          <div>
-                            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 truncate">
-                              {user.displayName || "Unknown User"}
-                            </h3>
-                            <p className="text-[13px] text-[var(--text-secondary)] line-clamp-2 min-h-[39px]">
-                              {user.email || "No email provided."}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-[var(--surface-base)] px-5 py-3 w-full">
-                          <div className="flex items-center gap-2 overflow-hidden">
-                            <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
-                              UID
-                            </span>
-                            <span className="font-mono truncate text-[11px] text-[var(--text-primary)]">
-                              {user.uid}
-                            </span>
-                          </div>
-                          <CopyButton
-                            textToCopy={user.uid}
-                            className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
-                            title="Copy UID"
-                            onCopy={() => {
-                              setSuccess("ID copied to clipboard");
-                              setTimeout(() => setSuccess(null), 3000);
-                            }}
-                          />
-                        </div>
+                        )}
                       </div>
-                    ))}
-                    {filteredUsers.length === 0 && (
-                      <div className="col-span-full rounded-[10px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 text-center text-[13px] text-[var(--text-secondary)]">
-                        {users.length === 0 ? "No users found." : "No users match your search."}
+                    </div>
+                  )
+                })}
+                {(() => {
+                  const noBranchUsers = companyUsers.filter(u => !u.branchIds || u.branchIds.length === 0);
+                  if (noBranchUsers.length === 0) return null;
+                  
+                  const isExpanded = expandedUserBranches[`${selectedCompany.id}-nobranch`];
+                  const displayedUsers = isExpanded ? noBranchUsers : noBranchUsers.slice(0, 5);
+                  
+                  return (
+                    <div className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
+                      <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-3.5 w-3.5 text-amber-400" />
+                          <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">Company Level (No Branch)</h4>
+                        </div>
+                        <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
+                          {noBranchUsers.length} users
+                        </span>
                       </div>
-                    )}
-                  </div>
+                      <div className="p-3">
+                        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                          {displayedUsers.map(renderUserBtn)}
+                        </div>
+                        {noBranchUsers.length > 5 && (
+                          <div className="mt-3 text-center border-t border-[var(--border-subtle)] pt-2">
+                            <button
+                              onClick={() => setExpandedUserBranches(prev => ({ ...prev, [`${selectedCompany.id}-nobranch`]: !isExpanded }))}
+                              className="text-[11px] font-medium text-sky-500 hover:text-sky-400 transition-colors"
+                            >
+                              {isExpanded ? "Show less" : `See all ${noBranchUsers.length} users`}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })()}
+                {companyBranches.length === 0 && companyUsers.length === 0 && (
+                   <p className="text-[12px] text-[var(--text-secondary)] text-center py-4">No branches or users in this company.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    })()}
+  </div>
+</div>
                 )}
               </div>
             </div>
@@ -2524,82 +2681,213 @@ export function AdminSettings() {
                     <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
                   </div>
                 ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredPanels.map((panel) => {
-                      const isAlarm = panel.zones?.some((z) => z);
-                      const statusColor = isAlarm ? "bg-[var(--color-error)]" : "bg-[var(--color-success)]";
-                      return (
-                        <div
-                          key={panel.serial || Math.random().toString()}
-                          className="surface-panel flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] animate-fade-in-up rounded-[14px] overflow-hidden"
-                        >
-                          <div className="p-5 flex-1 w-full relative">
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface-muted)] border border-[var(--border-subtle)]">
-                                <div className={`h-[10px] w-[10px] rounded-full ${statusColor} shadow-sm`} />
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => openEditPanel(panel)}
-                                  className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
-                                  aria-label="Edit panel"
-                                >
-                                  <Edit2 className="h-4 w-4" />
-                                </button>
-                                {hasRole([
+                  <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
+  {/* ── Left Panel: Company List ── */}
+  <div className={`${selectedPanelCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
+    <div className="flex-1 overflow-y-auto">
+      <div className="divide-y divide-[var(--border-subtle)]">
+        {[{ id: 'unassigned', name: 'Unassigned', description: 'Panels without a company' }, ...filteredCompanies].map((company) => {
+          const isUnassigned = company.id === 'unassigned';
+          const isSelected = selectedPanelCompanyId === company.id;
+          const panelCount = isUnassigned 
+            ? filteredPanels.filter(p => !p.companyId).length 
+            : filteredPanels.filter(p => p.companyId === company.id).length;
+          
+          return (
+            <button
+              key={company.id}
+              onClick={() => setSelectedPanelCompanyId(company.id)}
+              className={`w-full flex items-center gap-2.5 px-3 sm:px-4 py-2.5 text-left transition-colors group ${
+                isSelected
+                  ? 'bg-[var(--surface-hover)] border-l-2 border-l-emerald-500'
+                  : 'hover:bg-[var(--surface-hover)] border-l-2 border-l-transparent'
+              }`}
+            >
+              <div
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[12px] font-medium text-[var(--text-on-accent)] shadow-sm"
+                style={{ backgroundColor: isUnassigned ? '#64748b' : getAvatarColor(company.name) }}
+              >
+                {isUnassigned ? <Cpu className="h-3.5 w-3.5 text-white" /> : company.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-[12px] font-semibold text-[var(--text-primary)] truncate">
+                    {company.name}
+                  </span>
+                </div>
+                <p className="text-[10px] text-[var(--text-secondary)] truncate mt-0.5">
+                  {company.description || "No description"}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="flex items-center gap-1 text-[9px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
+                  <Cpu className="h-[9px] w-[9px]" />
+                  {panelCount}
+                </span>
+                <ChevronRight className="h-3 w-3 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity md:block hidden" />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+
+  {/* ── Right Panel: Company Detail & Branches ── */}
+  <div className={`${selectedPanelCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
+    {(() => {
+      if (!selectedPanelCompanyId) {
+        return (
+          <div className="flex-1 flex items-center justify-center p-8">
+            <div className="text-center">
+              <Cpu className="mx-auto h-12 w-12 text-[var(--text-secondary)] opacity-30 mb-3" />
+              <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select a company</p>
+              <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose a company from the list to view its panels</p>
+            </div>
+          </div>
+        );
+      }
+
+      const isUnassigned = selectedPanelCompanyId === 'unassigned';
+      const selectedCompany = isUnassigned 
+        ? { id: 'unassigned', name: 'Unassigned', description: 'Panels without a company' } 
+        : companies.find(c => c.id === selectedPanelCompanyId);
+      
+      if (!selectedCompany) return null;
+
+      const companyPanels = isUnassigned 
+        ? filteredPanels.filter(p => !p.companyId)
+        : filteredPanels.filter(p => p.companyId === selectedCompany.id);
+
+      const companyBranches = isUnassigned ? [] : branches.filter(b => b.companyId === selectedCompany.id);
+      
+      const renderPanelBtn = (panel: Panel) => {
+        const isAlarm = panel.zones?.some((z) => z);
+        const statusColor = isAlarm ? "bg-[var(--color-error)]" : "bg-[var(--color-success)]";
+        return (
+          <button
+            key={panel.serial || Math.random().toString()}
+            onClick={() => openEditPanel(panel)}
+            className="flex items-center gap-2 p-2 rounded-[6px] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition-colors text-left group min-w-0"
+          >
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] bg-[var(--surface-muted)] border border-[var(--border-subtle)]">
+              <div className={`h-[6px] w-[6px] rounded-full ${statusColor} shadow-sm`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate">{panel.name || "Unknown Panel"}</p>
+              <p className="text-[9px] text-[var(--text-secondary)] truncate">S/N: {panel.serial}</p>
+            </div>
+            {panel.serial && hasRole([
                                   "super_admin",
                                   "head_office",
                                   "system_integrator",
                                 ]) && (
-                                  <button
-                                    onClick={() => handleDeletePanel(panel.serial)}
-                                    className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
-                                    aria-label="Delete panel"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                            <div>
-                              <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 truncate">
-                                {panel.name || "Unknown Panel"}
-                              </h3>
-                              <p className="text-[13px] text-[var(--text-secondary)] line-clamp-2 min-h-[39px]">
-                                Last active: {getPanelHeartbeat(panel.serial)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-[var(--surface-base)] px-5 py-3 w-full">
-                            <div className="flex items-center gap-2 overflow-hidden">
-                              <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
-                                Serial
-                              </span>
-                              <span className="font-mono truncate text-[11px] text-[var(--text-primary)]">
-                                {panel.serial || "No serial"}
-                              </span>
-                            </div>
-                            <CopyButton
-                              textToCopy={panel.serial}
-                              className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
-                              title="Copy Serial"
-                              onCopy={() => {
-                                setSuccess("ID copied to clipboard");
-                                setTimeout(() => setSuccess(null), 3000);
-                              }}
-                            />
-                          </div>
+              <div
+                onClick={(e) => { e.stopPropagation(); handleDeletePanel(panel.serial); }}
+                className="h-5 w-5 flex items-center justify-center rounded text-[var(--color-error)] opacity-0 group-hover:opacity-100 hover:bg-[var(--status-danger-bg)] transition-all shrink-0"
+              >
+                <Trash2 className="h-3 w-3" />
+              </div>
+            )}
+          </button>
+        );
+      };
+
+      return (
+        <div className="flex-1 overflow-y-auto">
+          {/* Header */}
+          <div className="px-3 sm:px-5 pt-3 pb-2.5 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)] sticky top-0 z-10">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedPanelCompanyId(null)}
+                className="flex md:hidden h-6 w-6 shrink-0 items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+              <div
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[14px] font-semibold text-[var(--text-on-accent)] shadow-sm"
+                style={{ backgroundColor: isUnassigned ? '#64748b' : getAvatarColor(selectedCompany.name) }}
+              >
+                {isUnassigned ? <Cpu className="h-4 w-4 text-white" /> : selectedCompany.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-[14px] font-bold text-[var(--text-primary)] truncate">{selectedCompany.name}</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 truncate">{companyPanels.length} total panels</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="px-3 sm:px-5 py-3">
+            {isUnassigned ? (
+               <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                 {companyPanels.map(renderPanelBtn)}
+                 {companyPanels.length === 0 && (
+                   <p className="text-[12px] text-[var(--text-secondary)] col-span-full text-center py-4">No unassigned panels.</p>
+                 )}
+               </div>
+            ) : (
+              <div className="space-y-4">
+                {companyBranches.map(branch => {
+                  const assignedPanels = companyPanels.filter(p => p.branchId === branch.id);
+                  
+                  return (
+                    <div key={branch.id} className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
+                      <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                          <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">{branch.name}</h4>
                         </div>
-                      );
-                    })}
-                    {filteredPanels.length === 0 && (
-                      <div className="col-span-full rounded-[10px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 text-center text-[13px] text-[var(--text-secondary)]">
-                        {(panels || []).filter(Boolean).length === 0
-                          ? "No panels provisioned yet."
-                          : "No panels match your search."}
+                        <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
+                          {assignedPanels.length} panels
+                        </span>
                       </div>
-                    )}
-                  </div>
+                      <div className="p-3">
+                        {assignedPanels.length === 0 ? (
+                          <p className="text-[11px] text-[var(--text-secondary)] text-center py-2">No panels assigned to this branch.</p>
+                        ) : (
+                          <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                            {assignedPanels.map(renderPanelBtn)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+                {(() => {
+                  const noBranchPanels = companyPanels.filter(p => !p.branchId);
+                  if (noBranchPanels.length === 0) return null;
+                  
+                  return (
+                    <div className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
+                      <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-3.5 w-3.5 text-amber-400" />
+                          <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">Company Level (No Branch)</h4>
+                        </div>
+                        <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
+                          {noBranchPanels.length} panels
+                        </span>
+                      </div>
+                      <div className="p-3">
+                        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+                          {noBranchPanels.map(renderPanelBtn)}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
+                {companyBranches.length === 0 && companyPanels.length === 0 && (
+                   <p className="text-[12px] text-[var(--text-secondary)] text-center py-4">No branches or panels in this company.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    })()}
+  </div>
+</div>
                 )}
               </div>
             </div>
