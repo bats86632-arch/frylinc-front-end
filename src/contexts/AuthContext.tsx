@@ -171,6 +171,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = async (data: ProfileUpdateData) => {
+    // Optimistic UI update to ensure instantaneous rendering before API responds
+    setUserData((prev) => (prev ? { ...prev, ...data } : null));
     await apiClient.patch("/me/profile", data);
     await refreshUserData();
   };

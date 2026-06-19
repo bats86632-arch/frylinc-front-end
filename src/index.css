@@ -188,12 +188,12 @@ body {
 .theme-transition *,
 .theme-transition *::before,
 .theme-transition *::after {
-    transition: background-color 300ms var(--ease-smooth),
-                color 300ms var(--ease-smooth),
-                border-color 300ms var(--ease-smooth),
-                fill 300ms var(--ease-smooth),
-                stroke 300ms var(--ease-smooth),
-                box-shadow 300ms var(--ease-smooth) !important;
+    transition: background-color 50ms var(--ease-smooth),
+                color 50ms var(--ease-smooth),
+                border-color 50ms var(--ease-smooth),
+                fill 50ms var(--ease-smooth),
+                stroke 50ms var(--ease-smooth),
+                box-shadow 50ms var(--ease-smooth) !important;
     transition-delay: 0s !important;
 }
 
