@@ -212,6 +212,7 @@ export function AdminSettings() {
   const watchedUserCompanyId = watchUser("companyId") || "";
   const watchedUserBranchIds = watchUser("branchIds") || "";
   const watchedEditUserBranchIds = watchEditUser("branchIds") || "";
+  const watchedEditUserCompanyId = watchEditUser("companyId") || "";
 
   // Helper: get branches filtered by company, or all if no company specified
   const getBranchesForCompany = (companyId: string): Branch[] => {
@@ -896,6 +897,84 @@ export function AdminSettings() {
                   </div>
                 )}
 
+                {/* Company edit form */}
+                {editingCompanyData && (
+                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
+                    <div className="mb-6 flex items-center justify-between">
+                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
+                        Edit Company
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCompanyData(null);
+                          resetEditCompany();
+                        }}
+                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                      >
+                        <XCircle className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={handleSubmitEditCompany(handleEditCompany)}
+                      className="space-y-5"
+                    >
+                      <div>
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          Company Name
+                        </label>
+                        <input
+                          {...registerEditCompany("name")}
+                          placeholder="e.g. Acme Corp"
+                          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                          disabled={editCompanyFormLoading}
+                        />
+                        {editCompanyErrors.name && (
+                          <p className="mt-1 text-[12px] text-red-400">
+                            {editCompanyErrors.name.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          Description
+                        </label>
+                        <textarea
+                          {...registerEditCompany("description")}
+                          className="control-field w-full rounded-[6px] px-3 py-2 text-[13px] resize-none"
+                          rows={3}
+                          disabled={editCompanyFormLoading}
+                          placeholder="Optional details about this company"
+                        />
+                        {editCompanyErrors.description && (
+                          <p className="mt-1 text-[12px] text-red-400">
+                            {editCompanyErrors.description.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={editCompanyFormLoading}
+                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                        >
+                          {editCompanyFormLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Updating...
+                            </>
+                          ) : (
+                            "Update Company"
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
                 {companiesLoading ? (
                   <div className="flex justify-center py-6">
                     <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
@@ -1261,6 +1340,225 @@ export function AdminSettings() {
                   </div>
                 )}
 
+                {/* User edit form */}
+                {editingUserData && (
+                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
+                    <div className="mb-6 flex items-center justify-between">
+                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
+                        Edit User
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingUserData(null);
+                          resetEditUser();
+                        }}
+                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                      >
+                        <XCircle className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={handleSubmitEditUser(handleEditUser)}
+                      className="space-y-5"
+                    >
+                      <div>
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          Display Name
+                        </label>
+                        <input
+                          {...registerEditUser("displayName")}
+                          placeholder="Full name"
+                          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                          disabled={editUserFormLoading}
+                        />
+                        {editUserErrors.displayName && (
+                          <p className="mt-1 text-[12px] text-red-400">
+                            {editUserErrors.displayName.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid gap-5 md:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                            Email
+                          </label>
+                          <input
+                            {...registerEditUser("email")}
+                            placeholder="user@example.com"
+                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                            disabled={editUserFormLoading}
+                          />
+                          {editUserErrors.email && (
+                            <p className="mt-1 text-[12px] text-red-400">
+                              {editUserErrors.email.message}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                            Password (leave blank to keep current)
+                          </label>
+                          <input
+                            {...registerEditUser("password")}
+                            type="password"
+                            placeholder="New password (optional)"
+                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                            disabled={editUserFormLoading}
+                          />
+                          {editUserErrors.password && (
+                            <p className="mt-1 text-[12px] text-red-400">
+                              {editUserErrors.password.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-5 md:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                            Role
+                          </label>
+                          <select
+                            {...registerEditUser("role")}
+                            className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                            disabled={editUserFormLoading}
+                          >
+                            <option value="end_user">End User</option>
+                            {hasRole(["super_admin", "head_office"]) && (
+                              <option value="system_integrator">
+                                System Integrator
+                              </option>
+                            )}
+                            {hasRole(["super_admin"]) && (
+                              <option value="head_office">Head Office</option>
+                            )}
+                            {hasRole(["super_admin"]) && (
+                              <option value="super_admin">Super Admin</option>
+                            )}
+                          </select>
+                        </div>
+                        {hasRole(["super_admin"]) && (
+                          <div>
+                            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                              Company
+                            </label>
+                            <select
+                              {...registerEditUser("companyId")}
+                              className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                              disabled={editUserFormLoading || companiesLoading}
+                            >
+                              <option value="">— Select a company —</option>
+                              {companies.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  {c.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          Branch Access
+                        </label>
+                        {branchesLoading ? (
+                          <p className="text-[12px] text-[var(--text-secondary)]">
+                            Loading branches...
+                          </p>
+                        ) : branches.length === 0 ? (
+                          <p className="text-[11px] text-[var(--text-secondary)]">
+                            No branches available.
+                          </p>
+                        ) : (
+                          <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-2">
+                            {getBranchesForCompany(watchedEditUserCompanyId).map(
+                              (branch) => {
+                                const currentIds = (watchedEditUserBranchIds || "")
+                                  .split(",")
+                                  .map((s) => s.trim())
+                                  .filter(Boolean);
+                                const isChecked = currentIds.includes(
+                                  branch.id,
+                                );
+                                return (
+                                  <label
+                                    key={branch.id}
+                                    className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-[var(--surface-hover)]"
+                                    style={{
+                                      opacity: editUserFormLoading ? 0.5 : 1,
+                                    }}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      disabled={editUserFormLoading}
+                                      onChange={(e) => {
+                                        const prev = (
+                                          watchedEditUserBranchIds || ""
+                                        )
+                                          .split(",")
+                                          .map((s) => s.trim())
+                                          .filter(Boolean);
+                                        const next = e.target.checked
+                                          ? [...prev, branch.id]
+                                          : prev.filter(
+                                              (id) => id !== branch.id,
+                                            );
+                                        setEditUserValue(
+                                          "branchIds",
+                                          next.join(", "),
+                                        );
+                                      }}
+                                      className="h-4 w-4 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
+                                    />
+                                    <span className="text-[13px] text-[var(--text-primary)]">
+                                      {branch.name}
+                                    </span>
+                                    <span className="ml-auto font-mono text-[10px] text-[var(--text-secondary)] flex items-center gap-1.5">
+                                      {branch.id.slice(0, 8)}…
+                                      <button
+                                        onClick={(e) =>
+                                          handleCopyId(e, branch.id)
+                                        }
+                                        className="hover:text-[var(--text-primary)] transition-colors"
+                                        title="Copy full ID"
+                                      >
+                                        <Copy className="h-3 w-3" />
+                                      </button>
+                                    </span>
+                                  </label>
+                                );
+                              },
+                            )}
+                          </div>
+                        )}
+                        <input type="hidden" {...registerEditUser("branchIds")} />
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={editUserFormLoading}
+                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                        >
+                          {editUserFormLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Updating...
+                            </>
+                          ) : (
+                            "Update User"
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
                 {usersLoading ? (
                   <div className="flex justify-center py-6">
                     <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
@@ -1584,6 +1882,165 @@ export function AdminSettings() {
                             </>
                           ) : (
                             "Create Panel"
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                {/* Panel edit form */}
+                {editingPanelData && (
+                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
+                    <div className="mb-6 flex items-center justify-between">
+                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
+                        Edit Panel
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingPanelData(null);
+                          resetEditPanel();
+                        }}
+                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                      >
+                        <XCircle className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={handleSubmitEditPanel(handleEditPanel)}
+                      className="space-y-5"
+                    >
+                      <div>
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          Serial Number
+                        </label>
+                        <input
+                          {...registerEditPanel("serial")}
+                          className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                            editPanelErrors.serial ? "border-red-400/70" : ""
+                          }`}
+                          placeholder="e.g., FP-2024-001"
+                          disabled={true} 
+                        />
+                        {editPanelErrors.serial && (
+                          <p className="mt-1 text-[12px] text-red-400">
+                            {editPanelErrors.serial.message}
+                          </p>
+                        )}
+                        <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
+                          Serial numbers cannot be modified after creation.
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          Panel Name
+                        </label>
+                        <input
+                          {...registerEditPanel("name")}
+                          className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                            editPanelErrors.name ? "border-red-400/70" : ""
+                          }`}
+                          placeholder="e.g., Building A - Floor 1"
+                          disabled={editPanelFormLoading}
+                        />
+                        {editPanelErrors.name && (
+                          <p className="mt-1 text-[12px] text-red-400">
+                            {editPanelErrors.name.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                            Company
+                          </label>
+                          <select
+                            {...registerEditPanel("companyId")}
+                            className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                              editPanelErrors.companyId ? "border-red-400/70" : ""
+                            }`}
+                            disabled={editPanelFormLoading || companiesLoading}
+                          >
+                            <option value="">— Select a company —</option>
+                            {companies.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
+                          {editPanelErrors.companyId && (
+                            <p className="mt-1 text-[12px] text-red-400">
+                              {editPanelErrors.companyId.message}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                            Branch
+                          </label>
+                          <select
+                            {...registerEditPanel("branchId")}
+                            className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                              editPanelErrors.branchId ? "border-red-400/70" : ""
+                            }`}
+                            disabled={editPanelFormLoading || branchesLoading}
+                          >
+                            <option value="">— Select a branch —</option>
+                            {getBranchesForCompany(watchedEditPanelCompanyId).map((b) => (
+                              <option key={b.id} value={b.id}>
+                                {b.name}
+                              </option>
+                            ))}
+                          </select>
+                          {editPanelErrors.branchId && (
+                            <p className="mt-1 text-[12px] text-red-400">
+                              {editPanelErrors.branchId.message}
+                            </p>
+                          )}
+                          {!watchedEditPanelCompanyId && (
+                            <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
+                              Enter a Company ID above to filter branches
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          IP Address (Default is autofilled)
+                        </label>
+                        <input
+                          {...registerEditPanel("ipAddress")}
+                          className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                            editPanelErrors.ipAddress ? "border-red-400/70" : ""
+                          }`}
+                          placeholder="e.g., 72.167.225.142"
+                          disabled={editPanelFormLoading}
+                        />
+                        {editPanelErrors.ipAddress && (
+                          <p className="mt-1 text-[12px] text-red-400">
+                            {editPanelErrors.ipAddress.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex justify-end pt-2">
+                        <button
+                          type="submit"
+                          disabled={editPanelFormLoading}
+                          className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                        >
+                          {editPanelFormLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Updating...
+                            </>
+                          ) : (
+                            "Update Panel"
                           )}
                         </button>
                       </div>
