@@ -36,6 +36,8 @@ import {
   ChevronLeft,
   MapPin,
   ChevronRight,
+  ShieldAlert,
+  Building,
 } from "lucide-react";
 import { CopyButton } from "../components/CopyButton";
 
@@ -228,12 +230,14 @@ export function AdminSettings() {
   const { branches, loading: branchesLoading, reloadBranches } = useBranches();
 
   // Watch form values for dependent dropdowns
-  const watchedPanelCompanyId = watch("companyId");
-  const watchedEditPanelCompanyId = watchEditPanel("companyId");
-  const watchedUserCompanyId = watchUser("companyId") || "";
-  const watchedUserBranchIds = watchUser("branchIds") || "";
-  const watchedEditUserBranchIds = watchEditUser("branchIds") || "";
-  const watchedEditUserCompanyId = watchEditUser("companyId") || "";
+    const watchedPanelCompanyId = watch("companyId");
+    const watchedEditPanelCompanyId = watchEditPanel("companyId");
+    const watchedUserCompanyId = watchUser("companyId") || "";
+    const watchedUserBranchIds = watchUser("branchIds") || "";
+    const watchedUserRole = watchUser("role");
+    const watchedEditUserRole = watchEditUser("role");
+    const watchedEditUserBranchIds = watchEditUser("branchIds") || "";
+    const watchedEditUserCompanyId = watchEditUser("companyId") || "";
 
   // Helper: get branches filtered by company, or all if no company specified
   const getBranchesForCompany = (companyId: string): Branch[] => {
@@ -511,22 +515,41 @@ export function AdminSettings() {
     setUserFormLoading(true);
     setError(null);
     try {
-      const branchIds = data.branchIds
-        ? data.branchIds
-            .split(",")
-            .map((id) => id.trim())
-            .filter(Boolean)
+      let finalCompanyId: string | undefined = data.companyId;
+      let finalBranchIds: string[] = data.branchIds
+        ? data.branchIds.split(",").map((id) => id.trim()).filter(Boolean)
         : [];
+      let finalAssignments: Record<string, string[]> | undefined = undefined;
+
+      if (data.role === "super_admin") {
+        finalCompanyId = undefined;
+        finalBranchIds = [];
+      } else if (data.role === "head_office") {
+        finalBranchIds = [];
+      } else if (data.role === "system_integrator") {
+        finalAssignments = userAssignments;
+        const firstCompany = Object.keys(userAssignments)[0];
+        if (firstCompany) {
+          finalCompanyId = firstCompany;
+          finalBranchIds = userAssignments[firstCompany];
+        } else {
+          finalCompanyId = undefined;
+          finalBranchIds = [];
+        }
+      }
+
       await UserService.createUser({
         displayName: data.displayName,
         email: data.email,
         password: data.password,
         role: data.role,
-        companyId: data.companyId,
-        branchIds,
+        companyId: finalCompanyId,
+        branchIds: finalBranchIds,
+        assignments: finalAssignments,
       });
       setUserFormOpen(false);
       resetUser();
+      setUserAssignments({});
       await loadUsers();
       setSuccess("User created successfully");
       setTimeout(() => setSuccess(null), 3000);
@@ -542,22 +565,41 @@ export function AdminSettings() {
     setEditUserFormLoading(true);
     setError(null);
     try {
-      const branchIds = data.branchIds
-        ? data.branchIds
-            .split(",")
-            .map((id) => id.trim())
-            .filter(Boolean)
+      let finalCompanyId: string | undefined = data.companyId;
+      let finalBranchIds: string[] = data.branchIds
+        ? data.branchIds.split(",").map((id) => id.trim()).filter(Boolean)
         : [];
+      let finalAssignments: Record<string, string[]> | undefined = undefined;
+
+      if (data.role === "super_admin") {
+        finalCompanyId = undefined;
+        finalBranchIds = [];
+      } else if (data.role === "head_office") {
+        finalBranchIds = [];
+      } else if (data.role === "system_integrator") {
+        finalAssignments = userAssignments;
+        const firstCompany = Object.keys(userAssignments)[0];
+        if (firstCompany) {
+          finalCompanyId = firstCompany;
+          finalBranchIds = userAssignments[firstCompany];
+        } else {
+          finalCompanyId = undefined;
+          finalBranchIds = [];
+        }
+      }
+
       await UserService.updateUser(editingUserData.uid, {
         displayName: data.displayName,
         email: data.email,
         password: data.password || undefined,
         role: data.role,
-        companyId: data.companyId,
-        branchIds,
+        companyId: finalCompanyId,
+        branchIds: finalBranchIds,
+        assignments: finalAssignments,
       });
       setEditingUserData(null);
       resetEditUser();
+      setUserAssignments({});
       await loadUsers();
       setSuccess("User updated successfully");
       setTimeout(() => setSuccess(null), 3000);
@@ -581,6 +623,7 @@ export function AdminSettings() {
         : String(user.branchIds || ""),
     );
     setEditUserValue("password", "");
+    setUserAssignments(user.assignments || {});
   };
 
   const handleCreatePanel = async (data: PanelFormData) => {
@@ -663,6 +706,191 @@ export function AdminSettings() {
       (p.serial || "").toLowerCase().includes(panelSearchQuery.toLowerCase()) ||
       (p.ipAddress || "").toLowerCase().includes(panelSearchQuery.toLowerCase())
   );
+
+  const renderUserAssignmentsUI = (
+    watchedRole: Role | undefined,
+    watchedCompanyId: string,
+    watchedBranchIds: string,
+    registerFn: any,
+    setValueFn: any,
+    formLoading: boolean,
+    isEdit: boolean
+  ) => {
+    return (
+      <>
+        {watchedRole === 'super_admin' && (
+          <div className="md:col-span-2">
+            <div className="rounded-[6px] bg-[var(--surface-hover)] border border-[var(--border-subtle)] p-3 flex items-start gap-2.5">
+              <ShieldAlert className="h-4 w-4 text-orange-500 mt-0.5" />
+              <p className="text-[12px] text-[var(--text-secondary)]">
+                Super Admins have unrestricted global access to all companies, branches, and panels.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {watchedRole !== 'super_admin' && watchedRole !== 'system_integrator' && hasRole(['super_admin']) && (
+          <div>
+            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+              Company
+            </label>
+            <select
+              {...registerFn('companyId')}
+              className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+              disabled={formLoading || companiesLoading}
+            >
+              <option value="">— Select a company —</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {watchedRole === 'head_office' && (
+          <div className="md:col-span-2">
+            <div className="rounded-[6px] bg-[var(--surface-hover)] border border-[var(--border-subtle)] p-3 flex items-start gap-2.5">
+              <Building className="h-4 w-4 text-blue-500 mt-0.5" />
+              <p className="text-[12px] text-[var(--text-secondary)]">
+                Head Office personnel automatically receive access to all branches within their assigned company.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {watchedRole === 'end_user' && (
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+              Branch Access
+            </label>
+            {branchesLoading ? (
+              <p className="text-[12px] text-[var(--text-secondary)]">Loading branches...</p>
+            ) : branches.length === 0 ? (
+              <p className="text-[11px] text-[var(--text-secondary)]">No branches available.</p>
+            ) : (
+              <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-2">
+                {getBranchesForCompany(watchedCompanyId).map((branch) => {
+                  const currentIds = (watchedBranchIds || '').split(',').map((s) => s.trim()).filter(Boolean);
+                  const isChecked = currentIds.includes(branch.id);
+                  return (
+                    <label key={branch.id} className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-[var(--surface-hover)]" style={{ opacity: formLoading ? 0.5 : 1 }}>
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        disabled={formLoading}
+                        onChange={(e) => {
+                          const prev = (watchedBranchIds || '').split(',').map((s) => s.trim()).filter(Boolean);
+                          const next = e.target.checked ? [...prev, branch.id] : prev.filter((id) => id !== branch.id);
+                          setValueFn('branchIds', next.join(', '));
+                        }}
+                        className="h-4 w-4 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
+                      />
+                      <span className="text-[13px] text-[var(--text-primary)]">{branch.name}</span>
+                      <span className="ml-auto font-mono text-[10px] text-[var(--text-secondary)] flex items-center gap-1.5">
+                        {branch.id.slice(0, 8)}…
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {watchedRole === 'system_integrator' && (
+          <div className="md:col-span-2 space-y-3">
+            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+              System Integrator Assignments
+            </label>
+            <div className="rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-3">
+              <div className="flex gap-2 mb-4">
+                <select 
+                  id={isEdit ? 'si-edit-company-select' : 'si-company-select'}
+                  className="control-field flex-1 rounded-[6px] px-3 h-[32px] text-[12px]"
+                >
+                  <option value="">— Add a Company —</option>
+                  {companies.map((c) => (
+                    <option key={c.id} value={c.id} disabled={!!userAssignments[c.id]}>{c.name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const select = document.getElementById(isEdit ? 'si-edit-company-select' : 'si-company-select') as HTMLSelectElement;
+                    if (select && select.value && !userAssignments[select.value]) {
+                      setUserAssignments(prev => ({ ...prev, [select.value]: [] }));
+                      select.value = '';
+                    }
+                  }}
+                  className="h-[32px] px-3 bg-[var(--surface-hover)] border border-[var(--border-subtle)] rounded-[6px] text-[12px] font-medium text-[var(--text-primary)] hover:bg-[var(--surface-overlay)] transition-colors"
+                >
+                  Add
+                </button>
+              </div>
+              
+              {Object.keys(userAssignments).length === 0 ? (
+                <p className="text-[11px] text-[var(--text-secondary)] text-center py-2">No companies assigned yet.</p>
+              ) : (
+                <div className="space-y-4">
+                  {Object.entries(userAssignments).map(([compId, assignedBranchIds]) => {
+                    const company = companies.find(c => c.id === compId);
+                    const compBranches = getBranchesForCompany(compId);
+                    return (
+                      <div key={compId} className="border border-[var(--border-subtle)] rounded-[6px] overflow-hidden">
+                        <div className="bg-[var(--surface-hover)] px-3 py-2 flex items-center justify-between border-b border-[var(--border-subtle)]">
+                          <span className="text-[12px] font-semibold text-[var(--text-primary)]">{company?.name || compId}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const next = { ...userAssignments };
+                              delete next[compId];
+                              setUserAssignments(next);
+                            }}
+                            className="text-[var(--text-secondary)] hover:text-red-500 transition-colors"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <div className="p-2 space-y-1 max-h-[120px] overflow-y-auto bg-[var(--surface-base)]">
+                          {compBranches.length === 0 ? (
+                            <p className="text-[10px] text-[var(--text-secondary)] px-1">No branches found.</p>
+                          ) : (
+                            compBranches.map(b => (
+                              <label key={b.id} className="flex cursor-pointer items-center gap-2 rounded-[4px] px-2 py-1 hover:bg-[var(--surface-hover)]">
+                                <input
+                                  type="checkbox"
+                                  checked={assignedBranchIds.includes(b.id)}
+                                  onChange={(e) => {
+                                    setUserAssignments(prev => {
+                                      const next = { ...prev };
+                                      if (e.target.checked) {
+                                        next[compId] = [...(next[compId] || []), b.id];
+                                      } else {
+                                        next[compId] = (next[compId] || []).filter(id => id !== b.id);
+                                      }
+                                      return next;
+                                    });
+                                  }}
+                                  className="h-3.5 w-3.5 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
+                                />
+                                <span className="text-[11px] text-[var(--text-primary)]">{b.name}</span>
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
 
   return (
     <div className="animate-fade-in p-4 sm:p-5 max-w-5xl mx-auto">
