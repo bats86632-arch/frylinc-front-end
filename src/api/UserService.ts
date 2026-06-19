@@ -1,9 +1,9 @@
-import apiClient from './axios';
-import { User, Role } from '../types';
+import apiClient from "./axios";
+import { User, Role } from "../types";
 
 export const UserService = {
   async getUsers(): Promise<User[]> {
-    const response = await apiClient.get('/users');
+    const response = await apiClient.get("/users");
     return response.data.users;
   },
 
@@ -20,11 +20,14 @@ export const UserService = {
     companyId?: string;
     branchIds?: string[];
   }): Promise<User> {
-    const response = await apiClient.post('/users', data);
+    const response = await apiClient.post("/users", data);
     return response.data.user;
   },
 
-  async updateUser(uid: string, data: Partial<User>): Promise<User> {
+  async updateUser(
+    uid: string,
+    data: Partial<User> & { password?: string },
+  ): Promise<User> {
     const response = await apiClient.patch(`/users/${uid}`, data);
     return response.data;
   },
@@ -38,8 +41,10 @@ export const UserService = {
     return response.data;
   },
 
-  async updateProfile(displayName: string): Promise<{ ok: boolean; uid: string; displayName: string }> {
-    const response = await apiClient.patch('/me/profile', { displayName });
+  async updateProfile(
+    displayName: string,
+  ): Promise<{ ok: boolean; uid: string; displayName: string }> {
+    const response = await apiClient.patch("/me/profile", { displayName });
     return response.data;
-  }
+  },
 };
