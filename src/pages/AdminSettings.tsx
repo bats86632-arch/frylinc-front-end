@@ -590,10 +590,10 @@ export function AdminSettings() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-[#7a7773]">Synced 12s ago</span>
+          <span className="text-[11px] text-[var(--text-secondary)]">Synced 12s ago</span>
           <button
             onClick={handleGlobalRefresh}
-            className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-white/[0.08] bg-transparent text-white/50 transition-all duration-150 hover:border-white/[0.15] hover:text-white"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--border-subtle)] bg-transparent text-white/50 transition-all duration-150 hover:border-white/[0.15] hover:text-white"
           >
             <RefreshCw
               className={`h-[18px] w-[18px] ${usersLoading || panelsLoading ? "animate-spin" : ""}`}
@@ -646,25 +646,25 @@ export function AdminSettings() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20">
                   <Building2 className="h-6 w-6 text-amber-400" />
                 </div>
-                <ArrowRight className="h-5 w-5 text-[#7a7773] transition-all duration-200 group-hover:text-[#f0ede8] group-hover:translate-x-1" />
+                <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
               </div>
-              <h3 className="text-[17px] font-bold text-[#f0ede8] mb-1.5">
+              <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
                 Company Management
               </h3>
-              <p className="text-[13px] text-[#7a7773] leading-relaxed mb-5">
+              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
                 Create, edit, and manage companies and their branch structures.
               </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
+              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
                 <div className="flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-40 animate-ping" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
                   </span>
-                  <span className="text-[13px] font-semibold text-[#f0ede8] tabular-nums">
+                  <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
                     {companiesLoading ? "—" : companies.length}
                   </span>
                 </div>
-                <span className="text-[12px] text-[#7a7773]">
+                <span className="text-[12px] text-[var(--text-secondary)]">
                   {companiesLoading ? "Loading…" : "companies registered"}
                 </span>
               </div>
@@ -683,25 +683,25 @@ export function AdminSettings() {
               <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-br from-sky-500/20 to-sky-600/10 border border-sky-500/20">
                 <Users className="h-6 w-6 text-sky-400" />
               </div>
-              <ArrowRight className="h-5 w-5 text-[#7a7773] transition-all duration-200 group-hover:text-[#f0ede8] group-hover:translate-x-1" />
+              <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
             </div>
-            <h3 className="text-[17px] font-bold text-[#f0ede8] mb-1.5">
+            <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
               User Management
             </h3>
-            <p className="text-[13px] text-[#7a7773] leading-relaxed mb-5">
+            <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
               Manage user accounts, assign roles, and configure branch access.
             </p>
-            <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
               <div className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-40 animate-ping" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-400" />
                 </span>
-                <span className="text-[13px] font-semibold text-[#f0ede8] tabular-nums">
+                <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
                   {usersLoading ? "—" : users.length}
                 </span>
               </div>
-              <span className="text-[12px] text-[#7a7773]">
+              <span className="text-[12px] text-[var(--text-secondary)]">
                 {usersLoading ? "Loading…" : "users active"}
               </span>
             </div>
@@ -719,25 +719,25 @@ export function AdminSettings() {
               <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20">
                 <Cpu className="h-6 w-6 text-emerald-400" />
               </div>
-              <ArrowRight className="h-5 w-5 text-[#7a7773] transition-all duration-200 group-hover:text-[#f0ede8] group-hover:translate-x-1" />
+              <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
             </div>
-            <h3 className="text-[17px] font-bold text-[#f0ede8] mb-1.5">
+            <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
               Panel Provisioning
             </h3>
-            <p className="text-[13px] text-[#7a7773] leading-relaxed mb-5">
+            <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
               Register new panels, assign them to branches, and track status.
             </p>
-            <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
               <div className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40 animate-ping" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                 </span>
-                <span className="text-[13px] font-semibold text-[#f0ede8] tabular-nums">
+                <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
                   {panelsLoading ? "—" : panels.length}
                 </span>
               </div>
-              <span className="text-[12px] text-[#7a7773]">
+              <span className="text-[12px] text-[var(--text-secondary)]">
                 {panelsLoading ? "Loading…" : `panels provisioned`}
               </span>
             </div>
@@ -753,19 +753,19 @@ export function AdminSettings() {
       {activeSection === "companies" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-md admin-overlay-backdrop"
+            className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
           <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[5vw] sm:top-[8vh] sm:bottom-[4vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
-              className="flex flex-col flex-1 min-h-0 bg-[#141412] rounded-t-[20px] sm:rounded-[20px] border border-white/[0.08] shadow-2xl overflow-hidden"
+              className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
               {/* Sticky header */}
-              <div className="shrink-0 flex items-center justify-between border-b border-white/[0.06] px-5 sm:px-7 py-4 bg-[#141412]">
+              <div className="shrink-0 flex items-center justify-between border-b border-[var(--border-subtle)] px-5 sm:px-7 py-4 bg-[var(--surface-overlay)]">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setActiveSection(null)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
@@ -773,13 +773,13 @@ export function AdminSettings() {
                     <Building2 className="h-4 w-4 text-amber-400" />
                   </div>
                   <div>
-                    <h2 className="text-[15px] font-bold text-[#f0ede8]">Company Management</h2>
-                    <p className="text-[11px] text-[#7a7773]">{!companiesLoading && `${companies.length} companies`}</p>
+                    <h2 className="text-[15px] font-bold text-[var(--text-primary)]">Company Management</h2>
+                    <p className="text-[11px] text-[var(--text-secondary)]">{!companiesLoading && `${companies.length} companies`}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="relative hidden sm:block">
-                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" />
                     <input
                       type="text"
                       placeholder="Search companies..."
@@ -790,14 +790,14 @@ export function AdminSettings() {
                   </div>
                   <button
                     onClick={() => setCompanyFormOpen(true)}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-white/[0.04]"
                   >
                     <Plus className="h-[14px] w-[14px]" />
                     Add
                   </button>
                   <button
                     onClick={() => setActiveSection(null)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -806,7 +806,7 @@ export function AdminSettings() {
               {/* Mobile search */}
               <div className="shrink-0 px-5 pt-3 pb-2 sm:hidden">
                 <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" />
                   <input
                     type="text"
                     placeholder="Search companies..."
@@ -820,9 +820,9 @@ export function AdminSettings() {
               <div className="flex-1 overflow-y-auto p-5 sm:p-7">
                 {/* Company creation form */}
                 {companyFormOpen && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-white/[0.06] p-6">
+                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
                     <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[#f0ede8]">
+                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
                         Create Company
                       </h3>
                       <button
@@ -831,7 +831,7 @@ export function AdminSettings() {
                           setCompanyFormOpen(false);
                           resetCompany();
                         }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] transition-all duration-200 ease-out hover:bg-white/[0.06] hover:text-[#f0ede8]"
+                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
                       >
                         <XCircle className="h-5 w-5" />
                       </button>
@@ -842,7 +842,7 @@ export function AdminSettings() {
                       className="space-y-5"
                     >
                       <div>
-                        <label className="mb-2 block text-[13px] text-[#7a7773]">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Company Name
                         </label>
                         <input
@@ -859,7 +859,7 @@ export function AdminSettings() {
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-[13px] text-[#7a7773]">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Description
                         </label>
                         <textarea
@@ -898,7 +898,7 @@ export function AdminSettings() {
 
                 {companiesLoading ? (
                   <div className="flex justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin text-[#f0ede8] opacity-50" />
+                    <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
                   </div>
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -918,7 +918,7 @@ export function AdminSettings() {
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={() => openEditCompany(company)}
-                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                                 aria-label="Edit company"
                               >
                                 <Edit2 className="h-4 w-4" />
@@ -933,26 +933,26 @@ export function AdminSettings() {
                             </div>
                           </div>
                           <div>
-                            <h3 className="text-[15px] font-bold text-[#f0ede8] mb-1 truncate">
+                            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 truncate">
                               {company.name}
                             </h3>
-                            <p className="text-[13px] text-[#7a7773] line-clamp-2 min-h-[39px]">
+                            <p className="text-[13px] text-[var(--text-secondary)] line-clamp-2 min-h-[39px]">
                               {company.description || "No description provided."}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between border-t border-white/[0.06] bg-white/[0.01] px-5 py-3 w-full">
+                        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-white/[0.01] px-5 py-3 w-full">
                           <div className="flex items-center gap-2 overflow-hidden">
-                            <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                            <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                               ID
                             </span>
-                            <span className="font-mono truncate text-[11px] text-[#f0ede8]">
+                            <span className="font-mono truncate text-[11px] text-[var(--text-primary)]">
                               {company.id}
                             </span>
                           </div>
                           <button
                             onClick={(e) => handleCopyId(e, company.id)}
-                            className="text-[#7a7773] shrink-0 ml-2 hover:text-white transition-colors"
+                            className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-white transition-colors"
                             title="Copy ID"
                           >
                             <Copy className="h-3.5 w-3.5" />
@@ -961,7 +961,7 @@ export function AdminSettings() {
                       </div>
                     ))}
                     {filteredCompanies.length === 0 && (
-                      <div className="col-span-full rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-6 text-center text-[13px] text-[#7a7773]">
+                      <div className="col-span-full rounded-[10px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 text-center text-[13px] text-[var(--text-secondary)]">
                         {companies.length === 0 ? "No companies found." : "No companies match your search."}
                       </div>
                     )}
@@ -977,19 +977,19 @@ export function AdminSettings() {
       {activeSection === "users" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-md admin-overlay-backdrop"
+            className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
           <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[5vw] sm:top-[8vh] sm:bottom-[4vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
-              className="flex flex-col flex-1 min-h-0 bg-[#141412] rounded-t-[20px] sm:rounded-[20px] border border-white/[0.08] shadow-2xl overflow-hidden"
+              className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
               {/* Sticky header */}
-              <div className="shrink-0 flex items-center justify-between border-b border-white/[0.06] px-5 sm:px-7 py-4 bg-[#141412]">
+              <div className="shrink-0 flex items-center justify-between border-b border-[var(--border-subtle)] px-5 sm:px-7 py-4 bg-[var(--surface-overlay)]">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setActiveSection(null)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
@@ -997,13 +997,13 @@ export function AdminSettings() {
                     <Users className="h-4 w-4 text-sky-400" />
                   </div>
                   <div>
-                    <h2 className="text-[15px] font-bold text-[#f0ede8]">User Management</h2>
-                    <p className="text-[11px] text-[#7a7773]">{!usersLoading && `${users.length} users`}</p>
+                    <h2 className="text-[15px] font-bold text-[var(--text-primary)]">User Management</h2>
+                    <p className="text-[11px] text-[var(--text-secondary)]">{!usersLoading && `${users.length} users`}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="relative hidden sm:block">
-                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" />
                     <input
                       type="text"
                       placeholder="Search users..."
@@ -1014,14 +1014,14 @@ export function AdminSettings() {
                   </div>
                   <button
                     onClick={() => setUserFormOpen(true)}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-white/[0.04]"
                   >
                     <Plus className="h-[14px] w-[14px]" />
                     Add
                   </button>
                   <button
                     onClick={() => setActiveSection(null)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -1030,7 +1030,7 @@ export function AdminSettings() {
               {/* Mobile search */}
               <div className="shrink-0 px-5 pt-3 pb-2 sm:hidden">
                 <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" />
                   <input
                     type="text"
                     placeholder="Search users..."
@@ -1044,9 +1044,9 @@ export function AdminSettings() {
               <div className="flex-1 overflow-y-auto p-5 sm:p-7">
                 {/* User creation form */}
                 {userFormOpen && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-white/[0.06] p-6">
+                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
                     <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[#f0ede8]">
+                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
                         Create User
                       </h3>
                       <button
@@ -1055,7 +1055,7 @@ export function AdminSettings() {
                           setUserFormOpen(false);
                           resetUser();
                         }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] transition-all duration-200 ease-out hover:bg-white/[0.06] hover:text-[#f0ede8]"
+                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
                       >
                         <XCircle className="h-5 w-5" />
                       </button>
@@ -1066,7 +1066,7 @@ export function AdminSettings() {
                       className="space-y-5"
                     >
                       <div>
-                        <label className="mb-2 block text-[13px] text-[#7a7773]">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Display Name
                         </label>
                         <input
@@ -1084,7 +1084,7 @@ export function AdminSettings() {
 
                       <div className="grid gap-5 md:grid-cols-2">
                         <div>
-                          <label className="mb-2 block text-[13px] text-[#7a7773]">
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                             Email
                           </label>
                           <input
@@ -1100,7 +1100,7 @@ export function AdminSettings() {
                           )}
                         </div>
                         <div>
-                          <label className="mb-2 block text-[13px] text-[#7a7773]">
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                             Password
                           </label>
                           <input
@@ -1120,7 +1120,7 @@ export function AdminSettings() {
 
                       <div className="grid gap-5 md:grid-cols-2">
                         <div>
-                          <label className="mb-2 block text-[13px] text-[#7a7773]">
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                             Role
                           </label>
                           <select
@@ -1144,7 +1144,7 @@ export function AdminSettings() {
                         </div>
                         {hasRole(["super_admin"]) && (
                           <div>
-                            <label className="mb-2 block text-[13px] text-[#7a7773]">
+                            <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                               Company
                             </label>
                             <select
@@ -1164,19 +1164,19 @@ export function AdminSettings() {
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-[13px] text-[#7a7773]">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Branch Access
                         </label>
                         {branchesLoading ? (
-                          <p className="text-[12px] text-[#7a7773]">
+                          <p className="text-[12px] text-[var(--text-secondary)]">
                             Loading branches...
                           </p>
                         ) : branches.length === 0 ? (
-                          <p className="text-[11px] text-[#7a7773]">
+                          <p className="text-[11px] text-[var(--text-secondary)]">
                             No branches available.
                           </p>
                         ) : (
-                          <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-white/[0.08] bg-[#0f0f0e] p-2">
+                          <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-[var(--border-subtle)] bg-[#0f0f0e] p-2">
                             {getBranchesForCompany(watchedUserCompanyId).map(
                               (branch) => {
                                 const currentIds = (watchedUserBranchIds || "")
@@ -1217,10 +1217,10 @@ export function AdminSettings() {
                                       }}
                                       className="h-4 w-4 rounded border-white/20 bg-white/5 accent-[#e53d3d]"
                                     />
-                                    <span className="text-[13px] text-[#f0ede8]">
+                                    <span className="text-[13px] text-[var(--text-primary)]">
                                       {branch.name}
                                     </span>
-                                    <span className="ml-auto font-mono text-[10px] text-[#7a7773] flex items-center gap-1.5">
+                                    <span className="ml-auto font-mono text-[10px] text-[var(--text-secondary)] flex items-center gap-1.5">
                                       {branch.id.slice(0, 8)}…
                                       <button
                                         onClick={(e) =>
@@ -1263,7 +1263,7 @@ export function AdminSettings() {
 
                 {usersLoading ? (
                   <div className="flex justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin text-[#f0ede8] opacity-50" />
+                    <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
                   </div>
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -1283,7 +1283,7 @@ export function AdminSettings() {
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={() => openEditUser(user)}
-                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                                 aria-label="Edit user"
                               >
                                 <Edit2 className="h-4 w-4" />
@@ -1298,20 +1298,20 @@ export function AdminSettings() {
                             </div>
                           </div>
                           <div>
-                            <h3 className="text-[15px] font-bold text-[#f0ede8] mb-1 truncate">
+                            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 truncate">
                               {user.displayName || "Unknown User"}
                             </h3>
-                            <p className="text-[13px] text-[#7a7773] truncate">
+                            <p className="text-[13px] text-[var(--text-secondary)] truncate">
                               {user.email || "No email provided."}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between border-t border-white/[0.06] bg-white/[0.01] px-5 py-3 w-full">
+                        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-white/[0.01] px-5 py-3 w-full">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                               Role
                             </span>
-                            <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#f0ede8]">
+                            <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-primary)]">
                               {roleLabels[user.role as Role] || "User"}
                             </span>
                           </div>
@@ -1319,7 +1319,7 @@ export function AdminSettings() {
                       </div>
                     ))}
                     {filteredUsers.length === 0 && (
-                      <div className="col-span-full rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-6 text-center text-[13px] text-[#7a7773]">
+                      <div className="col-span-full rounded-[10px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 text-center text-[13px] text-[var(--text-secondary)]">
                         {users.length === 0 ? "No users found." : "No users match your search."}
                       </div>
                     )}
@@ -1335,19 +1335,19 @@ export function AdminSettings() {
       {activeSection === "panels" && (
         <div className="fixed inset-0 z-[200]">
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-md admin-overlay-backdrop"
+            className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
             onClick={() => setActiveSection(null)}
           />
           <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[5vw] sm:top-[8vh] sm:bottom-[4vh] z-[201] flex flex-col admin-overlay-drawer">
             <div
-              className="flex flex-col flex-1 min-h-0 bg-[#141412] rounded-t-[20px] sm:rounded-[20px] border border-white/[0.08] shadow-2xl overflow-hidden"
+              className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden"
             >
               {/* Sticky header */}
-              <div className="shrink-0 flex items-center justify-between border-b border-white/[0.06] px-5 sm:px-7 py-4 bg-[#141412]">
+              <div className="shrink-0 flex items-center justify-between border-b border-[var(--border-subtle)] px-5 sm:px-7 py-4 bg-[var(--surface-overlay)]">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setActiveSection(null)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
@@ -1355,13 +1355,13 @@ export function AdminSettings() {
                     <Cpu className="h-4 w-4 text-emerald-400" />
                   </div>
                   <div>
-                    <h2 className="text-[15px] font-bold text-[#f0ede8]">Panel Provisioning</h2>
-                    <p className="text-[11px] text-[#7a7773]">{!panelsLoading && `${panels.length} panels`}</p>
+                    <h2 className="text-[15px] font-bold text-[var(--text-primary)]">Panel Provisioning</h2>
+                    <p className="text-[11px] text-[var(--text-secondary)]">{!panelsLoading && `${panels.length} panels`}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="relative hidden sm:block">
-                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+                    <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" />
                     <input
                       type="text"
                       placeholder="Search panels..."
@@ -1372,14 +1372,14 @@ export function AdminSettings() {
                   </div>
                   <button
                     onClick={() => setPanelFormOpen(true)}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-white/[0.08] bg-transparent px-[12px] text-[12px] text-[#f0ede8] transition-all hover:bg-white/[0.04]"
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-white/[0.04]"
                   >
                     <Plus className="h-[14px] w-[14px]" />
                     Add
                   </button>
                   <button
                     onClick={() => setActiveSection(null)}
-                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -1388,7 +1388,7 @@ export function AdminSettings() {
               {/* Mobile search */}
               <div className="shrink-0 px-5 pt-3 pb-2 sm:hidden">
                 <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#7a7773]" />
+                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" />
                   <input
                     type="text"
                     placeholder="Search panels..."
@@ -1402,9 +1402,9 @@ export function AdminSettings() {
               <div className="flex-1 overflow-y-auto p-5 sm:p-7">
                 {/* Panel Provisioning form */}
                 {panelFormOpen && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-white/[0.06] p-6">
+                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
                     <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[#f0ede8]">
+                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
                         Provision Panel
                       </h3>
                       <button
@@ -1413,7 +1413,7 @@ export function AdminSettings() {
                           setPanelFormOpen(false);
                           reset();
                         }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#7a7773] transition-all duration-200 ease-out hover:bg-white/[0.06] hover:text-[#f0ede8]"
+                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
                       >
                         <XCircle className="h-5 w-5" />
                       </button>
@@ -1424,7 +1424,7 @@ export function AdminSettings() {
                       className="space-y-5"
                     >
                       <div>
-                        <label className="mb-2 block text-[13px] text-[#7a7773]">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Serial Number
                         </label>
                         <input
@@ -1443,7 +1443,7 @@ export function AdminSettings() {
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-[13px] text-[#7a7773]">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Panel Name
                         </label>
                         <input
@@ -1462,7 +1462,7 @@ export function AdminSettings() {
                       </div>
 
                       <div>
-                        <label className="mb-2 block text-[13px] text-[#7a7773]">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Number of Zones (1-8)
                         </label>
                         <input
@@ -1485,7 +1485,7 @@ export function AdminSettings() {
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="mb-2 block text-[13px] text-[#7a7773]">
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                             Company
                           </label>
                           <select
@@ -1509,7 +1509,7 @@ export function AdminSettings() {
                           )}
                         </div>
                         <div>
-                          <label className="mb-2 block text-[13px] text-[#7a7773]">
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                             Branch
                           </label>
                           <select
@@ -1532,7 +1532,7 @@ export function AdminSettings() {
                             </p>
                           )}
                           {!watchedPanelCompanyId && (
-                            <p className="mt-1 text-[11px] text-[#7a7773]">
+                            <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
                               Enter a Company ID above to filter branches
                             </p>
                           )}
@@ -1540,7 +1540,7 @@ export function AdminSettings() {
                       </div>
 
                       <div className="mt-3">
-                        <label className="mb-2 block text-[13px] text-[#7a7773]">
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           IP Address (Default is autofilled)
                         </label>
                         <input
@@ -1580,7 +1580,7 @@ export function AdminSettings() {
 
                 {panelsLoading ? (
                   <div className="flex justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin text-[#f0ede8] opacity-50" />
+                    <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
                   </div>
                 ) : (
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -1602,7 +1602,7 @@ export function AdminSettings() {
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={() => openEditPanel(panel)}
-                                  className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[#7a7773] hover:bg-white/[0.06] hover:text-[#f0ede8] transition-colors"
+                                  className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
                                   aria-label="Edit panel"
                                 >
                                   <Edit2 className="h-4 w-4" />
@@ -1623,26 +1623,26 @@ export function AdminSettings() {
                               </div>
                             </div>
                             <div>
-                              <h3 className="text-[15px] font-bold text-[#f0ede8] mb-1 truncate">
+                              <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 truncate">
                                 {panel.name || "Unknown Panel"}
                               </h3>
-                              <p className="text-[13px] text-[#7a7773] truncate">
+                              <p className="text-[13px] text-[var(--text-secondary)] truncate">
                                 Last active: {getPanelHeartbeat(panel.serial)}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between border-t border-white/[0.06] bg-white/[0.01] px-5 py-3 w-full">
+                          <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-white/[0.01] px-5 py-3 w-full">
                             <div className="flex items-center gap-2 overflow-hidden">
-                              <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[#7a7773]">
+                              <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                                 Serial
                               </span>
-                              <span className="font-mono truncate text-[11px] text-[#f0ede8]">
+                              <span className="font-mono truncate text-[11px] text-[var(--text-primary)]">
                                 {panel.serial || "No serial"}
                               </span>
                             </div>
                             <button
                               onClick={(e) => handleCopyId(e, panel.serial)}
-                              className="text-[#7a7773] shrink-0 ml-2 hover:text-white transition-colors"
+                              className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-white transition-colors"
                               title="Copy Serial"
                             >
                               <Copy className="h-3.5 w-3.5" />
@@ -1652,7 +1652,7 @@ export function AdminSettings() {
                       );
                     })}
                     {filteredPanels.length === 0 && (
-                      <div className="col-span-full rounded-[10px] border border-white/[0.08] bg-[#1a1816] p-6 text-center text-[13px] text-[#7a7773]">
+                      <div className="col-span-full rounded-[10px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 text-center text-[13px] text-[var(--text-secondary)]">
                         {(panels || []).filter(Boolean).length === 0
                           ? "No panels provisioned yet."
                           : "No panels match your search."}
@@ -1669,9 +1669,9 @@ export function AdminSettings() {
       {/* 🛑 Delete Company Modal 🛑 */}
       {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[12px] border border-white/[0.08] bg-[#1a1917] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
-              <h3 className="text-[15px] font-medium text-[#f0ede8]">
+          <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4">
+              <h3 className="text-[15px] font-medium text-[var(--text-primary)]">
                 Delete Company
               </h3>
               <button
@@ -1681,12 +1681,12 @@ export function AdminSettings() {
                     isOpen: false,
                   }))
                 }
-                className="text-[#7a7773] hover:text-[#f0ede8] transition-colors"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="px-5 py-5 text-[13px] text-[#f0ede8]">
+            <div className="px-5 py-5 text-[13px] text-[var(--text-primary)]">
               {deleteCompanyModalState.step === 1 ? (
                 <>
                   <p className="mb-4">
@@ -1696,9 +1696,9 @@ export function AdminSettings() {
                     </span>
                     ?
                   </p>
-                  <p className="mb-4 text-[#7a7773]">
+                  <p className="mb-4 text-[var(--text-secondary)]">
                     There are{" "}
-                    <span className="text-[#f0ede8] font-medium">
+                    <span className="text-[var(--text-primary)] font-medium">
                       {
                         (panels || []).filter(
                           (p) =>
@@ -1711,7 +1711,7 @@ export function AdminSettings() {
                     deleted.
                   </p>
                   {deleteCompanyModalState.associatedUsers.length > 0 && (
-                    <div className="mt-4 border border-white/[0.08] rounded-[8px] p-4 bg-white/[0.02]">
+                    <div className="mt-4 border border-[var(--border-subtle)] rounded-[8px] p-4 bg-white/[0.02]">
                       <p className="mb-3 font-medium">Users</p>
                       <label className="flex items-start gap-3 cursor-pointer">
                         <input
@@ -1725,7 +1725,7 @@ export function AdminSettings() {
                             }))
                           }
                         />
-                        <span className="text-[#7a7773]">
+                        <span className="text-[var(--text-secondary)]">
                           Also delete all{" "}
                           {deleteCompanyModalState.associatedUsers.length} users
                           associated with this company.
@@ -1741,7 +1741,7 @@ export function AdminSettings() {
                           isOpen: false,
                         }))
                       }
-                      className="px-4 py-2 text-[13px] text-[#7a7773] hover:text-[#f0ede8] transition-colors"
+                      className="px-4 py-2 text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                     >
                       Cancel
                     </button>
@@ -1767,7 +1767,7 @@ export function AdminSettings() {
                   <p className="mb-4 text-red-400 font-medium">
                     Warning: The following users will be permanently deleted:
                   </p>
-                  <div className="max-h-[200px] overflow-y-auto mb-4 border border-white/[0.08] rounded-[6px] bg-white/[0.02]">
+                  <div className="max-h-[200px] overflow-y-auto mb-4 border border-[var(--border-subtle)] rounded-[6px] bg-white/[0.02]">
                     {deleteCompanyModalState.associatedUsers.map((u) => (
                       <div
                         key={u.uid}
@@ -1776,7 +1776,7 @@ export function AdminSettings() {
                         <div className="font-medium">
                           {u.displayName || "Unknown User"}
                         </div>
-                        <div className="text-[11px] text-[#7a7773]">
+                        <div className="text-[11px] text-[var(--text-secondary)]">
                           {u.email}
                         </div>
                       </div>
@@ -1793,7 +1793,7 @@ export function AdminSettings() {
                           step: 1,
                         }))
                       }
-                      className="px-4 py-2 text-[13px] text-[#7a7773] hover:text-[#f0ede8] transition-colors"
+                      className="px-4 py-2 text-[13px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                     >
                       Back
                     </button>
@@ -1813,3 +1813,4 @@ export function AdminSettings() {
     </div>
   );
 }
+
