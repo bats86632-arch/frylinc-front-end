@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Camera,
 } from "lucide-react";
+import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
