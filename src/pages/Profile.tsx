@@ -100,7 +100,21 @@ export function Profile() {
           storage,
           `user-photos/${currentUser.uid}/profile.jpg`,
         );
-        await uploadBytes(photoStorageRef, photoFile);
+        
+        try {
+          const imageCompression = (await import("browser-image-compression")).default;
+          const options = {
+            maxSizeMB: 0.2, // 200kb
+            maxWidthOrHeight: 800,
+            useWebWorker: true,
+          };
+          const compressedFile = await imageCompression(photoFile, options);
+          await uploadBytes(photoStorageRef, compressedFile);
+        } catch (error) {
+          console.error("Compression failed, uploading original:", error);
+          await uploadBytes(photoStorageRef, photoFile);
+        }
+        
         photoURL = await getDownloadURL(photoStorageRef);
         setUploadingPhoto(false);
       }

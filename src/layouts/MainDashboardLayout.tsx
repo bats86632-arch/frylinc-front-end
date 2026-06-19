@@ -307,9 +307,17 @@ export function MainDashboardLayout() {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2.5 rounded-pill border border-white/[0.10] bg-white/[0.03] py-1.5 pl-1.5 pr-4 text-white/80 transition-all duration-150 hover:border-white/[0.18] hover:bg-white/[0.06] inset-highlight shadow-sm"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#e8173a] to-[#ff6b35] text-[13px] font-bold text-white shadow-sm inset-highlight">
-                  {userData?.displayName?.charAt(0).toUpperCase() || "U"}
-                </div>
+                {userData?.photoURL ? (
+                  <img
+                    src={userData.photoURL}
+                    alt={userData.displayName || "User avatar"}
+                    className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-white/10"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e8173a] to-[#ff6b35] text-[13px] font-bold text-white shadow-sm inset-highlight">
+                    {userData?.displayName?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                )}
                 <div className="hidden min-w-0 text-left sm:block">
                   <p className="max-w-[130px] truncate text-[13px] font-bold text-white leading-tight drop-shadow-sm">
                     {userData?.displayName}
@@ -329,13 +337,28 @@ export function MainDashboardLayout() {
                   />
                   <div className="surface-panel fixed top-[72px] left-4 right-4 sm:absolute sm:top-auto sm:left-auto sm:right-0 z-50 mt-3 sm:w-64 rounded-[16px] p-2 animate-scale-in origin-top sm:origin-top-right">
                     <div className="border-b border-white/[0.06] p-4 mb-1">
-                      <p className="truncate text-[15px] font-bold text-white drop-shadow-sm">
-                        {userData?.displayName}
-                      </p>
-                      <p className="mt-1.5 truncate text-[13px] font-medium text-white/50">
-                        {userData?.email}
-                      </p>
-                      <span className="mt-3 inline-flex rounded-full border border-white/[0.10] bg-white/[0.06] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white/70 inset-highlight shadow-sm">
+                      <div className="flex items-center gap-3">
+                        {userData?.photoURL ? (
+                          <img
+                            src={userData.photoURL}
+                            alt="User"
+                            className="h-10 w-10 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-white/10"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e8173a] to-[#ff6b35] text-[15px] font-bold text-white shadow-sm inset-highlight">
+                            {userData?.displayName?.charAt(0).toUpperCase() || "U"}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="truncate text-[15px] font-bold text-white drop-shadow-sm">
+                            {userData?.displayName}
+                          </p>
+                          <p className="mt-0.5 truncate text-[13px] font-medium text-white/50">
+                            {userData?.email}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="mt-4 inline-flex rounded-full border border-white/[0.10] bg-white/[0.06] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white/70 inset-highlight shadow-sm">
                         {roleLabel}
                       </span>
                     </div>
