@@ -1295,36 +1295,39 @@ export function AdminSettings() {
 
                             {/* Branches Section */}
                             <div className="px-3 sm:px-5 py-3">
-                              <div className="flex items-center justify-between mb-2.5">
-                                <div className="flex items-center gap-1.5">
-                                  <MapPin className="h-3.5 w-3.5 text-amber-400" />
-                                  <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">Branches</h4>
-                                  <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
-                                    {companyBranches.length}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={() => setAddingBranchToCompany(selectedCompany.id)}
-                                    className="flex h-7 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] px-2.5 text-[11px] font-medium text-[var(--text-primary)] transition-opacity hover:opacity-80"
-                                  >
-                                    <Plus className="h-3.5 w-3.5" />
-                                    Add
-                                  </button>
-                                  <div className="relative w-48">
-                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                                    <input
-                                      type="text"
-                                      placeholder="Search branches..."
-                                      className="control-field w-full h-7 pl-8 pr-3 text-[11px] rounded-[6px]"
-                                      value={branchSearchQuery}
-                                      onChange={(e) => setBranchSearchQuery(e.target.value)}
-                                    />
+                              <div className="space-y-4">
+                                <div className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
+                                  <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                                      <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">Branches</h4>
+                                      <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
+                                        {companyBranches.length}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={() => setAddingBranchToCompany(selectedCompany.id)}
+                                        className="flex h-7 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] px-2.5 text-[11px] font-medium text-[var(--text-primary)] transition-opacity hover:opacity-80"
+                                      >
+                                        <Plus className="h-3.5 w-3.5" />
+                                        Add
+                                      </button>
+                                      <div className="relative w-48">
+                                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                                        <input
+                                          type="text"
+                                          placeholder="Search branches..."
+                                          className="control-field w-full h-7 pl-8 pr-3 text-[11px] rounded-[6px]"
+                                          value={branchSearchQuery}
+                                          onChange={(e) => setBranchSearchQuery(e.target.value)}
+                                        />
+                                      </div>
+                                    </div>
                                   </div>
-                                </div>
-                              </div>
-                              
-                              {addingBranchToCompany === selectedCompany.id && (
+                                  
+                                  <div className="p-3">
+                                    {addingBranchToCompany === selectedCompany.id && (
                                 <div className="mb-4 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-hover)] p-3 shadow-sm animate-fade-in-up">
                                   <h5 className="mb-2 text-[12px] font-bold text-[var(--text-primary)]">Create New Branch</h5>
                                   <div className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -1539,6 +1542,9 @@ export function AdminSettings() {
                                   })}
                                 </div>
                               )}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         );
