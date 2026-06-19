@@ -1340,11 +1340,12 @@ export function AdminSettings() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Panel Provisioning Overlay ─────────────────────────────────────── */}
-      {activeSection === "panels" && (
+      {activeSection === "panels" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
@@ -1673,7 +1674,8 @@ export function AdminSettings() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* 🛑 Delete Company Modal 🛑 */}
