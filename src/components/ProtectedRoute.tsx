@@ -25,7 +25,7 @@ export function ProtectedRoute({
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center console-bg">
+      <div className="theme-scope flex min-h-screen items-center justify-center console-bg">
         <div className="flex flex-col items-center gap-5 animate-fade-in">
           <div className="relative">
             <div className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/40 ring-1 ring-white/10">
@@ -35,7 +35,7 @@ export function ProtectedRoute({
           </div>
           <div className="flex items-center gap-2.5">
             <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span className="text-[13px] font-medium text-slate-400">
+            <span className="text-[13px] font-medium text-[var(--text-secondary)]">
               Loading Fyrlinc…
             </span>
           </div>
