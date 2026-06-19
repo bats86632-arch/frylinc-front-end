@@ -34,6 +34,8 @@ import {
   Cpu,
   ArrowRight,
   ChevronLeft,
+  MapPin,
+  ChevronRight,
 } from "lucide-react";
 import { CopyButton } from "../components/CopyButton";
 
@@ -136,6 +138,7 @@ export function AdminSettings() {
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [panelSearchQuery, setPanelSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
@@ -876,7 +879,7 @@ export function AdminSettings() {
                 </div>
               </div>
               {/* Scrollable content */}
-              <div className="flex-1 overflow-y-auto p-5 sm:p-7">
+              <div className={`flex-1 flex flex-col min-h-0 ${companyFormOpen || editingCompanyData ? 'overflow-y-auto p-5 sm:p-7' : ''}`}>
                 {/* Company creation form */}
                 {companyFormOpen && (
                   <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
@@ -1244,72 +1247,212 @@ export function AdminSettings() {
                     <Loader2 className="h-6 w-6 animate-spin text-[var(--text-primary)] opacity-50" />
                   </div>
                 ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredCompanies.map((company) => (
-                      <div
-                        key={company.id}
-                        className="surface-panel flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] animate-fade-in-up rounded-[14px] overflow-hidden"
-                      >
-                        <div className="p-5 flex-1 w-full relative">
-                          <div className="flex items-start justify-between mb-4">
-                            <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-[15px] font-medium text-[var(--text-on-accent)] shadow-sm"
-                              style={{ backgroundColor: getAvatarColor(company.name) }}
-                            >
-                              {company.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => openEditCompany(company)}
-                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
-                                aria-label="Edit company"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() => startDeleteCompany(company)}
-                                className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
-                                aria-label="Delete company"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
+                  <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0 -mx-5 sm:-mx-7 -mb-5 sm:-mb-7">
+                    {/* ── Left Panel: Company List ── */}
+                    <div className={`${selectedCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[320px] lg:w-[360px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
+                      <div className="flex-1 overflow-y-auto">
+                        {filteredCompanies.length === 0 ? (
+                          <div className="p-6 text-center text-[13px] text-[var(--text-secondary)]">
+                            {companies.length === 0 ? "No companies found." : "No companies match your search."}
                           </div>
-                          <div>
-                            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-1 truncate">
-                              {company.name}
-                            </h3>
-                            <p className="text-[13px] text-[var(--text-secondary)] line-clamp-2 min-h-[39px]">
-                              {company.description || "No description provided."}
-                            </p>
+                        ) : (
+                          <div className="divide-y divide-[var(--border-subtle)]">
+                            {filteredCompanies.map((company) => {
+                              const companyBranches = branches.filter(b => b.companyId === company.id);
+                              const isSelected = selectedCompanyId === company.id;
+                              return (
+                                <button
+                                  key={company.id}
+                                  onClick={() => setSelectedCompanyId(company.id)}
+                                  className={`w-full flex items-center gap-3 px-5 sm:px-7 py-4 text-left transition-colors group ${
+                                    isSelected
+                                      ? 'bg-[var(--surface-hover)] border-l-2 border-l-amber-500'
+                                      : 'hover:bg-[var(--surface-hover)] border-l-2 border-l-transparent'
+                                  }`}
+                                >
+                                  <div
+                                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[14px] font-medium text-[var(--text-on-accent)] shadow-sm"
+                                    style={{ backgroundColor: getAvatarColor(company.name) }}
+                                  >
+                                    {company.name.charAt(0).toUpperCase()}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[14px] font-semibold text-[var(--text-primary)] truncate">
+                                        {company.name}
+                                      </span>
+                                    </div>
+                                    <p className="text-[12px] text-[var(--text-secondary)] truncate mt-0.5">
+                                      {company.description || "No description"}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <span className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)]">
+                                      <MapPin className="h-3 w-3" />
+                                      {companyBranches.length}
+                                    </span>
+                                    <ChevronRight className="h-4 w-4 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity md:block hidden" />
+                                  </div>
+                                </button>
+                              );
+                            })}
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] bg-[var(--surface-base)] px-5 py-3 w-full">
-                          <div className="flex items-center gap-2 overflow-hidden">
-                            <span className="text-[10px] shrink-0 font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
-                              ID
-                            </span>
-                            <span className="font-mono truncate text-[11px] text-[var(--text-primary)]">
-                              {company.id}
-                            </span>
-                          </div>
-                          <CopyButton
-                            textToCopy={company.id}
-                            className="text-[var(--text-secondary)] shrink-0 ml-2 hover:text-[var(--text-primary)] transition-colors"
-                            title="Copy ID"
-                            onCopy={() => {
-                              setSuccess("ID copied to clipboard");
-                              setTimeout(() => setSuccess(null), 3000);
-                            }}
-                          />
-                        </div>
+                        )}
                       </div>
-                    ))}
-                    {filteredCompanies.length === 0 && (
-                      <div className="col-span-full rounded-[10px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 text-center text-[13px] text-[var(--text-secondary)]">
-                        {companies.length === 0 ? "No companies found." : "No companies match your search."}
-                      </div>
-                    )}
+                    </div>
+
+                    {/* ── Right Panel: Company Detail ── */}
+                    <div className={`${selectedCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
+                      {(() => {
+                        const selectedCompany = companies.find(c => c.id === selectedCompanyId);
+                        if (!selectedCompany) {
+                          return (
+                            <div className="flex-1 flex items-center justify-center p-8">
+                              <div className="text-center">
+                                <Building2 className="mx-auto h-12 w-12 text-[var(--text-secondary)] opacity-30 mb-3" />
+                                <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select a company</p>
+                                <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose a company from the list to view its details and branches</p>
+                              </div>
+                            </div>
+                          );
+                        }
+                        const companyBranches = branches.filter(b => b.companyId === selectedCompany.id);
+                        return (
+                          <div className="flex-1 overflow-y-auto">
+                            {/* Company Header */}
+                            <div className="px-5 sm:px-7 pt-5 pb-4 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)] sticky top-0 z-10">
+                              <div className="flex items-start gap-4">
+                                {/* Mobile back button */}
+                                <button
+                                  onClick={() => setSelectedCompanyId(null)}
+                                  className="flex md:hidden h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors mt-0.5"
+                                >
+                                  <ChevronLeft className="h-5 w-5" />
+                                </button>
+                                <div
+                                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-[16px] font-semibold text-[var(--text-on-accent)] shadow-sm"
+                                  style={{ backgroundColor: getAvatarColor(selectedCompany.name) }}
+                                >
+                                  {selectedCompany.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-[16px] font-bold text-[var(--text-primary)] truncate">{selectedCompany.name}</h3>
+                                  <p className="text-[13px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">
+                                    {selectedCompany.description || "No description provided."}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">ID</span>
+                                    <span className="font-mono text-[11px] text-[var(--text-primary)] truncate">{selectedCompany.id}</span>
+                                    <CopyButton
+                                      textToCopy={selectedCompany.id}
+                                      className="text-[var(--text-secondary)] shrink-0 hover:text-[var(--text-primary)] transition-colors"
+                                      title="Copy ID"
+                                      iconClassName="h-3 w-3"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <button
+                                    onClick={() => openEditCompany(selectedCompany)}
+                                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+                                    aria-label="Edit company"
+                                  >
+                                    <Edit2 className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => startDeleteCompany(selectedCompany)}
+                                    className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
+                                    aria-label="Delete company"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Branches Section */}
+                            <div className="px-5 sm:px-7 py-4">
+                              <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-amber-400" />
+                                  <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">Branches</h4>
+                                  <span className="text-[11px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-2 py-0.5 rounded-full border border-[var(--border-subtle)]">
+                                    {companyBranches.length}
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => openEditCompany(selectedCompany)}
+                                  className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:opacity-80 transition-opacity"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                  Manage Branches
+                                </button>
+                              </div>
+
+                              {companyBranches.length === 0 ? (
+                                <div className="rounded-[10px] border border-dashed border-[var(--border-subtle)] bg-[var(--surface-base)] p-8 text-center">
+                                  <MapPin className="mx-auto h-8 w-8 text-[var(--text-secondary)] opacity-30 mb-2" />
+                                  <p className="text-[13px] font-medium text-[var(--text-secondary)]">No branches yet</p>
+                                  <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Click "Manage Branches" to add branches to this company</p>
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {companyBranches.map((branch, idx) => (
+                                    <div
+                                      key={branch.id}
+                                      className="surface-panel rounded-[10px] border border-[var(--border-subtle)] p-4 transition-all hover:border-[var(--border-default)] animate-fade-in-up"
+                                      style={{ animationDelay: `${idx * 30}ms` }}
+                                    >
+                                      <div className="flex items-start justify-between gap-3">
+                                        <div className="flex items-start gap-3 min-w-0 flex-1">
+                                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-amber-500/10 border border-amber-500/15 mt-0.5">
+                                            <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                                          </div>
+                                          <div className="min-w-0 flex-1">
+                                            <h5 className="text-[13px] font-semibold text-[var(--text-primary)] truncate">{branch.name}</h5>
+                                            {branch.address && (
+                                              <p className="text-[12px] text-[var(--text-secondary)] truncate mt-0.5">{branch.address}</p>
+                                            )}
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                                              {branch.supervisorName && (
+                                                <span className="text-[11px] text-[var(--text-secondary)]">
+                                                  <span className="font-medium">Supervisor:</span> {branch.supervisorName}
+                                                </span>
+                                              )}
+                                              {branch.contactNumber && (
+                                                <span className="text-[11px] text-[var(--text-secondary)]">
+                                                  <span className="font-medium">Contact:</span> {branch.contactNumber}
+                                                </span>
+                                              )}
+                                              {branch.emailAddress && (
+                                                <span className="text-[11px] text-[var(--text-secondary)]">
+                                                  <span className="font-medium">Email:</span> {branch.emailAddress}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-2">
+                                              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">ID</span>
+                                              <span className="font-mono text-[10px] text-[var(--text-primary)] truncate">{branch.id}</span>
+                                              <CopyButton
+                                                textToCopy={branch.id}
+                                                className="text-[var(--text-secondary)] shrink-0 hover:text-[var(--text-primary)] transition-colors"
+                                                title="Copy Branch ID"
+                                                iconClassName="h-3 w-3"
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   </div>
                 )}
               </div>
