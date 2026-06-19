@@ -1176,7 +1176,7 @@ export function AdminSettings() {
                             No branches available.
                           </p>
                         ) : (
-                          <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-[var(--border-subtle)] bg-[#0f0f0e] p-2">
+                          <div className="space-y-1 max-h-[150px] overflow-y-auto rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-2">
                             {getBranchesForCompany(watchedUserCompanyId).map(
                               (branch) => {
                                 const currentIds = (watchedUserBranchIds || "")
@@ -1189,7 +1189,7 @@ export function AdminSettings() {
                                 return (
                                   <label
                                     key={branch.id}
-                                    className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-white/[0.04]"
+                                    className="flex cursor-pointer items-center gap-2.5 rounded-[4px] px-2 py-1.5 hover:bg-[var(--surface-hover)]"
                                     style={{
                                       opacity: userFormLoading ? 0.5 : 1,
                                     }}
@@ -1215,7 +1215,7 @@ export function AdminSettings() {
                                           next.join(", "),
                                         );
                                       }}
-                                      className="h-4 w-4 rounded border-white/20 bg-white/5 accent-[#e53d3d]"
+                                      className="h-4 w-4 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
                                     />
                                     <span className="text-[13px] text-[var(--text-primary)]">
                                       {branch.name}
@@ -1226,7 +1226,7 @@ export function AdminSettings() {
                                         onClick={(e) =>
                                           handleCopyId(e, branch.id)
                                         }
-                                        className="hover:text-white transition-colors"
+                                        className="hover:text-[var(--text-primary)] transition-colors"
                                         title="Copy full ID"
                                       >
                                         <Copy className="h-3 w-3" />
