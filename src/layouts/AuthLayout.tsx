@@ -1,33 +1,30 @@
 import { Outlet } from "react-router-dom";
-import { Activity, Flame, RadioTower, ShieldCheck } from "lucide-react";
+import { Bell, Clock, Flame, BarChart3 } from "lucide-react";
 
-const signalRows = [
+const trustPoints = [
   {
-    label: "Panel Health",
-    value: "Online",
-    icon: Activity,
-    tone: "text-emerald-400",
-    accentBg: "rgba(52,211,153,0.08)",
-    accentBorder: "rgba(52,211,153,0.18)",
-    dot: "#34d399",
+    label: "24/7 Monitoring",
+    description: "Round-the-clock visibility into every panel.",
+    icon: Clock,
+    accentBg: "rgba(52,211,153,0.07)",
+    accentBorder: "rgba(52,211,153,0.16)",
+    iconColor: "text-emerald-400",
   },
   {
-    label: "Alarm Channel",
-    value: "Armed",
-    icon: RadioTower,
-    tone: "text-amber-300",
-    accentBg: "rgba(251,191,36,0.08)",
-    accentBorder: "rgba(251,191,36,0.18)",
-    dot: "#fbbf24",
+    label: "Instant Alerts",
+    description: "Get notified the moment something needs attention.",
+    icon: Bell,
+    accentBg: "rgba(251,191,36,0.07)",
+    accentBorder: "rgba(251,191,36,0.16)",
+    iconColor: "text-amber-300",
   },
   {
-    label: "Access Layer",
-    value: "Protected",
-    icon: ShieldCheck,
-    tone: "text-slate-200",
-    accentBg: "rgba(255,255,255,0.04)",
-    accentBorder: "rgba(255,255,255,0.10)",
-    dot: "#ffffff",
+    label: "Live Status",
+    description: "Real-time updates on all your connected panels.",
+    icon: BarChart3,
+    accentBg: "rgba(255,255,255,0.035)",
+    accentBorder: "rgba(255,255,255,0.09)",
+    iconColor: "text-slate-200",
   },
 ];
 
@@ -45,7 +42,7 @@ export function AuthLayout() {
       <div className="absolute inset-x-0 top-0 h-px bg-white/[0.06]" />
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
-        {/* ── Left info panel ────────────────────────────────────────────── */}
+        {/* ── Left info panel (desktop only) ──────────────────────────────── */}
         <section className="relative hidden h-screen flex-col overflow-hidden border-r border-white/[0.08] px-10 py-10 lg:flex xl:px-16">
           {/* Brand lock-up */}
           <div className="flex shrink-0 items-center gap-3.5">
@@ -62,51 +59,51 @@ export function AuthLayout() {
             </div>
           </div>
 
-          {/* Hero copy — vertically centered */}
+          {/* Hero — warm, non-techy messaging */}
           <div className="animate-fade-in flex flex-1 flex-col items-start justify-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.04] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white/55 inset-highlight">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#34d399] shadow-[0_0_14px_rgba(52,211,153,0.75)]" />
-              Secure operations console
-            </div>
-            <h1 className="font-display max-w-xl text-[3rem] font-bold leading-[0.98] tracking-[-0.055em] text-white text-balance xl:text-[4rem] drop-shadow-sm">
-              Command fire alarm telemetry with confidence.
+            <h1 className="font-display max-w-xl text-[3rem] font-bold leading-[1.05] tracking-[-0.04em] text-white text-balance xl:text-[3.75rem] drop-shadow-sm">
+              Your fire safety,
+              <br />
+              <span className="bg-gradient-to-r from-[#ff6b35] to-[#e8173a] bg-clip-text text-transparent">
+                always monitored.
+              </span>
             </h1>
-            <p className="mt-7 max-w-md text-[1rem] leading-8 text-white/58 font-medium xl:text-[1.08rem]">
-              Fyrlinc brings panel status, alarms, controls, and contact routing
-              into one high-trust desktop command center.
+            <p className="mt-6 max-w-md text-[1rem] leading-[1.75] text-white/50 font-medium xl:text-[1.05rem]">
+              Fyrlinc keeps you connected to every fire alarm panel — so you can
+              respond faster when it matters most.
             </p>
 
-            {/* Status rows */}
-            <div className="mt-10 grid max-w-md gap-3 w-full">
-              {signalRows.map((row, idx) => (
+            {/* Trust points */}
+            <div className="mt-10 grid max-w-md gap-3.5 w-full">
+              {trustPoints.map((point, idx) => (
                 <div
-                  key={row.label}
-                  className="flex items-center justify-between rounded-[14px] border px-5 py-3.5 animate-fade-in-up inset-highlight backdrop-blur-md"
+                  key={point.label}
+                  className="flex items-start gap-4 rounded-[14px] border px-5 py-4 animate-fade-in-up inset-highlight backdrop-blur-md"
                   style={{
-                    background: row.accentBg,
-                    borderColor: row.accentBorder,
-                    animationDelay: `${idx * 90}ms`,
+                    background: point.accentBg,
+                    borderColor: point.accentBorder,
+                    animationDelay: `${idx * 100}ms`,
                   }}
                 >
-                  <div className="flex items-center gap-3.5">
-                    <div
-                      className="flex h-9 w-9 items-center justify-center rounded-[9px] shadow-sm"
-                      style={{
-                        background: row.accentBg,
-                        border: `1px solid ${row.accentBorder}`,
-                      }}
-                    >
-                      <row.icon className={`h-[18px] w-[18px] ${row.tone}`} />
-                    </div>
-                    <span className="text-[13px] font-semibold text-white/80">
-                      {row.label}
-                    </span>
-                  </div>
-                  <span
-                    className={`text-[13px] font-bold tracking-wide ${row.tone}`}
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] shadow-sm mt-0.5"
+                    style={{
+                      background: point.accentBg,
+                      border: `1px solid ${point.accentBorder}`,
+                    }}
                   >
-                    {row.value}
-                  </span>
+                    <point.icon
+                      className={`h-[18px] w-[18px] ${point.iconColor}`}
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-bold text-white/90">
+                      {point.label}
+                    </p>
+                    <p className="mt-0.5 text-[12.5px] leading-relaxed text-white/40 font-medium">
+                      {point.description}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>

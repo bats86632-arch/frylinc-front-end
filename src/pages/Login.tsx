@@ -91,13 +91,10 @@ export function Login() {
     <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in lg:rounded-[28px] lg:border-white/[0.14] lg:bg-[linear-gradient(180deg,rgba(18,18,26,0.92),rgba(10,10,15,0.86))] lg:p-11 lg:shadow-[0_30px_110px_rgba(0,0,0,0.48)] lg:backdrop-blur-2xl">
       {/* Header */}
       <div className="mb-8 lg:mb-9">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-[14px] border border-[rgba(232,23,58,0.28)] bg-[rgba(232,23,58,0.10)] inset-highlight shadow-[0_12px_32px_rgba(232,23,58,0.16)] lg:h-14 lg:w-14 lg:rounded-[18px]">
             <LockKeyhole className="h-5 w-5 text-[#ff5c73] lg:h-6 lg:w-6" />
           </div>
-          <span className="hidden rounded-full border border-white/[0.10] bg-white/[0.04] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/45 inset-highlight lg:inline-flex">
-            Staff access
-          </span>
         </div>
         <h2 className="font-display text-[2rem] font-bold leading-tight tracking-tight text-white text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
           Welcome back
