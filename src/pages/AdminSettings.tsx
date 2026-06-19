@@ -26,6 +26,7 @@ import {
   Trash2,
   Edit2,
   X,
+  Copy,
 } from "lucide-react";
 
 const panelSchema = z.object({
@@ -392,6 +393,14 @@ export function AdminSettings() {
     await loadUsers();
   };
 
+  const handleCopyId = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(id);
+    setSuccess("ID copied to clipboard");
+    setTimeout(() => setSuccess(null), 3000);
+  };
+
   const handleCreateUser = async (data: UserFormData) => {
     setUserFormLoading(true);
     setError(null);
@@ -707,8 +716,15 @@ export function AdminSettings() {
                         <span className="truncate text-[13px] font-medium text-[#f0ede8]">
                           {company.name}
                         </span>
-                        <span className="shrink-0 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
+                        <span className="shrink-0 flex items-center gap-1.5 rounded-[4px] bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-[#7a7773]">
                           {company.id}
+                          <button
+                            onClick={(e) => handleCopyId(e, company.id)}
+                            className="hover:text-white transition-colors"
+                            title="Copy ID"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
                         </span>
                       </div>
                       <div className="mt-0.5 truncate text-[11px] text-[#7a7773]">
@@ -920,8 +936,15 @@ export function AdminSettings() {
                             <span className="text-[13px] text-[#f0ede8]">
                               {branch.name}
                             </span>
-                            <span className="ml-auto font-mono text-[10px] text-[#7a7773]">
+                            <span className="ml-auto font-mono text-[10px] text-[#7a7773] flex items-center gap-1.5">
                               {branch.id.slice(0, 8)}…
+                              <button
+                                onClick={(e) => handleCopyId(e, branch.id)}
+                                className="hover:text-white transition-colors"
+                                title="Copy full ID"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
                             </span>
                           </label>
                         );
@@ -1083,7 +1106,16 @@ export function AdminSettings() {
                       {getBranchesForCompany(editingCompanyData.id).map((branch) => (
                         <div key={branch.id} className="flex items-center justify-between rounded-[6px] border border-white/[0.06] bg-[#1a1917] px-3 py-2">
                           <span className="text-[13px] text-[#f0ede8]">{branch.name}</span>
-                          <span className="text-[10px] text-[#7a7773]">{branch.id.slice(0,8)}...</span>
+                          <span className="text-[10px] text-[#7a7773] flex items-center gap-1.5">
+                            {branch.id.slice(0,8)}...
+                            <button
+                              onClick={(e) => handleCopyId(e, branch.id)}
+                              className="hover:text-white transition-colors"
+                              title="Copy full ID"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </button>
+                          </span>
                         </div>
                       ))}
                       {getBranchesForCompany(editingCompanyData.id).length === 0 && (
@@ -1315,8 +1347,15 @@ export function AdminSettings() {
                               <span className="text-[13px] text-[#f0ede8]">
                                 {branch.name}
                               </span>
-                              <span className="ml-auto font-mono text-[10px] text-[#7a7773]">
+                              <span className="ml-auto font-mono text-[10px] text-[#7a7773] flex items-center gap-1.5">
                                 {branch.id.slice(0, 8)}…
+                                <button
+                                  onClick={(e) => handleCopyId(e, branch.id)}
+                                  className="hover:text-white transition-colors"
+                                  title="Copy full ID"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
                               </span>
                             </label>
                           );
