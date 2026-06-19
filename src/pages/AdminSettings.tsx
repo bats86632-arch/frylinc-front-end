@@ -160,6 +160,20 @@ export function AdminSettings() {
   const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [lastSynced, setLastSynced] = useState<number>(Date.now());
+  const [syncTimeText, setSyncTimeText] = useState("just now");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const diff = Math.floor((Date.now() - lastSynced) / 1000);
+      if (diff < 5) setSyncTimeText("just now");
+      else if (diff < 60) setSyncTimeText(`${diff}s ago`);
+      else setSyncTimeText(`${Math.floor(diff / 60)}m ago`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, [lastSynced]);
 
   const {
     register,
@@ -482,6 +496,7 @@ export function AdminSettings() {
       reloadCompanies(),
       reloadBranches(),
     ]);
+    setLastSynced(Date.now());
   };
 
   const handleCopyId = (e: React.MouseEvent, id: string) => {
@@ -656,7 +671,7 @@ export function AdminSettings() {
         <div className="hidden sm:flex items-center gap-3">
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-[var(--text-secondary)]">Synced 12s ago</span>
+          <span className="text-[11px] text-[var(--text-secondary)]">Synced {syncTimeText}</span>
           <button
             onClick={handleGlobalRefresh}
             className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] border border-[var(--border-subtle)] bg-transparent text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
@@ -2048,7 +2063,7 @@ export function AdminSettings() {
   <div className={`${selectedUserCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
     <div className="flex-1 overflow-y-auto">
       <div className="divide-y divide-[var(--border-subtle)]">
-        {[{ id: 'unassigned', name: 'Unassigned', description: 'Users without a company' }, ...filteredCompanies].map((company) => {
+        {[...(hasRole(['super_admin']) ? [{ id: 'unassigned', name: 'Unassigned', description: 'Users without a company' }] : []), ...filteredCompanies].map((company) => {
           const isUnassigned = company.id === 'unassigned';
           const isSelected = selectedUserCompanyId === company.id;
           const userCount = isUnassigned 
@@ -2686,7 +2701,7 @@ export function AdminSettings() {
   <div className={`${selectedPanelCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
     <div className="flex-1 overflow-y-auto">
       <div className="divide-y divide-[var(--border-subtle)]">
-        {[{ id: 'unassigned', name: 'Unassigned', description: 'Panels without a company' }, ...filteredCompanies].map((company) => {
+        {[...(hasRole(['super_admin']) ? [{ id: 'unassigned', name: 'Unassigned', description: 'Panels without a company' }] : []), ...filteredCompanies].map((company) => {
           const isUnassigned = company.id === 'unassigned';
           const isSelected = selectedPanelCompanyId === company.id;
           const panelCount = isUnassigned 
