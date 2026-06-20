@@ -985,7 +985,6 @@ export function AdminSettings() {
                   </div>,
                   document.body
                 )}
-                )}
 
                 {/* Company edit form */}
                 {editingCompanyData && createPortal(
