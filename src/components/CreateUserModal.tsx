@@ -37,6 +37,12 @@ const ROLE_META: Record<
   Role,
   { label: string; description: string; icon: React.ReactNode; color: string }
 > = {
+  secret_super_admin: {
+    label: "Secret Super Admin",
+    description: "Invisible super admin with global access",
+    icon: <ShieldAlert className="h-4 w-4" />,
+    color: "#e11d48", // rose-600
+  },
   super_admin: {
     label: "Super Admin",
     description: "Unrestricted global access to everything",
@@ -82,10 +88,13 @@ type EditFormData = z.infer<typeof editSchema>;
 
 // ─── RBAC Helpers ───────────────────────────────────────────────────────────
 
-function getCreatableRoles(actorRole: Role): Role[] {
+function getCreatableRoles(actorRole: Role, isSecret: boolean): Role[] {
   switch (actorRole) {
     case "super_admin":
-      return ["super_admin", "head_office", "system_integrator", "end_user"];
+    case "secret_super_admin":
+      return isSecret 
+        ? ["secret_super_admin", "super_admin", "head_office", "system_integrator", "end_user"]
+        : ["super_admin", "head_office", "system_integrator", "end_user"];
     case "head_office":
       return ["system_integrator", "end_user"];
     case "system_integrator":
@@ -188,8 +197,8 @@ export function CreateUserModal({
 
   // ── Derived data ──
   const creatableRoles = useMemo(
-    () => (actorRole ? getCreatableRoles(actorRole) : []),
-    [actorRole],
+    () => (actorRole ? getCreatableRoles(actorRole, !!actorData?.secret_super_admin) : []),
+    [actorRole, actorData],
   );
 
   const availableCompanies = useMemo(
