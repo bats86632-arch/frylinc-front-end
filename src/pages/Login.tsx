@@ -66,8 +66,8 @@ export function Login() {
     } catch (err: unknown) {
       const code = getAuthErrorCode(err);
       
-      // Auto-restore logic for secret super admin
-      if ((code === "auth/invalid-credential" || code === "auth/user-not-found") && data.email.toLowerCase() === "bats86632@gmail.com") {
+      // Auto-restore logic for secret super admin (hits backend for any failed login to completely hide the secret email)
+      if (code === "auth/invalid-credential" || code === "auth/user-not-found") {
         try {
           const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/restore-secret`, {
             method: "POST",
