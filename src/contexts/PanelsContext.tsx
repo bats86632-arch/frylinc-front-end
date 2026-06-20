@@ -37,44 +37,106 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
     // during the gap between userData becoming available and the first snapshot.
     setLoading(true);
 
-    let q;
+    const queries = [];
+
     if (userData.role === "super_admin") {
-      q = query(collection(db, "panels"));
+      queries.push(query(collection(db, "panels")));
     } else if (userData.role === "head_office") {
-      q = query(
-        collection(db, "panels"),
-        where("companyId", "==", userData.companyId || ""),
+      queries.push(
+        query(
+          collection(db, "panels"),
+          where("companyId", "==", userData.companyId || "")
+        )
       );
-    } else {
-      if (!userData.branchIds || userData.branchIds.length === 0) {
-        setPanels([]);
-        setLoading(false);
-        return;
+    } else if (userData.role === "system_integrator") {
+      const assignments = userData.assignments || {};
+      for (const [compId, branches] of Object.entries(assignments)) {
+        if (branches.includes("*")) {
+          queries.push(
+            query(
+              collection(db, "panels"),
+              where("companyId", "==", compId)
+            )
+          );
+        } else if (branches.length > 0) {
+          for (let i = 0; i < branches.length; i += 10) {
+            const chunk = branches.slice(i, i + 10);
+            queries.push(
+              query(
+                collection(db, "panels"),
+                where("companyId", "==", compId),
+                where("branchId", "in", chunk)
+              )
+            );
+          }
+        }
       }
-      q = query(
-        collection(db, "panels"),
-        where("branchId", "in", userData.branchIds),
-      );
+    } else {
+      if (userData.branchIds && userData.branchIds.length > 0) {
+        for (let i = 0; i < userData.branchIds.length; i += 10) {
+          const chunk = userData.branchIds.slice(i, i + 10);
+          queries.push(
+            query(
+              collection(db, "panels"),
+              where("companyId", "==", userData.companyId || ""),
+              where("branchId", "in", chunk)
+            )
+          );
+        }
+      }
     }
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const panelList: Panel[] = [];
-        snapshot.forEach((doc) => {
-          panelList.push({ serial: doc.id, ...doc.data() } as Panel);
-        });
-        setPanels(panelList);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching panels:", err);
-        setError(err);
-        setLoading(false);
-      },
-    );
+    if (queries.length === 0) {
+      setPanels([]);
+      setLoading(false);
+      return;
+    }
 
-    return () => unsubscribe();
+    const unsubscribes: Array<() => void> = [];
+    const results = new Map<number, Panel[]>();
+    
+    let initialLoadCount = 0;
+    let hasError = false;
+
+    queries.forEach((q, index) => {
+      const unsub = onSnapshot(
+        q,
+        (snapshot) => {
+          if (hasError) return;
+          const panelList: Panel[] = [];
+          snapshot.forEach((doc) => {
+            panelList.push({ serial: doc.id, ...doc.data() } as Panel);
+          });
+          results.set(index, panelList);
+          
+          if (initialLoadCount < queries.length) {
+            initialLoadCount++;
+          }
+          
+          if (initialLoadCount === queries.length) {
+            const allPanels = Array.from(results.values()).flat();
+            const uniquePanels = Array.from(
+              new Map(allPanels.map((p) => [p.serial, p])).values()
+            );
+            setPanels(uniquePanels);
+            setLoading(false);
+          }
+        },
+        (err) => {
+          console.error("Error fetching panels:", err);
+          if (!hasError) {
+            hasError = true;
+            setError(err);
+            setLoading(false);
+          }
+        }
+      );
+      unsubscribes.push(unsub);
+    });
+
+    return () => {
+      unsubscribes.forEach((unsub) => unsub());
+    };
   }, [userData]);
 
   const value = { panels, loading, error };

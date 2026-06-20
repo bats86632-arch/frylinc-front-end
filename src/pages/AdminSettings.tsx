@@ -632,11 +632,11 @@ export function AdminSettings() {
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
                   </span>
                   <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
-                    {companiesLoading ? "â" : companies.length}
+                    {companiesLoading ? "—" : companies.length}
                   </span>
                 </div>
                 <span className="text-[12px] text-[var(--text-secondary)]">
-                  {companiesLoading ? "Loadingâ¦" : "companies registered"}
+                  {companiesLoading ? "● Loading…" : "companies registered"}
                 </span>
               </div>
             </div>
@@ -669,11 +669,11 @@ export function AdminSettings() {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-400" />
                 </span>
                 <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
-                  {usersLoading ? "â" : users.length}
+                  {usersLoading ? "—" : users.length}
                 </span>
               </div>
               <span className="text-[12px] text-[var(--text-secondary)]">
-                {usersLoading ? "Loadingâ¦" : "users active"}
+                {usersLoading ? "● Loading…" : "users active"}
               </span>
             </div>
           </div>
@@ -705,11 +705,11 @@ export function AdminSettings() {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                 </span>
                 <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
-                  {panelsLoading ? "â" : panels.length}
+                  {panelsLoading ? "—" : panels.length}
                 </span>
               </div>
               <span className="text-[12px] text-[var(--text-secondary)]">
-                {panelsLoading ? "Loadingâ¦" : `panels provisioned`}
+                {panelsLoading ? "● Loading…" : `panels provisioned`}
               </span>
             </div>
           </div>
@@ -790,28 +790,40 @@ export function AdminSettings() {
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto p-5 sm:p-7">
                 {/* Company creation form */}
-                {companyFormOpen && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
-                    <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
-                        Create Company
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCompanyFormOpen(false);
-                          resetCompany();
-                        }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                      >
-                        <XCircle className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    <form
-                      onSubmit={handleSubmitCompany(handleCreateCompany)}
-                      className="space-y-5"
-                    >
+                {companyFormOpen && createPortal(
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget && !companyFormLoading) {
+                        setCompanyFormOpen(false);
+                        resetCompany();
+                      }
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative z-10 w-full max-w-[600px] mx-4 max-h-[90vh] flex flex-col animate-fade-in-up">
+                      <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
+                          <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                            Create Company
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCompanyFormOpen(false);
+                              resetCompany();
+                            }}
+                            disabled={companyFormLoading}
+                            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                          <form
+                            onSubmit={handleSubmitCompany(handleCreateCompany)}
+                            className="space-y-5"
+                          >
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Company Name
@@ -966,33 +978,50 @@ export function AdminSettings() {
                           )}
                         </button>
                       </div>
-                    </form>
-                  </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>,
+                  document.body
+                )}
                 )}
 
                 {/* Company edit form */}
-                {editingCompanyData && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
-                    <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
-                        Edit Company
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingCompanyData(null);
-                          resetEditCompany();
-                        }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                      >
-                        <XCircle className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    <form
-                      onSubmit={handleSubmitEditCompany(handleEditCompany)}
-                      className="space-y-5"
-                    >
+                {editingCompanyData && createPortal(
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget && !editCompanyFormLoading) {
+                        setEditingCompanyData(null);
+                        resetEditCompany();
+                      }
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative z-10 w-full max-w-[600px] mx-4 max-h-[90vh] flex flex-col animate-fade-in-up">
+                      <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
+                          <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                            Edit Company
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCompanyData(null);
+                              resetEditCompany();
+                            }}
+                            disabled={editCompanyFormLoading}
+                            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                          <form
+                            onSubmit={handleSubmitEditCompany(handleEditCompany)}
+                            className="space-y-5"
+                          >
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Company Name
@@ -1044,8 +1073,12 @@ export function AdminSettings() {
                           )}
                         </button>
                       </div>
-                    </form>
-                  </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>,
+                  document.body
                 )}
 
                 {companiesLoading ? (
@@ -1834,28 +1867,40 @@ export function AdminSettings() {
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto p-5 sm:p-7">
                 {/* Panel Provisioning form */}
-                {panelFormOpen && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
-                    <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
-                        Provision Panel
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPanelFormOpen(false);
-                          reset();
-                        }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                      >
-                        <XCircle className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    <form
-                      onSubmit={handleSubmit(handleCreatePanel)}
-                      className="space-y-5"
-                    >
+                {panelFormOpen && createPortal(
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget && !panelFormLoading) {
+                        setPanelFormOpen(false);
+                        reset();
+                      }
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative z-10 w-full max-w-[600px] mx-4 max-h-[90vh] flex flex-col animate-fade-in-up">
+                      <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
+                          <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                            Provision Panel
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPanelFormOpen(false);
+                              reset();
+                            }}
+                            disabled={panelFormLoading}
+                            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                          <form
+                            onSubmit={handleSubmit(handleCreatePanel)}
+                            className="space-y-5"
+                          >
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Serial Number
@@ -1928,7 +1973,7 @@ export function AdminSettings() {
                             }`}
                             disabled={panelFormLoading || companiesLoading}
                           >
-                            <option value="">â Select a company â</option>
+                            <option value="">— Select a company —</option>
                             {companies.map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}
@@ -1952,7 +1997,7 @@ export function AdminSettings() {
                             }`}
                             disabled={panelFormLoading || branchesLoading}
                           >
-                            <option value="">â Select a branch â</option>
+                            <option value="">— Select a branch —</option>
                             {getBranchesForCompany(watchedPanelCompanyId).map((b) => (
                               <option key={b.id} value={b.id}>
                                 {b.name}
@@ -2007,33 +2052,49 @@ export function AdminSettings() {
                           )}
                         </button>
                       </div>
-                    </form>
-                  </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>,
+                  document.body
                 )}
 
                 {/* Panel edit form */}
-                {editingPanelData && (
-                  <div className="animate-fade-in-up surface-panel mb-6 rounded-[14px] border border-[var(--border-subtle)] p-6">
-                    <div className="mb-6 flex items-center justify-between">
-                      <h3 className="text-balance text-[15px] font-bold text-[var(--text-primary)]">
-                        Edit Panel
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingPanelData(null);
-                          resetEditPanel();
-                        }}
-                        className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[var(--text-secondary)] transition-all duration-200 ease-out hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                      >
-                        <XCircle className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    <form
-                      onSubmit={handleSubmitEditPanel(handleEditPanel)}
-                      className="space-y-5"
-                    >
+                {editingPanelData && createPortal(
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget && !editPanelFormLoading) {
+                        setEditingPanelData(null);
+                        resetEditPanel();
+                      }
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative z-10 w-full max-w-[600px] mx-4 max-h-[90vh] flex flex-col animate-fade-in-up">
+                      <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
+                          <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                            Edit Panel
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingPanelData(null);
+                              resetEditPanel();
+                            }}
+                            disabled={editPanelFormLoading}
+                            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                          <form
+                            onSubmit={handleSubmitEditPanel(handleEditPanel)}
+                            className="space-y-5"
+                          >
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Serial Number
@@ -2081,7 +2142,7 @@ export function AdminSettings() {
                             }`}
                             disabled={editPanelFormLoading || companiesLoading}
                           >
-                            <option value="">â Select a company â</option>
+                            <option value="">— Select a company —</option>
                             {companies.map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}
@@ -2105,7 +2166,7 @@ export function AdminSettings() {
                             }`}
                             disabled={editPanelFormLoading || branchesLoading}
                           >
-                            <option value="">â Select a branch â</option>
+                            <option value="">— Select a branch —</option>
                             {getBranchesForCompany(watchedEditPanelCompanyId || "").map((b) => (
                               <option key={b.id} value={b.id}>
                                 {b.name}
@@ -2160,8 +2221,12 @@ export function AdminSettings() {
                           )}
                         </button>
                       </div>
-                    </form>
-                  </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>,
+                  document.body
                 )}
 
                 {panelsLoading ? (

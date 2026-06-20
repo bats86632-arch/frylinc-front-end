@@ -67,7 +67,6 @@ export function PanelDetail() {
     }
   }, [panel]);
 
-  const canControl = hasRole(["end_user"]);
   const canManageContacts = hasRole(["system_integrator"]);
   const isStrictlyEndUser = hasRole(["end_user"]) && !hasRole(["system_integrator"]);
 
@@ -189,7 +188,6 @@ export function PanelDetail() {
     allowedCommands: Array.isArray(panel.allowedCommands)
       ? panel.allowedCommands
       : [],
-    groupId: (panel as unknown as Record<string, unknown>).groupId as string || "",
   };
 
   const panelCommands =
@@ -387,14 +385,6 @@ export function PanelDetail() {
 
       {activeTab === "controls" && (
         <div className="animate-fade-in space-y-6">
-          {!canControl && (
-            <div className="rounded-[10px] border border-amber-300/20 bg-amber-400/[0.08] p-4">
-              <p className="text-sm text-amber-100">
-                You do not have permission to execute commands on this panel.
-              </p>
-            </div>
-          )}
-
           {commandError && (
             <div className="rounded-[10px] border border-red-300/20 bg-red-500/[0.08] p-4">
               <p className="text-sm text-red-100">{commandError}</p>
@@ -417,7 +407,7 @@ export function PanelDetail() {
                 <button
                   key={command}
                   onClick={() => handleSendCommand(command)}
-                  disabled={!canControl || commandLoading !== null || isEuRestricted}
+                  disabled={commandLoading !== null || isEuRestricted}
                   className={`rounded-[10px] border p-5 text-left transition-all duration-200 ease-smooth disabled:cursor-not-allowed disabled:opacity-50 ${
                     commandSuccess === command
                       ? "border-emerald-300/30 bg-emerald-400/[0.08] text-emerald-100 shadow-glow-emerald"

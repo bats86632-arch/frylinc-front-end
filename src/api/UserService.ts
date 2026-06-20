@@ -54,11 +54,6 @@ export const UserService = {
     this.invalidateCache();
   },
 
-  async updateUserGroups(uid: string, groups: string[]): Promise<User> {
-    const response = await apiClient.patch(`/users/${uid}/groups`, { groups });
-    this.invalidateCache();
-    return response.data;
-  },
 
   async updateProfile(data: {
     displayName?: string;
