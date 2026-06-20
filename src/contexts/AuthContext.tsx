@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       companyId: customClaims.companyId as string | undefined,
       branchIds: (customClaims.branchIds as string[]) || [],
       assignments,
+      secret_super_admin: customClaims.secret_super_admin === true,
       photoURL: user.photoURL || undefined,
     };
 
@@ -139,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             companyId: profile.companyId || prev.companyId,
             branchIds: profile.branchIds || prev.branchIds,
             assignments: profile.assignments || prev.assignments,
-            // Extended profile fields from Firestore
+            secret_super_admin: profile.secret_super_admin ?? prev.secret_super_admin,
             firstName: profile.firstName ?? prev.firstName,
             lastName: profile.lastName ?? prev.lastName,
             phoneNumber: profile.phoneNumber ?? prev.phoneNumber,
