@@ -41,31 +41,31 @@ const ROLE_META: Record<
     label: "Secret Super Admin",
     description: "Invisible super admin with global access",
     icon: <ShieldAlert className="h-4 w-4" />,
-    color: "#e11d48", // rose-600
+    color: "#6b7280", // gray
   },
   super_admin: {
     label: "Super Admin",
     description: "Unrestricted global access to everything",
     icon: <ShieldAlert className="h-4 w-4" />,
-    color: "#f97316",
+    color: "#1e6b8a", // teal
   },
   head_office: {
     label: "Head Office",
     description: "Full admin for one company",
     icon: <Building className="h-4 w-4" />,
-    color: "#3b82f6",
+    color: "#4a6fa5", // slate blue
   },
   system_integrator: {
     label: "System Integrator",
     description: "Field operations across assigned branches",
     icon: <Users className="h-4 w-4" />,
-    color: "#8b5cf6",
+    color: "#7c6f8a", // muted purple
   },
   end_user: {
     label: "Viewer",
     description: "View-only access to assigned branch",
     icon: <Eye className="h-4 w-4" />,
-    color: "#10b981",
+    color: "#2e7d5e", // muted green
   },
 };
 
@@ -689,7 +689,7 @@ export function CreateUserModal({
                                             e.target.checked,
                                           )
                                         }
-                                        className="h-4 w-4 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
+                                        className="h-4 w-4 rounded border-[var(--border-subtle)] bg-transparent accent-[var(--accent)]"
                                       />
                                       <div className="flex-1 min-w-0">
                                         <span className="text-[12px] text-[var(--text-primary)]">
@@ -841,7 +841,7 @@ export function CreateUserModal({
                                                           e.target.checked,
                                                         )
                                                       }
-                                                      className="h-3.5 w-3.5 rounded border-[var(--border-subtle)] bg-transparent accent-[#e53d3d]"
+                                                      className="h-3.5 w-3.5 rounded border-[var(--border-subtle)] bg-transparent accent-[var(--accent)]"
                                                     />
                                                     <span className="text-[11px] text-[var(--text-primary)]">
                                                       {b.name}

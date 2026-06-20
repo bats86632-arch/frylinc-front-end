@@ -138,9 +138,9 @@ export function PanelDetail() {
 
   if (loading) {
     return (
-      <div className="animate-fade-in space-y-8">
+      <div className="animate-fade-in space-y-8 p-[32px]">
         {/* Header skeleton */}
-        <div className="skeleton h-36 rounded-card" />
+        <div className="skeleton h-36 rounded-[12px]" />
         {/* Tab bar skeleton */}
         <div className="flex gap-1">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -152,7 +152,7 @@ export function PanelDetail() {
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="skeleton aspect-square rounded-[10px]"
+              className="skeleton aspect-square rounded-[8px]"
             />
           ))}
         </div>
@@ -162,18 +162,18 @@ export function PanelDetail() {
 
   if (error || !panel) {
     return (
-      <div className="animate-fade-in flex min-h-[60vh] items-center justify-center">
-        <div className="surface-panel max-w-md rounded-card p-10 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[14px] border border-red-400/20 bg-gradient-to-br from-red-500/20 to-red-600/5 text-red-300 shadow-glow-red">
+      <div className="animate-fade-in flex min-h-[60vh] items-center justify-center p-[32px]">
+        <div className="surface-panel max-w-md rounded-[16px] p-10 text-center border border-[var(--border-subtle)]">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-[12px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] text-[var(--color-error)]">
             <AlertTriangle className="h-8 w-8" />
           </div>
-          <h3 className="font-display text-title text-balance text-[var(--text-primary)]">Panel Not Found</h3>
-          <p className="mt-3 text-body leading-relaxed text-slate-400">
+          <h3 className="font-sans text-[22px] font-bold text-[var(--text-primary)]">Panel Not Found</h3>
+          <p className="mt-3 text-[15px] leading-relaxed text-[var(--text-secondary)]">
             The panel with serial "{serial}" could not be found.
           </p>
           <button
             onClick={() => navigate("/")}
-            className="btn-primary mt-6 rounded-element px-5 py-2.5 text-sm font-semibold"
+            className="btn-primary mt-6 rounded-[8px] px-5 py-2.5 text-sm font-semibold"
           >
             Go to Dashboard
           </button>
@@ -202,22 +202,22 @@ export function PanelDetail() {
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
-      {/* Header card - glows red when alarm is active */}
+      {/* Header card */}
       <section
-        className={`surface-panel relative overflow-hidden rounded-[14px] p-6 transition-all duration-500 ease-smooth ${
-          hasAlarm ? "shadow-[0_0_60px_rgba(239,68,68,0.15),0_0_20px_rgba(239,68,68,0.1)]" : ""
+        className={`surface-panel relative overflow-hidden rounded-[16px] p-6 transition-all duration-300 ${
+          hasAlarm ? "border border-[var(--color-error)]" : "border border-[var(--border-subtle)]"
         }`}
       >
-        {/* Red left-rail accent */}
+        {/* Left rail accent */}
         {hasAlarm && (
-          <div className="absolute left-0 top-0 h-full w-1.5 rounded-bl-card rounded-tl-card bg-gradient-to-b from-red-400 via-red-500 to-red-600" />
+          <div className="absolute left-0 top-0 h-full w-1.5 rounded-l-[16px] bg-[var(--color-error)]" />
         )}
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 gap-4">
             <Link
               to="/"
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] text-slate-300 transition-all duration-200 ease-smooth hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] hover:-translate-y-0.5"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-all duration-200 hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
               aria-label="Back to dashboard"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -225,32 +225,32 @@ export function PanelDetail() {
 
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="font-display text-[22px] font-bold tracking-tight text-[var(--text-primary)]">
+                <h1 className="font-sans text-[22px] font-bold tracking-tight text-[var(--text-primary)]">
                   {normalizedPanel.name}
                 </h1>
 
                 {hasAlarm && (
-                  <span className="inline-flex animate-pulse-shadow items-center gap-1.5 rounded-full border border-red-300/30 bg-red-500/15 px-4 py-1.5 text-sm font-bold tracking-wide text-red-100 shadow-glow-red">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-1.5 text-sm font-bold tracking-wide text-[var(--color-error)]">
                     <AlertTriangle className="h-4 w-4" />
                     ALARM ACTIVE
                   </span>
                 )}
 
                 {isOffline && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-400/20 bg-slate-500/10 px-3 py-1 text-xs font-semibold text-slate-300">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-overlay)] px-3 py-1 text-xs font-semibold text-[var(--text-secondary)]">
                     <WifiOff className="h-4 w-4" />
                     Disabled (Offline)
                   </span>
                 )}
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-400">
-                <span className="font-mono tabular-nums text-slate-300">
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[var(--text-secondary)]">
+                <span className="font-mono tabular-nums">
                   {normalizedPanel.serial}
                 </span>
                 <span className="tabular-nums">{normalizedPanel.zoneCount} Zones</span>
                 {normalizedPanel.ipAddress && (
-                  <span className="font-mono tabular-nums text-slate-300">
+                  <span className="font-mono tabular-nums">
                     {normalizedPanel.ipAddress}
                   </span>
                 )}
@@ -260,26 +260,23 @@ export function PanelDetail() {
 
           {/* 3 stat mini-cards */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:w-[440px]">
-            <div className="surface-muted relative overflow-hidden rounded-[10px] px-4 py-3.5">
-              {/* Icon removed */}
-              <p className="text-micro uppercase tracking-wider text-slate-500">Total Zones</p>
+            <div className="surface-overlay relative overflow-hidden rounded-[8px] px-4 py-3.5 border border-[var(--border-subtle)]">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">Total Zones</p>
               <p className="mt-1.5 text-2xl font-semibold tabular-nums text-[var(--text-primary)]">
                 {normalizedPanel.zoneCount}
               </p>
             </div>
-            <div className="surface-muted relative overflow-hidden rounded-[10px] px-4 py-3.5">
-              {/* Icon removed */}
-              <p className="text-micro uppercase tracking-wider text-slate-500">In Alarm</p>
+            <div className="surface-overlay relative overflow-hidden rounded-[8px] px-4 py-3.5 border border-[var(--border-subtle)]">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">In Alarm</p>
               <p
-                className={`mt-1.5 text-2xl font-semibold tabular-nums ${activeZones > 0 ? "text-red-200" : "text-slate-300"}`}
+                className={`mt-1.5 text-2xl font-semibold tabular-nums ${activeZones > 0 ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}
               >
                 {activeZones}
               </p>
             </div>
-            <div className="surface-muted relative overflow-hidden rounded-[10px] px-4 py-3.5">
-              {/* Icon removed */}
-              <p className="text-micro uppercase tracking-wider text-slate-500">Commands</p>
-              <p className="mt-1.5 text-2xl font-semibold tabular-nums text-amber-200">
+            <div className="surface-overlay relative overflow-hidden rounded-[8px] px-4 py-3.5 border border-[var(--border-subtle)]">
+              <p className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">Commands</p>
+              <p className="mt-1.5 text-2xl font-semibold tabular-nums text-[var(--accent)]">
                 {panelCommands.length}
               </p>
             </div>
@@ -287,19 +284,19 @@ export function PanelDetail() {
         </div>
       </section>
 
-      {/* Tab bar - polished underline style */}
+      {/* Tab bar */}
       <div className="flex flex-row gap-0 border-b border-[var(--border-subtle)] bg-transparent overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`whitespace-nowrap shrink-0 flex items-center justify-center gap-2 px-5 py-3.5 text-[13px] font-medium transition-all duration-200 ease-smooth ${
+            className={`whitespace-nowrap shrink-0 flex items-center justify-center gap-2 px-5 py-3.5 text-[13px] font-medium transition-all duration-200 ${
               activeTab === tab.id
-                ? "rounded-t-lg border-b-[3px] border-amber-400 bg-amber-400/[0.04] text-[var(--text-primary)]"
-                : "rounded-t-lg border-b-[3px] border-transparent text-slate-400 hover:bg-[var(--surface-raised)] hover:text-slate-200"
+                ? "border-b-[2px] border-[var(--accent)] text-[var(--text-primary)]"
+                : "border-b-[2px] border-transparent text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)]"
             }`}
           >
-            <tab.icon className={`h-4 w-4 transition-colors duration-200 ${activeTab === tab.id ? "text-amber-400" : ""}`} />
+            <tab.icon className={`h-4 w-4 transition-colors duration-200 ${activeTab === tab.id ? "text-[var(--accent)]" : ""}`} />
             <span>{tab.label}</span>
           </button>
         ))}
@@ -308,24 +305,24 @@ export function PanelDetail() {
       {/* Zones tab */}
       {activeTab === "zones" && (
         <div className="animate-fade-in space-y-6">
-          <section className="surface-panel rounded-[14px] p-6">
+          <section className="surface-panel rounded-[12px] p-6 border border-[var(--border-subtle)]">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Zone Status Grid
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
                   <span className="tabular-nums">{visibleZones}</span> zones displayed
                 </p>
               </div>
               <div className="flex items-center gap-5 text-sm">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-3 w-3 rounded-[3px] bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.75)]" />
-                  <span className="text-slate-400">Alarm</span>
+                  <div className="h-3 w-3 rounded-[3px] bg-[var(--color-error)]" />
+                  <span className="text-[var(--text-secondary)]">Alarm</span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <div className="h-3 w-3 rounded-[3px] bg-slate-700" />
-                  <span className="text-slate-400">Normal</span>
+                  <div className="h-3 w-3 rounded-[3px] bg-[var(--surface-overlay)] border border-[var(--border-default)]" />
+                  <span className="text-[var(--text-secondary)]">Normal</span>
                 </div>
               </div>
             </div>
@@ -336,10 +333,10 @@ export function PanelDetail() {
                 return (
                   <div
                     key={idx}
-                    className={`aspect-square rounded-[10px] border text-sm font-semibold tabular-nums transition-all duration-200 ease-smooth ${
+                    className={`aspect-square rounded-[8px] border text-sm font-semibold tabular-nums transition-all duration-200 ${
                       zoneAlarm
-                        ? "animate-pulse-shadow border-red-300/40 bg-red-500 text-white shadow-glow-red"
-                        : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-slate-400 hover:scale-105 hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-slate-200 hover:shadow-elevation-1"
+                        ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] text-[var(--color-error)]"
+                        : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
                     } flex cursor-default items-center justify-center`}
                     title={`Zone ${idx + 1}: ${zoneAlarm ? "ALARM" : "Normal"}`}
                   >
@@ -351,14 +348,14 @@ export function PanelDetail() {
           </section>
 
           {panel.zones.some((z) => z) && (
-            <section className="overflow-hidden rounded-card border border-red-400/30 bg-gradient-to-br from-red-950/50 via-red-950/30 to-slate-950/70 p-6 shadow-[0_0_40px_rgba(239,68,68,0.08)]">
-              <h3 className="mb-5 flex items-center gap-2.5 text-subtitle font-semibold text-red-100">
+            <section className="overflow-hidden rounded-[12px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-6">
+              <h3 className="mb-5 flex items-center gap-2.5 text-[16px] font-semibold text-[var(--color-error)]">
                 {/* Pulsing live-indicator dot */}
                 <span className="relative mr-1 flex h-3 w-3">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-                  <span className="relative h-3 w-3 rounded-full bg-red-500" />
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-[var(--color-error)] opacity-75" />
+                  <span className="relative h-3 w-3 rounded-full bg-[var(--color-error)]" />
                 </span>
-                <AlertTriangle className="h-5 w-5 text-red-400" />
+                <AlertTriangle className="h-5 w-5" />
                 Active Alarms
               </h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -366,12 +363,12 @@ export function PanelDetail() {
                   zoneAlarm ? (
                     <div
                       key={idx}
-                      className="surface-panel animate-pulse-shadow rounded-[10px] border border-red-300/20 bg-gradient-to-br from-red-950/40 to-slate-950/80 p-5"
+                      className="surface-panel rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--surface-base)] p-5"
                     >
-                      <p className="text-lg font-semibold tabular-nums text-red-100">
+                      <p className="text-lg font-semibold tabular-nums text-[var(--text-primary)]">
                         Zone {idx + 1}
                       </p>
-                      <p className="mt-1.5 text-micro uppercase tracking-wider text-red-300/70">
+                      <p className="mt-1.5 text-[10px] uppercase tracking-wider text-[var(--color-error)]">
                         ALARM ACTIVE
                       </p>
                     </div>
@@ -386,17 +383,17 @@ export function PanelDetail() {
       {activeTab === "controls" && (
         <div className="animate-fade-in space-y-6">
           {commandError && (
-            <div className="rounded-[10px] border border-red-300/20 bg-red-500/[0.08] p-4">
-              <p className="text-sm text-red-100">{commandError}</p>
+            <div className="rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-4">
+              <p className="text-sm text-[var(--color-error)]">{commandError}</p>
             </div>
           )}
 
-          <section className="surface-panel rounded-[14px] p-6">
+          <section className="surface-panel rounded-[12px] p-6 border border-[var(--border-subtle)]">
             <div className="mb-6">
               <h3 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                 Available Commands
               </h3>
-              <p className="mt-1.5 text-sm text-slate-500">
+              <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
                 Commands are sent to the selected panel.
               </p>
             </div>
@@ -408,47 +405,47 @@ export function PanelDetail() {
                   key={command}
                   onClick={() => handleSendCommand(command)}
                   disabled={commandLoading !== null || isEuRestricted}
-                  className={`rounded-[10px] border p-5 text-left transition-all duration-200 ease-smooth disabled:cursor-not-allowed disabled:opacity-50 ${
+                  className={`rounded-[8px] border p-5 text-left transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
                     commandSuccess === command
-                      ? "border-emerald-300/30 bg-emerald-400/[0.08] text-emerald-100 shadow-glow-emerald"
+                      ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
                       : commandLoading === command
-                        ? "border-amber-300/30 bg-amber-400/[0.08] text-amber-100 shadow-glow-amber"
+                        ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
                         : command === "ARM"
-                          ? "border-red-500/25 bg-red-500/[0.02] text-red-200 hover:border-red-400/40 hover:bg-red-500/[0.05] hover:shadow-[0_0_16px_rgba(239,68,68,0.12)] hover:-translate-y-0.5"
+                          ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] text-[var(--color-error)] hover:border-[var(--color-error)]"
                           : command === "ZONE OFF"
-                            ? "border-emerald-500/25 bg-emerald-500/[0.02] text-emerald-200 hover:border-emerald-400/40 hover:bg-emerald-500/[0.05] hover:shadow-[0_0_16px_rgba(52,211,153,0.12)] hover:-translate-y-0.5"
-                            : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-amber-300/30 hover:bg-amber-400/[0.06] hover:shadow-glow-amber hover:-translate-y-0.5"
+                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)]"
+                            : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)]"
                   }`}
                 >
                   {commandSuccess === command ? (
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-emerald-500/15">
-                        <CheckCircle className="h-5 w-5 text-emerald-300" />
+                      <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--color-success)]/10">
+                        <CheckCircle className="h-5 w-5 text-[var(--color-success)]" />
                       </span>
                       <span className="text-sm font-semibold">Sent</span>
                     </div>
                   ) : commandLoading === command ? (
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-amber-500/15">
-                        <Loader2 className="h-5 w-5 animate-spin text-amber-200" />
+                      <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--color-warning)]/10">
+                        <Loader2 className="h-5 w-5 animate-spin text-[var(--color-warning)]" />
                       </span>
                       <span className="text-sm font-semibold">Sending...</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <span className={`flex h-10 w-10 items-center justify-center rounded-[10px] border ${
+                      <span className={`flex h-10 w-10 items-center justify-center rounded-[8px] border ${
                         command === "ARM"
-                          ? "border-red-500/20 bg-red-500/[0.04]"
+                          ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]"
                           : command === "ZONE OFF"
-                            ? "border-emerald-500/20 bg-emerald-500/[0.04]"
-                            : "border-[var(--border-subtle)] bg-gradient-to-br from-white/[0.06] to-white/[0.02]"
+                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)]"
+                            : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]"
                       }`}>
                         <Play className={`h-4 w-4 ${
                           command === "ARM"
-                            ? "text-red-400/80"
+                            ? "text-[var(--color-error)]"
                             : command === "ZONE OFF"
-                              ? "text-emerald-400/80"
-                              : "text-amber-300/70"
+                              ? "text-[var(--color-success)]"
+                              : "text-[var(--accent)]"
                         }`} />
                       </span>
                       <span className="text-sm font-semibold">{command}</span>
@@ -468,12 +465,12 @@ export function PanelDetail() {
               <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                 Event History
               </h2>
-              <p className="mt-1 text-sm text-slate-500">Panel event stream</p>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">Panel event stream</p>
             </div>
             <button
               onClick={loadEvents}
               disabled={eventsLoading}
-              className="btn-secondary flex items-center gap-2 rounded-element px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-2 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] px-4 py-2 text-[13px] font-medium text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             >
               <RefreshCw
                 className={`h-4 w-4 ${eventsLoading ? "animate-spin" : ""}`}
@@ -483,68 +480,70 @@ export function PanelDetail() {
           </div>
 
           {eventsLoading ? (
-            <div className="surface-panel flex justify-center rounded-card py-16">
-              <Loader2 className="h-7 w-7 animate-spin text-amber-300" />
+            <div className="surface-panel flex justify-center rounded-[12px] py-16 border border-[var(--border-subtle)]">
+              <Loader2 className="h-7 w-7 animate-spin text-[var(--accent)]" />
             </div>
           ) : events.length === 0 ? (
-            <div className="surface-panel rounded-card py-16 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[14px] bg-slate-800/50">
-                <Clock className="h-7 w-7 text-slate-600" />
+            <div className="surface-panel rounded-[12px] py-16 text-center border border-[var(--border-subtle)]">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[12px] bg-[var(--surface-overlay)] border border-[var(--border-subtle)]">
+                <Clock className="h-7 w-7 text-[var(--text-quaternary)]" />
               </div>
-              <p className="text-sm text-slate-400">No events recorded</p>
+              <p className="text-sm text-[var(--text-secondary)]">No events recorded</p>
             </div>
           ) : (
-            <div className="table-shell overflow-x-auto">
-              <table className="w-full min-w-[720px]">
-                <thead className="sticky top-0 border-b border-[var(--border-subtle)] bg-slate-950/95 backdrop-blur-lg">
-                  <tr>
-                    <th className="px-5 py-3.5 text-left text-micro uppercase tracking-wider text-slate-500">
-                      Timestamp
-                    </th>
-                    <th className="px-5 py-3.5 text-left text-micro uppercase tracking-wider text-slate-500">
-                      Type
-                    </th>
-                    <th className="px-5 py-3.5 text-left text-micro uppercase tracking-wider text-slate-500">
-                      Details
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.05]">
-                  {events.map((event) => (
-                    <tr
-                      key={event.id}
-                      className="transition-all duration-150 ease-smooth hover:bg-[var(--surface-raised)]"
-                    >
-                      <td className="px-5 py-3.5 font-mono text-sm tabular-nums text-slate-300">
-                        {formatDateTime(
-                          event.timestamp || (event as { createdAt?: unknown }).createdAt,
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <span
-                          className={`inline-flex items-center rounded-full border px-3 py-1 text-micro font-semibold tracking-wide ${
-                            event.type.includes("alarm")
-                              ? "border-red-300/25 bg-red-500/[0.08] text-red-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-                              : event.type.includes("warning")
-                                ? "border-amber-300/25 bg-amber-400/[0.08] text-amber-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-                                : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-slate-300"
-                          }`}
-                        >
-                          {event.type}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 text-sm text-slate-400">
-                        {event.details}
-                        {event.zoneNumber && (
-                          <span className="ml-2 font-mono tabular-nums text-slate-500">
-                            (Zone {event.zoneNumber})
-                          </span>
-                        )}
-                      </td>
+            <div className="surface-panel rounded-[12px] border border-[var(--border-subtle)] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px]">
+                  <thead className="bg-[var(--surface-overlay)] border-b border-[var(--border-subtle)]">
+                    <tr>
+                      <th className="px-5 py-3.5 text-left text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                        Timestamp
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                        Type
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                        Details
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border-subtle)]">
+                    {events.map((event) => (
+                      <tr
+                        key={event.id}
+                        className="transition-colors hover:bg-[var(--surface-hover)]"
+                      >
+                        <td className="px-5 py-3.5 font-mono text-sm tabular-nums text-[var(--text-secondary)]">
+                          {formatDateTime(
+                            event.timestamp || (event as { createdAt?: unknown }).createdAt,
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide ${
+                              event.type.includes("alarm")
+                                ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] text-[var(--color-error)]"
+                                : event.type.includes("warning")
+                                  ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
+                                  : "border-[var(--border-subtle)] bg-[var(--surface-overlay)] text-[var(--text-secondary)]"
+                            }`}
+                          >
+                            {event.type}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-sm text-[var(--text-primary)]">
+                          {event.details}
+                          {event.zoneNumber && (
+                            <span className="ml-2 font-mono tabular-nums text-[var(--text-secondary)]">
+                              (Zone {event.zoneNumber})
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
@@ -556,15 +555,15 @@ export function PanelDetail() {
             <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
               Contact Numbers
             </h2>
-            <p className="mt-1.5 text-sm text-slate-500">
+            <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
               Configure up to 9 mobile numbers to receive alerts from this
               panel.
             </p>
           </div>
 
           {commandError && (
-            <div className="mb-4 rounded-[10px] border border-red-300/20 bg-red-500/[0.08] p-4">
-              <p className="text-sm text-red-100">{commandError}</p>
+            <div className="mb-4 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-4">
+              <p className="text-sm text-[var(--color-error)]">{commandError}</p>
             </div>
           )}
 
@@ -575,8 +574,8 @@ export function PanelDetail() {
               const isSuccess = syncSuccessSlot === slot;
 
               return (
-                <div key={slot} className="surface-muted rounded-[10px] p-5">
-                  <label className="mb-2.5 block text-micro uppercase tracking-wider font-semibold text-slate-400">
+                <div key={slot} className="surface-overlay rounded-[12px] p-5 border border-[var(--border-subtle)]">
+                  <label className="mb-2.5 block text-[10px] uppercase tracking-wider font-semibold text-[var(--text-secondary)]">
                     Slot {slot}
                   </label>
                   <div className="flex flex-col gap-3 sm:flex-row">
@@ -595,16 +594,16 @@ export function PanelDetail() {
                           }))
                         }
                         disabled={!canManageContacts || isSyncing}
-                        className="control-field w-full rounded-element py-2.5 pl-10 pr-3 text-sm tabular-nums transition-all duration-200 focus:ring-2 focus:ring-amber-500/40 disabled:opacity-50"
+                        className="control-field w-full rounded-[8px] py-2.5 pl-10 pr-3 text-[13px] tabular-nums transition-colors focus:ring-1 focus:ring-[var(--border-strong)] disabled:opacity-50"
                       />
                     </div>
                     <button
                       onClick={() => handleSyncContact(slot)}
                       disabled={!canManageContacts || isSyncing}
-                      className={`flex items-center justify-center gap-2 rounded-element px-4 py-2.5 text-sm font-medium transition-all duration-200 ease-smooth disabled:cursor-not-allowed disabled:opacity-50 ${
+                      className={`flex items-center justify-center gap-2 rounded-[8px] px-4 py-2.5 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                         isSuccess
-                          ? "bg-emerald-500/15 text-emerald-300 shadow-glow-emerald hover:bg-emerald-500/25"
-                          : "bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 hover:-translate-y-0.5"
+                          ? "bg-[var(--status-success-bg)] text-[var(--color-success)] border border-[var(--status-success-border)]"
+                          : "bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)]"
                       }`}
                     >
                       {isSuccess ? (

@@ -45,14 +45,14 @@ interface PanelCardProps {
 
   return (
     <>
-      <div className={`h-full flex flex-col surface-panel group transition-colors duration-200 hover:bg-[#222120]`}>
+      <div className={`h-full flex flex-col surface-panel group transition-colors duration-200 hover:bg-[var(--surface-hover)]`}>
         {/* ── Header ──────────────────────────────────────────────────────────── */}
         <div className="flex items-start justify-between border-b border-[var(--border-subtle)] p-5">
           <div className="flex items-center gap-3">
             <div
-              className={`flex h-[42px] w-[42px] items-center justify-center rounded-[10px] ring-1 ring-[var(--border-subtle)] transition-colors duration-300 ${
+              className={`flex h-[42px] w-[42px] items-center justify-center rounded-[8px] ring-1 ring-[var(--border-subtle)] transition-colors duration-300 ${
                 panel.alarm
-                  ? "bg-[#e53d3d]/10 text-[#e53d3d] border border-[#e53d3d]/20"
+                  ? "bg-[var(--status-danger-bg)] text-[var(--color-error)] border border-[var(--status-danger-border)]"
                   : "bg-[var(--surface-raised)] text-[var(--text-primary)] border border-[var(--border-subtle)]"
               }`}
             >
@@ -64,17 +64,16 @@ interface PanelCardProps {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-display text-[1.1rem] font-bold leading-tight tracking-tight text-[var(--text-primary)]">
+                <h3 className="font-sans text-[1.1rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
                   {panel.name}
                 </h3>
-                {/* 8px inline green dot */}
+                {/* 8px inline dot */}
                 {!panel.alarm && (
-                  <span className="h-2 w-2 rounded-full bg-[#34d399] shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
+                  <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
                 )}
                 {panel.alarm && (
                   <span className="relative flex h-2 w-2">
-                    <span className="absolute h-full w-full animate-ping rounded-full bg-[#e53d3d] opacity-70" />
-                    <span className="relative h-full w-full rounded-full bg-[#e53d3d]" />
+                    <span className="relative h-full w-full rounded-full bg-[var(--color-error)]" />
                   </span>
                 )}
               </div>
@@ -87,7 +86,7 @@ interface PanelCardProps {
 
           {/* Alarm Count Chip */}
           {activeAlarmCount > 0 && (
-            <span className="flex items-center gap-1.5 rounded-full bg-[#e53d3d]/10 px-2.5 py-1 text-[11px] font-bold text-[#e53d3d] border border-[#e53d3d]/20">
+            <span className="flex items-center gap-1.5 rounded-full bg-[var(--status-danger-bg)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-error)] border border-[var(--status-danger-border)]">
               {activeAlarmCount} Active
             </span>
           )}
@@ -126,8 +125,8 @@ interface PanelCardProps {
             <div className="flex items-center gap-2 text-[12px] font-medium text-[var(--text-secondary)]">
               RSSI
               <div className="flex items-end gap-[2px] h-3.5">
-                <div className="w-1 h-1.5 bg-[#34d399] rounded-[1px]" />
-                <div className="w-1 h-2.5 bg-[#34d399] rounded-[1px]" />
+                <div className="w-1 h-1.5 bg-[var(--color-success)] rounded-[1px]" />
+                <div className="w-1 h-2.5 bg-[var(--color-success)] rounded-[1px]" />
                 <div className="w-1 h-3.5 bg-[var(--surface-hover)] rounded-[1px]" />
               </div>
             </div>
@@ -154,17 +153,17 @@ interface PanelCardProps {
                   }}
                   className={`relative flex items-center justify-between rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${
                     zone.state === "alarm"
-                      ? "border-[#e53d3d]/30 bg-[#e53d3d]/10 cursor-pointer hover:bg-[#e53d3d]/20"
+                      ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] cursor-pointer hover:bg-[color-mix(in_srgb,var(--status-danger-bg)_80%,transparent)]"
                       : zone.state === "warning"
-                      ? "border-amber-400/20 bg-amber-400/10 cursor-default"
+                      ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] cursor-default"
                       : zone.state === "offline"
-                      ? "border-white/5 border-dashed bg-transparent cursor-default opacity-50"
-                      : "border-[var(--border-subtle)] bg-[#222120] cursor-default group-hover:border-[var(--border-subtle)]"
+                      ? "border-[var(--border-subtle)] border-dashed bg-transparent cursor-default opacity-50"
+                      : "border-[var(--border-subtle)] bg-[var(--surface-overlay)] cursor-default group-hover:border-[var(--border-default)]"
                   }`}
                   disabled={zone.state !== "alarm"}
                 >
                   <div className="flex items-center gap-2 overflow-hidden">
-                    <span className={`text-[11px] font-bold ${zone.state === "alarm" ? "text-[#e53d3d]" : zone.state === "warning" ? "text-amber-400" : "text-[var(--text-secondary)]"}`}>
+                    <span className={`text-[11px] font-bold ${zone.state === "alarm" ? "text-[var(--color-error)]" : zone.state === "warning" ? "text-[var(--color-warning)]" : "text-[var(--text-secondary)]"}`}>
                       Z{zone.index + 1}
                     </span>
                     <span className={`truncate text-[12px] font-medium ${
@@ -178,12 +177,11 @@ interface PanelCardProps {
                   </div>
                   {zone.state === "alarm" && (
                     <span className="relative flex h-[6px] w-[6px] shrink-0">
-                      <span className="absolute h-full w-full animate-ping rounded-full bg-[#e53d3d] opacity-70" />
-                      <span className="relative h-full w-full rounded-full bg-[#e53d3d]" />
+                      <span className="relative h-full w-full rounded-full bg-[var(--color-error)]" />
                     </span>
                   )}
                   {zone.state === "warning" && (
-                    <span className="h-[6px] w-[6px] rounded-full bg-amber-400 shrink-0" />
+                    <span className="h-[6px] w-[6px] rounded-full bg-[var(--color-warning)] shrink-0" />
                   )}
                 </button>
               ))}
@@ -193,7 +191,7 @@ interface PanelCardProps {
 
         {/* ── Footer ──────────────────────────────────────────────────────────── */}
         <div className="mt-auto flex items-center justify-end border-t border-[var(--border-subtle)] px-5 py-3">
-          <span className="text-[12px] font-semibold text-[#e53d3d] transition-opacity duration-200 hover:text-[#ff4f4f]">
+          <span className="text-[12px] font-semibold text-[var(--accent)] transition-opacity duration-200 hover:text-[var(--accent-hover)]">
             View details &rarr;
           </span>
         </div>
@@ -206,13 +204,13 @@ interface PanelCardProps {
             className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
             onClick={() => setResolvingZone(null)}
           />
-          <div className="animate-slide-up relative w-full max-w-sm overflow-hidden rounded-[16px] bg-[#1a1917] shadow-2xl ring-1 ring-[var(--border-subtle)]">
-            <div className="h-1.5 w-full bg-[#e53d3d]" />
+          <div className="animate-slide-up relative w-full max-w-sm overflow-hidden rounded-[16px] bg-[var(--surface-raised)] shadow-2xl ring-1 ring-[var(--border-subtle)]">
+            <div className="h-1.5 w-full bg-[var(--color-error)]" />
             <div className="p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[10px] bg-[#e53d3d]/10 text-[#e53d3d] ring-1 ring-[#e53d3d]/20">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[8px] bg-[var(--status-danger-bg)] text-[var(--color-error)] ring-1 ring-[var(--status-danger-border)]">
                 <AlertTriangle className="h-6 w-6" />
               </div>
-              <h3 className="font-display text-lg font-bold text-[var(--text-primary)]">Resolve Zone Alarm</h3>
+              <h3 className="font-sans text-lg font-bold text-[var(--text-primary)]">Resolve Zone Alarm</h3>
               <p className="mt-2 text-[13px] text-[var(--text-secondary)]">
                 Zone {resolvingZone + 1} is currently in an alarm state. Have you inspected and resolved the physical issue?
               </p>
@@ -221,17 +219,17 @@ interface PanelCardProps {
                 <button
                   onClick={() => setResolvingZone(null)}
                   disabled={isResolving}
-                  className="rounded-[8px] px-4 py-2 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                  className="rounded-[6px] px-4 py-2 text-[13px] font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-overlay)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleResolveZone}
                   disabled={isResolving}
-                  className="flex items-center gap-2 rounded-[8px] bg-[#e53d3d] px-5 py-2 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[#ff4f4f] disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-[6px] bg-[var(--color-error)] px-5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-[color-mix(in_srgb,var(--color-error)_90%,black)] disabled:opacity-50"
                 >
                   {isResolving ? (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--border-strong)] border-t-white" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
                   ) : (
                     <CheckCircle className="h-4 w-4" />
                   )}
@@ -245,4 +243,3 @@ interface PanelCardProps {
     </>
   );
 }
-

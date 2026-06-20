@@ -575,12 +575,12 @@ export function AdminSettings() {
 
       {/* Error banner */}
       {error && (
-        <div className="animate-fade-in mb-6 flex items-center gap-3 rounded-[10px] border border-red-300/25 bg-red-500/10 p-4 shadow-sm">
-          <AlertCircle className="h-5 w-5 shrink-0 text-red-200" />
-          <p className="text-[13px] text-red-100">{error}</p>
+        <div className="animate-fade-in mb-6 flex items-center gap-3 rounded-[10px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-4 shadow-sm">
+          <AlertCircle className="h-5 w-5 shrink-0 text-[var(--color-error)]" />
+          <p className="text-[13px] text-[var(--text-primary)]">{error}</p>
           <button
             onClick={() => setError(null)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-[10px] text-red-200/80 transition-all duration-200 ease-out hover:bg-red-500/20 hover:text-red-100"
+            className="ml-auto flex h-8 w-8 items-center justify-center rounded-[10px] text-[var(--color-error)]/80 transition-all duration-200 ease-out hover:bg-[var(--status-danger-bg)] hover:text-[var(--text-primary)]"
             aria-label="Dismiss error"
           >
             <XCircle className="h-4 w-4" />
@@ -590,12 +590,12 @@ export function AdminSettings() {
 
       {/* Success banner */}
       {success && (
-        <div className="animate-fade-in mb-6 flex items-center gap-3 rounded-[10px] border border-emerald-300/25 bg-emerald-400/10 p-4 shadow-sm">
-          <CheckCircle className="h-5 w-5 shrink-0 text-emerald-200" />
-          <p className="text-[13px] text-emerald-100">{success}</p>
+        <div className="animate-fade-in mb-6 flex items-center gap-3 rounded-[10px] border border-emerald-300/25 bg-[var(--accent)]/10 p-4 shadow-sm">
+          <CheckCircle className="h-5 w-5 shrink-0 text-[var(--color-success)]" />
+          <p className="text-[13px] text-[var(--text-primary)]">{success}</p>
           <button
             onClick={() => setSuccess(null)}
-            className="ml-auto flex h-8 w-8 items-center justify-center rounded-[10px] text-emerald-200/80 transition-all duration-200 ease-out hover:bg-emerald-500/20 hover:text-emerald-100"
+            className="ml-auto flex h-8 w-8 items-center justify-center rounded-[10px] text-[var(--color-success)]/80 transition-all duration-200 ease-out hover:bg-[var(--status-success-bg)] hover:text-[var(--text-primary)]"
             aria-label="Dismiss success"
           >
             <XCircle className="h-4 w-4" />
@@ -611,11 +611,11 @@ export function AdminSettings() {
             onClick={() => setActiveSection("companies")}
             className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
           >
-            <div className="admin-hero-glow bg-amber-500 -top-10 -left-10" />
+            
             <div className="relative z-10">
               <div className="mb-5 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20">
-                  <Building2 className="h-6 w-6 text-amber-400" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                  <Building2 className="h-6 w-6 text-[var(--accent)]" />
                 </div>
                 <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
               </div>
@@ -628,8 +628,8 @@ export function AdminSettings() {
               <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
                 <div className="flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-40 animate-ping" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
                   </span>
                   <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
                     {companiesLoading ? "—" : companies.length}
@@ -648,11 +648,11 @@ export function AdminSettings() {
           onClick={() => setActiveSection("users")}
           className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
         >
-          <div className="admin-hero-glow bg-sky-500 -top-10 -right-10" />
+          
           <div className="relative z-10">
             <div className="mb-5 flex items-center justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-br from-sky-500/20 to-sky-600/10 border border-sky-500/20">
-                <Users className="h-6 w-6 text-sky-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                <Users className="h-6 w-6 text-[var(--accent)]" />
               </div>
               <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
             </div>
@@ -665,8 +665,8 @@ export function AdminSettings() {
             <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
               <div className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-40 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-400" />
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
                 </span>
                 <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
                   {usersLoading ? "—" : users.length}
@@ -684,11 +684,11 @@ export function AdminSettings() {
           onClick={() => setActiveSection("panels")}
           className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
         >
-          <div className="admin-hero-glow bg-emerald-500 -bottom-10 -right-10" />
+          
           <div className="relative z-10">
             <div className="mb-5 flex items-center justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20">
-                <Cpu className="h-6 w-6 text-emerald-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                <Cpu className="h-6 w-6 text-[var(--accent)]" />
               </div>
               <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
             </div>
@@ -701,8 +701,8 @@ export function AdminSettings() {
             <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
               <div className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
                 </span>
                 <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
                   {panelsLoading ? "—" : panels.length}
@@ -740,8 +740,8 @@ export function AdminSettings() {
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20">
-                    <Building2 className="h-4 w-4 text-amber-400" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                    <Building2 className="h-4 w-4 text-[var(--accent)]" />
                   </div>
                   <div>
                     <h2 className="text-[15px] font-bold text-[var(--text-primary)]">Company Management</h2>
@@ -835,7 +835,7 @@ export function AdminSettings() {
                           disabled={companyFormLoading}
                         />
                         {companyErrors.name && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {companyErrors.name.message}
                           </p>
                         )}
@@ -853,7 +853,7 @@ export function AdminSettings() {
                           placeholder="Optional details about this company"
                         />
                         {companyErrors.description && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {companyErrors.description.message}
                           </p>
                         )}
@@ -892,7 +892,7 @@ export function AdminSettings() {
                                   <button
                                     type="button"
                                     onClick={() => removeCreateCompanyBranch(index)}
-                                    className="flex items-center gap-1 text-[11px] text-[var(--color-error)] hover:text-red-400 p-1 rounded-md transition-colors"
+                                    className="flex items-center gap-1 text-[11px] text-[var(--color-error)] hover:text-[var(--color-error)] p-1 rounded-md transition-colors"
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                     Remove
@@ -909,7 +909,7 @@ export function AdminSettings() {
                                       disabled={companyFormLoading}
                                     />
                                     {companyErrors.branches?.[index]?.name && (
-                                      <p className="mt-1 text-[11px] text-red-400">
+                                      <p className="mt-1 text-[11px] text-[var(--color-error)]">
                                         {companyErrors.branches[index]?.name?.message}
                                       </p>
                                     )}
@@ -1032,7 +1032,7 @@ export function AdminSettings() {
                           disabled={editCompanyFormLoading}
                         />
                         {editCompanyErrors.name && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {editCompanyErrors.name.message}
                           </p>
                         )}
@@ -1050,7 +1050,7 @@ export function AdminSettings() {
                           placeholder="Optional details about this company"
                         />
                         {editCompanyErrors.description && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {editCompanyErrors.description.message}
                           </p>
                         )}
@@ -1104,7 +1104,7 @@ export function AdminSettings() {
                                   onClick={() => setSelectedCompanyId(company.id)}
                                   className={`w-full flex items-center gap-2.5 px-3 sm:px-4 py-2.5 text-left transition-colors group ${
                                     isSelected
-                                      ? 'bg-[var(--surface-hover)] border-l-2 border-l-amber-500'
+                                      ? 'bg-[var(--surface-hover)] border-l-2 border-l-[var(--accent)]'
                                       : 'hover:bg-[var(--surface-hover)] border-l-2 border-l-transparent'
                                   }`}
                                 >
@@ -1416,8 +1416,8 @@ export function AdminSettings() {
                                           <div className="flex flex-col flex-1 h-full relative">
                                             <div className="flex items-start justify-between mb-3">
                                               <div className="flex items-center gap-2.5 pr-14">
-                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-amber-500/10 border border-amber-500/15">
-                                                  <MapPin className="h-4 w-4 text-amber-400" />
+                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                                                  <MapPin className="h-4 w-4 text-[var(--accent)]" />
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
                                                   <span className="text-[13px] font-bold text-[var(--text-primary)] truncate" title={branch.name}>{branch.name}</span>
@@ -1509,8 +1509,8 @@ export function AdminSettings() {
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-gradient-to-br from-sky-500/20 to-sky-600/10 border border-sky-500/20">
-                    <Users className="h-4 w-4 text-sky-400" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                    <Users className="h-4 w-4 text-[var(--accent)]" />
                   </div>
                   <div>
                     <h2 className="text-[15px] font-bold text-[var(--text-primary)]">User Management</h2>
@@ -1581,7 +1581,7 @@ export function AdminSettings() {
               onClick={() => setSelectedUserCompanyId(company.id)}
               className={`w-full flex items-center gap-2.5 px-3 sm:px-4 py-2.5 text-left transition-colors group ${
                 isSelected
-                  ? 'bg-[var(--surface-hover)] border-l-2 border-l-sky-500'
+                  ? 'bg-[var(--surface-hover)] border-l-2 border-l-[var(--accent)]'
                   : 'hover:bg-[var(--surface-hover)] border-l-2 border-l-transparent'
               }`}
             >
@@ -1712,7 +1712,7 @@ export function AdminSettings() {
                     <div key={branch.id} className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
                       <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                          <MapPin className="h-3.5 w-3.5 text-[var(--accent)]" />
                           <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">{branch.name}</h4>
                         </div>
                         <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
@@ -1731,7 +1731,7 @@ export function AdminSettings() {
                           <div className="mt-3 text-center border-t border-[var(--border-subtle)] pt-2">
                             <button
                               onClick={() => setExpandedUserBranches(prev => ({ ...prev, [`${selectedCompany.id}-${branch.id}`]: !isExpanded }))}
-                              className="text-[11px] font-medium text-sky-500 hover:text-sky-400 transition-colors"
+                              className="text-[11px] font-medium text-sky-500 hover:text-[var(--accent)] transition-colors"
                             >
                               {isExpanded ? "Show less" : `See all ${assignedUsers.length} users`}
                             </button>
@@ -1752,7 +1752,7 @@ export function AdminSettings() {
                     <div className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
                       <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Building2 className="h-3.5 w-3.5 text-amber-400" />
+                          <Building2 className="h-3.5 w-3.5 text-[var(--accent)]" />
                           <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">Company Level (No Branch)</h4>
                         </div>
                         <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
@@ -1767,7 +1767,7 @@ export function AdminSettings() {
                           <div className="mt-3 text-center border-t border-[var(--border-subtle)] pt-2">
                             <button
                               onClick={() => setExpandedUserBranches(prev => ({ ...prev, [`${selectedCompany.id}-nobranch`]: !isExpanded }))}
-                              className="text-[11px] font-medium text-sky-500 hover:text-sky-400 transition-colors"
+                              className="text-[11px] font-medium text-sky-500 hover:text-[var(--accent)] transition-colors"
                             >
                               {isExpanded ? "Show less" : `See all ${noBranchUsers.length} users`}
                             </button>
@@ -1816,8 +1816,8 @@ export function AdminSettings() {
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20">
-                    <Cpu className="h-4 w-4 text-emerald-400" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                    <Cpu className="h-4 w-4 text-[var(--accent)]" />
                   </div>
                   <div>
                     <h2 className="text-[15px] font-bold text-[var(--text-primary)]">Panel Provisioning</h2>
@@ -1907,13 +1907,13 @@ export function AdminSettings() {
                         <input
                           {...register("serial")}
                           className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            errors.serial ? "border-red-400/70" : ""
+                            errors.serial ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., FP-2024-001"
                           disabled={panelFormLoading}
                         />
                         {errors.serial && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {errors.serial.message}
                           </p>
                         )}
@@ -1926,13 +1926,13 @@ export function AdminSettings() {
                         <input
                           {...register("name")}
                           className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            errors.name ? "border-red-400/70" : ""
+                            errors.name ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., Building A - Floor 1"
                           disabled={panelFormLoading}
                         />
                         {errors.name && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {errors.name.message}
                           </p>
                         )}
@@ -1946,7 +1946,7 @@ export function AdminSettings() {
                           type="number"
                           {...register("zoneCount")}
                           className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            errors.zoneCount ? "border-red-400/70" : ""
+                            errors.zoneCount ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="8"
                           min={1}
@@ -1954,7 +1954,7 @@ export function AdminSettings() {
                           disabled={panelFormLoading}
                         />
                         {errors.zoneCount && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {errors.zoneCount.message}
                           </p>
                         )}
@@ -1968,7 +1968,7 @@ export function AdminSettings() {
                           <select
                             {...register("companyId")}
                             className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                              errors.companyId ? "border-red-400/70" : ""
+                              errors.companyId ? "border-[var(--status-danger-border)]" : ""
                             }`}
                             disabled={panelFormLoading || companiesLoading}
                           >
@@ -1980,7 +1980,7 @@ export function AdminSettings() {
                             ))}
                           </select>
                           {errors.companyId && (
-                            <p className="mt-1 text-[12px] text-red-400">
+                            <p className="mt-1 text-[12px] text-[var(--color-error)]">
                               {errors.companyId.message}
                             </p>
                           )}
@@ -1992,7 +1992,7 @@ export function AdminSettings() {
                           <select
                             {...register("branchId")}
                             className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                              errors.branchId ? "border-red-400/70" : ""
+                              errors.branchId ? "border-[var(--status-danger-border)]" : ""
                             }`}
                             disabled={panelFormLoading || branchesLoading}
                           >
@@ -2004,7 +2004,7 @@ export function AdminSettings() {
                             ))}
                           </select>
                           {errors.branchId && (
-                            <p className="mt-1 text-[12px] text-red-400">
+                            <p className="mt-1 text-[12px] text-[var(--color-error)]">
                               {errors.branchId.message}
                             </p>
                           )}
@@ -2023,13 +2023,13 @@ export function AdminSettings() {
                         <input
                           {...register("ipAddress")}
                           className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            errors.ipAddress ? "border-red-400/70" : ""
+                            errors.ipAddress ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., 72.167.225.142"
                           disabled={panelFormLoading}
                         />
                         {errors.ipAddress && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {errors.ipAddress.message}
                           </p>
                         )}
@@ -2117,13 +2117,13 @@ export function AdminSettings() {
                         <input
                           {...registerEditPanel("name")}
                           className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            editPanelErrors.name ? "border-red-400/70" : ""
+                            editPanelErrors.name ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., Building A - Floor 1"
                           disabled={editPanelFormLoading}
                         />
                         {editPanelErrors.name && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {editPanelErrors.name.message}
                           </p>
                         )}
@@ -2137,7 +2137,7 @@ export function AdminSettings() {
                           <select
                             {...registerEditPanel("companyId")}
                             className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                              editPanelErrors.companyId ? "border-red-400/70" : ""
+                              editPanelErrors.companyId ? "border-[var(--status-danger-border)]" : ""
                             }`}
                             disabled={editPanelFormLoading || companiesLoading}
                           >
@@ -2149,7 +2149,7 @@ export function AdminSettings() {
                             ))}
                           </select>
                           {editPanelErrors.companyId && (
-                            <p className="mt-1 text-[12px] text-red-400">
+                            <p className="mt-1 text-[12px] text-[var(--color-error)]">
                               {editPanelErrors.companyId.message}
                             </p>
                           )}
@@ -2161,7 +2161,7 @@ export function AdminSettings() {
                           <select
                             {...registerEditPanel("branchId")}
                             className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                              editPanelErrors.branchId ? "border-red-400/70" : ""
+                              editPanelErrors.branchId ? "border-[var(--status-danger-border)]" : ""
                             }`}
                             disabled={editPanelFormLoading || branchesLoading}
                           >
@@ -2173,7 +2173,7 @@ export function AdminSettings() {
                             ))}
                           </select>
                           {editPanelErrors.branchId && (
-                            <p className="mt-1 text-[12px] text-red-400">
+                            <p className="mt-1 text-[12px] text-[var(--color-error)]">
                               {editPanelErrors.branchId.message}
                             </p>
                           )}
@@ -2192,13 +2192,13 @@ export function AdminSettings() {
                         <input
                           {...registerEditPanel("ipAddress")}
                           className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            editPanelErrors.ipAddress ? "border-red-400/70" : ""
+                            editPanelErrors.ipAddress ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., 72.167.225.142"
                           disabled={editPanelFormLoading}
                         />
                         {editPanelErrors.ipAddress && (
-                          <p className="mt-1 text-[12px] text-red-400">
+                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {editPanelErrors.ipAddress.message}
                           </p>
                         )}
@@ -2251,7 +2251,7 @@ export function AdminSettings() {
               onClick={() => setSelectedPanelCompanyId(company.id)}
               className={`w-full flex items-center gap-2.5 px-3 sm:px-4 py-2.5 text-left transition-colors group ${
                 isSelected
-                  ? 'bg-[var(--surface-hover)] border-l-2 border-l-emerald-500'
+                  ? 'bg-[var(--surface-hover)] border-l-2 border-l-[var(--accent)]'
                   : 'hover:bg-[var(--surface-hover)] border-l-2 border-l-transparent'
               }`}
             >
@@ -2387,7 +2387,7 @@ export function AdminSettings() {
                     <div key={branch.id} className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
                       <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                          <MapPin className="h-3.5 w-3.5 text-[var(--accent)]" />
                           <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">{branch.name}</h4>
                         </div>
                         <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
@@ -2414,7 +2414,7 @@ export function AdminSettings() {
                     <div className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
                       <div className="bg-[var(--surface-hover)] px-3 py-2 border-b border-[var(--border-subtle)] flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Building2 className="h-3.5 w-3.5 text-amber-400" />
+                          <Building2 className="h-3.5 w-3.5 text-[var(--accent)]" />
                           <h4 className="text-[12px] font-semibold text-[var(--text-primary)]">Company Level (No Branch)</h4>
                         </div>
                         <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-raised)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border-subtle)]">
@@ -2538,7 +2538,7 @@ export function AdminSettings() {
                           confirmDeleteCompany();
                         }
                       }}
-                      className="px-4 py-2 rounded-[6px] bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors font-medium"
+                      className="px-4 py-2 rounded-[6px] bg-[var(--status-danger-bg)] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors font-medium"
                     >
                       Continue
                     </button>
@@ -2546,7 +2546,7 @@ export function AdminSettings() {
                 </>
               ) : (
                 <>
-                  <p className="mb-4 text-red-400 font-medium">
+                  <p className="mb-4 text-[var(--color-error)] font-medium">
                     Warning: The following users will be permanently deleted:
                   </p>
                   <div className="max-h-[200px] overflow-y-auto mb-4 border border-[var(--border-subtle)] rounded-[6px] bg-[var(--surface-raised)]">

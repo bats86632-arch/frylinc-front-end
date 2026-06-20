@@ -25,16 +25,16 @@ export function ProtectedRoute({
 
   if (loading) {
     return (
-      <div className="theme-scope flex min-h-screen items-center justify-center console-bg">
+      <div className="theme-scope flex min-h-screen items-center justify-center bg-[var(--surface-base)]">
         <div className="flex flex-col items-center gap-5 animate-fade-in">
           <div className="relative">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[14px] bg-gradient-to-br from-red-500 to-amber-400 shadow-lg shadow-red-950/40 ring-1 ring-[var(--border-subtle)]">
-              <Flame className="h-7 w-7 text-[var(--text-primary)]" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-[12px] bg-[var(--accent)] ring-1 ring-[var(--border-subtle)]">
+              <Flame className="h-7 w-7 text-white" />
             </div>
-            <div className="absolute -inset-2 animate-pulse-ring rounded-[18px] border border-amber-400/20" />
+            <div className="absolute -inset-2 rounded-[16px] border border-[var(--border-default)]" />
           </div>
           <div className="flex items-center gap-2.5">
-            <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
             <span className="text-[13px] font-medium text-[var(--text-secondary)]">
               Loading Fyrlinc…
             </span>

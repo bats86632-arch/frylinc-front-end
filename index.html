@@ -18,7 +18,7 @@
             property="og:description"
             content="IoT Fire Alarm Panel Monitoring System"
         />
-        <meta name="theme-color" content="#0a0a0a" />
+        <meta name="theme-color" content="#111214" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
@@ -26,19 +26,13 @@
             content="black-translucent"
         />
         <meta name="apple-mobile-web-app-title" content="Fyrlinc" />
-        <!-- Google Fonts: Inter (body) + Space Grotesk (display) + Barlow Condensed -->
-        <!-- Preconnect so DNS/TCP is ready before the font CSS is requested -->
+        <!-- Google Fonts: Inter -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <!-- Non-blocking font load: preload the stylesheet, then apply it once
-         downloaded. This removes the render-blocking penalty entirely.
-         The service worker (Workbox CacheFirst) caches both the CSS and the
-         woff2 files so repeat visits are served with zero network latency.
-         Outfit removed — it was marked legacy and is unused. -->
         <link
             rel="preload"
             as="style"
-            href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
             onload="
                 this.onload = null;
                 this.rel = 'stylesheet';
@@ -47,11 +41,11 @@
         <noscript>
             <link
                 rel="stylesheet"
-                href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap"
+                href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
             />
         </noscript>
     </head>
-    <body class="bg-[#0f0f0e]">
+    <body class="bg-[var(--surface-base)]">
         <div id="root">
             <style>
                 .initial-loader-container {
@@ -60,13 +54,13 @@
                     width: 100vw;
                     align-items: center;
                     justify-content: center;
-                    background-color: #0f0f0e;
+                    background-color: #111214;
                 }
                 .initial-loader {
                     width: 40px;
                     height: 40px;
-                    border: 3px solid rgba(245, 158, 11, 0.2);
-                    border-top-color: #f59e0b;
+                    border: 3px solid rgba(30, 107, 138, 0.2);
+                    border-top-color: #1e6b8a;
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
                 }

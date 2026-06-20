@@ -133,27 +133,27 @@ export function Login() {
   };
 
   return (
-    <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in lg:rounded-[28px] lg:border-white/[0.14] lg:bg-[linear-gradient(180deg,rgba(18,18,26,0.92),rgba(10,10,15,0.86))] lg:p-11 lg:shadow-[0_30px_110px_rgba(0,0,0,0.48)] lg:backdrop-blur-2xl">
+    <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in lg:rounded-[16px] lg:border-[var(--border-subtle)] lg:bg-[var(--surface-panel)] lg:p-11 lg:shadow-2xl">
       {/* Header */}
       <div className="mb-8 lg:mb-9">
         <div className="mb-6">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[14px] border border-[rgba(232,23,58,0.28)] bg-[rgba(232,23,58,0.10)] inset-highlight shadow-[0_12px_32px_rgba(232,23,58,0.16)] lg:h-14 lg:w-14 lg:rounded-[18px]">
-            <LockKeyhole className="h-5 w-5 text-[#ff5c73] lg:h-6 lg:w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-[var(--border-default)] bg-[var(--surface-overlay)] lg:h-14 lg:w-14 lg:rounded-[12px]">
+            <LockKeyhole className="h-5 w-5 text-[var(--text-primary)] lg:h-6 lg:w-6" />
           </div>
         </div>
-        <h2 className="font-display text-[2rem] font-bold leading-tight tracking-tight text-[var(--text-primary)] text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
+        <h2 className="font-sans text-[2rem] font-bold leading-tight tracking-tight text-[var(--text-primary)] text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
           Welcome back
         </h2>
-        <p className="mt-2 text-body leading-relaxed text-[var(--text-tertiary)] font-medium lg:mt-3 lg:max-w-sm lg:text-[0.95rem]">
+        <p className="mt-2 text-[15px] leading-relaxed text-[var(--text-secondary)] font-medium lg:mt-3 lg:max-w-sm">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
 
       {/* Error banner */}
       {error && (
-        <div className="mb-7 flex items-start gap-3 rounded-[12px] border border-[rgba(232,23,58,0.30)] bg-[rgba(232,23,58,0.12)] p-4 animate-fade-in inset-highlight">
-          <AlertCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#ff8099]" />
-          <p className="text-[13px] font-medium leading-6 text-[#ffb3c0]">
+        <div className="mb-7 flex items-start gap-3 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-4 animate-fade-in">
+          <AlertCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--color-error)]" />
+          <p className="text-[13px] font-medium leading-6 text-[var(--color-error)]">
             {error}
           </p>
         </div>
@@ -161,9 +161,9 @@ export function Login() {
 
       {/* Success banner */}
       {success && (
-        <div className="mb-7 flex items-start gap-3 rounded-[12px] border border-[rgba(34,197,94,0.30)] bg-[rgba(34,197,94,0.12)] p-4 animate-fade-in inset-highlight">
-          <CheckCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[#4ade80]" />
-          <p className="text-[13px] font-medium leading-6 text-[#86efac]">
+        <div className="mb-7 flex items-start gap-3 rounded-[8px] border border-[var(--status-success-border)] bg-[var(--status-success-bg)] p-4 animate-fade-in">
+          <CheckCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--color-success)]" />
+          <p className="text-[13px] font-medium leading-6 text-[var(--color-success)]">
             {success}
           </p>
         </div>
@@ -187,20 +187,20 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium lg:h-[52px] lg:rounded-[14px] ${
+                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] ${
                   errors.email
-                    ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)] pr-10"
+                    ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] pr-10"
                     : ""
                 }`}
                 placeholder="you@example.com"
                 disabled={isLoading}
               />
               {errors.email && (
-                <AlertCircle className="pointer-events-none absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#e8173a]" />
+                <AlertCircle className="pointer-events-none absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[var(--color-error)]" />
               )}
             </div>
             {errors.email && (
-              <p className="mt-2 text-[13px] font-medium text-[#ff8099] animate-fade-in">
+              <p className="mt-2 text-[13px] font-medium text-[var(--color-error)] animate-fade-in">
                 {errors.email.message}
               </p>
             )}
@@ -218,7 +218,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-[12px] font-medium text-[#ff5c73] hover:text-[#ff8099] transition-colors"
+                className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
               >
                 Forgot password?
               </button>
@@ -228,9 +228,9 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium lg:h-[52px] lg:rounded-[14px] ${
+                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] ${
                   errors.password
-                    ? "border-[rgba(232,23,58,0.50)] bg-[rgba(232,23,58,0.05)]"
+                    ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]"
                     : ""
                 }`}
                 placeholder="Enter your password"
@@ -239,7 +239,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[8px] text-[var(--text-quaternary)] transition-all duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-default)]"
+                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-[var(--text-quaternary)] transition-all duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-default)]"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -250,7 +250,7 @@ export function Login() {
               </button>
             </div>
             {errors.password && (
-              <p className="mt-2 text-[13px] font-medium text-[#ff8099] animate-fade-in">
+              <p className="mt-2 text-[13px] font-medium text-[var(--color-error)] animate-fade-in">
                 {errors.password.message}
               </p>
             )}
@@ -261,7 +261,7 @@ export function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="btn-primary mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-4 text-[15px] font-bold lg:h-[54px] lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_16px_36px_rgba(232,23,58,0.28)]"
+          className="btn-primary mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-4 text-[15px] font-bold lg:h-[48px] rounded-[8px]"
         >
           {isLoading ? (
             <>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export function PrivacyPolicy() {
   return (
-    <div className="legal-page min-h-screen console-bg p-6 text-[var(--text-primary)] md:p-12">
+    <div className="legal-page min-h-screen bg-[var(--surface-base)] p-6 text-[var(--text-primary)] md:p-12">
       <div className="mx-auto max-w-3xl">
         <Link
           to="/"
@@ -13,7 +13,7 @@ export function PrivacyPolicy() {
           <span>Back to App</span>
         </Link>
 
-        <h1 className="font-display mb-4 text-[32px] font-bold">
+        <h1 className="mb-4 text-[32px] font-bold">
           Privacy Policy
         </h1>
         <p className="mb-8 text-[var(--text-secondary)]">

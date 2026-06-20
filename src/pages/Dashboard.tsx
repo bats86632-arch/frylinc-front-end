@@ -157,11 +157,11 @@ export function Dashboard() {
   if (error) {
     return (
       <div className="surface-panel p-8 text-center animate-fade-in-up m-[32px]">
-        <ShieldAlert className="mx-auto h-12 w-12 text-[#e8173a] opacity-80 mb-4" />
-        <p className="text-[15px] font-bold text-[var(--text-primary)] drop-shadow-sm">
+        <ShieldAlert className="mx-auto h-12 w-12 text-[var(--color-error)] opacity-80 mb-4" />
+        <p className="text-[15px] font-bold text-[var(--text-primary)]">
           System Error
         </p>
-        <p className="mt-2 text-[13px] text-[#ff8099]">{error.message}</p>
+        <p className="mt-2 text-[13px] text-[var(--color-error)]">{error.message}</p>
       </div>
     );
   }
@@ -181,7 +181,7 @@ export function Dashboard() {
                   setSearchQuery("");
                   setFilter("all");
                 }}
-                className="group flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                className="group flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
               >
                 <ArrowLeft className="h-4 w-4" />
               </button>
@@ -210,7 +210,7 @@ export function Dashboard() {
                 setSearchQuery("");
                 setFilter("all");
               }}
-              className="group flex h-8 w-8 items-center justify-center rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+              className="group flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -234,23 +234,23 @@ export function Dashboard() {
         <div className="flex flex-col sm:flex-row gap-6">
           {showCompanyView && (
             <>
-              <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[#e53d3d] rounded-[14px]">
+              <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[var(--color-error)] rounded-[12px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   System Alarms
                 </p>
                 <p
-                  className={`mt-0.5 font-display text-[28px] font-bold leading-none tabular-nums ${
-                    systemAlarmCount > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"
+                  className={`mt-0.5 font-sans text-[28px] font-bold leading-none tabular-nums ${
+                    systemAlarmCount > 0 ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"
                   }`}
                 >
                   {systemAlarmCount}
                 </p>
               </div>
-              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[14px]">
+              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[12px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Total Companies
                 </p>
-                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
+                <p className="mt-0.5 font-sans text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {(companies || []).length}
                 </p>
               </div>
@@ -259,23 +259,23 @@ export function Dashboard() {
 
           {showBranchView && (
             <>
-              <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[#e53d3d] rounded-[14px]">
+              <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[var(--color-error)] rounded-[12px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Branch Alarms
                 </p>
                 <p
-                  className={`mt-0.5 font-display text-[28px] font-bold leading-none tabular-nums ${
-                    branchAlarmCount > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"
+                  className={`mt-0.5 font-sans text-[28px] font-bold leading-none tabular-nums ${
+                    branchAlarmCount > 0 ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"
                   }`}
                 >
                   {branchAlarmCount}
                 </p>
               </div>
-              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[14px]">
+              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[12px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Total Branches
                 </p>
-                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
+                <p className="mt-0.5 font-sans text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {viewBranches.length}
                 </p>
               </div>
@@ -284,39 +284,39 @@ export function Dashboard() {
 
           {showPanelView && (
             <>
-              <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[#e53d3d] rounded-[14px]">
+              <div className="surface-panel flex-1 px-5 py-3 border-t-2 border-[var(--color-error)] rounded-[12px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Active Alarms
                 </p>
                 <p
-                  className={`mt-0.5 font-display text-[28px] font-bold leading-none tabular-nums ${
-                    activeAlarms > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"
+                  className={`mt-0.5 font-sans text-[28px] font-bold leading-none tabular-nums ${
+                    activeAlarms > 0 ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"
                   }`}
                 >
                   {activeAlarms}
                 </p>
               </div>
-              <div className="flex-1 surface-panel relative overflow-hidden px-5 py-3 pb-4 border-t-2 border-[#34d399] rounded-[14px]">
+              <div className="flex-1 surface-panel relative overflow-hidden px-5 py-3 pb-4 border-t-2 border-[var(--color-success)] rounded-[12px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Online Panels
                 </p>
-                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
+                <p className="mt-0.5 font-sans text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {onlinePanels}
                 </p>
                 <div className="absolute bottom-0 left-0 right-0 flex h-[3px] w-full gap-[1px]">
                   {[...Array(30)].map((_, i) => (
                     <div
                       key={i}
-                      className={`h-full flex-1 ${i < 29 ? "bg-[#34d399]" : "bg-[#e53d3d]"}`}
+                      className={`h-full flex-1 ${i < 29 ? "bg-[var(--color-success)]" : "bg-[var(--color-error)]"}`}
                     />
                   ))}
                 </div>
               </div>
-              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[14px]">
+              <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[12px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
                   Total Devices
                 </p>
-                <p className="mt-0.5 font-display text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
+                <p className="mt-0.5 font-sans text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {activePanels.length}
                 </p>
               </div>
@@ -344,7 +344,7 @@ export function Dashboard() {
                 onClick={() => setFilter("all")}
                 className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
                   filter === "all"
-                    ? "border-[#e53d3d] text-[var(--text-primary)]"
+                    ? "border-[var(--color-error)] text-[var(--text-primary)]"
                     : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
@@ -357,12 +357,12 @@ export function Dashboard() {
                 onClick={() => setFilter("alarm")}
                 className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
                   filter === "alarm"
-                    ? "border-[#e53d3d] text-[var(--text-primary)]"
+                    ? "border-[var(--color-error)] text-[var(--text-primary)]"
                     : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 Alarms{" "}
-                <span className="ml-1.5 rounded bg-[#e53d3d]/10 text-[#e53d3d] px-1.5 py-0.5 text-[10px] tabular-nums">
+                <span className="ml-1.5 rounded bg-[var(--status-danger-bg)] text-[var(--color-error)] px-1.5 py-0.5 text-[10px] tabular-nums">
                   {activeAlarms}
                 </span>
               </button>
@@ -370,12 +370,12 @@ export function Dashboard() {
                 onClick={() => setFilter("online")}
                 className={`whitespace-nowrap pb-3 text-[13px] font-medium transition-all duration-150 border-b-2 ${
                   filter === "online"
-                    ? "border-[#e53d3d] text-[var(--text-primary)]"
+                    ? "border-[var(--color-error)] text-[var(--text-primary)]"
                     : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 Online{" "}
-                <span className="ml-1.5 rounded bg-[#34d399]/10 text-[#34d399] px-1.5 py-0.5 text-[10px] tabular-nums">
+                <span className="ml-1.5 rounded bg-[var(--status-success-bg)] text-[var(--color-success)] px-1.5 py-0.5 text-[10px] tabular-nums">
                   {onlinePanels}
                 </span>
               </button>
@@ -407,7 +407,7 @@ export function Dashboard() {
         filteredCompanies.length === 0 ? (
           <div className="surface-panel py-20 text-center">
             <Building2 className="mx-auto mb-4 h-12 w-12 text-[var(--text-quaternary)]" />
-            <p className="text-[16px] font-bold text-[var(--text-primary)] drop-shadow-sm">
+            <p className="text-[16px] font-bold text-[var(--text-primary)]">
               No companies found
             </p>
             <p className="mt-2 text-[13px] font-medium text-[var(--text-quaternary)]">
@@ -427,16 +427,16 @@ export function Dashboard() {
                     setSelectedCompanyId(company.id);
                     setSearchQuery("");
                   }}
-                  className="surface-panel group flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-raised)] animate-fade-in-up rounded-[14px] overflow-hidden"
+                  className="surface-panel group flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-raised)] animate-fade-in-up rounded-[12px] overflow-hidden"
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
                   <div className="p-5 flex-1 w-full">
                     <div className="flex items-start justify-between mb-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-raised)] text-[var(--text-primary)] ring-1 ring-[var(--border-subtle)] group-hover:bg-[var(--surface-hover)] transition-colors">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] text-[var(--text-primary)] ring-1 ring-[var(--border-subtle)] group-hover:bg-[var(--surface-hover)] transition-colors">
                         <Building2 className="h-5 w-5 opacity-70" />
                       </div>
                       {stats.alarms > 0 && (
-                        <div className="flex items-center gap-1.5 rounded bg-[#e53d3d]/10 px-2 py-1 text-[11px] font-bold tracking-wide text-[#e53d3d]">
+                        <div className="flex items-center gap-1.5 rounded bg-[var(--status-danger-bg)] px-2 py-1 text-[11px] font-bold tracking-wide text-[var(--color-error)]">
                           <Flame className="h-3 w-3" />
                           {stats.alarms} ALARM{stats.alarms > 1 ? "S" : ""}
                         </div>
@@ -456,7 +456,7 @@ export function Dashboard() {
                           <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                             Alarms
                           </p>
-                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"}`}>
+                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
                             {stats.alarms}
                           </p>
                         </div>
@@ -464,7 +464,7 @@ export function Dashboard() {
                           <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                             Online
                           </p>
-                          <p className="text-[13px] font-bold text-[#34d399]">
+                          <p className="text-[13px] font-bold text-[var(--color-success)]">
                             {stats.online}
                           </p>
                         </div>
@@ -493,7 +493,7 @@ export function Dashboard() {
         filteredBranches.length === 0 ? (
           <div className="surface-panel py-20 text-center">
             <MapPin className="mx-auto mb-4 h-12 w-12 text-[var(--text-quaternary)]" />
-            <p className="text-[16px] font-bold text-[var(--text-primary)] drop-shadow-sm">
+            <p className="text-[16px] font-bold text-[var(--text-primary)]">
               No branches found
             </p>
             <p className="mt-2 text-[13px] font-medium text-[var(--text-quaternary)]">
@@ -514,16 +514,16 @@ export function Dashboard() {
                     setSearchQuery("");
                     setFilter("all");
                   }}
-                  className="surface-panel group flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-raised)] animate-fade-in-up rounded-[14px] overflow-hidden"
+                  className="surface-panel group flex flex-col text-left transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-raised)] animate-fade-in-up rounded-[12px] overflow-hidden"
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
                   <div className="p-5 flex-1 w-full">
                     <div className="flex items-start justify-between mb-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--surface-raised)] text-[var(--text-primary)] ring-1 ring-[var(--border-subtle)] group-hover:bg-[var(--surface-hover)] transition-colors">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] text-[var(--text-primary)] ring-1 ring-[var(--border-subtle)] group-hover:bg-[var(--surface-hover)] transition-colors">
                         <MapPin className="h-5 w-5 opacity-70" />
                       </div>
                       {stats.alarms > 0 && (
-                        <div className="flex items-center gap-1.5 rounded bg-[#e53d3d]/10 px-2 py-1 text-[11px] font-bold tracking-wide text-[#e53d3d]">
+                        <div className="flex items-center gap-1.5 rounded bg-[var(--status-danger-bg)] px-2 py-1 text-[11px] font-bold tracking-wide text-[var(--color-error)]">
                           <Flame className="h-3 w-3" />
                           {stats.alarms} ALARM{stats.alarms > 1 ? "S" : ""}
                         </div>
@@ -543,7 +543,7 @@ export function Dashboard() {
                           <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                             Alarms
                           </p>
-                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[#e53d3d]" : "text-[var(--text-primary)]"}`}>
+                          <p className={`text-[13px] font-bold ${stats.alarms > 0 ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
                             {stats.alarms}
                           </p>
                         </div>
@@ -551,7 +551,7 @@ export function Dashboard() {
                           <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
                             Online
                           </p>
-                          <p className="text-[13px] font-bold text-[#34d399]">
+                          <p className="text-[13px] font-bold text-[var(--color-success)]">
                             {stats.online}
                           </p>
                         </div>
@@ -579,7 +579,7 @@ export function Dashboard() {
       filteredPanels.length === 0 ? (
         <div className="surface-panel py-20 text-center">
           <Activity className="mx-auto mb-4 h-12 w-12 text-[var(--text-quaternary)]" />
-          <p className="text-[16px] font-bold text-[var(--text-primary)] drop-shadow-sm">
+          <p className="text-[16px] font-bold text-[var(--text-primary)]">
             No panels found
           </p>
           <p className="mt-2 text-[13px] font-medium text-[var(--text-quaternary)]">
