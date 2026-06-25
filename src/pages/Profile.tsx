@@ -8,6 +8,8 @@ import {
   User as UserIcon,
   ShieldCheck,
   Camera,
+  Loader2,
+  Building,
 } from "lucide-react";
 import {
   EmailAuthProvider,
@@ -21,6 +23,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { storage, auth } from "../config/firebase";
+import { CompanyService } from "../api/CompanyService";
+import { useCompanies } from "../hooks/useCompanies";
 
 // ── Reusable field components ────────────────────────────────────────────────
 const ReadOnlyField = ({
@@ -100,6 +104,13 @@ export function Profile() {
   );
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
+  // ── Company Photo ───────────────────────────────────────────────────────────
+  const { companies, reloadCompanies } = useCompanies();
+  const myCompany = companies.find(c => c.id === userData?.companyId);
+  const [uploadingCompanyLogo, setUploadingCompanyLogo] = useState(false);
+  const [companyLogoError, setCompanyLogoError] = useState("");
+  const [companyLogoSuccess, setCompanyLogoSuccess] = useState(false);
+
   // ── Profile save state ──────────────────────────────────────────────────────
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
@@ -167,6 +178,49 @@ export function Profile() {
       setUploadingPhoto(false);
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
+    }
+  };
+
+  const handleCompanyLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !myCompany || !userData?.companyId) return;
+
+    if (!file.type.startsWith("image/")) {
+      setCompanyLogoError("Please select an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setCompanyLogoError("Image must be less than 5MB");
+      return;
+    }
+
+    setUploadingCompanyLogo(true);
+    setCompanyLogoError("");
+    setCompanyLogoSuccess(false);
+
+    try {
+      const fileRef = storageRef(storage, `companies/logos/${Date.now()}_${file.name}`);
+      let fileToUpload = file;
+      try {
+        const imageCompression = (await import("browser-image-compression")).default;
+        const options = { maxSizeMB: 0.2, maxWidthOrHeight: 800, useWebWorker: true };
+        fileToUpload = await imageCompression(file, options);
+      } catch (err) {
+        console.error("Compression failed", err);
+      }
+      
+      await uploadBytes(fileRef, fileToUpload);
+      const logoUrl = await getDownloadURL(fileRef);
+      
+      await CompanyService.updateCompany(userData.companyId, { logoUrl });
+      await reloadCompanies();
+      
+      setCompanyLogoSuccess(true);
+      setTimeout(() => setCompanyLogoSuccess(false), 3000);
+    } catch (err: any) {
+      setCompanyLogoError(err.message || "Failed to upload company logo");
+    } finally {
+      setUploadingCompanyLogo(false);
     }
   };
 
@@ -549,6 +603,57 @@ export function Profile() {
             </button>
           </div>
         </div>
+
+        {/* Company Profile (Head Office only) */}
+        {userData?.role === "head_office" && myCompany && (
+          <div className="surface-panel rounded-[16px] p-6 border border-[var(--border-subtle)] lg:col-span-2">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-secondary)]">
+                <Building className="h-[18px] w-[18px]" />
+              </div>
+              <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
+                Company Profile
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              <div className="relative inline-block shrink-0">
+                <div className="flex h-20 w-20 items-center justify-center rounded-[12px] overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-raised)]">
+                  {myCompany.logoUrl ? (
+                    <img src={myCompany.logoUrl} alt={myCompany.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-[24px] font-bold text-[var(--text-secondary)]">
+                      {myCompany.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <label
+                  htmlFor="company-logo-upload"
+                  className="absolute -bottom-2 -right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--text-secondary)] shadow-sm transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                  title="Change company logo"
+                >
+                  <Camera className="h-4 w-4" />
+                </label>
+                <input
+                  id="company-logo-upload"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={handleCompanyLogoChange}
+                  disabled={uploadingCompanyLogo}
+                />
+              </div>
+              <div>
+                <h3 className="text-[16px] font-bold text-[var(--text-primary)]">{myCompany.name}</h3>
+                <p className="text-[13px] text-[var(--text-secondary)] mt-1">Manage your organization's logo</p>
+                
+                {companyLogoError && <p className="mt-2 text-[13px] text-[var(--color-error)]">{companyLogoError}</p>}
+                {companyLogoSuccess && <p className="mt-2 text-[13px] text-[var(--color-success)]">Logo updated successfully</p>}
+                {uploadingCompanyLogo && <p className="mt-2 text-[13px] text-[var(--text-secondary)] flex items-center gap-2"><Loader2 className="h-3 w-3 animate-spin"/> Uploading...</p>}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from 'react-dom';
+import { storage } from "../config/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -147,6 +149,9 @@ export function AdminSettings() {
   // Bulk upload states
   const [bulkUploadModalOpen, setBulkUploadModalOpen] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
+
+  // Logo upload state
+  const [logoFile, setLogoFile] = useState<File | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -368,7 +373,25 @@ export function AdminSettings() {
   const handleCreateCompany = async (data: CompanyFormData) => {
     setCompanyFormLoading(true);
     try {
-      const company = await CompanyService.createCompany({ name: data.name, description: data.description });
+      let logoUrl = "";
+      if (logoFile) {
+        const fileRef = ref(storage, `companies/logos/${Date.now()}_${logoFile.name}`);
+        let fileToUpload = logoFile;
+        try {
+          const imageCompression = (await import("browser-image-compression")).default;
+          const options = { maxSizeMB: 0.2, maxWidthOrHeight: 800, useWebWorker: true };
+          fileToUpload = await imageCompression(logoFile, options);
+        } catch (e) {
+          console.error("Compression failed", e);
+        }
+        await uploadBytes(fileRef, fileToUpload);
+        logoUrl = await getDownloadURL(fileRef);
+      }
+
+      const companyData: Partial<Company> = { name: data.name, description: data.description };
+      if (logoUrl) companyData.logoUrl = logoUrl;
+
+      const company = await CompanyService.createCompany(companyData as Omit<Company, "id" | "createdAt" | "updatedAt">);
       
       // Create branches if any
       if (data.branches && data.branches.length > 0) {
@@ -1312,7 +1335,7 @@ export function AdminSettings() {
                                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[12px] font-medium text-[var(--text-on-accent)] shadow-sm"
                                     style={{ backgroundColor: getAvatarColor(company.name) }}
                                   >
-                                    {company.name.charAt(0).toUpperCase()}
+                                    {company.logoUrl ? <img src={company.logoUrl} alt={company.name} className='h-full w-full object-cover' /> : company.name.charAt(0).toUpperCase()}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
@@ -1378,7 +1401,7 @@ export function AdminSettings() {
                                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[14px] font-semibold text-[var(--text-on-accent)] shadow-sm"
                                   style={{ backgroundColor: getAvatarColor(selectedCompany.name) }}
                                 >
-                                  {selectedCompany.name.charAt(0).toUpperCase()}
+                                  {selectedCompany.logoUrl ? <img src={selectedCompany.logoUrl} alt={selectedCompany.name} className='h-full w-full object-cover' /> : selectedCompany.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <h3 className="text-[14px] font-bold text-[var(--text-primary)] truncate">{selectedCompany.name}</h3>
@@ -1789,7 +1812,7 @@ export function AdminSettings() {
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[12px] font-medium text-[var(--text-on-accent)] shadow-sm"
                 style={{ backgroundColor: isUnassigned ? '#64748b' : getAvatarColor(company.name) }}
               >
-                {isUnassigned ? <Users className="h-3.5 w-3.5 text-white" /> : company.name.charAt(0).toUpperCase()}
+                {isUnassigned ? <Users className='h-3.5 w-3.5 text-white' /> : company.logoUrl ? <img src={company.logoUrl} alt={company.name} className='h-full w-full object-cover' /> : company.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -1883,7 +1906,7 @@ export function AdminSettings() {
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[14px] font-semibold text-[var(--text-on-accent)] shadow-sm"
                 style={{ backgroundColor: isUnassigned ? '#64748b' : getAvatarColor(selectedCompany.name) }}
               >
-                {isUnassigned ? <Users className="h-4 w-4 text-white" /> : selectedCompany.name.charAt(0).toUpperCase()}
+                {isUnassigned ? <Users className='h-4 w-4 text-white' /> : selectedCompany.logoUrl ? <img src={selectedCompany.logoUrl} alt={selectedCompany.name} className='h-full w-full object-cover' /> : selectedCompany.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-[14px] font-bold text-[var(--text-primary)] truncate">{selectedCompany.name}</h3>
@@ -2459,7 +2482,7 @@ export function AdminSettings() {
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] text-[12px] font-medium text-[var(--text-on-accent)] shadow-sm"
                 style={{ backgroundColor: isUnassigned ? '#64748b' : getAvatarColor(company.name) }}
               >
-                {isUnassigned ? <Cpu className="h-3.5 w-3.5 text-white" /> : company.name.charAt(0).toUpperCase()}
+                {isUnassigned ? <Cpu className='h-3.5 w-3.5 text-white' /> : company.logoUrl ? <img src={company.logoUrl} alt={company.name} className='h-full w-full object-cover' /> : company.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -2560,7 +2583,7 @@ export function AdminSettings() {
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[14px] font-semibold text-[var(--text-on-accent)] shadow-sm"
                 style={{ backgroundColor: isUnassigned ? '#64748b' : getAvatarColor(selectedCompany.name) }}
               >
-                {isUnassigned ? <Cpu className="h-4 w-4 text-white" /> : selectedCompany.name.charAt(0).toUpperCase()}
+                {isUnassigned ? <Cpu className='h-4 w-4 text-white' /> : selectedCompany.logoUrl ? <img src={selectedCompany.logoUrl} alt={selectedCompany.name} className='h-full w-full object-cover' /> : selectedCompany.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-[14px] font-bold text-[var(--text-primary)] truncate">{selectedCompany.name}</h3>
