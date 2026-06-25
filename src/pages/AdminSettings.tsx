@@ -40,6 +40,7 @@ import {
   ChevronRight,
   ShieldAlert,
   Building,
+  Camera,
 } from "lucide-react";
 import { CopyButton } from "../components/CopyButton";
 import { CreateUserModal } from "../components/CreateUserModal";
@@ -753,7 +754,7 @@ export function AdminSettings() {
         </div>
       )}
 
-      {/* ââ Hero Cards Grid ââââââââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* â”€â”€ Hero Cards Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {/* Company Management Card */}
         {hasRole(["super_admin"]) && (
@@ -866,11 +867,11 @@ export function AdminSettings() {
         </button>
       </div>
 
-      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */}
       {/* OVERLAY DRAWERS                                                    */}
-      {/* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */}
 
-      {/* ââ Company Management Overlay ââââââââââââââââââââââââââââââââââââââ */}
+      {/* â”€â”€ Company Management Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeSection === "companies" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
@@ -1047,6 +1048,35 @@ export function AdminSettings() {
                             onSubmit={handleSubmitCompany(handleCreateCompany)}
                             className="space-y-5"
                           >
+                        <div className="flex justify-center mb-6">
+                          <div className="relative inline-block shrink-0">
+                            <div className="flex h-20 w-20 items-center justify-center rounded-[12px] overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-raised)]">
+                              {logoFile ? (
+                                <img src={URL.createObjectURL(logoFile)} alt="Logo Preview" className="h-full w-full object-cover" />
+                              ) : (
+                                <span className="text-[24px] font-bold text-[var(--text-secondary)]">
+                                  <Building2 className="h-8 w-8 opacity-50" />
+                                </span>
+                              )}
+                            </div>
+                            <label
+                              htmlFor="create-company-logo"
+                              className="absolute -bottom-2 -right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--text-secondary)] shadow-sm transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                              title="Upload company logo"
+                            >
+                              <Camera className="h-4 w-4" />
+                            </label>
+                            <input
+                              id="create-company-logo"
+                              type="file"
+                              accept="image/*"
+                              className="sr-only"
+                              onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                              disabled={companyFormLoading}
+                            />
+                          </div>
+                        </div>
+
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Company Name
@@ -1244,6 +1274,37 @@ export function AdminSettings() {
                             onSubmit={handleSubmitEditCompany(handleEditCompany)}
                             className="space-y-5"
                           >
+                        <div className="flex justify-center mb-6">
+                          <div className="relative inline-block shrink-0">
+                            <div className="flex h-20 w-20 items-center justify-center rounded-[12px] overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-raised)]">
+                              {logoFile ? (
+                                <img src={URL.createObjectURL(logoFile)} alt="Logo Preview" className="h-full w-full object-cover" />
+                              ) : editingCompanyData.logoUrl ? (
+                                <img src={editingCompanyData.logoUrl} alt="Company Logo" className="h-full w-full object-cover" />
+                              ) : (
+                                <span className="text-[24px] font-bold text-[var(--text-secondary)]">
+                                  <Building2 className="h-8 w-8 opacity-50" />
+                                </span>
+                              )}
+                            </div>
+                            <label
+                              htmlFor="edit-company-logo"
+                              className="absolute -bottom-2 -right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--text-secondary)] shadow-sm transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                              title="Update company logo"
+                            >
+                              <Camera className="h-4 w-4" />
+                            </label>
+                            <input
+                              id="edit-company-logo"
+                              type="file"
+                              accept="image/*"
+                              className="sr-only"
+                              onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                              disabled={editCompanyFormLoading}
+                            />
+                          </div>
+                        </div>
+
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Company Name
@@ -1309,7 +1370,7 @@ export function AdminSettings() {
                   </div>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
-                    {/* ââ Left Panel: Company List ââ */}
+                    {/* â”€â”€ Left Panel: Company List â”€â”€ */}
                     <div className={`${selectedCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
                       <div className="flex-1 overflow-y-auto">
                         {filteredCompanies.length === 0 ? (
@@ -1362,7 +1423,7 @@ export function AdminSettings() {
                       </div>
                     </div>
 
-                    {/* ââ Right Panel: Company Detail ââ */}
+                    {/* â”€â”€ Right Panel: Company Detail â”€â”€ */}
                     <div className={`${selectedCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
                       {(() => {
                         const selectedCompany = companies.find(c => c.id === selectedCompanyId);
@@ -1712,7 +1773,7 @@ export function AdminSettings() {
         </div>, document.body
       )}
 
-      {/* ââ User Management Overlay âââââââââââââââââââââââââââââââââââââââââ */}
+      {/* â”€â”€ User Management Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeSection === "users" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
@@ -1787,7 +1848,7 @@ export function AdminSettings() {
                   </div>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
-  {/* ââ Left Panel: Company List ââ */}
+  {/* â”€â”€ Left Panel: Company List â”€â”€ */}
   <div className={`${selectedUserCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
     <div className="flex-1 overflow-y-auto">
       <div className="divide-y divide-[var(--border-subtle)]">
@@ -1838,7 +1899,7 @@ export function AdminSettings() {
     </div>
   </div>
 
-  {/* ââ Right Panel: Company Detail & Branches ââ */}
+  {/* â”€â”€ Right Panel: Company Detail & Branches â”€â”€ */}
   <div className={`${selectedUserCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
     {(() => {
       if (!selectedUserCompanyId) {
@@ -2019,7 +2080,7 @@ export function AdminSettings() {
         document.body
       )}
 
-      {/* ââ Panel Provisioning Overlay âââââââââââââââââââââââââââââââââââââââ */}
+      {/* â”€â”€ Panel Provisioning Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeSection === "panels" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
