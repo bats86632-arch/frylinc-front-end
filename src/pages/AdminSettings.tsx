@@ -143,6 +143,11 @@ export function AdminSettings() {
   const [inlineEditBranchLoading, setInlineEditBranchLoading] = useState(false);
   const [editUserFormLoading, setEditUserFormLoading] = useState(false);
   const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
+  
+  // Bulk upload states
+  const [bulkUploadModalOpen, setBulkUploadModalOpen] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [lastSynced, setLastSynced] = useState<number>(Date.now());
