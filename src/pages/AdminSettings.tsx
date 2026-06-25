@@ -266,12 +266,30 @@ export function AdminSettings() {
     const ws = XLSX.utils.json_to_sheet([
       {
         "Company Name": "Acme Corp",
-        "Company Description": "A sample company",
+        "Company Description": "Global Manufacturing",
         "Branch Name": "HQ",
-        "Branch Address": "123 Main St",
+        "Branch Address": "123 Main St, NY",
         "Branch Supervisor": "John Doe",
         "Branch Contact": "1234567890",
         "Branch Email": "hq@acmecorp.com"
+      },
+      {
+        "Company Name": "Acme Corp",
+        "Company Description": "Global Manufacturing",
+        "Branch Name": "West Coast Facility",
+        "Branch Address": "456 Market St, CA",
+        "Branch Supervisor": "Jane Smith",
+        "Branch Contact": "1234567891",
+        "Branch Email": "west@acmecorp.com"
+      },
+      {
+        "Company Name": "TechNova",
+        "Company Description": "Software Solutions",
+        "Branch Name": "Main Office",
+        "Branch Address": "789 Tech Blvd, TX",
+        "Branch Supervisor": "Alice Johnson",
+        "Branch Contact": "1234567892",
+        "Branch Email": "info@technova.com"
       }
     ]);
     const wb = XLSX.utils.book_new();

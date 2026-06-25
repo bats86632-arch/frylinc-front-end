@@ -57,11 +57,25 @@ export function Dashboard() {
   const downloadBranchTemplate = () => {
     const ws = xlsx.utils.json_to_sheet([
       {
-        "Branch Name": "Example Branch",
-        Address: "123 Main St",
+        "Branch Name": "Mumbai South Branch",
+        Address: "Nariman Point, Mumbai",
         "Supervisor Name": "John Doe",
-        "Contact Number": "1234567890",
-        "Email Address": "john@example.com",
+        "Contact Number": "9876543210",
+        "Email Address": "mumbai.south@example.com",
+      },
+      {
+        "Branch Name": "Delhi North Branch",
+        Address: "Connaught Place, Delhi",
+        "Supervisor Name": "Jane Smith",
+        "Contact Number": "9876543211",
+        "Email Address": "delhi.north@example.com",
+      },
+      {
+        "Branch Name": "Bangalore Tech Park",
+        Address: "Whitefield, Bangalore",
+        "Supervisor Name": "Alice Johnson",
+        "Contact Number": "9876543212",
+        "Email Address": "blr.tech@example.com",
       },
     ]);
     const wb = xlsx.utils.book_new();
