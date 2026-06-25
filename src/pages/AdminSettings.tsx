@@ -46,8 +46,8 @@ const panelSchema = z.object({
   serial: z.string().min(1, "Serial is required"),
   name: z.string().min(1, "Name is required"),
   zoneCount: z.coerce.number().min(1).max(8, "Max 8 zones"),
-  companyId: z.string().min(1, "Company ID is required"),
-  branchId: z.string().min(1, "Branch ID is required"),
+  companyId: z.string().optional(),
+  branchId: z.string().optional(),
   ipAddress: z.string().optional(),
   allowedCommands: z.string().optional(),
 });
@@ -76,12 +76,14 @@ const branchSchema = z.object({
 const editCompanySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
+  logoUrl: z.string().optional(),
 });
 type EditCompanyFormData = z.infer<typeof editCompanySchema>;
 
 const companySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
+  logoUrl: z.string().optional(),
   branches: z.array(branchSchema).optional(),
 });
 type CompanyFormData = z.infer<typeof companySchema>;
@@ -254,6 +256,92 @@ export function AdminSettings() {
     name: "branches",
   });
 
+  const downloadTemplate = async () => {
+    const XLSX = await import("xlsx");
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        "Company Name": "Acme Corp",
+        "Company Description": "A sample company",
+        "Branch Name": "HQ",
+        "Branch Address": "123 Main St",
+        "Branch Supervisor": "John Doe",
+        "Branch Contact": "1234567890",
+        "Branch Email": "hq@acmecorp.com"
+      }
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    XLSX.writeFile(wb, "Companies_Branches_Template.xlsx");
+  };
+
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setBulkUploading(true);
+    try {
+      const XLSX = await import("xlsx");
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+
+      const companyMap = new Map<string, any>();
+      rows.forEach((row: any) => {
+        const companyName = row["Company Name"]?.toString().trim();
+        if (!companyName) return;
+
+        if (!companyMap.has(companyName)) {
+          companyMap.set(companyName, {
+            name: companyName,
+            description: row["Company Description"]?.toString().trim(),
+            branches: []
+          });
+        }
+
+        const branchName = row["Branch Name"]?.toString().trim();
+        if (branchName) {
+          companyMap.get(companyName).branches.push({
+            name: branchName,
+            address: row["Branch Address"]?.toString().trim(),
+            supervisorName: row["Branch Supervisor"]?.toString().trim(),
+            contactNumber: row["Branch Contact"]?.toString().trim(),
+            emailAddress: row["Branch Email"]?.toString().trim()
+          });
+        }
+      });
+
+      const companiesToCreate = Array.from(companyMap.values());
+      for (const compData of companiesToCreate) {
+        const company = await CompanyService.createCompany({
+          name: compData.name,
+          description: compData.description
+        });
+
+        if (compData.branches && compData.branches.length > 0) {
+          await Promise.all(
+            compData.branches.map((branch: any) =>
+              BranchService.createBranch({
+                ...branch,
+                companyId: company.id
+              })
+            )
+          );
+        }
+      }
+
+      setSuccess("Bulk upload completed successfully");
+      setBulkUploadModalOpen(false);
+      await reloadCompanies();
+      await reloadBranches();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Bulk upload failed"));
+    } finally {
+      setBulkUploading(false);
+      e.target.value = "";
+    }
+  };
+
   const handleCreateCompany = async (data: CompanyFormData) => {
     setCompanyFormLoading(true);
     try {
@@ -273,6 +361,7 @@ export function AdminSettings() {
       
       setSuccess("Company and branches created successfully");
       setCompanyFormOpen(false);
+      setLogoFile(null);
       resetCompany();
       await reloadCompanies();
       await reloadBranches();
@@ -350,9 +439,24 @@ export function AdminSettings() {
     if (!editingCompanyData) return;
     setEditCompanyFormLoading(true);
     try {
+      let logoUrl = data.logoUrl;
+      if (logoFile) {
+        const fileRef = ref(storage, `companies/logos/${Date.now()}_${logoFile.name}`);
+        let fileToUpload = logoFile;
+        try {
+          const imageCompression = (await import("browser-image-compression")).default;
+          const options = { maxSizeMB: 0.2, maxWidthOrHeight: 800, useWebWorker: true };
+          fileToUpload = await imageCompression(logoFile, options);
+        } catch (e) {
+          console.error("Compression failed", e);
+        }
+        await uploadBytes(fileRef, fileToUpload);
+        logoUrl = await getDownloadURL(fileRef);
+      }
       await CompanyService.updateCompany(editingCompanyData.id, {
         name: data.name,
         description: data.description,
+        ...(logoUrl ? { logoUrl } : {}),
       });
 
       await reloadCompanies();
@@ -760,6 +864,13 @@ export function AdminSettings() {
                     />
                   </div>
                   <button
+                    onClick={() => setBulkUploadModalOpen(true)}
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
+                  >
+                    <Plus className="h-[14px] w-[14px]" />
+                    Use Excel
+                  </button>
+                  <button
                     onClick={() => setCompanyFormOpen(true)}
                     className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
                   >
@@ -790,7 +901,73 @@ export function AdminSettings() {
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto p-5 sm:p-7">
                 {/* Company creation form */}
-                {companyFormOpen && createPortal(
+                  {bulkUploadModalOpen && createPortal(
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget && !bulkUploading) {
+                        setBulkUploadModalOpen(false);
+                      }
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative z-10 w-full max-w-[400px] mx-4 flex flex-col animate-fade-in-up">
+                      <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden p-6 flex flex-col gap-4 text-center bg-[var(--surface-overlay)]">
+                        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4 mb-2">
+                          <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                            Bulk Create Companies & Branches
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => setBulkUploadModalOpen(false)}
+                            disabled={bulkUploading}
+                            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                        
+                        <p className="text-[13px] text-[var(--text-secondary)] mb-4 text-left">
+                          Download the template, fill in your data, and upload the Excel file to bulk-create companies and branches.
+                        </p>
+                        
+                        <div className="flex flex-col gap-3">
+                          <button
+                            onClick={downloadTemplate}
+                            disabled={bulkUploading}
+                            className="flex h-[36px] items-center justify-center rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-5 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-raised)] disabled:opacity-50"
+                          >
+                            Download Template
+                          </button>
+                          
+                          <button
+                            onClick={() => document.getElementById("excel-upload")?.click()}
+                            disabled={bulkUploading}
+                            className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                          >
+                            {bulkUploading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Uploading...
+                              </>
+                            ) : (
+                              "Upload Excel"
+                            )}
+                          </button>
+                          <input
+                            id="excel-upload"
+                            type="file"
+                            accept=".xlsx, .xls"
+                            className="hidden"
+                            onChange={handleBulkUpload}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>,
+                  document.body
+                )}
+              {companyFormOpen && createPortal(
                   <div
                     className="fixed inset-0 z-[9999] flex items-center justify-center"
                     onClick={(e) => {
@@ -2026,7 +2203,7 @@ export function AdminSettings() {
                             errors.ipAddress ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., 72.167.225.142"
-                          disabled={panelFormLoading}
+                          disabled={panelFormLoading || !hasRole(["super_admin", "head_office"])}
                         />
                         {errors.ipAddress && (
                           <p className="mt-1 text-[12px] text-[var(--color-error)]">
@@ -2195,7 +2372,7 @@ export function AdminSettings() {
                             editPanelErrors.ipAddress ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., 72.167.225.142"
-                          disabled={editPanelFormLoading}
+                          disabled={editPanelFormLoading || !hasRole(["super_admin", "head_office"])}
                         />
                         {editPanelErrors.ipAddress && (
                           <p className="mt-1 text-[12px] text-[var(--color-error)]">

@@ -4,6 +4,7 @@ export interface Company {
   id: string;
   name: string;
   description?: string;
+  logoUrl?: string;
   enabled?: boolean;
 }
 
@@ -15,11 +16,11 @@ export const CompanyService = {
     cachedCompanies = null;
     lastFetchTime = 0;
   },
-  async createCompany(data: { name: string; description?: string }): Promise<Company> {
+  async createCompany(data: { name: string; description?: string; logoUrl?: string }): Promise<Company> {
     const response = await apiClient.post('/companies', data);
     this.invalidateCache();
     const result = response.data;
-    return { id: result.companyId || result.id, name: data.name, description: data.description };
+    return { id: result.companyId || result.id, name: data.name, description: data.description, logoUrl: data.logoUrl };
   },
   
   async getCompanies(): Promise<Company[]> {
