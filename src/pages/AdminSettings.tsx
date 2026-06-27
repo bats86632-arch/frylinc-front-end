@@ -2249,7 +2249,7 @@ export function AdminSettings() {
                       className="control-field h-[32px] w-[200px] rounded-[6px] pl-8 pr-3 text-[12px]"
                     />
                   </div>
-                  {!hasRole(["end_user"]) && (
+                  {hasRole(["system_integrator"]) && (
                     <button
                       onClick={() => setBulkPanelUploadModalOpen(true)}
                       className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
