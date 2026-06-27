@@ -315,68 +315,7 @@ export function PanelDetail() {
             </div>
           )}
 
-          {/* MOB Command section */}
-          <section className="surface-panel rounded-[12px] p-6 border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-[14px] font-bold text-[var(--text-primary)]">
-                General MOB Command
-              </h2>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">
-                Trigger manual override for the entire panel.
-              </p>
-            </div>
-            {(() => {
-              const isPhoneConfigured = Object.values(panel.contactNumbers || {}).some(num => num.trim() !== "");
-              if (isPhoneConfigured) {
-                const command = "MOB";
-                const isEuRestricted = isStrictlyEndUser;
-                return (
-                  <button
-                    key={command}
-                    onClick={() => handleSendCommand(command)}
-                    disabled={commandLoading !== null || isEuRestricted}
-                    className={`rounded-[8px] border px-6 py-3 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 shrink-0 ${
-                      commandSuccess === command
-                        ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
-                        : commandLoading === command
-                          ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
-                          : "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)]"
-                    }`}
-                  >
-                    {commandSuccess === command ? (
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4" />
-                        <span className="text-sm font-semibold">Sent</span>
-                      </div>
-                    ) : commandLoading === command ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm font-semibold">Sending...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Play className="h-4 w-4" />
-                        <span className="text-sm font-semibold">Send MOB</span>
-                      </div>
-                    )}
-                  </button>
-                );
-              } else {
-                return (
-                  <button
-                    key="MOB_CONFIGURE"
-                    onClick={() => setActiveTab("contacts")}
-                    className="rounded-[8px] border px-6 py-3 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Settings className="h-4 w-4 text-[var(--accent)]" />
-                      <span className="text-sm font-semibold">Configure MOB</span>
-                    </div>
-                  </button>
-                );
-              }
-            })()}
-          </section>
+
 
           {/* Zones Grid */}
           <section className="surface-panel rounded-[12px] p-6 border border-[var(--border-subtle)]">
@@ -389,6 +328,69 @@ export function PanelDetail() {
                   <span className="tabular-nums">{visibleZones}</span> zones displayed
                 </p>
               </div>
+            </div>
+
+            {/* MOB Command section */}
+            <div className="mb-8 pb-8 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-[14px] font-bold text-[var(--text-primary)]">
+                  MOB Command
+                </h2>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
+                  Trigger manual override for the entire panel.
+                </p>
+              </div>
+              {(() => {
+                const isPhoneConfigured = Object.values(panel.contactNumbers || {}).some(num => num.trim() !== "");
+                if (isPhoneConfigured) {
+                  const command = "MOB";
+                  const isEuRestricted = isStrictlyEndUser;
+                  return (
+                    <button
+                      key={command}
+                      onClick={() => handleSendCommand(command)}
+                      disabled={commandLoading !== null || isEuRestricted}
+                      className={`rounded-[8px] border px-6 py-3 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 shrink-0 ${
+                        commandSuccess === command
+                          ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
+                          : commandLoading === command
+                            ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
+                            : "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)]"
+                      }`}
+                    >
+                      {commandSuccess === command ? (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4" />
+                          <span className="text-sm font-semibold">Sent</span>
+                        </div>
+                      ) : commandLoading === command ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-sm font-semibold">Sending...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Play className="h-4 w-4" />
+                          <span className="text-sm font-semibold">Send MOB</span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                } else {
+                  return (
+                    <button
+                      key="MOB_CONFIGURE"
+                      onClick={() => setActiveTab("contacts")}
+                      className="rounded-[8px] border px-6 py-3 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Settings className="h-4 w-4 text-[var(--accent)]" />
+                        <span className="text-sm font-semibold">Configure MOB</span>
+                      </div>
+                    </button>
+                  );
+                }
+              })()}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
