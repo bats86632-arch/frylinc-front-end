@@ -97,7 +97,8 @@ export function PanelDetail() {
     setCommandLoading(command);
 
     try {
-      await PanelService.sendCommand(serial, command);
+      const apiCommand = command.startsWith("ARM") ? "ARM" : command;
+      await PanelService.sendCommand(serial, apiCommand);
       setCommandSuccess(command);
       setTimeout(() => setCommandSuccess(null), 3000);
     } catch (err: unknown) {
