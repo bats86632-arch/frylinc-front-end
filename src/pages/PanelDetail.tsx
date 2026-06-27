@@ -524,6 +524,9 @@ export function PanelDetail() {
                         Type
                       </th>
                       <th className="px-5 py-3.5 text-left text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                        Direction
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
                         Details
                       </th>
                     </tr>
@@ -552,8 +555,29 @@ export function PanelDetail() {
                             {event.type}
                           </span>
                         </td>
+                        <td className="px-5 py-3.5">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide ${
+                              event.type === "command"
+                                ? "border-[var(--accent)]/30 bg-[var(--accent)]/10 text-[var(--accent)]"
+                                : "border-[var(--color-success)]/30 bg-[var(--status-success-bg)] text-[var(--color-success)]"
+                            }`}
+                          >
+                            {event.type === "command" ? "Sent" : "Received"}
+                          </span>
+                        </td>
                         <td className="px-5 py-3.5 text-sm text-[var(--text-primary)]">
-                          {event.details}
+                          {event.command && (
+                            <span>
+                              {event.command}
+                              {event.ackPayload && <span className="ml-2 text-[var(--text-secondary)]">(Ack: {event.ackPayload})</span>}
+                            </span>
+                          )}
+                          {event.raw && <span className="font-mono text-xs">{event.raw}</span>}
+                          {event.zone && <span>Zone {event.zone}</span>}
+                          {event.details && <span>{event.details}</span>}
+                          {(!event.command && !event.raw && !event.zone && !event.details) && <span className="text-[var(--text-secondary)]">-</span>}
+                          
                           {event.zoneNumber && (
                             <span className="ml-2 font-mono tabular-nums text-[var(--text-secondary)]">
                               (Zone {event.zoneNumber})

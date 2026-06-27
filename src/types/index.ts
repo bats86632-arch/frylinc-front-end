@@ -65,9 +65,16 @@ export interface Event {
   id: string;
   panelSerial: string;
   type: string;
-  timestamp: Date;
-  details: string;
+  timestamp?: Date;
+  createdAt?: any;
+  details?: string;
   zoneNumber?: number;
+  command?: string;
+  ackPayload?: string;
+  raw?: string;
+  zones?: boolean[];
+  alarm?: boolean;
+  zone?: number;
 }
 
 export interface Group {
