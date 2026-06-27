@@ -381,7 +381,7 @@ export function AdminSettings() {
         "Zone Count": 8,
         "Company Name": "TechNova",
         "Branch Name": "Main Office",
-        "IP Address": "192.168.1.100"
+        "IP Address": "72.167.225.142"
       },
       {
         "Serial Number": "123457",
@@ -389,7 +389,7 @@ export function AdminSettings() {
         "Zone Count": 4,
         "Company Name": "TechNova",
         "Branch Name": "Main Office",
-        "IP Address": ""
+        "IP Address": "72.167.225.142"
       }
     ]);
     const wb = XLSX.utils.book_new();
@@ -415,7 +415,10 @@ export function AdminSettings() {
         const zoneCount = parseInt(row["Zone Count"]?.toString().trim()) || 8;
         const companyName = row["Company Name"]?.toString().trim();
         const branchName = row["Branch Name"]?.toString().trim();
-        const ipAddress = row["IP Address"]?.toString().trim() || "";
+        let ipAddress = row["IP Address"]?.toString().trim() || "72.167.225.142";
+        if (!hasRole(["head_office"])) {
+          ipAddress = "72.167.225.142";
+        }
 
         if (!serial || !name || !companyName) continue;
 
