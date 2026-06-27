@@ -103,13 +103,39 @@ export function PanelDetail() {
       let apiCommand = command;
       if (command.startsWith("ARM")) apiCommand = "ARM";
       if (command.startsWith("ZONE OFF")) apiCommand = "ZONE OFF";
-      if (command.startsWith("RESET")) apiCommand = "RESET";
       
       await PanelService.sendCommand(serial, apiCommand);
       setCommandSuccess(command);
       setTimeout(() => setCommandSuccess(null), 3000);
     } catch (err: unknown) {
       setCommandError(getApiErrorMessage(err, "Failed to send command"));
+    } finally {
+      setCommandLoading(null);
+    }
+  };
+
+  const handleResetZone = async (zoneIndex: number) => {
+    if (!serial || !panel) return;
+    const commandId = `RESET ${zoneIndex + 1}`;
+
+    setCommandError(null);
+    setCommandSuccess(null);
+    setCommandLoading(commandId);
+
+    try {
+      const newZones = [...(panel.zones || [])];
+      newZones[zoneIndex] = false;
+      const hasAnyAlarm = newZones.some(Boolean);
+
+      await PanelService.updatePanel(serial, {
+        zones: newZones,
+        alarm: hasAnyAlarm
+      });
+
+      setCommandSuccess(commandId);
+      setTimeout(() => setCommandSuccess(null), 3000);
+    } catch (err: unknown) {
+      setCommandError(getApiErrorMessage(err, "Failed to reset zone"));
     } finally {
       setCommandLoading(null);
     }
@@ -427,7 +453,7 @@ export function PanelDetail() {
                         </button>
                         
                         <button
-                          onClick={() => handleSendCommand(resetCmd)}
+                          onClick={() => handleResetZone(idx)}
                           disabled={commandLoading !== null || isEuRestricted}
                           className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                             zoneAlarm 
