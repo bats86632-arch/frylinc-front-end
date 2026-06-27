@@ -753,7 +753,18 @@ export function AdminSettings() {
     }
   };
 
-  // Mock function for panel heartbeat
+  
+  const handleDeleteBranch = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this branch? This cannot be undone.")) return;
+    try {
+      await BranchService.deleteBranch(id);
+      setSuccess("Branch deleted successfully");
+      await reloadBranches();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to delete branch"));
+    }
+  };
+// Mock function for panel heartbeat
   
   const filteredCompanies = (companies || []).filter(
     (c) =>
@@ -1802,6 +1813,17 @@ export function AdminSettings() {
                                                 >
                                                   <Edit2 className="h-3 w-3" />
                                                 </button>
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteBranch(branch.id);
+                                                  }}
+                                                  className="flex h-6 w-6 items-center justify-center rounded-[4px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[var(--color-error)] hover:text-white hover:bg-[var(--color-error)] hover:border-[var(--color-error)] transition-all"
+                                                  title="Delete branch"
+                                                >
+                                                  <Trash2 className="h-3 w-3" />
+                                                </button>
+
                                               </div>
                                             </div>
                                             
