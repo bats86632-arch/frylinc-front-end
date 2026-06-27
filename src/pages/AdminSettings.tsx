@@ -374,14 +374,16 @@ export function AdminSettings() {
 
   const downloadPanelTemplate = async () => {
     const XLSX = await import("xlsx");
-    const ws = XLSX.utils.json_to_sheet([
+    const isSI = !hasRole(["head_office"]);
+
+    const templateData = [
       {
         "Serial Number": "123456",
         "Panel Name": "Main Lobby Panel",
         "Zone Count": 8,
         "Company Name": "TechNova",
         "Branch Name": "Main Office",
-        "IP Address": "72.167.225.142"
+        ...(!isSI && { "IP Address": "72.167.225.142" })
       },
       {
         "Serial Number": "123457",
@@ -389,9 +391,11 @@ export function AdminSettings() {
         "Zone Count": 4,
         "Company Name": "TechNova",
         "Branch Name": "Main Office",
-        "IP Address": "72.167.225.142"
+        ...(!isSI && { "IP Address": "72.167.225.142" })
       }
-    ]);
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(templateData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Panels");
     XLSX.writeFile(wb, "Panels_Template.xlsx");
