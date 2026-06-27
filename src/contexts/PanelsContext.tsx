@@ -107,6 +107,7 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
           snapshot.forEach((doc) => {
             panelList.push({ serial: doc.id, ...doc.data() } as Panel);
           });
+          console.log(`[BRIDGE] Received panel data update from bridge for ${panelList.length} panels`, panelList);
           results.set(index, panelList);
           
           if (initialLoadCount < queries.length) {

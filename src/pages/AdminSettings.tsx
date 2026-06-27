@@ -150,6 +150,9 @@ export function AdminSettings() {
   // Bulk upload states
   const [bulkUploadModalOpen, setBulkUploadModalOpen] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
+  
+  const [bulkPanelUploadModalOpen, setBulkPanelUploadModalOpen] = useState(false);
+  const [bulkPanelUploading, setBulkPanelUploading] = useState(false);
 
   // Logo upload state
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -367,6 +370,82 @@ export function AdminSettings() {
       setError(getApiErrorMessage(err, "Bulk upload failed"));
     } finally {
       setBulkUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const downloadPanelTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        "Serial Number": "123456",
+        "Panel Name": "Main Lobby Panel",
+        "Zone Count": 8,
+        "Company Name": "TechNova",
+        "Branch Name": "Main Office",
+        "IP Address": "192.168.1.100"
+      },
+      {
+        "Serial Number": "123457",
+        "Panel Name": "Warehouse Panel",
+        "Zone Count": 4,
+        "Company Name": "TechNova",
+        "Branch Name": "Main Office",
+        "IP Address": ""
+      }
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Panels");
+    XLSX.writeFile(wb, "Panels_Template.xlsx");
+  };
+
+  const handleBulkPanelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setBulkPanelUploading(true);
+    try {
+      const XLSX = await import("xlsx");
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+
+      for (const row of rows as any[]) {
+        const serial = row["Serial Number"]?.toString().trim();
+        const name = row["Panel Name"]?.toString().trim();
+        const zoneCount = parseInt(row["Zone Count"]?.toString().trim()) || 8;
+        const companyName = row["Company Name"]?.toString().trim();
+        const branchName = row["Branch Name"]?.toString().trim();
+        const ipAddress = row["IP Address"]?.toString().trim() || "";
+
+        if (!serial || !name || !companyName) continue;
+
+        const company = companies.find(c => c.name.toLowerCase() === companyName.toLowerCase());
+        if (!company) continue;
+
+        let branchId = "";
+        if (branchName) {
+          const branch = branches.find(b => b.companyId === company.id && b.name.toLowerCase() === branchName.toLowerCase());
+          if (branch) branchId = branch.id;
+        }
+
+        await PanelService.createPanel({
+          serial,
+          name,
+          zoneCount,
+          companyId: company.id,
+          branchId,
+          ipAddress
+        });
+      }
+
+      setSuccess("Panels bulk upload completed successfully");
+      setBulkPanelUploadModalOpen(false);
+      // Wait for PanelsService/Context to reload, though we don't have a reloadPanels here natively, we assume real-time updates or trigger a generic refresh.
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Bulk panel upload failed"));
+    } finally {
+      setBulkPanelUploading(false);
       e.target.value = "";
     }
   };
@@ -1007,6 +1086,72 @@ export function AdminSettings() {
                             accept=".xlsx, .xls"
                             className="hidden"
                             onChange={handleBulkUpload}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>,
+                  document.body
+                )}
+                  {bulkPanelUploadModalOpen && createPortal(
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget && !bulkPanelUploading) {
+                        setBulkPanelUploadModalOpen(false);
+                      }
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative z-10 w-full max-w-[400px] mx-4 flex flex-col animate-fade-in-up">
+                      <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden p-6 flex flex-col gap-4 text-center bg-[var(--surface-overlay)]">
+                        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4 mb-2">
+                          <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                            Bulk Create Panels
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => setBulkPanelUploadModalOpen(false)}
+                            disabled={bulkPanelUploading}
+                            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                        
+                        <p className="text-[13px] text-[var(--text-secondary)] mb-4 text-left">
+                          Download the template, fill in your data, and upload the Excel file to bulk-create panels and assign them to companies and branches.
+                        </p>
+                        
+                        <div className="flex flex-col gap-3">
+                          <button
+                            onClick={downloadPanelTemplate}
+                            disabled={bulkPanelUploading}
+                            className="flex h-[36px] items-center justify-center rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-5 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-raised)] disabled:opacity-50"
+                          >
+                            Download Template
+                          </button>
+                          
+                          <button
+                            onClick={() => document.getElementById("panel-excel-upload")?.click()}
+                            disabled={bulkPanelUploading}
+                            className="flex h-[36px] items-center justify-center rounded-[6px] bg-[#f0ede8] px-5 text-[13px] font-medium text-[#1a1816] transition-colors hover:bg-white disabled:opacity-50"
+                          >
+                            {bulkPanelUploading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Uploading...
+                              </>
+                            ) : (
+                              "Upload Excel"
+                            )}
+                          </button>
+                          <input
+                            id="panel-excel-upload"
+                            type="file"
+                            accept=".xlsx, .xls"
+                            className="hidden"
+                            onChange={handleBulkPanelUpload}
                           />
                         </div>
                       </div>
@@ -2119,6 +2264,13 @@ export function AdminSettings() {
                       className="control-field h-[32px] w-[200px] rounded-[6px] pl-8 pr-3 text-[12px]"
                     />
                   </div>
+                  <button
+                    onClick={() => setBulkPanelUploadModalOpen(true)}
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
+                  >
+                    <Plus className="h-[14px] w-[14px]" />
+                    Use Excel
+                  </button>
                   <button
                     onClick={() => setPanelFormOpen(true)}
                     className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"

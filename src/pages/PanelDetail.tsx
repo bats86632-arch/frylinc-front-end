@@ -22,11 +22,10 @@ import {
 import { formatDateTime } from "../utils/formatters";
 import { Event } from "../types";
 
-type Tab = "zones" | "controls" | "history" | "contacts";
+type Tab = "zones" | "history" | "contacts";
 
 const tabs: Array<{ id: Tab; label: string; icon: typeof Settings }> = [
-  { id: "zones", label: "Zone Status", icon: Settings },
-  { id: "controls", label: "Controls", icon: Play },
+  { id: "zones", label: "Zones", icon: Settings },
   { id: "history", label: "Event History", icon: History },
   { id: "contacts", label: "Contact Numbers", icon: Phone },
 ];
@@ -97,7 +96,11 @@ export function PanelDetail() {
     setCommandLoading(command);
 
     try {
-      const apiCommand = command.startsWith("ARM") ? "ARM" : command;
+      let apiCommand = command;
+      if (command.startsWith("ARM")) apiCommand = "ARM";
+      if (command.startsWith("ZONE OFF")) apiCommand = "ZONE OFF";
+      if (command.startsWith("RESET")) apiCommand = "RESET";
+      
       await PanelService.sendCommand(serial, apiCommand);
       setCommandSuccess(command);
       setTimeout(() => setCommandSuccess(null), 3000);
@@ -303,86 +306,8 @@ export function PanelDetail() {
           </button>
         ))}
       </div>
-
       {/* Zones tab */}
       {activeTab === "zones" && (
-        <div className="animate-fade-in space-y-6">
-          <section className="surface-panel rounded-[12px] p-6 border border-[var(--border-subtle)]">
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
-                  Zone Status Grid
-                </h2>
-                <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                  <span className="tabular-nums">{visibleZones}</span> zones displayed
-                </p>
-              </div>
-              <div className="flex items-center gap-5 text-sm">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-3 w-3 rounded-[3px] bg-[var(--color-error)]" />
-                  <span className="text-[var(--text-secondary)]">Alarm</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <div className="h-3 w-3 rounded-[3px] bg-[var(--surface-overlay)] border border-[var(--border-default)]" />
-                  <span className="text-[var(--text-secondary)]">Normal</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
-              {Array.from({ length: visibleZones }).map((_, idx) => {
-                const zoneAlarm = panel.zones[idx] || false;
-                return (
-                  <div
-                    key={idx}
-                    className={`aspect-square rounded-[8px] border text-sm font-semibold tabular-nums transition-all duration-200 ${
-                      zoneAlarm
-                        ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] text-[var(--color-error)]"
-                        : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                    } flex cursor-default items-center justify-center`}
-                    title={`Zone ${idx + 1}: ${zoneAlarm ? "ALARM" : "Normal"}`}
-                  >
-                    {idx + 1}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-
-          {panel.zones.some((z) => z) && (
-            <section className="overflow-hidden rounded-[12px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-6">
-              <h3 className="mb-5 flex items-center gap-2.5 text-[16px] font-semibold text-[var(--color-error)]">
-                {/* Pulsing live-indicator dot */}
-                <span className="relative mr-1 flex h-3 w-3">
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-[var(--color-error)] opacity-75" />
-                  <span className="relative h-3 w-3 rounded-full bg-[var(--color-error)]" />
-                </span>
-                <AlertTriangle className="h-5 w-5" />
-                Active Alarms
-              </h3>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {panel.zones.map((zoneAlarm, idx) =>
-                  zoneAlarm ? (
-                    <div
-                      key={idx}
-                      className="surface-panel rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--surface-base)] p-5"
-                    >
-                      <p className="text-lg font-semibold tabular-nums text-[var(--text-primary)]">
-                        Zone {idx + 1}
-                      </p>
-                      <p className="mt-1.5 text-[10px] uppercase tracking-wider text-[var(--color-error)]">
-                        ALARM ACTIVE
-                      </p>
-                    </div>
-                  ) : null,
-                )}
-              </div>
-            </section>
-          )}
-        </div>
-      )}
-
-      {activeTab === "controls" && (
         <div className="animate-fade-in space-y-6">
           {commandError && (
             <div className="rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-4">
@@ -390,131 +315,174 @@ export function PanelDetail() {
             </div>
           )}
 
-          <section className="surface-panel rounded-[12px] p-6 border border-[var(--border-subtle)]">
-            <div className="mb-6">
-              <h3 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
-                Available Commands
-              </h3>
-              <p className="mt-1.5 text-sm text-[var(--text-secondary)]">
-                Commands are sent to the selected panel.
+          {/* MOB Command section */}
+          <section className="surface-panel rounded-[12px] p-6 border border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-[14px] font-bold text-[var(--text-primary)]">
+                General MOB Command
+              </h2>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
+                Trigger manual override for the entire panel.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {panelCommands.map((command) => {
-                const isEuRestricted = isStrictlyEndUser && command !== "ZONE OFF";
+            {(() => {
+              const isPhoneConfigured = Object.values(panel.contactNumbers || {}).some(num => num.trim() !== "");
+              if (isPhoneConfigured) {
+                const command = "MOB";
+                const isEuRestricted = isStrictlyEndUser;
                 return (
-                <button
-                  key={command}
-                  onClick={() => handleSendCommand(command)}
-                  disabled={commandLoading !== null || isEuRestricted}
-                  className={`rounded-[8px] border p-5 text-left transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
-                    commandSuccess === command
-                      ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
-                      : commandLoading === command
-                        ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
-                        : command.startsWith("ARM")
-                          ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] text-[var(--color-error)] hover:border-[var(--color-error)]"
-                          : command === "ZONE OFF"
-                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)]"
-                            : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)]"
-                  }`}
-                >
-                  {commandSuccess === command ? (
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--color-success)]/10">
-                        <CheckCircle className="h-5 w-5 text-[var(--color-success)]" />
-                      </span>
-                      <span className="text-sm font-semibold">Sent</span>
-                    </div>
-                  ) : commandLoading === command ? (
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--color-warning)]/10">
-                        <Loader2 className="h-5 w-5 animate-spin text-[var(--color-warning)]" />
-                      </span>
-                      <span className="text-sm font-semibold">Sending...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <span className={`flex h-10 w-10 items-center justify-center rounded-[8px] border ${
-                        command.startsWith("ARM")
-                          ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]"
-                          : command === "ZONE OFF"
-                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)]"
-                            : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]"
-                      }`}>
-                        <Play className={`h-4 w-4 ${
-                          command.startsWith("ARM")
-                            ? "text-[var(--color-error)]"
-                            : command === "ZONE OFF"
-                              ? "text-[var(--color-success)]"
-                              : "text-[var(--accent)]"
-                        }`} />
-                      </span>
-                      <span className="text-sm font-semibold">{command}</span>
-                    </div>
-                  )}
-                </button>
-              )})}
-              
-              {(() => {
-                const isPhoneConfigured = Object.values(panel.contactNumbers || {}).some(num => num.trim() !== "");
-                if (isPhoneConfigured) {
-                  const command = "MOB";
-                  const isEuRestricted = isStrictlyEndUser;
-                  return (
-                    <button
-                      key={command}
-                      onClick={() => handleSendCommand(command)}
-                      disabled={commandLoading !== null || isEuRestricted}
-                      className={`rounded-[8px] border p-5 text-left transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
-                        commandSuccess === command
-                          ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
-                          : commandLoading === command
-                            ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
-                            : "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)]"
-                      }`}
-                    >
-                      {commandSuccess === command ? (
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--color-success)]/10">
-                            <CheckCircle className="h-5 w-5 text-[var(--color-success)]" />
-                          </span>
-                          <span className="text-sm font-semibold">Sent</span>
-                        </div>
-                      ) : commandLoading === command ? (
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[var(--color-warning)]/10">
-                            <Loader2 className="h-5 w-5 animate-spin text-[var(--color-warning)]" />
-                          </span>
-                          <span className="text-sm font-semibold">Sending...</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[var(--status-success-border)] bg-[var(--status-success-bg)]">
-                            <Play className="h-4 w-4 text-[var(--color-success)]" />
-                          </span>
-                          <span className="text-sm font-semibold">{command}</span>
-                        </div>
-                      )}
-                    </button>
-                  );
-                } else {
-                  return (
-                    <button
-                      key="MOB_CONFIGURE"
-                      onClick={() => setActiveTab("contacts")}
-                      className="rounded-[8px] border p-5 text-left transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)]"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-overlay)]">
-                          <Settings className="h-4 w-4 text-[var(--accent)]" />
-                        </span>
-                        <span className="text-sm font-semibold">Configure MOB</span>
+                  <button
+                    key={command}
+                    onClick={() => handleSendCommand(command)}
+                    disabled={commandLoading !== null || isEuRestricted}
+                    className={`rounded-[8px] border px-6 py-3 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 shrink-0 ${
+                      commandSuccess === command
+                        ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
+                        : commandLoading === command
+                          ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
+                          : "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)]"
+                    }`}
+                  >
+                    {commandSuccess === command ? (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="text-sm font-semibold">Sent</span>
                       </div>
-                    </button>
-                  );
-                }
-              })()}
+                    ) : commandLoading === command ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm font-semibold">Sending...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Play className="h-4 w-4" />
+                        <span className="text-sm font-semibold">Send MOB</span>
+                      </div>
+                    )}
+                  </button>
+                );
+              } else {
+                return (
+                  <button
+                    key="MOB_CONFIGURE"
+                    onClick={() => setActiveTab("contacts")}
+                    className="rounded-[8px] border px-6 py-3 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Settings className="h-4 w-4 text-[var(--accent)]" />
+                      <span className="text-sm font-semibold">Configure MOB</span>
+                    </div>
+                  </button>
+                );
+              }
+            })()}
+          </section>
+
+          {/* Zones Grid */}
+          <section className="surface-panel rounded-[12px] p-6 border border-[var(--border-subtle)]">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
+                  Zones & Controls
+                </h2>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                  <span className="tabular-nums">{visibleZones}</span> zones displayed
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: visibleZones }).map((_, idx) => {
+                const zoneNum = idx + 1;
+                const zoneAlarm = panel.zones[idx] || false;
+                
+                const armCmd = `ARM ${zoneNum}`;
+                const silenceCmd = `ZONE OFF ${zoneNum}`;
+                const resetCmd = `RESET ${zoneNum}`;
+                
+                const isEuRestricted = isStrictlyEndUser;
+
+                return (
+                  <div
+                    key={idx}
+                    className={`rounded-[12px] border p-5 flex flex-col gap-4 transition-all duration-200 ${
+                      zoneAlarm
+                        ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]"
+                        : "border-[var(--border-subtle)] bg-[var(--surface-raised)]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`text-lg font-bold ${zoneAlarm ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
+                        Zone {zoneNum}
+                      </span>
+                      {zoneAlarm ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--status-danger-border)] bg-[var(--surface-base)] px-2.5 py-1 text-xs font-bold tracking-wide text-[var(--color-error)]">
+                          <span className="relative flex h-2 w-2">
+                            <span className="absolute h-full w-full animate-ping rounded-full bg-[var(--color-error)] opacity-75" />
+                            <span className="relative h-2 w-2 rounded-full bg-[var(--color-error)]" />
+                          </span>
+                          ALARM
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-base)] px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)]">
+                          <div className="h-2 w-2 rounded-full bg-[var(--text-secondary)] opacity-50" />
+                          NORMAL
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 mt-auto">
+                      {/* ARM */}
+                      <button
+                        onClick={() => handleSendCommand(armCmd)}
+                        disabled={commandLoading !== null || isEuRestricted}
+                        className={`rounded-[6px] border py-2 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                          commandSuccess === armCmd
+                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
+                            : commandLoading === armCmd
+                              ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
+                              : "border-[var(--status-danger-border)] bg-[var(--surface-base)] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)]"
+                        }`}
+                      >
+                        {commandLoading === armCmd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : commandSuccess === armCmd ? <CheckCircle className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                        ARM
+                      </button>
+
+                      {/* SILENCE */}
+                      <button
+                        onClick={() => handleSendCommand(silenceCmd)}
+                        disabled={commandLoading !== null}
+                        className={`rounded-[6px] border py-2 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                          commandSuccess === silenceCmd
+                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
+                            : commandLoading === silenceCmd
+                              ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
+                              : "border-[var(--status-success-border)] bg-[var(--surface-base)] text-[var(--color-success)] hover:bg-[var(--status-success-bg)]"
+                        }`}
+                      >
+                        {commandLoading === silenceCmd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : commandSuccess === silenceCmd ? <CheckCircle className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                        SILENCE
+                      </button>
+
+                      {/* RESET */}
+                      <button
+                        onClick={() => handleSendCommand(resetCmd)}
+                        disabled={commandLoading !== null || isEuRestricted}
+                        className={`rounded-[6px] border py-2 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                          commandSuccess === resetCmd
+                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
+                            : commandLoading === resetCmd
+                              ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
+                              : "border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--accent)] hover:bg-[var(--surface-hover)]"
+                        }`}
+                      >
+                        {commandLoading === resetCmd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : commandSuccess === resetCmd ? <CheckCircle className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                        RESET
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
         </div>

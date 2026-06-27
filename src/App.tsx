@@ -30,37 +30,7 @@ const TermsOfService = lazy(() =>
   import("./pages/TermsOfService").then((m) => ({ default: m.TermsOfService })),
 );
 
-// @ts-expect-error virtual module provided by vite-plugin-pwa
-import { useRegisterSW } from "virtual:pwa-register/react";
-
 function App() {
-  const {
-    needRefresh: [needRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onRegistered(r: any) {
-      console.log("SW Registered");
-      // Optional: check for updates every 10 minutes in the background
-      if (r) {
-        setInterval(() => {
-          r.update();
-        }, 10 * 60 * 1000);
-      }
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onRegisterError(error: any) {
-      console.error("SW registration error", error);
-    },
-  });
-
-  useEffect(() => {
-    if (needRefresh) {
-      // Instantly activate the new service worker and reload the page
-      updateServiceWorker(true);
-    }
-  }, [needRefresh, updateServiceWorker]);
-
   // Fire-and-forget prefetch for the most likely route chunks.
   // These dynamic imports prime the browser's module cache so when the router
   // resolves after auth, the chunks are either already cached or mid-download.

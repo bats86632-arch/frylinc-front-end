@@ -15,6 +15,7 @@ export const PanelService = {
   },
 
   async sendCommand(serial: string, command: string): Promise<CommandResponse> {
+    console.log(`[BRIDGE] Sending command "${command}" to panel ${serial}`);
     const response = await apiClient.post(`/panels/${serial}/commands`, { command });
     return response.data;
   },

@@ -80,7 +80,7 @@ export function Dashboard() {
     ]);
     const wb = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(wb, ws, "Branches");
-    xlsx.utils.writeFile(wb, "branch_bulk_template.xlsx");
+    xlsx.writeFile(wb, "branch_bulk_template.xlsx");
   };
 
   const handleBranchBulkUpload = async (
@@ -500,7 +500,7 @@ export function Dashboard() {
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-[11px]">
           {showBranchView && !isEndUser && role !== "system_integrator" && (
             <button
               onClick={() => setBulkUploadModalOpen(true)}
@@ -511,7 +511,7 @@ export function Dashboard() {
             </button>
           )}
 
-          <div className="relative mb-[11px] w-full sm:w-72">
+          <div className="relative w-full sm:w-72">
             <Search className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-secondary)] z-10" />
             <input
               type="text"
