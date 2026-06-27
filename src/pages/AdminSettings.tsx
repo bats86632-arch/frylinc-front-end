@@ -29,7 +29,6 @@ import {
   Trash2,
   Edit2,
   X,
-  Copy,
   Search,
   Building2,
   Users,
@@ -38,8 +37,6 @@ import {
   ChevronLeft,
   MapPin,
   ChevronRight,
-  ShieldAlert,
-  Building,
   Camera,
 } from "lucide-react";
 import { CopyButton } from "../components/CopyButton";
@@ -92,6 +89,7 @@ const companySchema = z.object({
 type CompanyFormData = z.infer<typeof companySchema>;
 
 const roleLabels: Record<Role, string> = {
+  secret_super_admin: "Secret Super Admin",
   super_admin: "Super Admin",
   head_office: "Head Office",
   system_integrator: "System Integrator",
@@ -129,7 +127,7 @@ export function AdminSettings() {
   const [branchSearchQuery, setBranchSearchQuery] = useState("");
   const [addingBranchToCompany, setAddingBranchToCompany] = useState<string | null>(null);
   const [newBranchForm, setNewBranchForm] = useState<Partial<Branch>>({});
-  const [userAssignments, setUserAssignments] = useState<Record<string, string[]>>({});
+  
 
   const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
@@ -140,11 +138,11 @@ export function AdminSettings() {
   const [panelFormOpen, setPanelFormOpen] = useState(false);
   const [userFormOpen, setUserFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
-  const [userFormLoading, setUserFormLoading] = useState(false);
+  
   const [inlineEditingBranchId, setInlineEditingBranchId] = useState<string | null>(null);
   const [inlineEditBranchForm, setInlineEditBranchForm] = useState<Partial<Branch>>({});
   const [inlineEditBranchLoading, setInlineEditBranchLoading] = useState(false);
-  const [editUserFormLoading, setEditUserFormLoading] = useState(false);
+  
   const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
   
   // Bulk upload states
@@ -247,7 +245,7 @@ export function AdminSettings() {
     handleSubmit: handleSubmitEditCompany,
     reset: resetEditCompany,
     setValue: setEditCompanyValue,
-    control: controlEditCompany,
+    
     formState: { errors: editCompanyErrors },
   } = useForm<EditCompanyFormData>({
     resolver: zodResolver(editCompanySchema),
@@ -374,7 +372,8 @@ export function AdminSettings() {
     }
   };
 
-  const downloadPanelTemplate = () => {
+  const downloadPanelTemplate = async () => {
+    const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet([
       {
         "Serial Number": "123456",
@@ -468,7 +467,7 @@ export function AdminSettings() {
         logoUrl = await getDownloadURL(fileRef);
       }
 
-      const companyData: Partial<Company> = { name: data.name, description: data.description };
+      const companyData: Partial<Company> = { name: data.name, description: data.description || "" };
       if (logoUrl) companyData.logoUrl = logoUrl;
 
       const company = await CompanyService.createCompany(companyData as Omit<Company, "id" | "createdAt" | "updatedAt">);
@@ -581,7 +580,7 @@ export function AdminSettings() {
       }
       await CompanyService.updateCompany(editingCompanyData.id, {
         name: data.name,
-        description: data.description,
+        description: data.description || "",
         ...(logoUrl ? { logoUrl } : {}),
       });
 
@@ -689,14 +688,7 @@ export function AdminSettings() {
     setLastSynced(Date.now());
   };
 
-  const handleCopyId = (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigator.clipboard.writeText(id);
-    setSuccess("ID copied to clipboard");
-    setTimeout(() => setSuccess(null), 3000);
-  };
-
+  
   const openEditUser = (user: User) => {
     setEditingUserData(user);
     setUserFormOpen(true);
@@ -710,8 +702,8 @@ export function AdminSettings() {
         serial: data.serial,
         name: data.name,
         zoneCount: data.zoneCount,
-        companyId: data.companyId,
-        branchId: data.branchId,
+        companyId: data.companyId || "",
+        branchId: data.branchId || "",
         ipAddress: data.ipAddress?.trim() || undefined,
         allowedCommands: normalizeAllowedCommands(),
       });
@@ -755,14 +747,7 @@ export function AdminSettings() {
   };
 
   // Mock function for panel heartbeat
-  const getPanelHeartbeat = (serial: string) => {
-    const hash = serial
-      .split("")
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const times = ["Just now", "15s ago", "42s ago", "1m ago"];
-    return times[hash % times.length];
-  };
-
+  
   const filteredCompanies = (companies || []).filter(
     (c) =>
       c.name.toLowerCase().includes(companySearchQuery.toLowerCase()) ||
@@ -2264,13 +2249,15 @@ export function AdminSettings() {
                       className="control-field h-[32px] w-[200px] rounded-[6px] pl-8 pr-3 text-[12px]"
                     />
                   </div>
-                  <button
-                    onClick={() => setBulkPanelUploadModalOpen(true)}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
-                  >
-                    <Plus className="h-[14px] w-[14px]" />
-                    Use Excel
-                  </button>
+                  {!hasRole(["end_user"]) && (
+                    <button
+                      onClick={() => setBulkPanelUploadModalOpen(true)}
+                      className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
+                    >
+                      <Plus className="h-[14px] w-[14px]" />
+                      Use Excel
+                    </button>
+                  )}
                   <button
                     onClick={() => setPanelFormOpen(true)}
                     className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
@@ -2433,7 +2420,7 @@ export function AdminSettings() {
                             disabled={panelFormLoading || branchesLoading}
                           >
                             <option value="">— Select a branch —</option>
-                            {getBranchesForCompany(watchedPanelCompanyId).map((b) => (
+                            {getBranchesForCompany(watchedPanelCompanyId || "").map((b) => (
                               <option key={b.id} value={b.id}>
                                 {b.name}
                               </option>
@@ -2771,7 +2758,7 @@ export function AdminSettings() {
                                   "system_integrator",
                                 ]) && (
               <div
-                onClick={(e) => { e.stopPropagation(); handleDeletePanel(panel.serial); }}
+                onClick={(e) => { e.stopPropagation(); handleDeletePanel(panel.serial || ""); }}
                 className="h-5 w-5 flex items-center justify-center rounded text-[var(--color-error)] opacity-0 group-hover:opacity-100 hover:bg-[var(--status-danger-bg)] transition-all shrink-0"
               >
                 <Trash2 className="h-3 w-3" />

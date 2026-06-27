@@ -9,7 +9,6 @@ import {
   ShieldAlert,
   Building,
   Users,
-  MapPin,
   XCircle,
   Plus,
   ChevronDown,

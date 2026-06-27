@@ -41,6 +41,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const roleHierarchy: Record<Role, number> = {
+  secret_super_admin: 5,
   super_admin: 4,
   head_office: 3,
   system_integrator: 2,

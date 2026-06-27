@@ -6,7 +6,7 @@ import './index.css';
 // @ts-expect-error virtual module provided by vite-plugin-pwa
 import { registerSW } from 'virtual:pwa-register';
 
-const updateSW = registerSW({
+registerSW({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onRegistered(r: any) {
     if (r) {

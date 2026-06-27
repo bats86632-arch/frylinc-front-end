@@ -4,7 +4,7 @@ import { usePanel } from "../hooks/usePanels";
 
 import { PanelService } from "../api/PanelService";
 import { useAuth } from "../contexts/AuthContext";
-import { DEFAULT_PANEL_COMMANDS } from "../config/panelDefaults";
+
 import {
   AlertTriangle,
   ArrowLeft,
@@ -12,7 +12,6 @@ import {
   Clock,
   History,
   Loader2,
-  Play,
   RefreshCw,
   Settings,
   Phone,
