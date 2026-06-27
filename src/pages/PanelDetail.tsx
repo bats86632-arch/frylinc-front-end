@@ -18,6 +18,10 @@ import {
   Phone,
   Save,
   WifiOff,
+  Shield,
+  ShieldAlert,
+  BellOff,
+  RotateCcw
 } from "lucide-react";
 import { formatDateTime } from "../utils/formatters";
 import { Event } from "../types";
@@ -337,60 +341,19 @@ export function PanelDetail() {
                   MOB Command
                 </h2>
                 <p className="text-sm text-[var(--text-secondary)] mt-1">
-                  Trigger manual override for the entire panel.
+                  To configure mobile numbers for the MOB command, click on the contact numbers tab.
                 </p>
               </div>
-              {(() => {
-                const isPhoneConfigured = Object.values(panel.contactNumbers || {}).some(num => num.trim() !== "");
-                if (isPhoneConfigured) {
-                  const command = "MOB";
-                  const isEuRestricted = isStrictlyEndUser;
-                  return (
-                    <button
-                      key={command}
-                      onClick={() => handleSendCommand(command)}
-                      disabled={commandLoading !== null || isEuRestricted}
-                      className={`rounded-[8px] border px-6 py-3 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 shrink-0 ${
-                        commandSuccess === command
-                          ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
-                          : commandLoading === command
-                            ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
-                            : "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)]"
-                      }`}
-                    >
-                      {commandSuccess === command ? (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4" />
-                          <span className="text-sm font-semibold">Sent</span>
-                        </div>
-                      ) : commandLoading === command ? (
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span className="text-sm font-semibold">Sending...</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Play className="h-4 w-4" />
-                          <span className="text-sm font-semibold">Send MOB</span>
-                        </div>
-                      )}
-                    </button>
-                  );
-                } else {
-                  return (
-                    <button
-                      key="MOB_CONFIGURE"
-                      onClick={() => setActiveTab("contacts")}
-                      className="rounded-[8px] border px-6 py-3 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Settings className="h-4 w-4 text-[var(--accent)]" />
-                        <span className="text-sm font-semibold">Configure MOB</span>
-                      </div>
-                    </button>
-                  );
-                }
-              })()}
+              <button
+                key="MOB_CONFIGURE"
+                onClick={() => setActiveTab("contacts")}
+                className="rounded-[8px] border px-6 py-3 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0 shadow-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <Settings className="h-4 w-4 text-[var(--accent)]" />
+                  <span className="text-sm font-semibold">Configure MOB</span>
+                </div>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -407,81 +370,81 @@ export function PanelDetail() {
                 return (
                   <div
                     key={idx}
-                    className={`rounded-[12px] border p-5 flex flex-col gap-4 transition-all duration-200 ${
+                    className={`relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${
                       zoneAlarm
-                        ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]"
-                        : "border-[var(--border-subtle)] bg-[var(--surface-raised)]"
+                        ? "border-[var(--color-error)] shadow-[0_0_20px_rgba(220,38,38,0.15)] bg-gradient-to-br from-[var(--status-danger-bg)] to-[var(--surface-raised)]"
+                        : "border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-strong)]"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className={`text-lg font-bold ${zoneAlarm ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
-                        Zone {zoneNum}
-                      </span>
+                    {/* Top status bar */}
+                    <div className="flex items-center justify-between relative z-10">
+                      <div className="flex flex-col">
+                        <span className={`text-xs font-bold tracking-widest uppercase ${zoneAlarm ? "text-[var(--color-error)]" : "text-[var(--text-tertiary)]"}`}>
+                          Status
+                        </span>
+                        <span className={`text-xl font-black tracking-tight ${zoneAlarm ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
+                          Zone {zoneNum}
+                        </span>
+                      </div>
                       {zoneAlarm ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--status-danger-border)] bg-[var(--surface-base)] px-2.5 py-1 text-xs font-bold tracking-wide text-[var(--color-error)]">
-                          <span className="relative flex h-2 w-2">
-                            <span className="absolute h-full w-full animate-ping rounded-full bg-[var(--color-error)] opacity-75" />
-                            <span className="relative h-2 w-2 rounded-full bg-[var(--color-error)]" />
-                          </span>
-                          ALARM
-                        </span>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-error)]/10 text-[var(--color-error)] animate-pulse">
+                          <AlertTriangle className="h-5 w-5" />
+                        </div>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-base)] px-2.5 py-1 text-xs font-semibold text-[var(--text-secondary)]">
-                          <div className="h-2 w-2 rounded-full bg-[var(--text-secondary)] opacity-50" />
-                          NORMAL
-                        </span>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+                          <Shield className="h-4 w-4" />
+                        </div>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 mt-auto">
-                      {/* ARM */}
+                    {/* Controls Divider */}
+                    <div className={`h-[1px] w-full ${zoneAlarm ? 'bg-[var(--color-error)]/20' : 'bg-[var(--border-subtle)]'}`} />
+
+                    {/* Control Panel Buttons */}
+                    <div className="grid grid-cols-1 gap-2.5 relative z-10 mt-auto">
+                      {/* Action buttons with glassmorphic aesthetic */}
                       <button
                         onClick={() => handleSendCommand(armCmd)}
                         disabled={commandLoading !== null || isEuRestricted}
-                        className={`rounded-[6px] border py-2 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                          commandSuccess === armCmd
-                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
-                            : commandLoading === armCmd
-                              ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
-                              : "border-[var(--status-danger-border)] bg-[var(--surface-base)] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)]"
-                        }`}
+                        className="group relative flex items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 px-4 py-2.5 transition-all duration-300 hover:border-[var(--accent)] hover:bg-[var(--accent)]/5 hover:shadow-lg hover:shadow-[var(--accent)]/10 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {commandLoading === armCmd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : commandSuccess === armCmd ? <CheckCircle className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-                        ARM
+                         <span className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)]">Arm Zone</span>
+                         {commandLoading === armCmd ? <Loader2 className="h-4 w-4 animate-spin text-[var(--accent)]" /> : commandSuccess === armCmd ? <CheckCircle className="h-4 w-4 text-[var(--color-success)]" /> : <ShieldAlert className="h-4 w-4 text-[var(--text-secondary)] group-hover:text-[var(--accent)] transition-colors" />}
                       </button>
-
-                      {/* SILENCE */}
-                      <button
-                        onClick={() => handleSendCommand(silenceCmd)}
-                        disabled={commandLoading !== null}
-                        className={`rounded-[6px] border py-2 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                          commandSuccess === silenceCmd
-                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
-                            : commandLoading === silenceCmd
-                              ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
-                              : "border-[var(--status-success-border)] bg-[var(--surface-base)] text-[var(--color-success)] hover:bg-[var(--status-success-bg)]"
-                        }`}
-                      >
-                        {commandLoading === silenceCmd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : commandSuccess === silenceCmd ? <CheckCircle className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-                        SILENCE
-                      </button>
-
-                      {/* RESET */}
-                      <button
-                        onClick={() => handleSendCommand(resetCmd)}
-                        disabled={commandLoading !== null || isEuRestricted}
-                        className={`rounded-[6px] border py-2 flex flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                          commandSuccess === resetCmd
-                            ? "border-[var(--status-success-border)] bg-[var(--status-success-bg)] text-[var(--color-success)]"
-                            : commandLoading === resetCmd
-                              ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
-                              : "border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--accent)] hover:bg-[var(--surface-hover)]"
-                        }`}
-                      >
-                        {commandLoading === resetCmd ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : commandSuccess === resetCmd ? <CheckCircle className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                        RESET
-                      </button>
+                      
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <button
+                          onClick={() => handleSendCommand(silenceCmd)}
+                          disabled={commandLoading !== null}
+                          className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            zoneAlarm 
+                              ? "border-[var(--color-warning)]/30 bg-[var(--status-warning-bg)] text-[var(--color-warning)] hover:border-[var(--color-warning)] hover:shadow-lg hover:shadow-[var(--color-warning)]/20" 
+                              : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 text-[var(--text-secondary)] hover:border-[var(--color-warning)] hover:text-[var(--color-warning)]"
+                          }`}
+                        >
+                           {commandLoading === silenceCmd ? <Loader2 className="h-4 w-4 animate-spin" /> : commandSuccess === silenceCmd ? <CheckCircle className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                           <span className="text-xs font-bold uppercase tracking-wider">Silence</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleSendCommand(resetCmd)}
+                          disabled={commandLoading !== null || isEuRestricted}
+                          className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            zoneAlarm 
+                              ? "border-[var(--color-success)]/30 bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)] hover:shadow-lg hover:shadow-[var(--color-success)]/20" 
+                              : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 text-[var(--text-secondary)] hover:border-[var(--color-success)] hover:text-[var(--color-success)]"
+                          }`}
+                        >
+                           {commandLoading === resetCmd ? <Loader2 className="h-4 w-4 animate-spin" /> : commandSuccess === resetCmd ? <CheckCircle className="h-4 w-4" /> : <RotateCcw className="h-4 w-4" />}
+                           <span className="text-xs font-bold uppercase tracking-wider">Reset</span>
+                        </button>
+                      </div>
                     </div>
+                    
+                    {/* Background decorative blob for alarm state */}
+                    {zoneAlarm && (
+                      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[var(--color-error)] blur-[50px] opacity-20 pointer-events-none" />
+                    )}
                   </div>
                 );
               })}
