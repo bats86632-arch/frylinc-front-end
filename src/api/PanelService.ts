@@ -1,5 +1,7 @@
 import apiClient from './axios';
 import { Panel, Event, CommandResponse } from '../types';
+import { db } from '../config/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 export const PanelService = {
   async getPanels(): Promise<Panel[]> {
@@ -18,6 +20,36 @@ export const PanelService = {
     console.log(`[BRIDGE] Sending command "${command}" to panel ${serial}`);
     const response = await apiClient.post(`/panels/${serial}/commands`, { command });
     return response.data;
+  },
+
+  waitForCommandConfirmation(serial: string, commandId: string, timeoutMs: number = 15000): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const commandRef = doc(db, 'panels', serial, 'commands', commandId);
+      let timeoutId: NodeJS.Timeout;
+      
+      const unsubscribe = onSnapshot(
+        commandRef,
+        (docSnap) => {
+          if (!docSnap.exists()) return;
+          const data = docSnap.data();
+          if (data.status === 'sent' || data.status === 'acknowledged') {
+            clearTimeout(timeoutId);
+            unsubscribe();
+            resolve();
+          }
+        },
+        (error) => {
+          clearTimeout(timeoutId);
+          unsubscribe();
+          reject(error);
+        }
+      );
+
+      timeoutId = setTimeout(() => {
+        unsubscribe();
+        reject(new Error('VM Bridge did not acknowledge command in time'));
+      }, timeoutMs);
+    });
   },
 
   async createPanel(data: {

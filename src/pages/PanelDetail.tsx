@@ -104,11 +104,18 @@ export function PanelDetail() {
       if (command.startsWith("ARM")) apiCommand = "ARM";
       if (command.startsWith("ZONE OFF")) apiCommand = "ZONE OFF";
       
-      await PanelService.sendCommand(serial, apiCommand);
+      const response = await PanelService.sendCommand(serial, apiCommand);
+      
+      if (response.commandId) {
+        await PanelService.waitForCommandConfirmation(serial, response.commandId);
+      }
+
       setCommandSuccess(command);
       setTimeout(() => setCommandSuccess(null), 3000);
     } catch (err: unknown) {
-      setCommandError(getApiErrorMessage(err, "Failed to send command"));
+      // Extract specific error message if it's the timeout error
+      const errMessage = err instanceof Error ? err.message : "Failed to send command";
+      setCommandError(getApiErrorMessage(err, errMessage));
     } finally {
       setCommandLoading(null);
     }
@@ -159,12 +166,17 @@ export function PanelDetail() {
       });
 
       // Send to panel
-      await PanelService.sendCommand(serial, `MOB=${slot}=${number}`);
+      const response = await PanelService.sendCommand(serial, `MOB=${slot}=${number}`);
+      
+      if (response.commandId) {
+        await PanelService.waitForCommandConfirmation(serial, response.commandId);
+      }
 
       setSyncSuccessSlot(slot);
       setTimeout(() => setSyncSuccessSlot(null), 3000);
     } catch (err: unknown) {
-      setCommandError(getApiErrorMessage(err, `Failed to sync slot ${slot}`));
+      const errMessage = err instanceof Error ? err.message : "Failed to sync contact";
+      setCommandError(getApiErrorMessage(err, errMessage));
     } finally {
       setSyncingSlot(null);
     }
