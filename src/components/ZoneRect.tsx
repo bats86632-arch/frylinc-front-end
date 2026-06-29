@@ -167,14 +167,14 @@ export function ZoneRect({
 
   // Resize handle positions: [inset-x%, inset-y%, cursor]
   const handles: { pos: string; cursor: string; handle: ResizeHandle }[] = [
-    { pos: "top-[-4px] left-[-4px]", cursor: "cursor-nw-resize", handle: "nw" },
-    { pos: "top-[-4px] left-[calc(50%-4px)]", cursor: "cursor-n-resize", handle: "n" },
-    { pos: "top-[-4px] right-[-4px]", cursor: "cursor-ne-resize", handle: "ne" },
-    { pos: "top-[calc(50%-4px)] right-[-4px]", cursor: "cursor-e-resize", handle: "e" },
-    { pos: "bottom-[-4px] right-[-4px]", cursor: "cursor-se-resize", handle: "se" },
-    { pos: "bottom-[-4px] left-[calc(50%-4px)]", cursor: "cursor-s-resize", handle: "s" },
-    { pos: "bottom-[-4px] left-[-4px]", cursor: "cursor-sw-resize", handle: "sw" },
-    { pos: "top-[calc(50%-4px)] left-[-4px]", cursor: "cursor-w-resize", handle: "w" },
+    { pos: "top-[-8px] left-[-8px]", cursor: "cursor-nw-resize", handle: "nw" },
+    { pos: "top-[-8px] left-[calc(50%-8px)]", cursor: "cursor-n-resize", handle: "n" },
+    { pos: "top-[-8px] right-[-8px]", cursor: "cursor-ne-resize", handle: "ne" },
+    { pos: "top-[calc(50%-8px)] right-[-8px]", cursor: "cursor-e-resize", handle: "e" },
+    { pos: "bottom-[-8px] right-[-8px]", cursor: "cursor-se-resize", handle: "se" },
+    { pos: "bottom-[-8px] left-[calc(50%-8px)]", cursor: "cursor-s-resize", handle: "s" },
+    { pos: "bottom-[-8px] left-[-8px]", cursor: "cursor-sw-resize", handle: "sw" },
+    { pos: "top-[calc(50%-8px)] left-[-8px]", cursor: "cursor-w-resize", handle: "w" },
   ];
 
   return (
@@ -192,15 +192,15 @@ export function ZoneRect({
         style={{ pointerEvents: "none" }}
       >
         <span
-          className={`text-center font-semibold leading-tight break-words w-full ${
+          className={`text-center font-bold leading-tight break-words w-full mix-blend-difference ${
             isAlarm
-              ? "text-white text-[11px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+              ? "text-white"
               : isOrphan
-              ? "text-[rgba(209,52,56,0.9)] text-[10px]"
-              : "text-[var(--text-primary)] text-[10px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+              ? "text-white opacity-90"
+              : "text-white"
           }`}
           style={{
-            fontSize: `clamp(8px, ${Math.min(zone.width, zone.height) * 0.18}vw, 13px)`,
+            fontSize: `clamp(10px, ${Math.min(zone.width, zone.height) * 0.22}vw, 16px)`,
           }}
         >
           {isOrphan ? (
@@ -222,7 +222,7 @@ export function ZoneRect({
           {handles.map(({ pos, cursor, handle }) => (
             <div
               key={handle}
-              className={`absolute w-[8px] h-[8px] rounded-[2px] bg-white border border-[var(--accent)] shadow-sm ${pos} ${cursor} z-30`}
+              className={`absolute w-[16px] h-[16px] rounded-[4px] bg-white border-2 border-[var(--accent)] shadow-md ${pos} ${cursor} z-30`}
               style={{ pointerEvents: "all" }}
               onPointerDown={(e) => {
                 e.stopPropagation();

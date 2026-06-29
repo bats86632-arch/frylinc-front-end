@@ -426,7 +426,7 @@ export function MapZones() {
 
       {/* Map image + zone overlay */}
       <div
-        className={`relative flex-1 min-h-[300px] rounded-[8px] border-2 overflow-hidden ${
+        className={`relative flex-1 min-h-[300px] rounded-[8px] border-2 overflow-auto flex items-center justify-center ${
           anyAlarm
             ? "map-border-alarm"
             : "border-[var(--border-default)]"
@@ -434,21 +434,23 @@ export function MapZones() {
         style={{ background: "var(--surface-overlay)" }}
         onClick={handleCanvasClick}
       >
-        {/* Floor plan image */}
-        <img
-          src={panelMap!.imageUrl}
-          alt="Floor plan"
-          draggable={false}
-          className="block w-full h-full object-contain select-none"
-          style={{ display: "block", userSelect: "none" }}
-        />
+        {/* Inner wrapper strictly fits the image content */}
+        <div className="relative inline-block max-w-full max-h-full">
+          {/* Floor plan image */}
+          <img
+            src={panelMap!.imageUrl}
+            alt="Floor plan"
+            draggable={false}
+            className="block max-w-full max-h-full object-contain select-none"
+            style={{ display: "block", userSelect: "none" }}
+          />
 
-        {/* Zone rectangle overlay — absolute-positioned container matching the image */}
-        <div
-          ref={containerRef}
-          className="absolute inset-0"
-          style={{ pointerEvents: "none" }}
-        >
+          {/* Zone rectangle overlay — absolute-positioned container matching the image */}
+          <div
+            ref={containerRef}
+            className="absolute inset-0"
+            style={{ pointerEvents: "none" }}
+          >
           <div className="relative w-full h-full" style={{ pointerEvents: "none" }}>
             {localZones.map((zone, idx) => {
               // Determine if this zone index exists in the panel's actual zones
@@ -476,6 +478,7 @@ export function MapZones() {
           </div>
         </div>
       </div>
+    </div>
 
       {/* Zone legend strip */}
       <div className="flex items-center gap-3 flex-wrap text-[10px] text-[var(--text-quaternary)]">
@@ -537,12 +540,21 @@ export function MapZones() {
 
   // ── Main render ───────────────────────────────────────────────────────────
   return (
-    <div className="flex h-[calc(100vh-72px)] overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-8">
+    <div className="flex relative h-[calc(100vh-72px)] overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-8">
+      {/* Mobile Backdrop Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="lg:hidden absolute inset-0 bg-black/40 z-30 transition-opacity" 
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* ── Left: Panel Selector ──────────────────────────────────────────── */}
       <aside
-        className={`flex flex-col border-r border-[var(--border-subtle)] bg-[var(--surface-overlay)] transition-all duration-300 ${
-          sidebarOpen ? "w-[260px] min-w-[260px]" : "w-0 min-w-0 overflow-hidden"
-        } lg:w-[260px] lg:min-w-[260px] lg:overflow-visible`}
+        className={`absolute z-40 inset-y-0 left-0 lg:static flex flex-col border-r border-[var(--border-subtle)] bg-[var(--surface-overlay)] transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0 w-[260px]" : "-translate-x-full w-[260px] lg:w-0 lg:min-w-0"
+        } lg:translate-x-0 lg:min-w-[260px] h-full shadow-2xl lg:shadow-none`}
       >
         {/* Sidebar header */}
         <div className="border-b border-[var(--border-subtle)] px-4 py-4 space-y-3">
