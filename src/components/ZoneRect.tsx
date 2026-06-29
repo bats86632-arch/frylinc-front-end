@@ -178,21 +178,49 @@ export function ZoneRect({
   ];
 
   return (
-    <div
-      style={rectStyle}
-      className={rectClass}
-      onPointerDown={(e) => handlePointerDown(e, "move")}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onClick={(e) => { e.stopPropagation(); if (!isReadOnly) onSelect(); }}
-    >
-      {/* ── Label ─────────────────────────────────────────────────────── */}
+    <>
       <div
-        className="absolute inset-0 flex items-center justify-center px-1"
-        style={{ pointerEvents: "none" }}
+        style={rectStyle}
+        className={rectClass}
+        onPointerDown={(e) => handlePointerDown(e, "move")}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onClick={(e) => { e.stopPropagation(); if (!isReadOnly) onSelect(); }}
+      >
+        {/* ── Resize Handles (only when selected and not read-only) ─────── */}
+        {isSelected && !isReadOnly && (
+          <>
+            {handles.map(({ pos, cursor, handle }) => (
+              <div
+                key={handle}
+                className={`absolute w-[16px] h-[16px] rounded-[4px] bg-white border-2 border-[var(--accent)] shadow-md ${pos} ${cursor} z-30`}
+                style={{ pointerEvents: "all" }}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  handlePointerDown(e, handle);
+                }}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+              />
+            ))}
+          </>
+        )}
+      </div>
+
+      {/* ── Label (Rendered as sibling to break out of Box stacking context) ── */}
+      <div
+        className="absolute flex items-center justify-center px-1 mix-blend-difference"
+        style={{
+          left: `${zone.x}%`,
+          top: `${zone.y}%`,
+          width: `${zone.width}%`,
+          height: `${zone.height}%`,
+          zIndex: 30, // Keep above all boxes
+          pointerEvents: "none",
+        }}
       >
         <span
-          className={`text-center font-bold leading-tight break-words w-full mix-blend-difference ${
+          className={`text-center font-bold leading-tight break-words w-full ${
             isAlarm
               ? "text-white"
               : isOrphan
@@ -215,25 +243,6 @@ export function ZoneRect({
           )}
         </span>
       </div>
-
-      {/* ── Resize Handles (only when selected and not read-only) ─────── */}
-      {isSelected && !isReadOnly && (
-        <>
-          {handles.map(({ pos, cursor, handle }) => (
-            <div
-              key={handle}
-              className={`absolute w-[16px] h-[16px] rounded-[4px] bg-white border-2 border-[var(--accent)] shadow-md ${pos} ${cursor} z-30`}
-              style={{ pointerEvents: "all" }}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                handlePointerDown(e, handle);
-              }}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-            />
-          ))}
-        </>
-      )}
-    </div>
+    </>
   );
 }
