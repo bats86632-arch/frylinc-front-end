@@ -209,7 +209,7 @@ export function ZoneRect({
 
       {/* ── Label (Rendered as sibling to break out of Box stacking context) ── */}
       <div
-        className="absolute flex items-center justify-center px-1 mix-blend-difference"
+        className="absolute flex items-start justify-end pt-1 pr-1.5 mix-blend-difference"
         style={{
           left: `${zone.x}%`,
           top: `${zone.y}%`,
@@ -220,7 +220,7 @@ export function ZoneRect({
         }}
       >
         <span
-          className={`text-center font-bold leading-tight break-words w-full ${
+          className={`text-right font-semibold leading-none ${
             isAlarm
               ? "text-white"
               : isOrphan
@@ -228,18 +228,18 @@ export function ZoneRect({
               : "text-white"
           }`}
           style={{
-            fontSize: `clamp(10px, ${Math.min(zone.width, zone.height) * 0.22}vw, 16px)`,
+            fontSize: `clamp(9px, ${Math.min(zone.width, zone.height) * 0.15}vw, 12px)`,
           }}
         >
           {isOrphan ? (
-            <>
-              <span className="block text-[8px] uppercase tracking-wider opacity-70">
+            <span className="flex flex-col items-end">
+              <span className="text-[7px] uppercase tracking-wider opacity-70">
                 Orphaned
               </span>
-              {zone.label}
-            </>
+              <span>{zone.zoneId.split('-Z')[1] || zone.label}</span>
+            </span>
           ) : (
-            zone.label
+            zone.zoneId.split('-Z')[1] || zone.label
           )}
         </span>
       </div>
