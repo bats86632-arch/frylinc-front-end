@@ -456,6 +456,14 @@ button, input, select, textarea {
     .animate-scale-in {
         animation: scale-in 150ms ease both;
     }
+    /* ── Map Zones Alarm Animations ───────────────────────────────────── */
+    .zone-alarm-pulse {
+        animation: zone-alarm-pulse 0.55s ease-in-out infinite;
+    }
+    .map-border-alarm {
+        animation: map-border-alarm 0.65s ease-in-out infinite;
+        border: 2px solid rgba(209, 52, 56, 0.6) !important;
+    }
 
     .text-balance {
         text-wrap: balance;
@@ -516,6 +524,35 @@ button, input, select, textarea {
 @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* ── Map Zones ──────────────────────────────────────────────────────────── */
+/* Fast strobe-like blink: zone rectangle turns fully solid red with glow */
+@keyframes zone-alarm-pulse {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(209, 52, 56, 0),
+                    0 0 12px 2px rgba(209, 52, 56, 0.5);
+    }
+    50% {
+        opacity: 0.82;
+        box-shadow: 0 0 0 4px rgba(209, 52, 56, 0.3),
+                    0 0 24px 8px rgba(209, 52, 56, 0.7);
+    }
+}
+
+/* Map canvas border throbs red independently */
+@keyframes map-border-alarm {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(209, 52, 56, 0),
+                    inset 0 0 0 0 rgba(209, 52, 56, 0);
+        border-color: rgba(209, 52, 56, 0.55);
+    }
+    50% {
+        box-shadow: 0 0 28px 6px rgba(209, 52, 56, 0.45),
+                    inset 0 0 16px 2px rgba(209, 52, 56, 0.12);
+        border-color: rgba(209, 52, 56, 1);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

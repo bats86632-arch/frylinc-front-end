@@ -1,0 +1,161 @@
+import { useState, useEffect } from "react";
+import {
+  doc,
+  onSnapshot,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { db, storage } from "../config/firebase";
+import { useAuth } from "../contexts/AuthContext";
+import { PanelMap, ZoneLayout } from "../types";
+
+interface UsePanelMapReturn {
+  panelMap: PanelMap | null;
+  mapLoading: boolean;
+  saving: boolean;
+  uploading: boolean;
+  uploadMap: (file: File, panelId: string) => Promise<void>;
+  replaceMap: (file: File, panelId: string, oldImagePath: string) => Promise<void>;
+  saveLayout: (panelId: string, zones: ZoneLayout[]) => Promise<void>;
+}
+
+export function usePanelMap(panelId: string | null): UsePanelMapReturn {
+  const [panelMap, setPanelMap] = useState<PanelMap | null>(null);
+  const [mapLoading, setMapLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const { currentUser } = useAuth();
+
+  // ── Real-time listener on panelMaps/{panelId} ──────────────────────────────
+  useEffect(() => {
+    if (!panelId) {
+      setPanelMap(null);
+      setMapLoading(false);
+      return;
+    }
+
+    setMapLoading(true);
+    const mapDocRef = doc(db, "panelMaps", panelId);
+
+    const unsub = onSnapshot(
+      mapDocRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          setPanelMap(snapshot.data() as PanelMap);
+        } else {
+          setPanelMap(null);
+        }
+        setMapLoading(false);
+      },
+      (err) => {
+        console.error("[usePanelMap] Firestore listener error:", err);
+        setPanelMap(null);
+        setMapLoading(false);
+      }
+    );
+
+    return () => unsub();
+  }, [panelId]);
+
+  // ── Upload a brand-new map image ───────────────────────────────────────────
+  const uploadMap = async (file: File, panelId: string): Promise<void> => {
+    if (!currentUser) throw new Error("Not authenticated");
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const storagePath = `panelMaps/${panelId}/map.${ext}`;
+      const storageRef = ref(storage, storagePath);
+
+      await uploadBytes(storageRef, file, {
+        contentType: file.type,
+        customMetadata: { uploadedBy: currentUser.uid },
+      });
+      const imageUrl = await getDownloadURL(storageRef);
+
+      const mapDocRef = doc(db, "panelMaps", panelId);
+      await setDoc(mapDocRef, {
+        imageUrl,
+        imagePath: storagePath,
+        zones: [],
+        updatedAt: serverTimestamp(),
+        updatedBy: currentUser.uid,
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // ── Replace existing map image (delete old, upload new) ────────────────────
+  const replaceMap = async (
+    file: File,
+    panelId: string,
+    oldImagePath: string
+  ): Promise<void> => {
+    if (!currentUser) throw new Error("Not authenticated");
+    setUploading(true);
+    try {
+      // Delete old file (best-effort — don't block upload if delete fails)
+      try {
+        const oldRef = ref(storage, oldImagePath);
+        await deleteObject(oldRef);
+      } catch (e) {
+        console.warn("[usePanelMap] Failed to delete old map image:", e);
+      }
+
+      // Upload new file
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const storagePath = `panelMaps/${panelId}/map.${ext}`;
+      const storageRef = ref(storage, storagePath);
+
+      await uploadBytes(storageRef, file, {
+        contentType: file.type,
+        customMetadata: { uploadedBy: currentUser.uid },
+      });
+      const imageUrl = await getDownloadURL(storageRef);
+
+      // Overwrite Firestore doc — reset zones since the floor plan changed
+      const mapDocRef = doc(db, "panelMaps", panelId);
+      await setDoc(mapDocRef, {
+        imageUrl,
+        imagePath: storagePath,
+        zones: [],
+        updatedAt: serverTimestamp(),
+        updatedBy: currentUser.uid,
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // ── Save zone layout positions ─────────────────────────────────────────────
+  const saveLayout = async (
+    panelId: string,
+    zones: ZoneLayout[]
+  ): Promise<void> => {
+    if (!currentUser) throw new Error("Not authenticated");
+    setSaving(true);
+    try {
+      const mapDocRef = doc(db, "panelMaps", panelId);
+      // Merge so imageUrl/imagePath are not accidentally overwritten
+      await setDoc(
+        mapDocRef,
+        {
+          zones,
+          updatedAt: serverTimestamp(),
+          updatedBy: currentUser.uid,
+        },
+        { merge: true }
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return { panelMap, mapLoading, saving, uploading, uploadMap, replaceMap, saveLayout };
+}

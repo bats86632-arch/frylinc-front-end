@@ -47,6 +47,8 @@ export default {
         'slide-up': 'slide-up 200ms ease both',
         'scale-in': 'scale-in 150ms ease both',
         'shimmer': 'shimmer 1.8s ease-in-out infinite',
+        'zone-alarm-pulse': 'zone-alarm-pulse 0.55s ease-in-out infinite',
+        'map-border-alarm': 'map-border-alarm 0.65s ease-in-out infinite',
       },
       keyframes: {
         'fade-in': {
@@ -68,6 +70,14 @@ export default {
         'shimmer': {
           '0%': { backgroundPosition: '200% 0' },
           '100%': { backgroundPosition: '-200% 0' },
+        },
+        'zone-alarm-pulse': {
+          '0%, 100%': { opacity: '1', boxShadow: '0 0 0 0 rgba(209,52,56,0), 0 0 12px 2px rgba(209,52,56,0.5)' },
+          '50%': { opacity: '0.82', boxShadow: '0 0 0 4px rgba(209,52,56,0.3), 0 0 24px 8px rgba(209,52,56,0.7)' },
+        },
+        'map-border-alarm': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(209,52,56,0)', borderColor: 'rgba(209,52,56,0.55)' },
+          '50%': { boxShadow: '0 0 28px 6px rgba(209,52,56,0.45)', borderColor: 'rgba(209,52,56,1)' },
         },
       },
       backdropBlur: {

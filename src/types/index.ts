@@ -1,3 +1,5 @@
+import type { Timestamp } from "firebase/firestore";
+
 export type Role =
   | "super_admin"
   | "secret_super_admin"
@@ -66,7 +68,7 @@ export interface Event {
   panelSerial: string;
   type: string;
   timestamp?: Date;
-  createdAt?: any;
+  createdAt?: Timestamp | Date;
   details?: string;
   zoneNumber?: number;
   command?: string;
@@ -92,4 +94,23 @@ export interface CommandResponse {
 export interface ApiResponse<T> {
   data: T;
   message?: string;
+}
+
+// ── Map Zones ──────────────────────────────────────────────────────────────
+
+export interface ZoneLayout {
+  zoneId: string;    // e.g. "219111-Z3"
+  label: string;     // e.g. "219111 — Zone 3"
+  x: number;         // percentage (0–100) from left of container
+  y: number;         // percentage (0–100) from top of container
+  width: number;     // percentage of container width
+  height: number;    // percentage of container height
+}
+
+export interface PanelMap {
+  imageUrl: string;    // Firebase Storage download URL
+  imagePath: string;   // Storage path (for deletion on replace)
+  zones: ZoneLayout[]; // saved zone rectangle positions
+  updatedAt: Timestamp;      // Firestore server timestamp
+  updatedBy: string;   // uid of last user to save
 }

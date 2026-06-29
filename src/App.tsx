@@ -29,6 +29,9 @@ const PrivacyPolicy = lazy(() =>
 const TermsOfService = lazy(() =>
   import("./pages/TermsOfService").then((m) => ({ default: m.TermsOfService })),
 );
+const MapZones = lazy(() =>
+  import("./pages/MapZones").then((m) => ({ default: m.MapZones })),
+);
 
 function App() {
   // Fire-and-forget prefetch for the most likely route chunks.
@@ -67,6 +70,7 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/panel/:serial" element={<PanelDetail />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/map-zones" element={<MapZones />} />
                   <Route
                     path="/admin"
                     element={

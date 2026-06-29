@@ -6,6 +6,7 @@ import {
   Flame,
   LayoutDashboard,
   LogOut,
+  Map,
   Menu,
   Settings,
   User as UserIcon,
@@ -35,6 +36,13 @@ const navigation: Array<{
     href: "/admin",
     icon: Settings,
     roles: ["super_admin", "head_office", "system_integrator"],
+  },
+  {
+    name: "Map Zones",
+    mobileName: "Map",
+    href: "/map-zones",
+    icon: Map,
+    roles: ["super_admin", "secret_super_admin", "head_office", "system_integrator", "end_user"],
   },
 ];
 
@@ -75,18 +83,22 @@ export function MainDashboardLayout() {
       ? "Admin Settings"
       : location.pathname === "/profile"
         ? "Your Profile"
-        : location.pathname.startsWith("/panel")
-          ? "Panel Details"
-          : "Fire Alarm Panels";
+        : location.pathname === "/map-zones"
+          ? "Map Zones"
+          : location.pathname.startsWith("/panel")
+            ? "Panel Details"
+            : "Fire Alarm Panels";
 
   const mobilePageTitle =
     location.pathname === "/admin"
       ? "Settings"
       : location.pathname === "/profile"
         ? "Your Profile"
-        : location.pathname.startsWith("/panel")
-          ? "Panel Details"
-          : "Dashboard";
+        : location.pathname === "/map-zones"
+          ? "Map"
+          : location.pathname.startsWith("/panel")
+            ? "Panel Details"
+            : "Dashboard";
 
   const roleLabel =
     userData?.role
