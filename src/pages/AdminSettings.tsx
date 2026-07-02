@@ -117,7 +117,24 @@ function getApiErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
-const syncedPanelsSet = new Set<string>();
+const getSyncedPanels = (): Set<string> => {
+  try {
+    const data = localStorage.getItem("syncedPanels");
+    if (data) return new Set(JSON.parse(data));
+  } catch (e) {
+    // ignore
+  }
+  return new Set();
+};
+const syncedPanelsSet = getSyncedPanels();
+const addSyncedPanel = (serial: string) => {
+  syncedPanelsSet.add(serial);
+  try {
+    localStorage.setItem("syncedPanels", JSON.stringify(Array.from(syncedPanelsSet)));
+  } catch (e) {
+    // ignore
+  }
+};
 
 export function AdminSettings() {
   const [users, setUsers] = useState<User[]>([]);
@@ -657,7 +674,7 @@ export function AdminSettings() {
     
     if (panelsMissingCommands.length > 0) {
       setSyncingPanelDefaults(true);
-      panelsMissingCommands.forEach(p => syncedPanelsSet.add(p.serial));
+      panelsMissingCommands.forEach(p => addSyncedPanel(p.serial));
       
       Promise.all(
         panelsMissingCommands.map((panel) =>
