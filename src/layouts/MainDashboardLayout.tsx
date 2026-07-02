@@ -209,11 +209,7 @@ export function MainDashboardLayout() {
       <div className="lg:pl-[260px] relative z-10">
         {/* Header - Solid background with border */}
         <header
-          className={`sticky top-0 z-30 flex h-[72px] items-center justify-between border-b bg-[var(--surface-base)] px-4 transition-colors duration-300 sm:px-6 lg:px-8 ${
-            notificationCount > 0
-              ? "border-[var(--status-danger-border)]"
-              : "border-[var(--border-subtle)]"
-          }`}
+          className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--surface-base)] px-4 transition-colors duration-300 sm:px-6 lg:px-8"
         >
           <div className="flex min-w-0 items-center gap-4">
             <button
