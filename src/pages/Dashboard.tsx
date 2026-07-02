@@ -158,13 +158,15 @@ export function Dashboard() {
   // ── View calculation ────────────────────────────────────────────────────
   const showCompanyView = isSuperAdmin && !selectedCompanyId;
   const showBranchView =
-    (isSuperAdmin && !!selectedCompanyId && !selectedBranchId) ||
+    (isSuperAdmin && !!selectedCompanyId && selectedCompanyId !== "unassigned" && !selectedBranchId) ||
     (isHoOrSi && !selectedBranchId);
-  const showPanelView = isEndUser || !!selectedBranchId;
+  const showPanelView = isEndUser || !!selectedBranchId || selectedCompanyId === "unassigned";
 
   // ── Company stats ───────────────────────────────────────────────────────
   const getCompanyStats = (companyId: string) => {
-    const compPanels = (panels || []).filter((p) => p.companyId === companyId);
+    const compPanels = companyId === "unassigned"
+      ? (panels || []).filter((p) => !p.companyId)
+      : (panels || []).filter((p) => p.companyId === companyId);
     const alarms = compPanels.filter((p) => p.alarm).length;
     return {
       total: compPanels.length,
@@ -187,9 +189,11 @@ export function Dashboard() {
   // ── Panel filtering ─────────────────────────────────────────────────────
   let activePanels = panels || [];
   if (isSuperAdmin && selectedCompanyId) {
-    activePanels = activePanels.filter(
-      (p) => p.companyId === selectedCompanyId,
-    );
+    if (selectedCompanyId === "unassigned") {
+      activePanels = activePanels.filter((p) => !p.companyId);
+    } else {
+      activePanels = activePanels.filter((p) => p.companyId === selectedCompanyId);
+    }
   }
   if (selectedBranchId) {
     activePanels = activePanels.filter((p) => p.branchId === selectedBranchId);
@@ -211,7 +215,17 @@ export function Dashboard() {
   });
 
   // ── Company filtering ───────────────────────────────────────────────────
-  const filteredCompanies = (companies || []).filter(
+  const unassignedCompany = {
+    id: "unassigned",
+    name: "Unassigned",
+    description: "Panels without a company",
+    logoUrl: "",
+    createdAt: "",
+    updatedAt: ""
+  } as any;
+  const allCompanies = isSuperAdmin ? [...(companies || []), unassignedCompany] : (companies || []);
+
+  const filteredCompanies = allCompanies.filter(
     (c) =>
       (c.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.description || "").toLowerCase().includes(searchQuery.toLowerCase()),
@@ -233,7 +247,7 @@ export function Dashboard() {
   );
 
   // ── Company view summary stats ──────────────────────────────────────────
-  const systemAlarmCount = (companies || []).reduce(
+  const systemAlarmCount = allCompanies.reduce(
     (acc, c) => acc + getCompanyStats(c.id).alarms,
     0,
   );
@@ -245,7 +259,7 @@ export function Dashboard() {
     (showBranchView && branchesLoading);
 
   // ── Breadcrumb helpers ──────────────────────────────────────────────────
-  const selectedCompanyName = (companies || []).find(
+  const selectedCompanyName = allCompanies.find(
     (c) => c.id === selectedCompanyId,
   )?.name;
   const selectedBranchName = (branches || []).find(
@@ -368,7 +382,7 @@ export function Dashboard() {
                   Total Companies
                 </p>
                 <p className="mt-0.5 font-sans text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
-                  {(companies || []).length}
+                  {allCompanies.length}
                 </p>
               </div>
             </>
