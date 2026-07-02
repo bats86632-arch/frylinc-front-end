@@ -12,6 +12,7 @@ import {
   User as UserIcon,
   X,
 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
 import { PanelService } from "../api/PanelService";
 import { ThemeToggle } from "../components/ThemeToggle";

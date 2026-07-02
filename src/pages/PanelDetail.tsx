@@ -383,7 +383,7 @@ export function PanelDetail() {
               </div>
               <Link
                 to={`/map-zones?panelId=${serial}`}
-                className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-4 py-2 text-[13px] font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
+                className="flex items-center justify-center w-full sm:w-auto gap-2 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-4 py-2 text-[13px] font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
               >
                 <Map className="h-4 w-4" />
                 View Zones Map
@@ -400,18 +400,18 @@ export function PanelDetail() {
                   Use these controls to interact with the entire panel or configure contacts.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                 <button
                   onClick={() => handleSendCommand("ZONE OFF")}
                   disabled={commandLoading !== null}
-                  className="flex items-center gap-2 rounded-[8px] border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-5 py-2.5 text-[14px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-5 py-2.5 text-[14px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50 w-full sm:w-auto"
                 >
                   {commandLoading === "ZONE OFF" ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellOff className="h-4 w-4" />}
                   Silence All
                 </button>
                 <button
                   onClick={() => setActiveTab("contacts")}
-                  className="rounded-[8px] border px-5 py-2.5 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0 shadow-sm"
+                  className="flex justify-center rounded-[8px] border px-5 py-2.5 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0 shadow-sm w-full sm:w-auto"
                 >
                   <div className="flex items-center gap-2">
                     <Settings className="h-4 w-4 text-[var(--accent)]" />
