@@ -150,15 +150,8 @@ export function PanelDetail() {
     setCommandLoading(commandId);
 
     try {
-      const newZones = [...(panel.zones || [])];
-      newZones[zoneIndex] = false;
-      const hasAnyAlarm = newZones.some(Boolean);
-
-      await PanelService.updatePanel(serial, {
-        zones: newZones,
-        alarm: hasAnyAlarm
-      });
-
+      await PanelService.resolveZoneAlarm(serial, zoneIndex);
+      
       showCommandSuccess(commandId);
     } catch (err: unknown) {
       setCommandError(getApiErrorMessage(err, "Failed to reset zone"));
