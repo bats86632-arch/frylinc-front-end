@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { usePanel } from "../hooks/usePanels";
 
@@ -20,7 +20,8 @@ import {
   Shield,
   ShieldAlert,
   BellOff,
-  RotateCcw
+  RotateCcw,
+  Map
 } from "lucide-react";
 import { formatDateTime } from "../utils/formatters";
 import { Event } from "../types";
@@ -62,6 +63,27 @@ export function PanelDetail() {
   const [commandLoading, setCommandLoading] = useState<string | null>(null);
   const [commandSuccess, setCommandSuccess] = useState<string | null>(null);
   const [commandError, setCommandError] = useState<string | null>(null);
+
+  const commandSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const showCommandSuccess = useCallback((cmd: string) => {
+    setCommandSuccess(cmd);
+    if (commandSuccessTimeoutRef.current) clearTimeout(commandSuccessTimeoutRef.current);
+    commandSuccessTimeoutRef.current = setTimeout(() => setCommandSuccess(null), 2000);
+  }, []);
+
+  const commandErrorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const showCommandError = useCallback((err: string) => {
+    setCommandError(err);
+    if (commandErrorTimeoutRef.current) clearTimeout(commandErrorTimeoutRef.current);
+    commandErrorTimeoutRef.current = setTimeout(() => setCommandError(null), 2000);
+  }, []);
+
+  const syncSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const showSyncSuccess = useCallback((slot: string) => {
+    setSyncSuccessSlot(slot);
+    if (syncSuccessTimeoutRef.current) clearTimeout(syncSuccessTimeoutRef.current);
+    syncSuccessTimeoutRef.current = setTimeout(() => setSyncSuccessSlot(null), 2000);
+  }, []);
 
   useEffect(() => {
     if (panel?.contactNumbers) {
@@ -109,8 +131,7 @@ export function PanelDetail() {
         await PanelService.waitForCommandConfirmation(serial, response.commandId);
       }
 
-      setCommandSuccess(command);
-      setTimeout(() => setCommandSuccess(null), 3000);
+      showCommandSuccess(command);
     } catch (err: unknown) {
       // Extract specific error message if it's the timeout error
       const errMessage = err instanceof Error ? err.message : "Failed to send command";
@@ -138,8 +159,7 @@ export function PanelDetail() {
         alarm: hasAnyAlarm
       });
 
-      setCommandSuccess(commandId);
-      setTimeout(() => setCommandSuccess(null), 3000);
+      showCommandSuccess(commandId);
     } catch (err: unknown) {
       setCommandError(getApiErrorMessage(err, "Failed to reset zone"));
     } finally {
@@ -171,8 +191,7 @@ export function PanelDetail() {
         await PanelService.waitForCommandConfirmation(serial, response.commandId);
       }
 
-      setSyncSuccessSlot(slot);
-      setTimeout(() => setSyncSuccessSlot(null), 3000);
+      showSyncSuccess(slot);
     } catch (err: unknown) {
       const errMessage = err instanceof Error ? err.message : "Failed to sync contact";
       setCommandError(getApiErrorMessage(err, errMessage));
@@ -369,28 +388,44 @@ export function PanelDetail() {
                   <span className="tabular-nums">{visibleZones}</span> zones displayed
                 </p>
               </div>
+              <Link
+                to={`/map-zones?panelId=${serial}`}
+                className="flex items-center gap-2 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-4 py-2 text-[13px] font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
+              >
+                <Map className="h-4 w-4" />
+                View Zones Map
+              </Link>
             </div>
 
-            {/* MOB Command section */}
+            {/* Global Controls & MOB */}
             <div className="mb-8 pb-8 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-[14px] font-bold text-[var(--text-primary)]">
-                  MOB Command
+                  Global Controls & MOB
                 </h2>
                 <p className="text-sm text-[var(--text-secondary)] mt-1">
-                  To configure mobile numbers for the MOB command, click on the contact numbers tab.
+                  Use these controls to interact with the entire panel or configure contacts.
                 </p>
               </div>
-              <button
-                key="MOB_CONFIGURE"
-                onClick={() => setActiveTab("contacts")}
-                className="rounded-[8px] border px-6 py-3 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0 shadow-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-[var(--accent)]" />
-                  <span className="text-sm font-semibold">Configure MOB</span>
-                </div>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleSendCommand("ZONE OFF")}
+                  disabled={commandLoading !== null}
+                  className="flex items-center gap-2 rounded-[8px] border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-5 py-2.5 text-[14px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
+                >
+                  {commandLoading === "ZONE OFF" ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellOff className="h-4 w-4" />}
+                  Silence All
+                </button>
+                <button
+                  onClick={() => setActiveTab("contacts")}
+                  className="rounded-[8px] border px-5 py-2.5 transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shrink-0 shadow-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <Settings className="h-4 w-4 text-[var(--accent)]" />
+                    <span className="text-sm font-semibold">Configure MOB</span>
+                  </div>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -399,7 +434,6 @@ export function PanelDetail() {
                 const zoneAlarm = panel.zones[idx] || false;
                 
                 const armCmd = `ARM ${zoneNum}`;
-                const silenceCmd = `ZONE OFF ${zoneNum}`;
                 const resetCmd = `RESET ${zoneNum}`;
                 
                 const isEuRestricted = isStrictlyEndUser;
@@ -451,16 +485,15 @@ export function PanelDetail() {
                       
                       <div className="grid grid-cols-2 gap-2.5">
                         <button
-                          onClick={() => handleSendCommand(silenceCmd)}
-                          disabled={commandLoading !== null}
-                          className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          onClick={() => showCommandError("This feature is coming soon. We are working on it.")}
+                          className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 ${
                             zoneAlarm 
                               ? "border-[var(--color-warning)]/30 bg-[var(--status-warning-bg)] text-[var(--color-warning)] hover:border-[var(--color-warning)] hover:shadow-lg hover:shadow-[var(--color-warning)]/20" 
                               : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 text-[var(--text-secondary)] hover:border-[var(--color-warning)] hover:text-[var(--color-warning)]"
                           }`}
                         >
-                           {commandLoading === silenceCmd ? <Loader2 className="h-4 w-4 animate-spin" /> : commandSuccess === silenceCmd ? <CheckCircle className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
-                           <span className="text-xs font-bold uppercase tracking-wider">Silence</span>
+                           <BellOff className="h-4 w-4" />
+                           <span className="text-xs font-bold uppercase tracking-wider">Isolate</span>
                         </button>
                         
                         <button

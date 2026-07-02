@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Map,
   Upload,
@@ -117,8 +118,10 @@ export function MapZones() {
 
   const canEdit = EDIT_ROLES.includes(role as (typeof EDIT_ROLES)[number]);
 
+  const [searchParams] = useSearchParams();
+  
   // Panel selection
-  const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null);
+  const [selectedPanelId, setSelectedPanelId] = useState<string | null>(searchParams.get("panelId"));
   const selectedPanel = useMemo(
     () => panels.find((p) => p.serial === selectedPanelId) ?? null,
     [panels, selectedPanelId]

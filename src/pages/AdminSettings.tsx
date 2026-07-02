@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from 'react-dom';
 import { storage } from "../config/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -159,6 +159,13 @@ export function AdminSettings() {
   const [success, setSuccess] = useState<string | null>(null);
   const [lastSynced, setLastSynced] = useState<number>(Date.now());
   const [syncTimeText, setSyncTimeText] = useState("just now");
+
+  const successTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const showSuccess = useCallback((msg: string) => {
+    setSuccess(msg);
+    if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
+    successTimeoutRef.current = setTimeout(() => setSuccess(null), 2000);
+  }, []);
 
   useEffect(() => {
     const updateTime = () => {
@@ -530,8 +537,7 @@ export function AdminSettings() {
       setInlineEditBranchLoading(true);
       await BranchService.createBranch({ ...newBranchForm, companyId } as any);
       await reloadBranches();
-      setSuccess("Branch created successfully");
-      setTimeout(() => setSuccess(null), 3000);
+      showSuccess("Branch created successfully");
       setAddingBranchToCompany(null);
       setNewBranchForm({});
     } catch (err: any) {
@@ -548,8 +554,7 @@ export function AdminSettings() {
       setInlineEditBranchLoading(true);
       await BranchService.updateBranch(branchId, inlineEditBranchForm);
       await reloadBranches();
-      setSuccess("Branch updated successfully");
-      setTimeout(() => setSuccess(null), 3000);
+      showSuccess("Branch updated successfully");
       setInlineEditingBranchId(null);
     } catch (err: any) {
       setError(err.message || "Failed to update branch");
@@ -626,8 +631,7 @@ export function AdminSettings() {
 
     try {
       await CompanyService.deleteCompany(company.id, deleteUsersAlso);
-      setSuccess("Company deleted successfully");
-      setTimeout(() => setSuccess(null), 3000);
+      showSuccess("Company deleted successfully");
       await reloadCompanies();
       await loadUsers();
     } catch (err: unknown) {
@@ -640,15 +644,21 @@ export function AdminSettings() {
     loadUsers();
   }, []);
 
+  const syncedPanelsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     if (!panels || panels.length === 0 || syncingPanelDefaults) return;
     const panelsMissingCommands = panels.filter(
       (panel) =>
-        !Array.isArray(panel.allowedCommands) ||
-        panel.allowedCommands.length === 0,
+        (!Array.isArray(panel.allowedCommands) ||
+        panel.allowedCommands.length === 0) &&
+        !syncedPanelsRef.current.has(panel.serial)
     );
+    
     if (panelsMissingCommands.length > 0) {
       setSyncingPanelDefaults(true);
+      panelsMissingCommands.forEach(p => syncedPanelsRef.current.add(p.serial));
+      
       Promise.all(
         panelsMissingCommands.map((panel) =>
           PanelService.updatePanel(panel.serial, {
@@ -657,10 +667,9 @@ export function AdminSettings() {
         ),
       )
         .then(() => {
-          setSuccess(
-            `Applied default controls to ${panelsMissingCommands.length} panel${panelsMissingCommands.length === 1 ? "" : "s"}`,
+          showSuccess(
+            `Applied default controls to ${panelsMissingCommands.length} panel${panelsMissingCommands.length === 1 ? "" : "s"}`
           );
-          setTimeout(() => setSuccess(null), 3000);
         })
         .catch((err) => {
           console.error("Failed to sync default commands", err);
@@ -669,7 +678,7 @@ export function AdminSettings() {
           setSyncingPanelDefaults(false);
         });
     }
-  }, [panels, syncingPanelDefaults]);
+  }, [panels, syncingPanelDefaults, showSuccess]);
 
   const loadUsers = async () => {
     setUsersLoading(true);
@@ -716,8 +725,7 @@ export function AdminSettings() {
       });
       setPanelFormOpen(false);
       reset();
-      setSuccess("Panel created successfully");
-      setTimeout(() => setSuccess(null), 3000);
+      showSuccess("Panel created successfully");
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Failed to create panel"));
     } finally {
@@ -733,8 +741,7 @@ export function AdminSettings() {
     try {
       await UserService.deleteUser(uid);
       await loadUsers();
-      setSuccess("User deleted successfully");
-      setTimeout(() => setSuccess(null), 3000);
+      showSuccess("User deleted successfully");
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Failed to delete user"));
     }
@@ -746,8 +753,7 @@ export function AdminSettings() {
     setError(null);
     try {
       await PanelService.deletePanel(serial);
-      setSuccess("Panel deleted successfully");
-      setTimeout(() => setSuccess(null), 3000);
+      showSuccess("Panel deleted successfully");
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Failed to delete panel"));
     }
@@ -3047,7 +3053,7 @@ export function AdminSettings() {
       <CreateUserModal
         isOpen={userFormOpen}
         onClose={() => { setUserFormOpen(false); setEditingUserData(null); }}
-        onSuccess={(msg) => { setSuccess(msg); loadUsers(); setTimeout(() => setSuccess(null), 3000); }}
+        onSuccess={(msg) => { showSuccess(msg); loadUsers(); }}
         onError={(msg) => { setError(msg); }}
         editingUser={editingUserData}
       />
