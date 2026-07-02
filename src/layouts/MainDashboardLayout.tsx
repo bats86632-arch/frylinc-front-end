@@ -12,8 +12,8 @@ import {
   User as UserIcon,
   X,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
+import { PanelService } from "../api/PanelService";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Role } from "../types";
 
@@ -110,15 +110,26 @@ export function MainDashboardLayout() {
   const notifications = useMemo(
     () =>
       (panels || [])
-        .filter((panel) => panel && panel.alarm)
+        .filter((panel) => panel && panel.alarm && !panel.clearedBy?.[userData?.uid || ""])
         .map((panel) => ({
           id: panel.serial,
           title: panel.name || "Unknown Panel",
           message: `Alarm active on ${panel.serial || "unknown"}`,
+          seen: !!panel.seenBy?.[userData?.uid || ""]
         })),
-    [panels],
+    [panels, userData?.uid],
   );
-  const notificationCount = notifications.length;
+  const unseenCount = notifications.filter(n => !n.seen).length;
+
+  const toggleNotifications = () => {
+    if (!notificationOpen) {
+      const unseenPanels = notifications.filter(n => !n.seen);
+      unseenPanels.forEach(p => {
+        PanelService.markNotificationSeen(p.id).catch(console.error);
+      });
+    }
+    setNotificationOpen(!notificationOpen);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -238,18 +249,20 @@ export function MainDashboardLayout() {
             {/* Notification bell */}
             <div className="relative">
               <button
-                onClick={() => setNotificationOpen((v) => !v)}
+                onClick={toggleNotifications}
                 className="relative flex h-10 w-10 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] shadow-sm"
                 aria-label="Notifications"
                 aria-expanded={notificationOpen}
                 aria-haspopup="menu"
               >
                 <Bell className="h-[18px] w-[18px]" />
-                <span
-                  className={`absolute -right-1.5 -top-1.5 flex h-[20px] min-w-[20px] items-center justify-center rounded-full border-[2px] border-[var(--surface-base)] bg-[var(--color-error)] px-1 text-[9px] font-bold text-white shadow-sm`}
-                >
-                  {notificationCount}
-                </span>
+                {unseenCount > 0 && (
+                  <span
+                    className={`absolute -right-1.5 -top-1.5 flex h-[20px] min-w-[20px] items-center justify-center rounded-full border-[2px] border-[var(--surface-base)] bg-[var(--color-error)] px-1 text-[9px] font-bold text-white shadow-sm`}
+                  >
+                    {unseenCount}
+                  </span>
+                )}
               </button>
 
               {notificationOpen && (
@@ -269,11 +282,11 @@ export function MainDashboardLayout() {
                         </p>
                       </div>
                       <span className="rounded-full border border-[var(--border-default)] bg-[var(--surface-overlay)] px-2.5 py-1 text-[11px] font-bold tabular-nums text-[var(--text-secondary)]">
-                        {notificationCount}
+                        {notifications.length}
                       </span>
                     </div>
 
-                    {notificationCount === 0 ? (
+                    {notifications.length === 0 ? (
                       <div className="rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-overlay)] p-6 text-center">
                         <Bell className="mx-auto mb-3 h-8 w-8 text-[var(--text-quaternary)]" />
                         <p className="text-[13px] font-semibold text-[var(--text-primary)]">
@@ -290,12 +303,23 @@ export function MainDashboardLayout() {
                             key={notification.id}
                             className="rounded-[6px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-4"
                           >
-                            <p className="text-[13px] font-semibold text-[var(--text-primary)]">
-                              {notification.title}
-                            </p>
-                            <p className="mt-1 text-[12px] text-[var(--text-secondary)]">
-                              {notification.message}
-                            </p>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="text-[13px] font-semibold text-[var(--text-primary)]">
+                                  {notification.title}
+                                </p>
+                                <p className="mt-1 text-[12px] text-[var(--text-secondary)]">
+                                  {notification.message}
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => PanelService.clearNotification(notification.id).catch(console.error)}
+                                className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1"
+                                aria-label="Clear notification"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

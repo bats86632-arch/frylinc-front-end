@@ -70,6 +70,14 @@ export const PanelService = {
     return response.data;
   },
 
+  async markNotificationSeen(serial: string): Promise<void> {
+    await apiClient.post(`/panels/${serial}/notifications/seen`);
+  },
+
+  async clearNotification(serial: string): Promise<void> {
+    await apiClient.post(`/panels/${serial}/notifications/clear`);
+  },
+
   async deletePanel(serial: string): Promise<void> {
     await apiClient.delete(`/panels/${serial}`);
   },

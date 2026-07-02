@@ -54,6 +54,8 @@ export interface Panel {
   mqttConnected: boolean;
   allowedCommands: string[];
   manuallyMarkedOffline?: boolean;
+  seenBy?: Record<string, boolean>;
+  clearedBy?: Record<string, boolean>;
 }
 
 export interface CommandLog {
