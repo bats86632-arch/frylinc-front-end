@@ -117,6 +117,8 @@ function getApiErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+const syncedPanelsSet = new Set<string>();
+
 export function AdminSettings() {
   const [users, setUsers] = useState<User[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
@@ -644,20 +646,18 @@ export function AdminSettings() {
     loadUsers();
   }, []);
 
-  const syncedPanelsRef = useRef<Set<string>>(new Set());
-
   useEffect(() => {
     if (!panels || panels.length === 0 || syncingPanelDefaults) return;
     const panelsMissingCommands = panels.filter(
       (panel) =>
         (!Array.isArray(panel.allowedCommands) ||
         panel.allowedCommands.length === 0) &&
-        !syncedPanelsRef.current.has(panel.serial)
+        !syncedPanelsSet.has(panel.serial)
     );
     
     if (panelsMissingCommands.length > 0) {
       setSyncingPanelDefaults(true);
-      panelsMissingCommands.forEach(p => syncedPanelsRef.current.add(p.serial));
+      panelsMissingCommands.forEach(p => syncedPanelsSet.add(p.serial));
       
       Promise.all(
         panelsMissingCommands.map((panel) =>
