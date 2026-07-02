@@ -11,7 +11,7 @@ import {
   AlertTriangle,
   ChevronRight,
   RadioTower,
-  Layers,
+  List,
   Info,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -563,7 +563,7 @@ export function MapZones() {
         <div className="border-b border-[var(--border-subtle)] px-4 py-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-[var(--text-tertiary)]" />
+              <List className="h-4 w-4 text-[var(--text-tertiary)]" />
               <h2 className="text-[13px] font-semibold text-[var(--text-primary)]">
                 Panels
               </h2>
@@ -622,7 +622,7 @@ export function MapZones() {
               className="lg:hidden flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] flex-shrink-0"
               aria-label="Toggle panel list"
             >
-              <Layers className="h-4 w-4" />
+              <List className="h-4 w-4" />
             </button>
 
             {selectedPanel ? (
