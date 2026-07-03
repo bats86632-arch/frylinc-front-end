@@ -624,20 +624,24 @@ export function MapZones() {
         onClick={handleCanvasClick}
         onWheel={handleCanvasWheel}
       >
-        {/* Inner wrapper: scales the image and zones together using CSS transform */}
+        {/* Inner wrapper: explicitly sized so scrollbars work correctly and zones scale natively */}
         <div
-          className="relative inline-block min-w-full origin-top-left transition-transform duration-100 ease-out"
-          style={{ transform: `scale(${zoom})` }}
+          className="relative transition-all duration-100 ease-out mx-auto"
+          style={{ 
+            width: mapImageRef.current?.naturalWidth ? mapImageRef.current.naturalWidth * zoom : "100%",
+            height: mapImageRef.current?.naturalHeight ? mapImageRef.current.naturalHeight * zoom : "auto",
+            minHeight: "100%", // Ensures it doesn't collapse before load
+          }}
         >
-          {/* Floor plan image — natural dimensions, no max-height clipping */}
+          {/* Floor plan image */}
           <img
             ref={mapImageRef}
             src={panelMap!.imageUrl}
             alt="Floor plan"
             draggable={false}
             onLoad={applyFitZoom}
-            className="block w-full select-none"
-            style={{ display: "block", userSelect: "none" }}
+            className="block select-none"
+            style={{ width: "100%", height: "100%", display: "block", userSelect: "none" }}
           />
 
           {/* Zone rectangle overlay — absolute-positioned container matching the image */}
