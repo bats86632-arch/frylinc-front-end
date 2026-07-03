@@ -24,6 +24,7 @@ import { usePanels } from "../hooks/usePanels";
 import { usePanelMap } from "../hooks/usePanelMap";
 import { ZoneRect } from "../components/ZoneRect";
 import { Panel, ZoneLayout } from "../types";
+import { PanelService } from "../api/PanelService";
 
 // Roles that can edit (upload, drag, resize, save)
 const EDIT_ROLES = ["super_admin", "secret_super_admin", "head_office", "system_integrator"] as const;
@@ -136,6 +137,8 @@ export function MapZones() {
   const [selectedZoneIdx, setSelectedZoneIdx] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [removeConfirm, setRemoveConfirm] = useState(false);
+  const [deletePanelConfirm, setDeletePanelConfirm] = useState(false);
+  const [isDeletingPanel, setIsDeletingPanel] = useState(false);
 
   // Container ref for coordinate system
   const containerRef = useRef<HTMLDivElement>(null);
@@ -840,6 +843,49 @@ export function MapZones() {
 
           {/* Status chips */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            {selectedPanel && canEdit && (
+              !deletePanelConfirm ? (
+                <button
+                  onClick={() => setDeletePanelConfirm(true)}
+                  disabled={isDeletingPanel}
+                  className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1 text-[11px] rounded-[6px] border-[var(--status-danger-border)] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)]"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  Delete Panel
+                </button>
+              ) : (
+                <div className="flex items-center gap-1.5 bg-[var(--status-danger-bg)] border border-[var(--status-danger-border)] rounded-[6px] p-1">
+                  <span className="text-[10px] text-[var(--color-error)] font-semibold px-1">Delete fully?</span>
+                  <button
+                    onClick={async () => {
+                      if (!selectedPanel) return;
+                      try {
+                        setIsDeletingPanel(true);
+                        await PanelService.deletePanel(selectedPanel.serial);
+                        setSelectedPanelId(null);
+                        setDeletePanelConfirm(false);
+                      } catch (err) {
+                        console.error("Failed to delete panel", err);
+                      } finally {
+                        setIsDeletingPanel(false);
+                      }
+                    }}
+                    disabled={isDeletingPanel}
+                    className="btn-primary inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-[4px] bg-[var(--color-error)] border-none text-white hover:bg-[var(--color-error)]/90"
+                  >
+                    {isDeletingPanel ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}
+                  </button>
+                  <button
+                    onClick={() => setDeletePanelConfirm(false)}
+                    disabled={isDeletingPanel}
+                    className="btn-secondary inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-[4px]"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )
+            )}
+            
             {selectedPanel && anyAlarm && (
               <span className="badge-alarm animate-pulse">
                 <AlertTriangle className="h-3 w-3" />
