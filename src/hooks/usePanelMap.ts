@@ -145,9 +145,15 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
       } catch (e) {
         console.warn("[usePanelMap] Failed to delete map image during remove:", e);
       }
-      const { deleteDoc } = await import("firebase/firestore");
+      const { updateDoc, deleteField, serverTimestamp } = await import("firebase/firestore");
       const mapDocRef = doc(db, "panelMaps", panelId);
-      await deleteDoc(mapDocRef);
+      await updateDoc(mapDocRef, {
+        imageUrl: deleteField(),
+        imagePath: deleteField(),
+        zones: deleteField(),
+        updatedAt: serverTimestamp(),
+        updatedBy: currentUser.uid,
+      });
     } finally {
       setUploading(false);
     }

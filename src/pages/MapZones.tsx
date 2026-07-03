@@ -630,7 +630,6 @@ export function MapZones() {
           style={{ 
             width: mapImageRef.current?.naturalWidth ? mapImageRef.current.naturalWidth * zoom : "100%",
             height: mapImageRef.current?.naturalHeight ? mapImageRef.current.naturalHeight * zoom : "auto",
-            minHeight: "100%", // Ensures it doesn't collapse before load
           }}
         >
           {/* Floor plan image */}
@@ -708,7 +707,7 @@ export function MapZones() {
   const renderCanvas = () => {
     if (!selectedPanelId) return renderEmptyCanvas();
     if (mapLoading) return renderLoading();
-    if (!panelMap) {
+    if (!panelMap || !panelMap.imageUrl) {
       return canEdit ? renderUploadPrompt() : renderReadOnlyNoMap();
     }
     return renderMapCanvas();
