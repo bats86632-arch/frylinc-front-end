@@ -1,4 +1,5 @@
 import { useRef, useCallback } from "react";
+import { Trash2 } from "lucide-react";
 import { ZoneLayout } from "../types";
 
 interface ZoneRectProps {
@@ -206,16 +207,16 @@ export function ZoneRect({
                 onPointerUp={handlePointerUp}
               />
             ))}
-            {/* Remove (×) button — top-center of the zone */}
+            {/* Remove button — hovering above the top-center of the zone */}
             {onRemove && (
               <button
-                className="absolute -top-4 left-1/2 -translate-x-1/2 z-40 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-error)] text-white text-[10px] font-bold shadow-md hover:bg-red-700 transition-colors"
+                className="absolute -top-8 left-1/2 -translate-x-1/2 z-40 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-error)] text-white shadow-md hover:bg-red-700 hover:scale-110 transition-all cursor-pointer"
                 style={{ pointerEvents: "all" }}
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
                 title="Remove zone box"
               >
-                ×
+                <Trash2 className="h-3.5 w-3.5" />
               </button>
             )}
           </>
