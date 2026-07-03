@@ -108,15 +108,7 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     if (!currentUser) throw new Error("Not authenticated");
     setUploading(true);
     try {
-      // Delete old file (best-effort — don't block upload if delete fails)
-      try {
-        const oldRef = ref(storage, oldImagePath);
-        await deleteObject(oldRef);
-      } catch (e) {
-        console.warn("[usePanelMap] Failed to delete old map image:", e);
-      }
-
-      // Upload new file
+      // Upload new file first
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,
@@ -124,7 +116,13 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
       };
       const compressedFile = await imageCompression(file, options);
       const ext = compressedFile.name.split(".").pop()?.toLowerCase() || "jpg";
-      const storagePath = `panelMaps/${panelId}/map.${ext}`;
+      
+      // Use a unique name to prevent overwriting if we keep the same extension,
+      // or just rely on the fact that if we overwrite it, we don't need to delete the old one.
+      // Actually, if we overwrite, the old one IS the new one, so deleting it would delete the new one!
+      // Let's generate a unique timestamp for the file name.
+      const timestamp = Date.now();
+      const storagePath = `panelMaps/${panelId}/map_${timestamp}.${ext}`;
       const storageRef = ref(storage, storagePath);
 
       await uploadBytes(storageRef, compressedFile, {
@@ -142,6 +140,16 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
         updatedAt: serverTimestamp(),
         updatedBy: currentUser.uid,
       });
+
+      // ONLY after successful upload and DB update, delete the old file (best-effort)
+      if (oldImagePath && oldImagePath !== storagePath) {
+        try {
+          const oldRef = ref(storage, oldImagePath);
+          await deleteObject(oldRef);
+        } catch (e) {
+          console.warn("[usePanelMap] Failed to delete old map image:", e);
+        }
+      }
     } finally {
       setUploading(false);
     }
