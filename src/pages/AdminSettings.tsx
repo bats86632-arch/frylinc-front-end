@@ -2953,7 +2953,7 @@ export function AdminSettings() {
       )}
 
       {/* ð Delete Company Modal ð */}
-      {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && (
+      {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && createPortal(
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4">
@@ -3094,7 +3094,8 @@ export function AdminSettings() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       <CreateUserModal
         isOpen={userFormOpen}
@@ -3105,7 +3106,7 @@ export function AdminSettings() {
       />
 
       {/* 🛑 Delete Branch Modal 🛑 */}
-      {deleteBranchModalState.isOpen && deleteBranchModalState.branch && (
+      {deleteBranchModalState.isOpen && deleteBranchModalState.branch && createPortal(
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4">
@@ -3180,7 +3181,8 @@ export function AdminSettings() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

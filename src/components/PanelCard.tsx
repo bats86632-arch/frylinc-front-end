@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Panel } from "../types";
 import { Activity, RadioTower, AlertTriangle, MapPin, Hash, CheckCircle, Clock } from "lucide-react";
 import { PanelService } from "../api/PanelService";
@@ -198,7 +199,7 @@ interface PanelCardProps {
       </div>
 
       {/* Resolution Modal */}
-      {resolvingZone !== null && (
+      {resolvingZone !== null && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
@@ -238,7 +239,8 @@ interface PanelCardProps {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
