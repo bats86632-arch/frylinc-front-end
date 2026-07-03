@@ -337,7 +337,11 @@ export function Dashboard() {
           <div className="flex items-center gap-3 animate-fade-in-up">
             <button
               onClick={() => {
-                setSelectedBranchId(null);
+                if (selectedCompanyId === "unassigned") {
+                  setSelectedCompanyId(null);
+                } else {
+                  setSelectedBranchId(null);
+                }
                 setSearchQuery("");
                 setFilter("all");
               }}
