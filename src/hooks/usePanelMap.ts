@@ -14,6 +14,7 @@ import {
 import { db, storage } from "../config/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { PanelMap, ZoneLayout } from "../types";
+import imageCompression from "browser-image-compression";
 
 interface UsePanelMapReturn {
   panelMap: PanelMap | null;
@@ -69,12 +70,18 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     if (!currentUser) throw new Error("Not authenticated");
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      const ext = compressedFile.name.split(".").pop()?.toLowerCase() || "jpg";
       const storagePath = `panelMaps/${panelId}/map.${ext}`;
       const storageRef = ref(storage, storagePath);
 
-      await uploadBytes(storageRef, file, {
-        contentType: file.type,
+      await uploadBytes(storageRef, compressedFile, {
+        contentType: compressedFile.type,
         customMetadata: { uploadedBy: currentUser.uid },
       });
       const imageUrl = await getDownloadURL(storageRef);
@@ -110,12 +117,18 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
       }
 
       // Upload new file
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      const ext = compressedFile.name.split(".").pop()?.toLowerCase() || "jpg";
       const storagePath = `panelMaps/${panelId}/map.${ext}`;
       const storageRef = ref(storage, storagePath);
 
-      await uploadBytes(storageRef, file, {
-        contentType: file.type,
+      await uploadBytes(storageRef, compressedFile, {
+        contentType: compressedFile.type,
         customMetadata: { uploadedBy: currentUser.uid },
       });
       const imageUrl = await getDownloadURL(storageRef);

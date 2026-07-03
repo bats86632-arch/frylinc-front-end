@@ -14,6 +14,7 @@ interface PanelsContextType {
   panels: Panel[];
   loading: boolean;
   error: Error | null;
+  refreshPanels: () => Promise<void>;
 }
 
 const PanelsContext = createContext<PanelsContextType | undefined>(undefined);
@@ -92,44 +93,44 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const unsubscribes: Array<() => void> = [];
-    const results = new Map<number, Panel[]>();
+    const unsubscribes: (() => void)[] = [];
+    const panelMap = new Map<string, Panel>();
     
-    let initialLoadCount = 0;
-    let hasError = false;
+    setLoading(true);
+    setError(null);
 
-    queries.forEach((q, index) => {
+    let initialLoadsPending = queries.length;
+
+    queries.forEach((q) => {
       const unsub = onSnapshot(
         q,
-        (snapshot) => {
-          if (hasError) return;
-          const panelList: Panel[] = [];
-          snapshot.forEach((doc) => {
-            panelList.push({ serial: doc.id, ...doc.data() } as Panel);
+        (snap) => {
+          // Process delta changes
+          snap.docChanges().forEach((change) => {
+            if (change.type === "removed") {
+              panelMap.delete(change.doc.id);
+            } else {
+              panelMap.set(change.doc.id, {
+                serial: change.doc.id,
+                ...change.doc.data(),
+              } as Panel);
+            }
           });
-          console.log(`[BRIDGE] Received panel data update from bridge for ${panelList.length} panels`, panelList);
-          results.set(index, panelList);
-          
-          if (initialLoadCount < queries.length) {
-            initialLoadCount++;
+
+          // Mark this query's initial load as done
+          if (initialLoadsPending > 0) {
+            initialLoadsPending--;
           }
-          
-          if (initialLoadCount === queries.length) {
-            const allPanels = Array.from(results.values()).flat();
-            const uniquePanels = Array.from(
-              new Map(allPanels.map((p) => [p.serial, p])).values()
-            );
-            setPanels(uniquePanels);
+          if (initialLoadsPending === 0) {
             setLoading(false);
           }
+
+          setPanels(Array.from(panelMap.values()));
         },
         (err) => {
-          console.error("Error fetching panels:", err);
-          if (!hasError) {
-            hasError = true;
-            setError(err);
-            setLoading(false);
-          }
+          console.error("Error in onSnapshot:", err);
+          setError(err);
+          setLoading(false);
         }
       );
       unsubscribes.push(unsub);
@@ -140,7 +141,13 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
     };
   }, [userData]);
 
-  const value = { panels, loading, error };
+  const refreshPanels = async () => {
+    // refreshPanels is no longer strictly necessary because we are using onSnapshot,
+    // which automatically maintains real-time sync with the server.
+    console.log("Panels are in active state (real-time). Refresh not required.");
+  };
+
+  const value = { panels, loading, error, refreshPanels };
 
   return (
     <PanelsContext.Provider value={value}>{children}</PanelsContext.Provider>
