@@ -13,6 +13,8 @@ import {
   RadioTower,
   List,
   Info,
+  Trash2,
+  PlusSquare,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
@@ -27,42 +29,23 @@ const MAX_FILE_MB = 20;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Build a staggered default position for a new zone */
-function defaultZonePos(index: number, total: number): Pick<ZoneLayout, "x" | "y" | "width" | "height"> {
-  const cols = Math.min(Math.ceil(Math.sqrt(total)), 4);
-  const col = index % cols;
-  const row = Math.floor(index / cols);
-  const cellW = 90 / cols;
-  const cellH = 24;
-  return {
-    x: 5 + col * cellW,
-    y: 5 + row * cellH,
-    width: Math.max(12, cellW - 2),
-    height: Math.max(10, cellH - 2),
-  };
-}
 
-/** Build the working zone array, reconciling saved layout with current panel zoneCount */
-function reconcileZones(
+/** Build the working zone array reconciling ONLY the zones already saved (ignore panel zoneCount for initialization) */
+function buildZonesFromSaved(
   panelSerial: string,
-  zoneCount: number,
   savedZones: ZoneLayout[]
 ): ZoneLayout[] {
-  // Build a lookup record from saved zones keyed by zoneId
-  const byId: Record<string, ZoneLayout> = {};
-  savedZones.forEach((z) => { byId[z.zoneId] = z; });
-  const result: ZoneLayout[] = [];
+  return savedZones.map((z, i) => ({
+    ...z,
+    label: `${panelSerial} \u2014 Zone ${z.zoneId.split('-Z')[1] || (i + 1)}`,
+  }));
+}
 
-  for (let i = 0; i < zoneCount; i++) {
-    const zoneId = `${panelSerial}-Z${i + 1}`;
-    const label = `${panelSerial} \u2014 Zone ${i + 1}`;
-    if (byId[zoneId]) {
-      result.push({ ...byId[zoneId], label }); // always use latest label
-    } else {
-      result.push({ zoneId, label, ...defaultZonePos(i, zoneCount) });
-    }
-  }
-  return result;
+/** Create a single new zone box at a sensible default position */
+function newZonePos(existingCount: number): Pick<ZoneLayout, "x" | "y" | "width" | "height"> {
+  // Stagger new zones diagonally so they don't all pile up
+  const offset = (existingCount % 8) * 5;
+  return { x: 5 + offset, y: 5 + offset, width: 20, height: 15 };
 }
 
 // ── Panel Selector item ───────────────────────────────────────────────────────
@@ -141,7 +124,7 @@ export function MapZones() {
   }, [panels, panelSearch]);
 
   // Map data hook
-  const { panelMap, mapLoading, saving, uploading, uploadMap, replaceMap, saveLayout } =
+  const { panelMap, mapLoading, saving, uploading, uploadMap, replaceMap, removeMap, saveLayout } =
     usePanelMap(selectedPanelId);
 
   // Local editing state
@@ -149,6 +132,7 @@ export function MapZones() {
   const [isDirty, setIsDirty] = useState(false);
   const [selectedZoneIdx, setSelectedZoneIdx] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [removeConfirm, setRemoveConfirm] = useState(false);
 
   // Container ref for coordinate system
   const containerRef = useRef<HTMLDivElement>(null);
@@ -160,7 +144,7 @@ export function MapZones() {
   // Sidebar open state (mobile)
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // ── Reconcile zones whenever panel or saved map changes ─────────────────
+  // ── Load only the saved zones (not all panel zones automatically) ───────
   useEffect(() => {
     if (!selectedPanel) {
       setLocalZones([]);
@@ -169,8 +153,8 @@ export function MapZones() {
       return;
     }
     const saved = panelMap?.zones ?? [];
-    const reconciled = reconcileZones(selectedPanel.serial, selectedPanel.zoneCount, saved);
-    setLocalZones(reconciled);
+    // Only load zones that were explicitly saved — don't auto-populate all panel zones
+    setLocalZones(buildZonesFromSaved(selectedPanel.serial, saved));
     setIsDirty(false);
     setSelectedZoneIdx(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,13 +188,34 @@ export function MapZones() {
     setSelectedZoneIdx(null);
   };
 
-  // ── Discard changes ──────────────────────────────────────────────────────
+  // ── Discard changes ─────────────────────────────────────────
   const handleDiscard = () => {
     if (!selectedPanel) return;
     const saved = panelMap?.zones ?? [];
-    setLocalZones(reconcileZones(selectedPanel.serial, selectedPanel.zoneCount, saved));
+    setLocalZones(buildZonesFromSaved(selectedPanel.serial, saved));
     setIsDirty(false);
     setSelectedZoneIdx(null);
+  };
+
+  // ── Add a single zone box ───────────────────────────────────────
+  const handleAddZone = () => {
+    if (!selectedPanel) return;
+    const maxZones = selectedPanel.zoneCount ?? 8;
+    if (localZones.length >= maxZones) return;
+    const nextNum = localZones.length + 1;
+    const zoneId = `${selectedPanel.serial}-Z${nextNum}`;
+    const label = `${selectedPanel.serial} \u2014 Zone ${nextNum}`;
+    const newZone: ZoneLayout = { zoneId, label, ...newZonePos(localZones.length) };
+    setLocalZones((prev) => [...prev, newZone]);
+    setIsDirty(true);
+    setSelectedZoneIdx(localZones.length);
+  };
+
+  // ── Remove a single zone box ────────────────────────────────────
+  const handleRemoveZone = (idx: number) => {
+    setLocalZones((prev) => prev.filter((_, i) => i !== idx));
+    setSelectedZoneIdx(null);
+    setIsDirty(true);
   };
 
   // ── File validation ──────────────────────────────────────────────────────
@@ -377,6 +382,53 @@ export function MapZones() {
               {uploading ? "Replacing…" : "Replace Map"}
             </button>
 
+            {/* Remove Map button */}
+            {!removeConfirm ? (
+              <button
+                onClick={() => setRemoveConfirm(true)}
+                disabled={uploading || saving}
+                className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] rounded-[6px] border-[var(--status-danger-border)] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)]"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Remove Map
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-[var(--color-error)] font-semibold">Remove map? This cannot be undone.</span>
+                <button
+                  onClick={async () => {
+                    if (selectedPanelId && panelMap?.imagePath) {
+                      await removeMap(selectedPanelId, panelMap.imagePath);
+                    }
+                    setRemoveConfirm(false);
+                  }}
+                  disabled={uploading}
+                  className="btn-secondary inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-[6px] border-[var(--status-danger-border)] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)]"
+                >
+                  {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+                  Yes, remove
+                </button>
+                <button
+                  onClick={() => setRemoveConfirm(false)}
+                  className="btn-secondary inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-[6px]"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            {/* Add Zone button */}
+            {localZones.length < (selectedPanel?.zoneCount ?? 0) && (
+              <button
+                onClick={handleAddZone}
+                disabled={saving}
+                className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] rounded-[6px] border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-muted)]"
+              >
+                <PlusSquare className="h-3.5 w-3.5" />
+                Add Zone ({localZones.length}/{selectedPanel?.zoneCount ?? 0})
+              </button>
+            )}
+
             {/* Dirty state controls */}
             {isDirty && (
               <>
@@ -414,7 +466,7 @@ export function MapZones() {
           {/* Info tip */}
           <div className="flex items-center gap-1 text-[10px] text-[var(--text-quaternary)]">
             <Info className="h-3 w-3" />
-            <span>Drag to move · Drag corners to resize</span>
+            <span>Drag to move · Drag corners to resize · Select a zone and press Delete to remove</span>
           </div>
         </div>
       )}
@@ -429,7 +481,7 @@ export function MapZones() {
 
       {/* Map image + zone overlay */}
       <div
-        className={`relative flex-1 min-h-[300px] rounded-[8px] border-2 overflow-auto flex items-center justify-center ${
+        className={`relative flex-1 min-h-[300px] rounded-[8px] border-2 overflow-auto ${
           anyAlarm
             ? "map-border-alarm"
             : "border-[var(--border-default)]"
@@ -437,14 +489,14 @@ export function MapZones() {
         style={{ background: "var(--surface-overlay)" }}
         onClick={handleCanvasClick}
       >
-        {/* Inner wrapper strictly fits the image content */}
-        <div className="relative inline-block max-w-full max-h-full">
-          {/* Floor plan image */}
+        {/* Inner wrapper: let image render at natural size so zones can cover the full image */}
+        <div className="relative inline-block min-w-full">
+          {/* Floor plan image — natural dimensions, no max-height clipping */}
           <img
             src={panelMap!.imageUrl}
             alt="Floor plan"
             draggable={false}
-            className="block max-w-full max-h-full object-contain select-none"
+            className="block w-full select-none"
             style={{ display: "block", userSelect: "none" }}
           />
 
@@ -474,6 +526,7 @@ export function MapZones() {
                     containerRef={containerRef as React.RefObject<HTMLDivElement>}
                     onSelect={() => setSelectedZoneIdx(idx)}
                     onChange={(updated) => handleZoneChange(idx, updated)}
+                    onRemove={canEdit ? () => handleRemoveZone(idx) : undefined}
                   />
                 </div>
               );

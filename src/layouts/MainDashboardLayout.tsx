@@ -39,8 +39,8 @@ const navigation: Array<{
     roles: ["super_admin", "head_office", "system_integrator"],
   },
   {
-    name: "Map Zones",
-    mobileName: "Map",
+    name: "Graphical Monitoring System (GMS)",
+    mobileName: "GMS",
     href: "/map-zones",
     icon: Map,
     roles: ["super_admin", "secret_super_admin", "head_office", "system_integrator", "end_user"],
@@ -85,7 +85,7 @@ export function MainDashboardLayout() {
       : location.pathname === "/profile"
         ? "Your Profile"
         : location.pathname === "/map-zones"
-          ? "Map Zones"
+          ? "Graphical Monitoring System (GMS)"
           : location.pathname.startsWith("/panel")
             ? "Panel Details"
             : "Fire Alarm Panels";
@@ -96,7 +96,7 @@ export function MainDashboardLayout() {
       : location.pathname === "/profile"
         ? "Your Profile"
         : location.pathname === "/map-zones"
-          ? "Map"
+          ? "GMS"
           : location.pathname.startsWith("/panel")
             ? "Panel Details"
             : "Dashboard";

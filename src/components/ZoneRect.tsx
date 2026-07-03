@@ -15,6 +15,8 @@ interface ZoneRectProps {
   containerRef: React.RefObject<HTMLDivElement>;
   onSelect: () => void;
   onChange: (updated: Partial<ZoneLayout>) => void;
+  /** Called when the user removes this zone box */
+  onRemove?: () => void;
 }
 
 type ResizeHandle =
@@ -35,6 +37,7 @@ export function ZoneRect({
   containerRef,
   onSelect,
   onChange,
+  onRemove,
 }: ZoneRectProps) {
   // We track pointer state in a ref to avoid stale closures without re-renders
   const dragState = useRef<{
@@ -203,6 +206,18 @@ export function ZoneRect({
                 onPointerUp={handlePointerUp}
               />
             ))}
+            {/* Remove (×) button — top-center of the zone */}
+            {onRemove && (
+              <button
+                className="absolute -top-4 left-1/2 -translate-x-1/2 z-40 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-error)] text-white text-[10px] font-bold shadow-md hover:bg-red-700 transition-colors"
+                style={{ pointerEvents: "all" }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                title="Remove zone box"
+              >
+                ×
+              </button>
+            )}
           </>
         )}
       </div>

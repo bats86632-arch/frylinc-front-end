@@ -22,6 +22,7 @@ interface UsePanelMapReturn {
   uploading: boolean;
   uploadMap: (file: File, panelId: string) => Promise<void>;
   replaceMap: (file: File, panelId: string, oldImagePath: string) => Promise<void>;
+  removeMap: (panelId: string, imagePath: string) => Promise<void>;
   saveLayout: (panelId: string, zones: ZoneLayout[]) => Promise<void>;
 }
 
@@ -133,6 +134,25 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     }
   };
 
+  // ── Remove entire map (delete image + Firestore doc) ───────────────────────
+  const removeMap = async (panelId: string, imagePath: string): Promise<void> => {
+    if (!currentUser) throw new Error("Not authenticated");
+    setUploading(true);
+    try {
+      try {
+        const oldRef = ref(storage, imagePath);
+        await deleteObject(oldRef);
+      } catch (e) {
+        console.warn("[usePanelMap] Failed to delete map image during remove:", e);
+      }
+      const { deleteDoc } = await import("firebase/firestore");
+      const mapDocRef = doc(db, "panelMaps", panelId);
+      await deleteDoc(mapDocRef);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // ── Save zone layout positions ─────────────────────────────────────────────
   const saveLayout = async (
     panelId: string,
@@ -157,5 +177,5 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     }
   };
 
-  return { panelMap, mapLoading, saving, uploading, uploadMap, replaceMap, saveLayout };
+  return { panelMap, mapLoading, saving, uploading, uploadMap, replaceMap, removeMap, saveLayout };
 }
