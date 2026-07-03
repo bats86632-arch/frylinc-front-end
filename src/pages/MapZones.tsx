@@ -15,6 +15,9 @@ import {
   Info,
   Trash2,
   PlusSquare,
+  Minus,
+  Plus,
+  Maximize2,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
@@ -136,6 +139,58 @@ export function MapZones() {
 
   // Container ref for coordinate system
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Canvas outer scroll container ref
+  const canvasScrollRef = useRef<HTMLDivElement>(null);
+
+  // Image ref for natural size
+  const mapImageRef = useRef<HTMLImageElement>(null);
+
+  // Zoom state: null = not yet calculated (image not loaded), number = zoom factor
+  const [zoom, setZoom] = useState<number>(1);
+  const [fitZoom, setFitZoom] = useState<number>(1);
+
+  /** Calculate and apply fit-to-screen zoom once the image dimensions are known */
+  const applyFitZoom = useCallback(() => {
+    const canvas = canvasScrollRef.current;
+    const img = mapImageRef.current;
+    if (!canvas || !img || !img.naturalWidth) return;
+    const availW = canvas.clientWidth   - 4;  // subtract border
+    const availH = canvas.clientHeight  - 4;
+    const scaleW = availW  / img.naturalWidth;
+    const scaleH = availH  / img.naturalHeight;
+    const fit = Math.min(scaleW, scaleH, 1); // never upscale beyond 100%
+    setFitZoom(fit);
+    setZoom(fit);
+  }, []);
+
+  // Re-fit whenever a new panel map loads
+  useEffect(() => {
+    setZoom(1); // reset while loading
+  }, [selectedPanelId, panelMap?.imagePath]);
+
+  // Keyboard Delete to remove selected zone
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedZoneIdx !== null && canEdit) {
+        // Only if not focused on an input/textarea
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        handleRemoveZone(selectedZoneIdx);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedZoneIdx, canEdit]);
+
+  // Scroll-wheel zoom on the canvas
+  const handleCanvasWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    if (!e.ctrlKey && !e.metaKey) return; // only zoom on Ctrl+scroll
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom((prev) => Math.min(3, Math.max(0.2, +(prev + delta).toFixed(2))));
+  }, []);
 
   // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -429,6 +484,47 @@ export function MapZones() {
               </button>
             )}
 
+            {/* Delete Selected Zone button */}
+            {selectedZoneIdx !== null && (
+              <button
+                onClick={() => handleRemoveZone(selectedZoneIdx)}
+                disabled={saving}
+                className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] border-[var(--status-danger-border)]"
+                title="Delete Selected Zone (Del)"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete Selected
+              </button>
+            )}
+
+            {/* Zoom Controls */}
+            <div className="flex items-center gap-1 bg-[var(--surface-overlay)] border border-[var(--border-default)] rounded-[6px] p-0.5 ml-2">
+              <button
+                onClick={() => setZoom((z) => Math.max(0.2, +(z - 0.1).toFixed(2)))}
+                className="p-1 hover:bg-[var(--surface-hover)] rounded-[4px] text-[var(--text-secondary)]"
+                title="Zoom Out"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => setZoom(fitZoom)}
+                className="p-1 hover:bg-[var(--surface-hover)] rounded-[4px] text-[var(--text-secondary)]"
+                title="Fit to Screen"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => setZoom((z) => Math.min(3, +(z + 0.1).toFixed(2)))}
+                className="p-1 hover:bg-[var(--surface-hover)] rounded-[4px] text-[var(--text-secondary)]"
+                title="Zoom In"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+              <span className="text-[10px] text-[var(--text-quaternary)] px-1 font-medium w-8 text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+            </div>
+
             {/* Dirty state controls */}
             {isDirty && (
               <>
@@ -481,6 +577,7 @@ export function MapZones() {
 
       {/* Map image + zone overlay */}
       <div
+        ref={canvasScrollRef}
         className={`relative flex-1 min-h-[300px] rounded-[8px] border-2 overflow-auto ${
           anyAlarm
             ? "map-border-alarm"
@@ -488,14 +585,20 @@ export function MapZones() {
         }`}
         style={{ background: "var(--surface-overlay)" }}
         onClick={handleCanvasClick}
+        onWheel={handleCanvasWheel}
       >
-        {/* Inner wrapper: let image render at natural size so zones can cover the full image */}
-        <div className="relative inline-block min-w-full">
+        {/* Inner wrapper: scales the image and zones together using CSS transform */}
+        <div
+          className="relative inline-block min-w-full origin-top-left transition-transform duration-100 ease-out"
+          style={{ transform: `scale(${zoom})` }}
+        >
           {/* Floor plan image — natural dimensions, no max-height clipping */}
           <img
+            ref={mapImageRef}
             src={panelMap!.imageUrl}
             alt="Floor plan"
             draggable={false}
+            onLoad={applyFitZoom}
             className="block w-full select-none"
             style={{ display: "block", userSelect: "none" }}
           />
