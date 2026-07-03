@@ -266,6 +266,18 @@ export function AdminSettings() {
     deleteUsersAlso: false,
   });
 
+  const [deleteBranchModalState, setDeleteBranchModalState] = useState<{
+    isOpen: boolean;
+    branch: Branch | null;
+    associatedPanels: Panel[];
+    deletePanelsAlso: boolean;
+  }>({
+    isOpen: false,
+    branch: null,
+    associatedPanels: [],
+    deletePanelsAlso: false,
+  });
+
   const {
     register: registerEditCompany,
     handleSubmit: handleSubmitEditCompany,
@@ -776,15 +788,32 @@ export function AdminSettings() {
     }
   };
 
-  
-  const handleDeleteBranch = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this branch? This cannot be undone.")) return;
+  const openDeleteBranchModal = (branch: Branch) => {
+    const panelsInBranch = panels.filter((p) => p.branchId === branch.id);
+    setDeleteBranchModalState({
+      isOpen: true,
+      branch,
+      associatedPanels: panelsInBranch,
+      deletePanelsAlso: false,
+    });
+  };
+
+  const confirmDeleteBranch = async () => {
+    const { branch, deletePanelsAlso } = deleteBranchModalState;
+    if (!branch) return;
+
+    setError(null);
     try {
-      await BranchService.deleteBranch(id);
+      await BranchService.deleteBranch(branch.id, deletePanelsAlso);
       setSuccess("Branch deleted successfully");
       await reloadBranches();
+      if (deletePanelsAlso) {
+        await reloadPanels();
+      }
+      setDeleteBranchModalState((prev) => ({ ...prev, isOpen: false }));
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Failed to delete branch"));
+      setDeleteBranchModalState((prev) => ({ ...prev, isOpen: false }));
     }
   };
 // Mock function for panel heartbeat
@@ -1839,7 +1868,7 @@ export function AdminSettings() {
                                                 <button
                                                   onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDeleteBranch(branch.id);
+                                                    openDeleteBranchModal(branch);
                                                   }}
                                                   className="flex h-6 w-6 items-center justify-center rounded-[4px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[var(--color-error)] hover:text-white hover:bg-[var(--color-error)] hover:border-[var(--color-error)] transition-all"
                                                   title="Delete branch"
@@ -2925,7 +2954,7 @@ export function AdminSettings() {
 
       {/* ð Delete Company Modal ð */}
       {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4">
               <h3 className="text-[15px] font-medium text-[var(--text-primary)]">
@@ -3074,6 +3103,85 @@ export function AdminSettings() {
         onError={(msg) => { setError(msg); }}
         editingUser={editingUserData}
       />
+
+      {/* 🛑 Delete Branch Modal 🛑 */}
+      {deleteBranchModalState.isOpen && deleteBranchModalState.branch && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4">
+              <h3 className="text-[15px] font-medium text-[var(--text-primary)]">
+                Delete Branch
+              </h3>
+              <button
+                onClick={() =>
+                  setDeleteBranchModalState((prev) => ({
+                    ...prev,
+                    isOpen: false,
+                  }))
+                }
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="px-5 py-5 text-[13px] text-[var(--text-primary)]">
+              <p className="mb-4">
+                Are you sure you want to delete branch{" "}
+                <strong className="text-white">
+                  {deleteBranchModalState.branch.name}
+                </strong>
+                ?
+              </p>
+              
+              {deleteBranchModalState.associatedPanels.length > 0 && (
+                <div className="mb-4 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={deleteBranchModalState.deletePanelsAlso}
+                      onChange={(e) =>
+                        setDeleteBranchModalState((prev) => ({
+                          ...prev,
+                          deletePanelsAlso: e.target.checked,
+                        }))
+                      }
+                      className="mt-0.5 rounded-[4px] border-[var(--border-subtle)] bg-[#1a1917] text-[var(--color-error)] focus:ring-[var(--color-error)]"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-[13px] font-medium text-white">
+                        Also delete all {deleteBranchModalState.associatedPanels.length} associated panels
+                      </span>
+                      <span className="text-[11px] text-[var(--text-secondary)] mt-1">
+                        If unchecked, these panels will be unassigned from this branch but kept in the company.
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() =>
+                    setDeleteBranchModalState((prev) => ({
+                      ...prev,
+                      isOpen: false,
+                    }))
+                  }
+                  className="btn-secondary rounded-[6px] px-4 py-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteBranch}
+                  className="btn-primary rounded-[6px] bg-[var(--color-error)] border-[var(--color-error)] hover:bg-[var(--color-error)]/90 px-4 py-2 text-white"
+                >
+                  Confirm Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -40,8 +40,8 @@ export const BranchService = {
     this.invalidateCache();
   },
 
-  async deleteBranch(id: string): Promise<void> {
-    await apiClient.delete(`/branches/${id}`);
+  async deleteBranch(id: string, deletePanels: boolean = false): Promise<void> {
+    await apiClient.delete(`/branches/${id}?deletePanels=${deletePanels}`);
     this.invalidateCache();
   },
 };
