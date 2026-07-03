@@ -154,14 +154,51 @@ export function MapZones() {
   const applyFitZoom = useCallback(() => {
     const canvas = canvasScrollRef.current;
     const img = mapImageRef.current;
-    if (!canvas || !img || !img.naturalWidth) return;
-    const availW = canvas.clientWidth   - 4;  // subtract border
-    const availH = canvas.clientHeight  - 4;
-    const scaleW = availW  / img.naturalWidth;
-    const scaleH = availH  / img.naturalHeight;
-    const fit = Math.min(scaleW, scaleH, 1); // never upscale beyond 100%
+    if (!canvas || !img || !img.naturalWidth || !img.naturalHeight) return;
+    
+    const availW = canvas.clientWidth - 4;  // subtract border
+    const availH = canvas.clientHeight - 4;
+    if (availW <= 0 || availH <= 0) return;
+
+    const scaleW = availW / img.naturalWidth;
+    const scaleH = availH / img.naturalHeight;
+    const isMobile = window.innerWidth < 768;
+
+    let fit: number;
+    if (isMobile) {
+      const containZoom = Math.min(scaleW, scaleH);
+      const coverZoom = Math.max(scaleW, scaleH);
+      const renderedHeightRatio = (img.naturalHeight * containZoom) / availH;
+      
+      if (renderedHeightRatio < 0.4) {
+        // If it's a wide image taking < 40% of phone height, boost zoom to fill ~65% of screen height
+        // This ensures it's readable and doesn't look like a tiny strip at the top
+        const boostZoom = (availH * 0.65) / img.naturalHeight;
+        fit = Math.min(boostZoom, coverZoom, 1.5);
+      } else {
+        fit = containZoom;
+      }
+    } else {
+      fit = Math.min(scaleW, scaleH, 1); // never upscale beyond 100% on desktop
+    }
+    
+    // Clamp zoom to reasonable bounds
+    fit = Math.min(3, Math.max(0.1, fit));
+    fit = Math.round(fit * 100) / 100;
+    
     setFitZoom(fit);
     setZoom(fit);
+
+    // If the image overflows horizontally due to the smart zoom boost, auto-center it
+    if (isMobile && fit > scaleW) {
+      setTimeout(() => {
+        if (canvasScrollRef.current) {
+          const cvs = canvasScrollRef.current;
+          cvs.scrollLeft = (cvs.scrollWidth - cvs.clientWidth) / 2;
+          cvs.scrollTop = (cvs.scrollHeight - cvs.clientHeight) / 2;
+        }
+      }, 50);
+    }
   }, []);
 
   // Re-fit whenever a new panel map loads
