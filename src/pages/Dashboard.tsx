@@ -383,7 +383,7 @@ export function Dashboard() {
               </div>
               <div className="flex-1 surface-panel px-5 py-3 border-t-2 border-[var(--border-default)] rounded-[12px]">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
-                  Total Companies
+                  Total Organizations
                 </p>
                 <p className="mt-0.5 font-sans text-[24px] font-bold leading-none tabular-nums text-[var(--text-primary)]">
                   {allCompanies.length}
@@ -465,7 +465,7 @@ export function Dashboard() {
         <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
           {showCompanyView && (
             <div className="whitespace-nowrap pb-3 text-[13px] font-medium border-b-2 border-transparent text-[var(--text-primary)]">
-              Companies Directory
+              Organizations Directory
             </div>
           )}
           {showBranchView && (
@@ -535,7 +535,7 @@ export function Dashboard() {
               type="text"
               placeholder={
                 showCompanyView
-                  ? "Search companies..."
+                  ? "Search organizations..."
                   : showBranchView
                     ? "Search branches..."
                     : "Search by panel ID or name..."

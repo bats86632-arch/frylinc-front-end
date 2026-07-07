@@ -1038,7 +1038,7 @@ export function AdminSettings() {
                     <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" />
                     <input
                       type="text"
-                      placeholder="Search companies..."
+                      placeholder="Search organizations..."
                       value={companySearchQuery}
                       onChange={(e) => setCompanySearchQuery(e.target.value)}
                       className="control-field h-[32px] w-[200px] rounded-[6px] pl-8 pr-3 text-[12px]"
@@ -1072,7 +1072,7 @@ export function AdminSettings() {
                   <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-secondary)]" />
                   <input
                     type="text"
-                    placeholder="Search companies..."
+                    placeholder="Search organizations..."
                     value={companySearchQuery}
                     onChange={(e) => setCompanySearchQuery(e.target.value)}
                     className="control-field h-[32px] w-full rounded-[6px] pl-8 pr-3 text-[12px]"
@@ -2331,7 +2331,7 @@ export function AdminSettings() {
                         </div>
                         
                         <p className="text-[13px] text-[var(--text-secondary)] mb-4 text-left">
-                          Download the template, fill in your data, and upload the Excel file to bulk-create panels and assign them to companies and branches.
+                          Download the template, fill in your data, and upload the Excel file to bulk-create panels and assign them to organizations and branches.
                         </p>
                         
                         <div className="flex flex-col gap-3">
