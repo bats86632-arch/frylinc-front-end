@@ -218,7 +218,7 @@ export function Profile() {
       setCompanyLogoSuccess(true);
       setTimeout(() => setCompanyLogoSuccess(false), 3000);
     } catch (err: any) {
-      setCompanyLogoError(err.message || "Failed to upload company logo");
+      setCompanyLogoError(err.message || "Failed to upload organization logo");
     } finally {
       setUploadingCompanyLogo(false);
     }
@@ -464,16 +464,16 @@ export function Profile() {
 
             {/* Company Name */}
             <EditableField
-              label="Company Name"
+              label="Organization Name"
               value={companyName}
               onChange={setCompanyName}
               placeholder="Your organisation"
               error={fieldErrors.companyName}
             />
 
-            {/* Company Role */}
+            {/* Organization Role */}
             <EditableField
-              label="Company Role"
+              label="Organization Role"
               value={companyRole}
               onChange={setCompanyRole}
               placeholder="e.g., Fire Safety Manager"
@@ -604,7 +604,7 @@ export function Profile() {
           </div>
         </div>
 
-        {/* Company Profile (Head Office only) */}
+        {/* Organization Profile (Head Office only) */}
         {userData?.role === "head_office" && myCompany && (
           <div className="surface-panel rounded-[16px] p-6 border border-[var(--border-subtle)] lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
@@ -612,7 +612,7 @@ export function Profile() {
                 <Building className="h-[18px] w-[18px]" />
               </div>
               <h2 className="text-[10px] uppercase tracking-[0.1em] text-[var(--text-primary)] opacity-50">
-                Company Profile
+                Organization Profile
               </h2>
             </div>
             
@@ -630,7 +630,7 @@ export function Profile() {
                 <label
                   htmlFor="company-logo-upload"
                   className="absolute -bottom-2 -right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--text-secondary)] shadow-sm transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                  title="Change company logo"
+                  title="Change organization logo"
                 >
                   <Camera className="h-4 w-4" />
                 </label>

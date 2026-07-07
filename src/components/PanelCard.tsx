@@ -107,7 +107,7 @@ interface PanelCardProps {
               </div>
             </div>
             <div className="space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">Company ID</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">Organization ID</p>
               <div className="flex items-center gap-2 text-[13px] font-medium text-[var(--text-primary)]">
                 <RadioTower className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                 <span className="truncate" title={panel.companyId || "Unknown"}>

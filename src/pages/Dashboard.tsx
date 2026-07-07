@@ -218,7 +218,7 @@ export function Dashboard() {
   const unassignedCompany = {
     id: "unassigned",
     name: "Unassigned",
-    description: "Panels without a company",
+    description: "Panels without an organization",
     logoUrl: "",
     createdAt: "",
     updatedAt: ""
@@ -555,12 +555,12 @@ export function Dashboard() {
           <div className="surface-panel py-20 text-center">
             <Building2 className="mx-auto mb-4 h-12 w-12 text-[var(--text-quaternary)]" />
             <p className="text-[16px] font-bold text-[var(--text-primary)]">
-              No companies found
+              No organizations found
             </p>
             <p className="mt-2 text-[13px] font-medium text-[var(--text-quaternary)]">
               {searchQuery
                 ? "Try adjusting your search query."
-                : "No companies available."}
+                : "No organizations available."}
             </p>
           </div>
         ) : (

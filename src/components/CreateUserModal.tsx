@@ -623,7 +623,7 @@ export function CreateUserModal({
                                     disabled={submitting}
                                   >
                                     <option value="">
-                                      — Select a company —
+                                      — Select an organization —
                                     </option>
                                     {availableCompanies.map((c) => (
                                       <option key={c.id} value={c.id}>
@@ -667,7 +667,7 @@ export function CreateUserModal({
                                 </div>
                               ) : availableBranches.length === 0 ? (
                                 <p className="text-[11px] text-[var(--text-secondary)] py-2">
-                                  No branches available for this company.
+                                  No branches available for this organization.
                                 </p>
                               ) : (
                                 <div className="space-y-1 max-h-[160px] overflow-y-auto rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-2">
@@ -728,7 +728,7 @@ export function CreateUserModal({
                                       disabled={submitting}
                                     >
                                       <option value="">
-                                        — Add a Company —
+                                        — Add an Organization —
                                       </option>
                                       {availableCompanies.map((c) => (
                                         <option
@@ -767,7 +767,7 @@ export function CreateUserModal({
                                 {/* Company assignments */}
                                 {Object.keys(siAssignments).length === 0 ? (
                                   <p className="text-[11px] text-[var(--text-secondary)] text-center py-3">
-                                    No companies assigned yet. Add a company
+                                    No organizations assigned yet. Add an organization
                                     above to begin.
                                   </p>
                                 ) : (
@@ -873,7 +873,7 @@ export function CreateUserModal({
                                   <strong className="text-[var(--text-primary)]">
                                     all branches
                                   </strong>{" "}
-                                  within their assigned company. No branch
+                                  within their assigned organization. No branch
                                   selection is needed.
                                 </p>
                               </div>

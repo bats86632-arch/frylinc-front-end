@@ -310,8 +310,8 @@ export function AdminSettings() {
     const XLSX = await import("xlsx");
     const ws = XLSX.utils.json_to_sheet([
       {
-        "Company Name": "Acme Corp",
-        "Company Description": "Global Manufacturing",
+        "Organization Name": "Acme Corp",
+        "Organization Description": "Global Manufacturing",
         "Branch Name": "HQ",
         "Branch Address": "123 Main St, NY",
         "Branch Supervisor": "John Doe",
@@ -319,8 +319,8 @@ export function AdminSettings() {
         "Branch Email": "hq@acmecorp.com"
       },
       {
-        "Company Name": "Acme Corp",
-        "Company Description": "Global Manufacturing",
+        "Organization Name": "Acme Corp",
+        "Organization Description": "Global Manufacturing",
         "Branch Name": "West Coast Facility",
         "Branch Address": "456 Market St, CA",
         "Branch Supervisor": "Jane Smith",
@@ -328,8 +328,8 @@ export function AdminSettings() {
         "Branch Email": "west@acmecorp.com"
       },
       {
-        "Company Name": "TechNova",
-        "Company Description": "Software Solutions",
+        "Organization Name": "TechNova",
+        "Organization Description": "Software Solutions",
         "Branch Name": "Main Office",
         "Branch Address": "789 Tech Blvd, TX",
         "Branch Supervisor": "Alice Johnson",
@@ -356,13 +356,13 @@ export function AdminSettings() {
 
       const companyMap = new Map<string, any>();
       rows.forEach((row: any) => {
-        const companyName = row["Company Name"]?.toString().trim();
+        const companyName = row["Organization Name"]?.toString().trim();
         if (!companyName) return;
 
         if (!companyMap.has(companyName)) {
           companyMap.set(companyName, {
             name: companyName,
-            description: row["Company Description"]?.toString().trim(),
+            description: row["Organization Description"]?.toString().trim(),
             branches: []
           });
         }
@@ -416,18 +416,18 @@ export function AdminSettings() {
 
     const templateData = [
       {
-        "Serial Number": "123456",
+        "Panel ID": "123456",
         "Panel Name": "Main Lobby Panel",
         "Zone Count": 8,
-        "Company Name": "TechNova",
+        "Organization Name": "TechNova",
         "Branch Name": "Main Office",
         ...(!isSI && { "IP Address": "72.167.225.142" })
       },
       {
-        "Serial Number": "123457",
+        "Panel ID": "123457",
         "Panel Name": "Warehouse Panel",
         "Zone Count": 4,
-        "Company Name": "TechNova",
+        "Organization Name": "TechNova",
         "Branch Name": "Main Office",
         ...(!isSI && { "IP Address": "72.167.225.142" })
       }
@@ -452,10 +452,10 @@ export function AdminSettings() {
       const rows = XLSX.utils.sheet_to_json(ws);
 
       for (const row of rows as any[]) {
-        const serial = row["Serial Number"]?.toString().trim();
+        const serial = row["Panel ID"]?.toString().trim();
         const name = row["Panel Name"]?.toString().trim();
         const zoneCount = parseInt(row["Zone Count"]?.toString().trim()) || 8;
-        const companyName = row["Company Name"]?.toString().trim();
+        const companyName = row["Organization Name"]?.toString().trim();
         const branchName = row["Branch Name"]?.toString().trim();
         let ipAddress = row["IP Address"]?.toString().trim() || "72.167.225.142";
         if (!hasRole(["head_office"])) {
@@ -529,7 +529,7 @@ export function AdminSettings() {
         );
       }
       
-      setSuccess("Company and branches created successfully");
+      setSuccess("Organization and branches created successfully");
       setCompanyFormOpen(false);
       setLogoFile(null);
       resetCompany();
@@ -666,7 +666,7 @@ export function AdminSettings() {
       await reloadCompanies();
       await loadUsers();
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err, "Failed to delete company"));
+      setError(getApiErrorMessage(err, "Failed to delete organization"));
     } finally {
       setDeleteCompanyModalState((prev) => ({ ...prev, isOpen: false }));
     }
@@ -890,7 +890,7 @@ export function AdminSettings() {
 
       {/* â”€â”€ Hero Cards Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Company Management Card */}
+        {/* Organization Management Card */}
         {hasRole(["super_admin"]) && (
           <button
             onClick={() => setActiveSection("companies")}
@@ -905,7 +905,7 @@ export function AdminSettings() {
                 <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
               </div>
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
-                Company Management
+                Organization Management
               </h3>
               <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
                 Create, edit, and manage companies and their branch structures.
@@ -1005,7 +1005,7 @@ export function AdminSettings() {
       {/* OVERLAY DRAWERS                                                    */}
       {/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */}
 
-      {/* â”€â”€ Company Management Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* â”€â”€ Organization Management Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeSection === "companies" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
@@ -1029,7 +1029,7 @@ export function AdminSettings() {
                     <Building2 className="h-4 w-4 text-[var(--accent)]" />
                   </div>
                   <div>
-                    <h2 className="text-[15px] font-bold text-[var(--text-primary)]">Company Management</h2>
+                    <h2 className="text-[15px] font-bold text-[var(--text-primary)]">Organization Management</h2>
                     <p className="text-[11px] text-[var(--text-secondary)]">{!companiesLoading && `${companies.length} companies`}</p>
                   </div>
                 </div>
@@ -1163,7 +1163,7 @@ export function AdminSettings() {
                       <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
                           <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
-                            Create Company
+                            Create Organization
                           </h3>
                           <button
                             type="button"
@@ -1196,7 +1196,7 @@ export function AdminSettings() {
                             <label
                               htmlFor="create-company-logo"
                               className="absolute -bottom-2 -right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--text-secondary)] shadow-sm transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                              title="Upload company logo"
+                              title="Upload organization logo"
                             >
                               <Camera className="h-4 w-4" />
                             </label>
@@ -1237,7 +1237,7 @@ export function AdminSettings() {
                           className="control-field w-full rounded-[6px] px-3 py-2 text-[13px] resize-none"
                           rows={3}
                           disabled={companyFormLoading}
-                          placeholder="Optional details about this company"
+                          placeholder="Optional details about this organization"
                         />
                         {companyErrors.description && (
                           <p className="mt-1 text-[12px] text-[var(--color-error)]">
@@ -1361,7 +1361,7 @@ export function AdminSettings() {
                               Creating...
                             </>
                           ) : (
-                            "Create Company"
+                            "Create Organization"
                           )}
                         </button>
                       </div>
@@ -1389,7 +1389,7 @@ export function AdminSettings() {
                       <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
                           <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
-                            Edit Company
+                            Edit Organization
                           </h3>
                           <button
                             type="button"
@@ -1414,7 +1414,7 @@ export function AdminSettings() {
                               {logoFile ? (
                                 <img src={URL.createObjectURL(logoFile)} alt="Logo Preview" className="h-full w-full object-cover" />
                               ) : editingCompanyData.logoUrl ? (
-                                <img src={editingCompanyData.logoUrl} alt="Company Logo" className="h-full w-full object-cover" />
+                                <img src={editingCompanyData.logoUrl} alt="Organization Logo" className="h-full w-full object-cover" />
                               ) : (
                                 <span className="text-[24px] font-bold text-[var(--text-secondary)]">
                                   <Building2 className="h-8 w-8 opacity-50" />
@@ -1424,7 +1424,7 @@ export function AdminSettings() {
                             <label
                               htmlFor="edit-company-logo"
                               className="absolute -bottom-2 -right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--surface-base)] text-[var(--text-secondary)] shadow-sm transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                              title="Update company logo"
+                              title="Update organization logo"
                             >
                               <Camera className="h-4 w-4" />
                             </label>
@@ -1465,7 +1465,7 @@ export function AdminSettings() {
                           className="control-field w-full rounded-[6px] px-3 py-2 text-[13px] resize-none"
                           rows={3}
                           disabled={editCompanyFormLoading}
-                          placeholder="Optional details about this company"
+                          placeholder="Optional details about this organization"
                         />
                         {editCompanyErrors.description && (
                           <p className="mt-1 text-[12px] text-[var(--color-error)]">
@@ -1486,7 +1486,7 @@ export function AdminSettings() {
                               Updating...
                             </>
                           ) : (
-                            "Update Company"
+                            "Update Organization"
                           )}
                         </button>
                       </div>
@@ -1509,7 +1509,7 @@ export function AdminSettings() {
                       <div className="flex-1 overflow-y-auto">
                         {filteredCompanies.length === 0 ? (
                           <div className="p-6 text-center text-[12px] text-[var(--text-secondary)]">
-                            {companies.length === 0 ? "No companies found." : "No companies match your search."}
+                            {companies.length === 0 ? "No organizations found." : "No organizations match your search."}
                           </div>
                         ) : (
                           <div className="divide-y divide-[var(--border-subtle)]">
@@ -1566,8 +1566,8 @@ export function AdminSettings() {
                             <div className="flex-1 flex items-center justify-center p-8">
                               <div className="text-center">
                                 <Building2 className="mx-auto h-12 w-12 text-[var(--text-secondary)] opacity-30 mb-3" />
-                                <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select a company</p>
-                                <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose a company from the list to view its details and branches</p>
+                                <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select an organization</p>
+                                <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose an organization from the list to view its details and branches</p>
                               </div>
                             </div>
                           );
@@ -1625,7 +1625,7 @@ export function AdminSettings() {
                                   <button
                                     onClick={() => startDeleteCompany(selectedCompany)}
                                     className="flex h-[26px] w-[26px] items-center justify-center rounded-[6px] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)] transition-colors"
-                                    aria-label="Delete company"
+                                    aria-label="Delete organization"
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </button>
@@ -1740,7 +1740,7 @@ export function AdminSettings() {
                                 <div className="rounded-[10px] border border-dashed border-[var(--border-subtle)] bg-[var(--surface-base)] p-8 text-center">
                                   <MapPin className="mx-auto h-8 w-8 text-[var(--text-secondary)] opacity-30 mb-2" />
                                   <p className="text-[13px] font-medium text-[var(--text-secondary)]">No branches yet</p>
-                                  <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Use the edit button on the company to add branches</p>
+                                  <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Use the edit button on the organization to add branches</p>
                                 </div>
                               ) : (
                                 <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
@@ -1997,7 +1997,7 @@ export function AdminSettings() {
   <div className={`${selectedUserCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
     <div className="flex-1 overflow-y-auto">
       <div className="divide-y divide-[var(--border-subtle)]">
-        {[...(hasRole(['super_admin']) ? [{ id: 'unassigned', name: 'Unassigned', description: 'Users without a company' }] : []), ...filteredCompanies].map((company) => {
+        {[...(hasRole(['super_admin']) ? [{ id: 'unassigned', name: 'Unassigned', description: 'Users without an organization' }] : []), ...filteredCompanies].map((company) => {
           const isUnassigned = company.id === 'unassigned';
           const isSelected = selectedUserCompanyId === company.id;
           const userCount = isUnassigned 
@@ -2052,8 +2052,8 @@ export function AdminSettings() {
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="text-center">
               <Users className="mx-auto h-12 w-12 text-[var(--text-secondary)] opacity-30 mb-3" />
-              <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select a company</p>
-              <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose a company from the list to view its users</p>
+              <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select an organization</p>
+              <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose an organization from the list to view its users</p>
             </div>
           </div>
         );
@@ -2061,7 +2061,7 @@ export function AdminSettings() {
 
       const isUnassigned = selectedUserCompanyId === 'unassigned';
       const selectedCompany = isUnassigned 
-        ? { id: 'unassigned', name: 'Unassigned', description: 'Users without a company' } 
+        ? { id: 'unassigned', name: 'Unassigned', description: 'Users without an organization' } 
         : companies.find(c => c.id === selectedUserCompanyId);
       
       if (!selectedCompany) return null;
@@ -2207,7 +2207,7 @@ export function AdminSettings() {
                   )
                 })()}
                 {companyBranches.length === 0 && companyUsers.length === 0 && (
-                   <p className="text-[12px] text-[var(--text-secondary)] text-center py-4">No branches or users in this company.</p>
+                   <p className="text-[12px] text-[var(--text-secondary)] text-center py-4">No branches or users in this organization.</p>
                 )}
               </div>
             )}
@@ -2406,7 +2406,7 @@ export function AdminSettings() {
                           >
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Serial Number
+                          Panel ID
                         </label>
                         <input
                           {...register("serial")}
@@ -2476,7 +2476,7 @@ export function AdminSettings() {
                             }`}
                             disabled={panelFormLoading || companiesLoading}
                           >
-                            <option value="">— Select a company —</option>
+                            <option value="">— Select an organization —</option>
                             {companies.map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}
@@ -2514,7 +2514,7 @@ export function AdminSettings() {
                           )}
                           {!watchedPanelCompanyId && (
                             <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
-                              Enter a Company ID above to filter branches
+                              Enter a Organization ID above to filter branches
                             </p>
                           )}
                         </div>
@@ -2600,7 +2600,7 @@ export function AdminSettings() {
                           >
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Serial Number
+                          Panel ID
                         </label>
                         <input
                           value={editingPanelData?.serial || ""}
@@ -2610,7 +2610,7 @@ export function AdminSettings() {
                           disabled={true} 
                         />
                         <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
-                          Serial numbers cannot be modified after creation.
+                          Panel IDs cannot be modified after creation.
                         </p>
                       </div>
 
@@ -2645,7 +2645,7 @@ export function AdminSettings() {
                             }`}
                             disabled={editPanelFormLoading || companiesLoading}
                           >
-                            <option value="">— Select a company —</option>
+                            <option value="">— Select an organization —</option>
                             {companies.map((c) => (
                               <option key={c.id} value={c.id}>
                                 {c.name}
@@ -2683,7 +2683,7 @@ export function AdminSettings() {
                           )}
                           {!watchedEditPanelCompanyId && (
                             <p className="mt-1 text-[11px] text-[var(--text-secondary)]">
-                              Enter a Company ID above to filter branches
+                              Enter a Organization ID above to filter branches
                             </p>
                           )}
                         </div>
@@ -2742,7 +2742,7 @@ export function AdminSettings() {
   <div className={`${selectedPanelCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
     <div className="flex-1 overflow-y-auto">
       <div className="divide-y divide-[var(--border-subtle)]">
-        {[...(hasRole(['super_admin']) ? [{ id: 'unassigned', name: 'Unassigned', description: 'Panels without a company' }] : []), ...filteredCompanies].map((company) => {
+        {[...(hasRole(['super_admin']) ? [{ id: 'unassigned', name: 'Unassigned', description: 'Panels without an organization' }] : []), ...filteredCompanies].map((company) => {
           const isUnassigned = company.id === 'unassigned';
           const isSelected = selectedPanelCompanyId === company.id;
           const panelCount = isUnassigned 
@@ -2797,8 +2797,8 @@ export function AdminSettings() {
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="text-center">
               <Cpu className="mx-auto h-12 w-12 text-[var(--text-secondary)] opacity-30 mb-3" />
-              <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select a company</p>
-              <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose a company from the list to view its panels</p>
+              <p className="text-[14px] font-medium text-[var(--text-secondary)]">Select an organization</p>
+              <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1">Choose an organization from the list to view its panels</p>
             </div>
           </div>
         );
@@ -2806,7 +2806,7 @@ export function AdminSettings() {
 
       const isUnassigned = selectedPanelCompanyId === 'unassigned';
       const selectedCompany = isUnassigned 
-        ? { id: 'unassigned', name: 'Unassigned', description: 'Panels without a company' } 
+        ? { id: 'unassigned', name: 'Unassigned', description: 'Panels without an organization' } 
         : companies.find(c => c.id === selectedPanelCompanyId);
       
       if (!selectedCompany) return null;
@@ -2934,7 +2934,7 @@ export function AdminSettings() {
                   )
                 })()}
                 {companyBranches.length === 0 && companyPanels.length === 0 && (
-                   <p className="text-[12px] text-[var(--text-secondary)] text-center py-4">No branches or panels in this company.</p>
+                   <p className="text-[12px] text-[var(--text-secondary)] text-center py-4">No branches or panels in this organization.</p>
                 )}
               </div>
             )}
@@ -2993,7 +2993,7 @@ export function AdminSettings() {
                         ).length
                       }
                     </span>{" "}
-                    panels associated with this company that will also be
+                    panels associated with this organization that will also be
                     deleted.
                   </p>
                   {deleteCompanyModalState.associatedUsers.length > 0 && (
@@ -3014,7 +3014,7 @@ export function AdminSettings() {
                         <span className="text-[var(--text-secondary)]">
                           Also delete all{" "}
                           {deleteCompanyModalState.associatedUsers.length} users
-                          associated with this company.
+                          associated with this organization.
                         </span>
                       </label>
                     </div>
@@ -3153,7 +3153,7 @@ export function AdminSettings() {
                         Also delete all {deleteBranchModalState.associatedPanels.length} associated panels
                       </span>
                       <span className="text-[11px] text-[var(--text-secondary)] mt-1">
-                        If unchecked, these panels will be unassigned from this branch but kept in the company.
+                        If unchecked, these panels will be unassigned from this branch but kept in the organization.
                       </span>
                     </div>
                   </label>
