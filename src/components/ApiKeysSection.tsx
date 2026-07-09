@@ -49,7 +49,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
     try {
       setCreating(true);
       setError(null);
-      const result = await ApiKeyService.createKey({
+      const result = await ApiKeyService.createApiKey({
         label,
         companyId: selectedCompanyId || undefined,
         branchIds: selectedBranches.length > 0 ? selectedBranches : undefined,
@@ -73,7 +73,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
     if (!confirm("Are you sure you want to revoke this API key? This action cannot be undone.")) return;
     try {
       setError(null);
-      await ApiKeyService.revokeKey(id);
+      await ApiKeyService.deleteApiKey(id);
       await fetchKeys();
     } catch (err: any) {
       setError(err.message || "Failed to revoke API key");
