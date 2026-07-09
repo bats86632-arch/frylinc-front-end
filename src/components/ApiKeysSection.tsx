@@ -34,9 +34,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
     try {
       setLoading(true);
       setError(null);
-      const data = companyId 
-        ? await ApiKeyService.listKeysByCompany(companyId)
-        : await ApiKeyService.listAllKeys();
+      const data = await ApiKeyService.getApiKeys(companyId);
       setKeys(data);
     } catch (err: any) {
       setError(err.message || "Failed to load API keys");
@@ -88,7 +86,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
 
   return (
     <div className="flex flex-col h-full bg-[var(--surface-base)] relative">
-      <div className="px-5 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between sticky top-0 bg-[var(--surface-base)] z-10">
+      <div className="pl-5 pr-14 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between sticky top-0 bg-[var(--surface-base)] z-10">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)] shadow-sm">
             <Key className="h-4 w-4 text-[var(--accent)]" />
