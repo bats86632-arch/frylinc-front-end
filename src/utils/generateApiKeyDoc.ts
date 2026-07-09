@@ -195,13 +195,6 @@ x-api-key: ${displayedKey}</code></pre>
     </div>
   `;
 
-  const container = document.createElement('div');
-  container.innerHTML = htmlContent;
-  container.style.position = 'absolute';
-  container.style.left = '-9999px';
-  container.style.top = '-9999px';
-  document.body.appendChild(container);
-
   const opt = {
     margin:       10,
     filename:     `Fyrlinc_API_Manual_${apiKey.label.replace(/\s+/g, '_')}_${apiKey.last4}.pdf`,
@@ -210,10 +203,7 @@ x-api-key: ${displayedKey}</code></pre>
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
-  html2pdf().set(opt).from(container).save().then(() => {
-    document.body.removeChild(container);
-  }).catch((err: any) => {
+  html2pdf().set(opt).from(htmlContent).save().catch((err: any) => {
     console.error("PDF Generation Error", err);
-    document.body.removeChild(container);
   });
 };
