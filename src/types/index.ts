@@ -122,3 +122,58 @@ export interface PanelMap {
   updatedAt: Timestamp;      // Firestore server timestamp
   updatedBy: string;   // uid of last user to save
 }
+
+// ── API Keys ────────────────────────────────────────────────────────────────
+
+export interface ApiKeyRecord {
+  id: string;
+  label: string;
+  username: string | null;
+  role: string | null;
+  last4: string | null;
+  enabled: boolean;
+  status: 'active' | 'suspended' | 'expired';
+  companyId: string | null;
+  branchIds: string[];
+  webhookUrl: string | null;
+  expiresAt: Timestamp | null;
+  createdByUid: string | null;
+  createdAt: Timestamp | null;
+  lastUsedAt: Timestamp | null;
+  // Legacy fields (may be present on older keys)
+  userId?: string | null;
+  email?: string | null;
+}
+
+export interface CreateApiKeyPayload {
+  label: string;
+  username?: string;
+  companyId?: string;
+  branchIds?: string[];
+  webhookUrl?: string;
+  expiresAt?: string | null;
+}
+
+// ── Audit Logs ──────────────────────────────────────────────────────────────
+
+export interface AuditLog {
+  id: string;
+  type: string;       // 'admin_action' | 'panel_event' | 'command'
+  action: string;     // 'SEND_COMMAND' | 'DELETE_PANEL' | 'ALARM' | 'CLEAR' | etc.
+  result: string;     // 'SUCCESS' | 'FAIL'
+  panelId?: string | null;
+  panelSerial?: string | null;
+  companyId?: string | null;
+  branchId?: string | null;
+  command?: string | null;
+  commandId?: string | null;
+  zone?: number | null;
+  actorEmail?: string | null;
+  actorRole?: string | null;
+  isApiKey?: boolean;
+  apiKeyId?: string | null;
+  timestamp: Timestamp | null;
+  // Legacy
+  user?: string;
+  role?: string;
+}

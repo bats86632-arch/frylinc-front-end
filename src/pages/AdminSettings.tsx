@@ -41,6 +41,8 @@ import {
 } from "lucide-react";
 import { CopyButton } from "../components/CopyButton";
 import { CreateUserModal } from "../components/CreateUserModal";
+import { ApiKeysSection } from "../components/ApiKeysSection";
+import { Key } from "lucide-react";
 
 const panelSchema = z.object({
   serial: z.string().min(1, "Serial is required"),
@@ -155,7 +157,7 @@ export function AdminSettings() {
   // using bsrCode, addressLine1, addressLine2, city, state, zipCode
   
 
-  const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | null>(null);
+  const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | "api_keys" | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [selectedUserCompanyId, setSelectedUserCompanyId] = useState<string | null>(null);
   const [selectedPanelCompanyId, setSelectedPanelCompanyId] = useState<string | null>(null);
@@ -933,6 +935,29 @@ export function AdminSettings() {
                   {companiesLoading ? "● Loading…" : "companies registered"}
                 </span>
               </div>
+            </div>
+          </button>
+        )}
+
+                {/* API Provisioning Card */}
+        {hasRole(["super_admin"]) && (
+          <button
+            onClick={() => setActiveSection("api_keys")}
+            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
+          >
+            <div className="relative z-10">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                  <Key className="h-6 w-6 text-[var(--accent)]" />
+                </div>
+                <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
+              </div>
+              <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
+                API Provisioning
+              </h3>
+              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
+                Manage global and organization-specific API keys and webhooks.
+              </p>
             </div>
           </button>
         )}
@@ -2045,6 +2070,21 @@ export function AdminSettings() {
                                   })}
                                 </div>
                               )}
+                              
+                              <div className="mt-8 border-t border-[var(--border-subtle)] pt-6">
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center gap-2">
+                                    <div className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm">
+                                      <Key className="h-3 w-3 text-[var(--text-secondary)]" />
+                                    </div>
+                                    <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">Organization API Keys</h4>
+                                  </div>
+                                </div>
+                                <div className="h-[400px] border border-[var(--border-subtle)] rounded-[8px] overflow-hidden relative">
+                                  <ApiKeysSection companyId={selectedCompany.id} companies={companies} branches={branches} />
+                                </div>
+                              </div>
+
                               </div>
                             </div>
                           </div>

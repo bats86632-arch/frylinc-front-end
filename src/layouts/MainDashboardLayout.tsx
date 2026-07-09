@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
   ChevronDown,
+  FileText,
   Flame,
   LayoutDashboard,
   LogOut,
@@ -30,6 +31,13 @@ const navigation: Array<{
     href: "/",
     icon: LayoutDashboard,
     roles: ["super_admin", "head_office", "system_integrator", "end_user"],
+  },
+  {
+    name: "Audit Reports",
+    mobileName: "Reports",
+    href: "/reports",
+    icon: FileText,
+    roles: ["super_admin", "head_office"],
   },
   {
     name: "Admin Settings",

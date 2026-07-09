@@ -72,6 +72,19 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/map-zones" element={<MapZones />} />
                   <Route
+                    path="/reports"
+                    element={
+                      <ProtectedRoute
+                        allowedRoles={[
+                          "super_admin",
+                          "head_office",
+                        ]}
+                      >
+                        <Reports />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/admin"
                     element={
                       <ProtectedRoute
