@@ -7,67 +7,70 @@ export const generateApiKeyDoc = (apiKey: ApiKeyRecord, orgName: string, actualK
 
   const htmlContent = `
     <style>
-      body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        color: #1f2937;
-        line-height: 1.6;
-        font-size: 14px;
-        margin: 0;
-        padding: 40px;
+      #pdf-content {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        color: #1f2937 !important;
+        background-color: #ffffff !important;
+        line-height: 1.6 !important;
+        font-size: 14px !important;
+        margin: 0 !important;
+        padding: 40px !important;
       }
-      h1, h2, h3, h4 { color: #111827; }
-      h1 { font-size: 28px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; color: #dc2626; }
-      h2 { font-size: 20px; margin-top: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
-      h3 { font-size: 16px; margin-top: 20px; color: #374151; }
-      .meta-box {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 30px;
+      #pdf-content h1, #pdf-content h2, #pdf-content h3, #pdf-content h4 { color: #111827 !important; }
+      #pdf-content h1 { font-size: 28px !important; border-bottom: 2px solid #e5e7eb !important; padding-bottom: 10px !important; margin-bottom: 20px !important; color: #dc2626 !important; }
+      #pdf-content h2 { font-size: 20px !important; margin-top: 30px !important; border-bottom: 1px solid #e5e7eb !important; padding-bottom: 5px !important; }
+      #pdf-content h3 { font-size: 16px !important; margin-top: 20px !important; color: #374151 !important; }
+      #pdf-content .meta-box {
+        background: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        padding: 20px !important;
+        margin-bottom: 30px !important;
       }
-      .meta-box strong { color: #4b5563; }
-      .secret-box {
-        background: #fee2e2;
-        border: 1px solid #f87171;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 30px;
-        color: #991b1b;
+      #pdf-content .meta-box strong { color: #4b5563 !important; }
+      #pdf-content .secret-box {
+        background: #fee2e2 !important;
+        border: 1px solid #f87171 !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+        margin-bottom: 30px !important;
+        color: #991b1b !important;
       }
-      pre {
-        background: #1e293b;
-        color: #f8fafc;
-        padding: 15px;
-        border-radius: 8px;
-        overflow-x: auto;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 12px;
-        line-height: 1.4;
+      #pdf-content p { color: #1f2937 !important; }
+      #pdf-content pre {
+        background: #1e293b !important;
+        color: #f8fafc !important;
+        padding: 15px !important;
+        border-radius: 8px !important;
+        overflow-x: auto !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
       }
-      code {
-        background: #f1f5f9;
-        color: #0f172a;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 13px;
+      #pdf-content code {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        font-size: 13px !important;
       }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        margin-bottom: 30px;
-        font-size: 13px;
+      #pdf-content table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        margin-top: 15px !important;
+        margin-bottom: 30px !important;
+        font-size: 13px !important;
       }
-      th, td {
-        border: 1px solid #e5e7eb;
-        padding: 10px;
-        text-align: left;
+      #pdf-content th, #pdf-content td {
+        border: 1px solid #e5e7eb !important;
+        padding: 10px !important;
+        text-align: left !important;
+        color: #1f2937 !important;
       }
-      th { background-color: #f9fafb; font-weight: bold; }
-      .page-break { page-break-before: always; }
-      .footer { margin-top: 50px; font-size: 11px; color: #9ca3af; text-align: center; }
+      #pdf-content th { background-color: #f9fafb !important; font-weight: bold !important; }
+      #pdf-content .page-break { page-break-before: always !important; }
+      #pdf-content .footer { margin-top: 50px !important; font-size: 11px !important; color: #9ca3af !important; text-align: center !important; }
     </style>
     
     <div id="pdf-content">
