@@ -287,9 +287,11 @@ export function Dashboard() {
   const selectedCompanyName = allCompanies.find(
     (c) => c.id === selectedCompanyId,
   )?.name;
-  const selectedBranchName = (branches || []).find(
+  const selectedBranch = (branches || []).find(
     (b) => b.id === selectedBranchId,
-  )?.name;
+  );
+  const selectedBranchName = selectedBranch?.name;
+  const selectedBranchBsr = selectedBranch?.bsrCode;
 
   // ── Loading skeleton ────────────────────────────────────────────────────
   if (loading) {
@@ -385,7 +387,18 @@ export function Dashboard() {
                 </>
               )}
               <MapPin className="h-4 w-4 text-[var(--text-secondary)]" />
-              {selectedBranchName || "Branch"}
+              {selectedBranchName ? (
+                <>
+                  {selectedBranchName}
+                  {selectedBranchBsr && (
+                    <span className="text-[var(--text-secondary)] font-normal text-[14px]">
+                      ({selectedBranchBsr})
+                    </span>
+                  )}
+                </>
+              ) : (
+                "Branch"
+              )}
             </h2>
           </div>
         )}
