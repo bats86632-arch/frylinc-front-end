@@ -105,7 +105,7 @@ export function Reports() {
       Panel_Serial: log.panelSerial || 'N/A',
       Organization: companyId ? companies.find(c => c.id === log.companyId)?.name : (log.companyId || 'N/A'),
       Branch: branchId ? branches.find(b => b.id === log.branchId)?.name : (log.branchId || 'N/A'),
-      Actor: log.actorEmail || log.user || 'System',
+      Account: log.actorEmail || log.user || 'System',
       Role: log.actorRole || log.role || 'N/A',
       Details: log.command || 'N/A'
     }));
@@ -264,7 +264,7 @@ export function Reports() {
                   <th className="px-5 py-3 font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-[10px]">Timestamp</th>
                   <th className="px-5 py-3 font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-[10px]">Type / Action</th>
                   <th className="px-5 py-3 font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-[10px]">Panel / Zone</th>
-                  <th className="px-5 py-3 font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-[10px]">Actor</th>
+                  <th className="px-5 py-3 font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-[10px]">Account</th>
                   <th className="px-5 py-3 font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-[10px]">Details</th>
                   <th className="px-5 py-3 font-semibold text-[var(--text-secondary)] uppercase tracking-wider text-[10px]">Result</th>
                 </tr>
