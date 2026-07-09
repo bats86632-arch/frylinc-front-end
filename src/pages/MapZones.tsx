@@ -150,7 +150,7 @@ export function MapZones() {
   const mapImageRef = useRef<HTMLImageElement>(null);
 
   // Zoom state: null = not yet calculated (image not loaded), number = zoom factor
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number | null>(null);
   const [fitZoom, setFitZoom] = useState<number>(1);
 
   /** Calculate and apply fit-to-screen zoom once the image dimensions are known */
@@ -206,7 +206,7 @@ export function MapZones() {
 
   // Re-fit whenever a new panel map loads
   useEffect(() => {
-    setZoom(1); // reset while loading
+    setZoom(null); // reset while loading
   }, [selectedPanelId, panelMap?.imagePath]);
 
   // Keyboard Delete to remove selected zone
@@ -229,7 +229,7 @@ export function MapZones() {
     if (!e.ctrlKey && !e.metaKey) return; // only zoom on Ctrl+scroll
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom((prev) => Math.min(3, Math.max(0.2, +(prev + delta).toFixed(2))));
+    setZoom((prev) => prev === null ? null : Math.min(3, Math.max(0.2, +(prev + delta).toFixed(2))));
   }, []);
 
   // File input ref
@@ -627,12 +627,18 @@ export function MapZones() {
         onClick={handleCanvasClick}
         onWheel={handleCanvasWheel}
       >
+        {zoom === null && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] rounded-[8px]">
+            <Loader2 className="h-6 w-6 animate-spin text-[var(--text-tertiary)]" />
+          </div>
+        )}
         {/* Inner wrapper: explicitly sized so scrollbars work correctly and zones scale natively */}
         <div
           className="relative transition-all duration-100 ease-out mx-auto"
           style={{ 
-            width: mapImageRef.current?.naturalWidth ? mapImageRef.current.naturalWidth * zoom : "100%",
-            height: mapImageRef.current?.naturalHeight ? mapImageRef.current.naturalHeight * zoom : "auto",
+            width: mapImageRef.current?.naturalWidth && zoom !== null ? mapImageRef.current.naturalWidth * zoom : "100%",
+            height: mapImageRef.current?.naturalHeight && zoom !== null ? mapImageRef.current.naturalHeight * zoom : "auto",
+            opacity: zoom === null ? 0 : 1,
           }}
         >
           {/* Floor plan image */}
