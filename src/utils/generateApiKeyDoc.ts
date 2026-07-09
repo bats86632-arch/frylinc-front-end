@@ -3,7 +3,8 @@ import { ApiKeyRecord } from "../types";
 
 export const generateApiKeyDoc = (apiKey: ApiKeyRecord, orgName: string, actualKey?: string) => {
   const baseUrl = import.meta.env.VITE_API_BASE_URL || "https://api.yourdomain.com";
-  const displayedKey = actualKey || `YOUR_SECRET_API_KEY (Ending in ${apiKey.last4})`;
+  const finalActualKey = actualKey || apiKey.key;
+  const displayedKey = finalActualKey || `YOUR_SECRET_API_KEY (Ending in ${apiKey.last4})`;
 
   const htmlContent = `
     <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2937; background-color: #ffffff; line-height: 1.6; font-size: 14px; padding: 40px; box-sizing: border-box;">
@@ -17,10 +18,10 @@ export const generateApiKeyDoc = (apiKey: ApiKeyRecord, orgName: string, actualK
         ${apiKey.webhookUrl ? `<p style="margin: 0;"><strong style="color: #4b5563;">Configured Webhook:</strong> ${apiKey.webhookUrl}</p>` : ""}
       </div>
 
-      ${actualKey ? `
+      ${finalActualKey ? `
       <div style="background: #fee2e2; border: 1px solid #f87171; border-radius: 8px; padding: 15px; margin-bottom: 30px; color: #991b1b;">
         <strong style="display: block; margin-bottom: 8px;">YOUR SECRET API KEY (DO NOT SHARE):</strong>
-        <code style="background: transparent; color: #991b1b; font-size: 16px; font-family: 'Courier New', Courier, monospace;">${actualKey}</code>
+        <code style="background: transparent; color: #991b1b; font-size: 16px; font-family: 'Courier New', Courier, monospace;">${finalActualKey}</code>
       </div>
       ` : ""}
 

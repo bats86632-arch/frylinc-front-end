@@ -129,6 +129,7 @@ export interface ApiKeyRecord {
   id: string;
   label: string;
   role: string | null;
+  key?: string; // Optional raw key for PDF generation
   last4: string | null;
   enabled: boolean;
   status: 'active' | 'suspended' | 'expired';
