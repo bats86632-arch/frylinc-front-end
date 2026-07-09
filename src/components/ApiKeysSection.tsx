@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { CopyButton } from "./CopyButton";
-import { Loader2, Plus, Trash2, Key, RefreshCw, XCircle, Settings2, Globe, Building2, MapPin } from "lucide-react";
+import { Loader2, Plus, Trash2, Key, RefreshCw, XCircle, Settings2, Globe, Building2, MapPin, FileText } from "lucide-react";
 import { ApiKeyService } from "../api/ApiKeyService";
 import { ApiKeyRecord, Branch, Company } from "../types";
+import { generateApiKeyDoc } from "../utils/generateApiKeyDoc";
 
 interface ApiKeysSectionProps {
   companyId?: string; // If provided, scoped to company. If omitted, shows all (for super admin)
@@ -267,13 +268,25 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
                       <p className="text-[10px] text-[var(--text-secondary)] font-mono">{key.id}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleRevoke(key.id)}
-                    className="flex h-6 w-6 items-center justify-center rounded-[4px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[var(--color-error)] hover:text-white hover:bg-[var(--color-error)] hover:border-[var(--color-error)] transition-all"
-                    title="Revoke Key"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        const orgName = key.companyId ? companies.find(c => c.id === key.companyId)?.name || key.companyId : "Global Scope";
+                        generateApiKeyDoc(key, orgName);
+                      }}
+                      className="flex h-6 w-6 items-center justify-center rounded-[4px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-all"
+                      title="Download API Documentation"
+                    >
+                      <FileText className="h-3 w-3" />
+                    </button>
+                    <button
+                      onClick={() => handleRevoke(key.id)}
+                      className="flex h-6 w-6 items-center justify-center rounded-[4px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[var(--color-error)] hover:text-white hover:bg-[var(--color-error)] hover:border-[var(--color-error)] transition-all"
+                      title="Revoke Key"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2 mb-3">
