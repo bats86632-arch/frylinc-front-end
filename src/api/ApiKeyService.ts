@@ -13,7 +13,7 @@ export const ApiKeyService = {
     return response.data;
   },
 
-  async createApiKey(data: CreateApiKeyPayload): Promise<{ apiKey: string; apiKeyId: string; username: string | null; last4: string }> {
+  async createApiKey(data: CreateApiKeyPayload): Promise<{ apiKey: string; apiKeyId: string; last4: string }> {
     const response = await apiClient.post('/api-keys', data);
     return response.data;
   },
@@ -21,8 +21,7 @@ export const ApiKeyService = {
   async updateApiKey(keyId: string, data: {
     enabled?: boolean;
     label?: string;
-    username?: string;
-    webhookUrl?: string;
+      webhookUrl?: string;
     expiresAt?: string | null;
     branchIds?: string[];
   }): Promise<void> {

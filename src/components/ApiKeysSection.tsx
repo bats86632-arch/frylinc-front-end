@@ -19,7 +19,6 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
 
   // Form state
   const [label, setLabel] = useState("");
-  const [username, setUsername] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(companyId || "");
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
@@ -54,7 +53,6 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
       setError(null);
       const result = await ApiKeyService.createKey({
         label,
-        username: username || undefined,
         companyId: selectedCompanyId || undefined,
         branchIds: selectedBranches.length > 0 ? selectedBranches : undefined,
         webhookUrl: webhookUrl || undefined,
@@ -63,7 +61,6 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
       await fetchKeys();
       // Reset form
       setLabel("");
-      setUsername("");
       setWebhookUrl("");
       setSelectedBranches([]);
       if (!companyId) setSelectedCompanyId("");

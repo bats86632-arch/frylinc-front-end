@@ -128,7 +128,6 @@ export interface PanelMap {
 export interface ApiKeyRecord {
   id: string;
   label: string;
-  username: string | null;
   role: string | null;
   last4: string | null;
   enabled: boolean;
@@ -147,7 +146,6 @@ export interface ApiKeyRecord {
 
 export interface CreateApiKeyPayload {
   label: string;
-  username?: string;
   companyId?: string;
   branchIds?: string[];
   webhookUrl?: string;
