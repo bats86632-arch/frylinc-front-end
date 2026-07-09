@@ -1974,7 +1974,7 @@ export function AdminSettings() {
                                                   <MapPin className="h-4 w-4 text-[var(--accent)]" />
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
-                                                  <span className="text-[13px] font-bold text-[var(--text-primary)] truncate" title={branch.name}>{branch.name}</span>
+                                                  <span className="text-[13px] font-bold text-[var(--text-primary)] truncate" title={branch.name}>{branch.name} {branch.bsrCode && <span className="text-[var(--text-secondary)] font-normal">({branch.bsrCode})</span>}</span>
                                                   <span className="text-[10px] text-[var(--text-secondary)] font-mono truncate">{branch.id}</span>
                                                 </div>
                                               </div>
@@ -2023,7 +2023,7 @@ export function AdminSettings() {
                                             <div className="grid grid-cols-2 gap-3 mt-auto text-[11px]">
                                               <div className="flex flex-col gap-0.5 col-span-2">
                                                 <span className="text-[9px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold">Address</span>
-                                                {branch.address ? <span className="text-[11px] text-[var(--text-primary)] truncate">{branch.address}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50 italic">None</span>}
+                                                {[branch.addressLine1, branch.addressLine2, branch.city, branch.state, branch.zipCode].filter(Boolean).length > 0 ? <span className="text-[11px] text-[var(--text-primary)] truncate" title={[branch.addressLine1, branch.addressLine2, branch.city, branch.state, branch.zipCode].filter(Boolean).join(', ')}>{[branch.addressLine1, branch.addressLine2, branch.city, branch.state, branch.zipCode].filter(Boolean).join(', ')}</span> : <span className="text-[11px] text-[var(--text-secondary)] opacity-50 italic">None</span>}
                                               </div>
                                               <div className="flex flex-col gap-0.5">
                                                 <span className="text-[9px] uppercase tracking-wider text-[var(--text-secondary)] font-semibold">Supervisor</span>
