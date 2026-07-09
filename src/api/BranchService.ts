@@ -26,7 +26,12 @@ export const BranchService = {
   async createBranch(data: {
     name: string;
     companyId: string;
-    address?: string;
+    bsrCode?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
     supervisorName?: string;
     contactNumber?: string;
     emailAddress?: string;

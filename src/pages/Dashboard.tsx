@@ -58,21 +58,36 @@ export function Dashboard() {
     const ws = xlsx.utils.json_to_sheet([
       {
         "Branch Name": "Mumbai South Branch",
-        Address: "Nariman Point, Mumbai",
+        "BSR Code": "MUM-01",
+        "Address Line 1": "Nariman Point",
+        "Address Line 2": "",
+        "City": "Mumbai",
+        "State": "Maharashtra",
+        "Zip Code": "400021",
         "Supervisor Name": "John Doe",
         "Contact Number": "9876543210",
         "Email Address": "mumbai.south@example.com",
       },
       {
         "Branch Name": "Delhi North Branch",
-        Address: "Connaught Place, Delhi",
+        "BSR Code": "DEL-02",
+        "Address Line 1": "Connaught Place",
+        "Address Line 2": "",
+        "City": "Delhi",
+        "State": "Delhi",
+        "Zip Code": "110001",
         "Supervisor Name": "Jane Smith",
         "Contact Number": "9876543211",
         "Email Address": "delhi.north@example.com",
       },
       {
         "Branch Name": "Bangalore Tech Park",
-        Address: "Whitefield, Bangalore",
+        "BSR Code": "BLR-03",
+        "Address Line 1": "Whitefield",
+        "Address Line 2": "",
+        "City": "Bangalore",
+        "State": "Karnataka",
+        "Zip Code": "560066",
         "Supervisor Name": "Alice Johnson",
         "Contact Number": "9876543212",
         "Email Address": "blr.tech@example.com",
@@ -121,7 +136,12 @@ export function Dashboard() {
           await BranchService.createBranch({
             name: branchName,
             companyId: targetCompanyId,
-            address: row["Address"]?.toString(),
+            bsrCode: row["BSR Code"]?.toString(),
+            addressLine1: row["Address Line 1"]?.toString(),
+            addressLine2: row["Address Line 2"]?.toString(),
+            city: row["City"]?.toString(),
+            state: row["State"]?.toString(),
+            zipCode: row["Zip Code"]?.toString(),
             supervisorName: row["Supervisor Name"]?.toString(),
             contactNumber: row["Contact Number"]?.toString(),
             emailAddress: row["Email Address"]?.toString(),
@@ -236,9 +256,14 @@ export function Dashboard() {
     ? (branches || []).filter((b) => b.companyId === selectedCompanyId)
     : branches || [];
 
-  const filteredBranches = viewBranches.filter((b) =>
-    (b.name || "").toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredBranches = viewBranches.filter((b) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      (b.name || "").toLowerCase().includes(q) ||
+      (b.bsrCode || "").toLowerCase().includes(q) ||
+      [b.addressLine1, b.addressLine2, b.city, b.state, b.zipCode].filter(Boolean).join(" ").toLowerCase().includes(q)
+    );
+  });
 
   // ── Branch view summary stats ───────────────────────────────────────────
   const branchAlarmCount = viewBranches.reduce(
@@ -681,10 +706,10 @@ export function Dashboard() {
                       )}
                     </div>
                     <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
-                      {branch.name}
+                      {branch.name} {branch.bsrCode && <span className="text-[var(--text-secondary)] font-normal">({branch.bsrCode})</span>}
                     </h3>
                     <p className="mt-1 text-[13px] text-[var(--text-secondary)] line-clamp-1">
-                      {branch.address || "No address provided"}
+                      {[branch.addressLine1, branch.addressLine2, branch.city, branch.state, branch.zipCode].filter(Boolean).length > 0 ? [branch.addressLine1, branch.addressLine2, branch.city, branch.state, branch.zipCode].filter(Boolean).join(', ') : "No address provided"}
                     </p>
                   </div>
                   <div className="flex flex-col border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] w-full">

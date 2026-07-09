@@ -32,7 +32,12 @@ export interface Branch {
   branchId: string; // Same as id; stored explicitly in the document
   name: string; // Human-readable branch name (SEPARATE from ID)
   companyId: string;
-  address?: string;
+  bsrCode?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   supervisorName?: string;
   contactNumber?: string;
   emailAddress?: string;
@@ -43,6 +48,7 @@ export interface Panel {
   serial: string;
   name: string;
   enabled: boolean;
+  panelType?: "Fire Alarm" | "Security" | "GSM Module";
   zoneCount: number;
   zones: boolean[];
   alarm: boolean;

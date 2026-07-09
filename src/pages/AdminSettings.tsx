@@ -45,7 +45,8 @@ import { CreateUserModal } from "../components/CreateUserModal";
 const panelSchema = z.object({
   serial: z.string().min(1, "Serial is required"),
   name: z.string().min(1, "Name is required"),
-  zoneCount: z.coerce.number().min(1).max(8, "Max 8 zones"),
+  panelType: z.enum(["Fire Alarm", "Security", "GSM Module"]).optional(),
+  zoneCount: z.coerce.number().min(1).max(16, "Max 16 zones"),
   companyId: z.string().optional(),
   branchId: z.string().optional(),
   ipAddress: z.string().optional(),
@@ -67,7 +68,12 @@ type EditPanelFormData = z.infer<typeof editPanelSchema>;
 const branchSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1, "Branch name is required"),
-  address: z.string().optional(),
+  bsrCode: z.string().optional(),
+  addressLine1: z.string().optional(),
+  addressLine2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
   supervisorName: z.string().optional(),
   contactNumber: z.string().optional(),
   emailAddress: z.string().optional(),
@@ -146,6 +152,7 @@ export function AdminSettings() {
   const [branchSearchQuery, setBranchSearchQuery] = useState("");
   const [addingBranchToCompany, setAddingBranchToCompany] = useState<string | null>(null);
   const [newBranchForm, setNewBranchForm] = useState<Partial<Branch>>({});
+  // using bsrCode, addressLine1, addressLine2, city, state, zipCode
   
 
   const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | null>(null);
@@ -231,6 +238,7 @@ export function AdminSettings() {
   } = useForm<EditPanelFormData>({ resolver: zodResolver(editPanelSchema) });
 
   const { branches, loading: branchesLoading, reloadBranches } = useBranches();
+  const watchedPanelType = watch("panelType") || "Fire Alarm";
 
   const watchedPanelCompanyId = watch("companyId");
   const watchedEditPanelCompanyId = watchEditPanel("companyId");
@@ -746,6 +754,7 @@ export function AdminSettings() {
       await PanelService.createPanel({
         serial: data.serial,
         name: data.name,
+        panelType: data.panelType,
         zoneCount: data.zoneCount,
         companyId: data.companyId || "",
         branchId: data.branchId || "",
@@ -1303,10 +1312,55 @@ export function AdminSettings() {
                                   </div>
 
                                   <div>
-                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Address</label>
+                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">BSR Code</label>
                                     <input
-                                      {...registerCompany(`branches.${index}.address`)}
-                                      placeholder="e.g. 123 Main St, City"
+                                      {...registerCompany(`branches.${index}.bsrCode`)}
+                                      placeholder="e.g. BSR123"
+                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
+                                      disabled={companyFormLoading}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Address Line 1</label>
+                                    <input
+                                      {...registerCompany(`branches.${index}.addressLine1`)}
+                                      placeholder="e.g. 123 Main St"
+                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
+                                      disabled={companyFormLoading}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Address Line 2</label>
+                                    <input
+                                      {...registerCompany(`branches.${index}.addressLine2`)}
+                                      placeholder="e.g. Suite 100"
+                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
+                                      disabled={companyFormLoading}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">City</label>
+                                    <input
+                                      {...registerCompany(`branches.${index}.city`)}
+                                      placeholder="City"
+                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
+                                      disabled={companyFormLoading}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">State</label>
+                                    <input
+                                      {...registerCompany(`branches.${index}.state`)}
+                                      placeholder="State"
+                                      className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
+                                      disabled={companyFormLoading}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Zip Code</label>
+                                    <input
+                                      {...registerCompany(`branches.${index}.zipCode`)}
+                                      placeholder="Zip"
                                       className="control-field w-full rounded-[4px] px-2 h-[30px] text-[13px]"
                                       disabled={companyFormLoading}
                                     />
@@ -1768,15 +1822,67 @@ export function AdminSettings() {
                                                 placeholder="Branch Name"
                                               />
                                             </div>
-                                            <div>
-                                              <label className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Address</label>
-                                              <input
-                                                type="text"
-                                                className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
-                                                value={inlineEditBranchForm.address || ""}
-                                                onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, address: e.target.value }))}
-                                                placeholder="Address"
-                                              />
+                                            <div className="grid grid-cols-2 gap-2">
+                                              <div>
+                                                <label className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">BSR Code</label>
+                                                <input
+                                                  type="text"
+                                                  className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                  value={inlineEditBranchForm.bsrCode || ""}
+                                                  onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, bsrCode: e.target.value }))}
+                                                  placeholder="BSR Code"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Address 1</label>
+                                                <input
+                                                  type="text"
+                                                  className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                  value={inlineEditBranchForm.addressLine1 || ""}
+                                                  onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, addressLine1: e.target.value }))}
+                                                  placeholder="Address 1"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Address 2</label>
+                                                <input
+                                                  type="text"
+                                                  className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                  value={inlineEditBranchForm.addressLine2 || ""}
+                                                  onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, addressLine2: e.target.value }))}
+                                                  placeholder="Address 2"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">City</label>
+                                                <input
+                                                  type="text"
+                                                  className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                  value={inlineEditBranchForm.city || ""}
+                                                  onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, city: e.target.value }))}
+                                                  placeholder="City"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">State</label>
+                                                <input
+                                                  type="text"
+                                                  className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                  value={inlineEditBranchForm.state || ""}
+                                                  onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, state: e.target.value }))}
+                                                  placeholder="State"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Zip</label>
+                                                <input
+                                                  type="text"
+                                                  className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                                  value={inlineEditBranchForm.zipCode || ""}
+                                                  onChange={(e) => setInlineEditBranchForm(prev => ({ ...prev, zipCode: e.target.value }))}
+                                                  placeholder="Zip"
+                                                />
+                                              </div>
                                             </div>
                                             <div>
                                               <label className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1 block">Supervisor</label>
@@ -1854,7 +1960,12 @@ export function AdminSettings() {
                                                     setInlineEditingBranchId(branch.id);
                                                     setInlineEditBranchForm({
                                                       name: branch.name,
-                                                      address: branch.address,
+                                                      bsrCode: branch.bsrCode,
+                                                      addressLine1: branch.addressLine1,
+                                                      addressLine2: branch.addressLine2,
+                                                      city: branch.city,
+                                                      state: branch.state,
+                                                      zipCode: branch.zipCode,
                                                       supervisorName: branch.supervisorName,
                                                       contactNumber: branch.contactNumber,
                                                       emailAddress: branch.emailAddress,
@@ -2406,6 +2517,21 @@ export function AdminSettings() {
                           >
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          Panel Type
+                        </label>
+                        <select
+                          {...register("panelType")}
+                          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                          disabled={panelFormLoading}
+                        >
+                          <option value="Fire Alarm">Fire Alarm</option>
+                          <option value="Security">Security</option>
+                          <option value="GSM Module">GSM Module</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Panel ID
                         </label>
                         <input
@@ -2444,7 +2570,7 @@ export function AdminSettings() {
 
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Number of Zones (1-8)
+                          Number of Zones (1-16)
                         </label>
                         <input
                           type="number"
@@ -2539,10 +2665,15 @@ export function AdminSettings() {
                         )}
                       </div>
 
-                      <div className="flex justify-end pt-2">
+                      <div className="flex flex-col items-end gap-2 pt-2">
+                        {(watchedPanelType === "Security" || watchedPanelType === "GSM Module") && (
+                          <p className="text-[12px] text-[var(--status-danger-border)] font-medium">
+                            We are working on them, they'll be live soon
+                          </p>
+                        )}
                         <button
                           type="submit"
-                          disabled={panelFormLoading}
+                          disabled={panelFormLoading || watchedPanelType === "Security" || watchedPanelType === "GSM Module"}
                           className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
                         >
                           {panelFormLoading ? (
@@ -2598,6 +2729,21 @@ export function AdminSettings() {
                             onSubmit={handleSubmitEditPanel(handleEditPanel)}
                             className="space-y-5"
                           >
+                      <div>
+                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                          Panel Type
+                        </label>
+                        <select
+                          {...register("panelType")}
+                          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
+                          disabled={panelFormLoading}
+                        >
+                          <option value="Fire Alarm">Fire Alarm</option>
+                          <option value="Security">Security</option>
+                          <option value="GSM Module">GSM Module</option>
+                        </select>
+                      </div>
+
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Panel ID

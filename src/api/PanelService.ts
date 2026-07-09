@@ -55,6 +55,7 @@ export const PanelService = {
   async createPanel(data: {
     serial: string;
     name: string;
+    panelType?: string;
     zoneCount: number;
     companyId: string;
     branchId: string;
