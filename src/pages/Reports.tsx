@@ -89,7 +89,7 @@ export function Reports() {
   const handleExport = () => {
     if (logs.length === 0) return;
     const exportData = logs.map(log => ({
-      Timestamp: log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleString() : 'N/A',
+      Timestamp: log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
       Type: log.type,
       Action: log.action,
       Result: log.result,
@@ -264,7 +264,7 @@ export function Reports() {
                 {logs.map(log => (
                   <tr key={log.id} className="hover:bg-[var(--surface-hover)] transition-colors">
                     <td className="px-5 py-3 whitespace-nowrap text-[var(--text-primary)] font-medium">
-                      {log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleString() : 'Unknown'}
+                      {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Unknown'}
                     </td>
                     <td className="px-5 py-3 whitespace-nowrap">
                       <div className="flex flex-col gap-0.5">
