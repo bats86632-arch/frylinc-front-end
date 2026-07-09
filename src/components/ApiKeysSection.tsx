@@ -203,18 +203,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Username (Optional)</label>
-                  <input
-                    className="control-field h-9 w-full rounded-[6px] px-3 text-[13px]"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    placeholder="e.g. integration_user"
-                    disabled={creating}
-                  />
-                  <p className="mt-1 text-[10px] text-[var(--text-secondary)]">Can be used as a Basic Auth username if needed.</p>
-                </div>
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                     <Globe className="h-3 w-3" /> Webhook URL (Optional)
@@ -299,12 +288,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
                     </span>
                   </div>
                   
-                  {key.username && (
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[var(--text-secondary)] font-semibold uppercase tracking-wider text-[9px]">Username</span>
-                      <span className="text-[var(--text-primary)] font-mono">{key.username}</span>
-                    </div>
-                  )}
+
 
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="text-[var(--text-secondary)] font-semibold uppercase tracking-wider text-[9px]">Organization</span>
