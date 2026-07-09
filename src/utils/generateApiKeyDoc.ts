@@ -13,7 +13,7 @@ export const generateApiKeyDoc = (apiKey: ApiKeyRecord, orgName: string, actualK
       <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
         <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">Organization:</strong> ${orgName}</p>
         <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">Key Label:</strong> ${apiKey.label}</p>
-        <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">Key ID:</strong> ${apiKey.id}</p>
+        <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">API Key:</strong> ${displayedKey}</p>
         <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">Permissions:</strong> ${apiKey.branchIds?.length ? "Scoped to specific branches" : "Global Scope"}</p>
         ${apiKey.webhookUrl ? `<p style="margin: 0;"><strong style="color: #4b5563;">Configured Webhook:</strong> ${apiKey.webhookUrl}</p>` : ""}
       </div>
