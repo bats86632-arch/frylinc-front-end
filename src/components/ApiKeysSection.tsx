@@ -11,6 +11,14 @@ interface ApiKeysSectionProps {
   branches?: Branch[];
 }
 
+const formatDate = (dateValue: any) => {
+  if (!dateValue) return null;
+  if (dateValue.seconds) return new Date(dateValue.seconds * 1000);
+  if (dateValue._seconds) return new Date(dateValue._seconds * 1000);
+  if (typeof dateValue === 'string' || typeof dateValue === 'number') return new Date(dateValue);
+  return null;
+}
+
 export function ApiKeysSection({ companyId, companies = [], branches = [] }: ApiKeysSectionProps) {
   const [keys, setKeys] = useState<ApiKeyRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -334,8 +342,8 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
                 </div>
 
                 <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-[10px] text-[var(--text-secondary)]">
-                  <span>Created: {key.createdAt ? new Date(key.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</span>
-                  <span>Last Used: {key.lastUsedAt ? new Date(key.lastUsedAt.seconds * 1000).toLocaleDateString() : 'Never'}</span>
+                  <span>Created: {formatDate(key.createdAt)?.toLocaleDateString() || 'N/A'}</span>
+                  <span>Last Used: {formatDate(key.lastUsedAt)?.toLocaleDateString() || 'Never'}</span>
                 </div>
               </div>
             ))}
