@@ -7,6 +7,15 @@ import { AuditLog } from "../types";
 import { Loader2, Search, FileText, AlertCircle, Building2, MapPin, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import * as xlsx from "xlsx";
 
+
+const formatTimestamp = (ts: any) => {
+  if (!ts) return 'Unknown';
+  if (typeof ts === 'string') return new Date(ts).toLocaleString();
+  const seconds = ts._seconds || ts.seconds;
+  if (seconds) return new Date(seconds * 1000).toLocaleString();
+  return 'Unknown';
+};
+
 export function Reports() {
   const { hasRole, userData } = useAuth();
   const { companies } = useCompanies();
@@ -89,7 +98,7 @@ export function Reports() {
   const handleExport = () => {
     if (logs.length === 0) return;
     const exportData = logs.map(log => ({
-      Timestamp: log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A',
+      Timestamp: formatTimestamp(log.timestamp),
       Type: log.type,
       Action: log.action,
       Result: log.result,
@@ -264,7 +273,7 @@ export function Reports() {
                 {logs.map(log => (
                   <tr key={log.id} className="hover:bg-[var(--surface-hover)] transition-colors">
                     <td className="px-5 py-3 whitespace-nowrap text-[var(--text-primary)] font-medium">
-                      {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Unknown'}
+                      {formatTimestamp(log.timestamp)}
                     </td>
                     <td className="px-5 py-3 whitespace-nowrap">
                       <div className="flex flex-col gap-0.5">
