@@ -83,6 +83,15 @@ x-api-key: ${displayedKey}</code></pre>
   -H "x-api-key: ${displayedKey}" \\
   -H "Content-Type: application/json"</code></pre>
 
+      <h3 style="font-size: 16px; margin-top: 25px; margin-bottom: 10px; color: #374151; font-weight: bold;">POST /panels/:serial/commands</h3>
+      <p style="margin-bottom: 10px;">Pushes a command to a specific panel. Supported commands: <code style="background: #f1f5f9; color: #0f172a; padding: 2px 4px; border-radius: 4px; font-size: 12px; font-family: 'Courier New', Courier, monospace;">ARM</code> (evacuate/alarm), <code style="background: #f1f5f9; color: #0f172a; padding: 2px 4px; border-radius: 4px; font-size: 12px; font-family: 'Courier New', Courier, monospace;">ZONE OFF</code> (silence/reset), and <code style="background: #f1f5f9; color: #0f172a; padding: 2px 4px; border-radius: 4px; font-size: 12px; font-family: 'Courier New', Courier, monospace;">MOB=slot=phone</code> (sync phone numbers).</p>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 10px; margin-bottom: 20px;"><code>curl -X POST "${baseUrl}/panels/P001/commands" \\
+  -H "x-api-key: ${displayedKey}" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "command": "ARM"
+  }'</code></pre>
+
       <h2 style="font-size: 20px; margin-top: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; color: #111827; font-weight: bold;">3. Webhook Integration</h2>
       <p style="margin-bottom: 15px;">If you have configured a webhook URL for this API key, Fyrlinc will automatically push real-time events to your endpoint via HTTP POST. You must respond with a 2xx status code.</p>
       
@@ -92,10 +101,10 @@ x-api-key: ${displayedKey}</code></pre>
   "panelSerial": "P001",
   "companyId": "${apiKey.companyId || 'company_id'}",
   "timestamp": "2026-07-09T10:00:00Z",
-  "data": {
-    "zoneId": "Z01",
-    "description": "Smoke detected in lobby"
-  }
+  "zones": ["0", "2", "0", "1"],
+  "alarm": true,
+  "triggeredZones": [2],
+  "rawString": "P001$0$2$0$1"
 }</code></pre>
 
       <strong style="color: #4b5563; display: block; margin-bottom: 10px;">Common Event Types:</strong>
@@ -108,19 +117,19 @@ x-api-key: ${displayedKey}</code></pre>
         </thead>
         <tbody>
           <tr>
-            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">PANEL_ONLINE</code></td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; display: inline-block; font-size: 11px; white-space: nowrap;">PANEL_ONLINE</code></td>
             <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;">Emitted when a panel connects to the network.</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">PANEL_OFFLINE</code></td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; display: inline-block; font-size: 11px; white-space: nowrap;">PANEL_OFFLINE</code></td>
             <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;">Emitted when a panel stops responding to heartbeats.</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">ALARM_TRIGGERED</code></td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; display: inline-block; font-size: 11px; white-space: nowrap;">ALARM_TRIGGERED</code></td>
             <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;">Emitted when a fire, smoke, or fault alarm is activated.</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">ALARM_CLEARED</code></td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; display: inline-block; font-size: 11px; white-space: nowrap;">ALARM_CLEARED</code></td>
             <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;">Emitted when an alarm state is restored to normal.</td>
           </tr>
         </tbody>
