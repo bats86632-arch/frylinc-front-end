@@ -140,7 +140,7 @@ export function Reports() {
             <FileText className="h-5 w-5 text-[var(--accent)]" />
           </div>
           <div>
-            <h1 className="text-[18px] font-bold text-[var(--text-primary)]">Audit Reports</h1>
+            <h1 className="text-[18px] font-bold text-[var(--text-primary)]">Reports</h1>
             <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">System-wide event and command logs</p>
           </div>
         </div>

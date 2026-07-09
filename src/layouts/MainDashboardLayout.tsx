@@ -33,15 +33,7 @@ const navigation: Array<{
     roles: ["super_admin", "head_office", "system_integrator", "end_user"],
   },
   {
-    name: "Audit Reports",
-    mobileName: "Reports",
-    href: "/reports",
-    icon: FileText,
-    roles: ["super_admin", "head_office"],
-  },
-  {
-    name: "Admin Settings",
-    mobileName: "Settings",
+    name: "Settings",
     href: "/admin",
     icon: Settings,
     roles: ["super_admin", "head_office", "system_integrator"],
@@ -52,6 +44,12 @@ const navigation: Array<{
     href: "/map-zones",
     icon: Map,
     roles: ["super_admin", "secret_super_admin", "head_office", "system_integrator", "end_user"],
+  },
+  {
+    name: "Reports",
+    href: "/reports",
+    icon: FileText,
+    roles: ["super_admin", "head_office"],
   },
 ];
 
