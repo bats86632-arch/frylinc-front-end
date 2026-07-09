@@ -25,7 +25,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
   
   // The raw API key returned upon creation
-  const [newKey, setNewKey] = useState<string | null>(null);
+  const [newKey, setNewKey] = useState<{ apiKey: string, apiKeyId: string, last4: string } | null>(null);
 
   useEffect(() => {
     fetchKeys();
@@ -56,7 +56,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
         branchIds: selectedBranches.length > 0 ? selectedBranches : undefined,
         webhookUrl: webhookUrl || undefined,
       });
-      setNewKey(result.apiKey);
+      setNewKey(result);
       await fetchKeys();
       // Reset form
       setLabel("");
@@ -124,23 +124,38 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
               Please copy this key and store it securely. You will not be able to see it again.
             </p>
             <div className="flex items-center gap-2 bg-[var(--surface-base)] p-3 rounded-[6px] border border-[var(--border-subtle)] font-mono text-[13px] text-[var(--text-primary)] break-all">
-              <span className="flex-1 select-all">{newKey}</span>
+              <span className="flex-1 select-all">{newKey.apiKey}</span>
               <CopyButton
-                textToCopy={newKey}
+                textToCopy={newKey.apiKey}
                 className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] shrink-0"
                 iconClassName="h-4 w-4"
                 title="Copy API Key"
               />
             </div>
-            <button
-              onClick={() => {
-                setNewKey(null);
-                setShowCreateForm(false);
-              }}
-              className="mt-4 px-4 py-2 bg-[var(--color-success)] text-white rounded-[6px] text-[12px] font-medium hover:bg-emerald-600 transition-colors"
-            >
-              Done
-            </button>
+            <div className="flex gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  const createdKeyRecord = keys.find(k => k.id === newKey.apiKeyId);
+                  if (createdKeyRecord) {
+                    const orgName = createdKeyRecord.companyId ? companies.find(c => c.id === createdKeyRecord.companyId)?.name || createdKeyRecord.companyId : "Global Scope";
+                    generateApiKeyDoc(createdKeyRecord, orgName, newKey.apiKey);
+                  }
+                }}
+                className="px-4 py-2 bg-[var(--surface-base)] text-[var(--text-primary)] border border-[var(--border-default)] rounded-[6px] text-[12px] font-medium hover:bg-[var(--surface-hover)] transition-colors flex items-center gap-2"
+              >
+                <FileText className="h-4 w-4" /> Download Complete Manual
+              </button>
+              <button
+                onClick={() => {
+                  setNewKey(null);
+                  setShowCreateForm(false);
+                }}
+                className="px-4 py-2 bg-[var(--color-success)] text-white rounded-[6px] text-[12px] font-medium hover:bg-emerald-600 transition-colors"
+              >
+                Done
+              </button>
+            </div>
           </div>
         )}
 
