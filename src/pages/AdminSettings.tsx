@@ -1744,9 +1744,39 @@ export function AdminSettings() {
                                     />
                                     <input
                                       className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
-                                      value={newBranchForm.address || ""}
-                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, address: e.target.value }))}
-                                      placeholder="Address"
+                                      value={newBranchForm.bsrCode || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, bsrCode: e.target.value }))}
+                                      placeholder="BSR Code"
+                                    />
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.addressLine1 || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, addressLine1: e.target.value }))}
+                                      placeholder="Address Line 1"
+                                    />
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.addressLine2 || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, addressLine2: e.target.value }))}
+                                      placeholder="Address Line 2"
+                                    />
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.city || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, city: e.target.value }))}
+                                      placeholder="City"
+                                    />
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.state || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, state: e.target.value }))}
+                                      placeholder="State"
+                                    />
+                                    <input
+                                      className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
+                                      value={newBranchForm.zipCode || ""}
+                                      onChange={(e) => setNewBranchForm(prev => ({ ...prev, zipCode: e.target.value }))}
+                                      placeholder="Zip Code"
                                     />
                                     <input
                                       className="control-field h-8 w-full rounded-[6px] px-2.5 text-[12px]"
