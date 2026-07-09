@@ -1,4 +1,4 @@
-import html2pdf from "html2pdf.js";
+
 import { ApiKeyRecord } from "../types";
 
 export const generateApiKeyDoc = (apiKey: ApiKeyRecord, orgName: string, actualKey?: string) => {
@@ -84,7 +84,12 @@ x-api-key: ${displayedKey}</code></pre>
   -H "Content-Type: application/json"</code></pre>
 
       <h3 style="font-size: 16px; margin-top: 25px; margin-bottom: 10px; color: #374151; font-weight: bold;">POST /panels/:serial/commands</h3>
-      <p style="margin-bottom: 10px;">Pushes a command to a specific panel. Supported commands: <code style="background: #f1f5f9; color: #0f172a; padding: 2px 4px; border-radius: 4px; font-size: 12px; font-family: 'Courier New', Courier, monospace;">ARM</code> (evacuate/alarm), <code style="background: #f1f5f9; color: #0f172a; padding: 2px 4px; border-radius: 4px; font-size: 12px; font-family: 'Courier New', Courier, monospace;">ZONE OFF</code> (silence/reset), and <code style="background: #f1f5f9; color: #0f172a; padding: 2px 4px; border-radius: 4px; font-size: 12px; font-family: 'Courier New', Courier, monospace;">MOB=slot=phone</code> (sync phone numbers).</p>
+      <p style="margin-bottom: 10px;">Pushes a command to a specific panel. Supported command formats:</p>
+      <ul style="margin-bottom: 15px; padding-left: 20px; font-size: 13px;">
+        <li style="margin-bottom: 5px;"><strong>ARM &lt;zoneNum&gt;</strong>: Evacuate or trigger the alarm for a specific zone (e.g., <code style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-family: monospace;">ARM 1</code> or just <code style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-family: monospace;">ARM</code> for all).</li>
+        <li style="margin-bottom: 5px;"><strong>ZONE OFF &lt;zoneNum&gt;</strong>: Silence or reset a specific zone (e.g., <code style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-family: monospace;">ZONE OFF 2</code> or just <code style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-family: monospace;">ZONE OFF</code>).</li>
+        <li style="margin-bottom: 5px;"><strong>MOB=&lt;slot&gt;=&lt;9 digits&gt;</strong>: Syncs a contact phone number to a specific slot (1-9). The phone number must be exactly 9 digits (e.g., <code style="background: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-family: monospace;">MOB=02=987654321</code>).</li>
+      </ul>
       <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 10px; margin-bottom: 20px;"><code>curl -X POST "${baseUrl}/panels/P001/commands" \\
   -H "x-api-key: ${displayedKey}" \\
   -H "Content-Type: application/json" \\
@@ -94,6 +99,7 @@ x-api-key: ${displayedKey}</code></pre>
 
       <h2 style="font-size: 20px; margin-top: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; color: #111827; font-weight: bold;">3. Webhook Integration</h2>
       <p style="margin-bottom: 15px;">If you have configured a webhook URL for this API key, Fyrlinc will automatically push real-time events to your endpoint via HTTP POST. You must respond with a 2xx status code.</p>
+      <p style="margin-bottom: 15px; font-size: 13px; color: #4b5563;">The payload includes a <code>rawString</code> field, which represents the raw status string emitted by the panel hardware (e.g. <code>P001$0$2$0$1</code>) allowing you to implement custom parsing logic if required.</p>
       
       <strong style="color: #4b5563; display: block; margin-bottom: 8px;">Payload Format:</strong>
       <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 5px; margin-bottom: 25px;"><code>{
@@ -141,15 +147,31 @@ x-api-key: ${displayedKey}</code></pre>
     </div>
   `;
 
-  const opt = {
-    margin:       10,
-    filename:     `Fyrlinc_API_Manual_${apiKey.label.replace(/\s+/g, '_')}_${apiKey.last4}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  html2pdf().set(opt).from(htmlContent).save().catch((err: any) => {
-    console.error("PDF Generation Error", err);
-  });
+  const printWindow = window.open("", "_blank");
+  if (printWindow) {
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Fyrlinc_API_Manual_${apiKey.label.replace(/\s+/g, '_')}_${apiKey.last4}</title>
+          <style>
+            @media print {
+              body { margin: 0; padding: 20px; -webkit-print-color-adjust: exact; }
+              @page { margin: 10mm; }
+            }
+          </style>
+        </head>
+        <body>
+          ${htmlContent}
+          <script>
+            window.onload = () => {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  } else {
+    console.error("Popup blocked. Could not open print window.");
+  }
 };
