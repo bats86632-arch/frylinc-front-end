@@ -17,8 +17,8 @@ export const PanelService = {
   },
 
   async sendCommand(serial: string, command: string): Promise<CommandResponse> {
-    console.log(`[BRIDGE] Sending command "${command}" to panel ${serial}`);
-    const response = await apiClient.post(`/panels/${serial}/commands`, { command });
+    console.log(`[BRIDGE] We're sending the commands thrice using the bridge: "${command}" to panel ${serial}`);
+    const response = await apiClient.post(`/panels/${serial}/commands`, { command, repeatCount: 3 });
     return response.data;
   },
 

@@ -249,11 +249,7 @@ export function PanelDetail() {
   };
 
   const visibleZones = Math.min(normalizedPanel.zoneCount || 0, 8);
-  const panelCommands = [];
-  for (let i = 1; i <= visibleZones; i++) {
-    panelCommands.push(`ARM ${i}`);
-  }
-  panelCommands.push("ZONE OFF");
+  const panelCommands = ["ARM", "ZONE OFF"];
 
   const isOffline = normalizedPanel.manuallyMarkedOffline === true;
   const hasAlarm = normalizedPanel.alarm;
@@ -402,6 +398,14 @@ export function PanelDetail() {
                   Silence All
                 </button>
                 <button
+                  onClick={() => handleSendCommand("ARM")}
+                  disabled={commandLoading !== null}
+                  className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
+                >
+                  {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                  Evacuate
+                </button>
+                <button
                   onClick={() => setActiveTab("contacts")}
                   className="flex items-center justify-center gap-2 rounded-[8px] border px-4 py-2 text-[13px] font-semibold transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shadow-sm"
                 >
@@ -464,14 +468,7 @@ export function PanelDetail() {
                     {/* Control Panel Buttons */}
                     <div className="grid grid-cols-1 gap-2.5 relative z-10 mt-auto">
                       {/* Action buttons with glassmorphic aesthetic */}
-                      <button
-                        onClick={() => handleSendCommand(armCmd)}
-                        disabled={commandLoading !== null || isEuRestricted}
-                        className="group relative flex items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 px-4 py-2.5 transition-all duration-300 hover:border-[var(--color-error)] hover:bg-[var(--color-error)]/5 hover:shadow-lg hover:shadow-[var(--color-error)]/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                         <span className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--color-error)]">Alarm</span>
-                         {commandLoading === armCmd ? <Loader2 className="h-4 w-4 animate-spin text-[var(--color-error)]" /> : commandSuccess === armCmd ? <CheckCircle className="h-4 w-4 text-[var(--color-success)]" /> : <ShieldAlert className="h-4 w-4 text-[var(--text-secondary)] group-hover:text-[var(--color-error)] transition-colors" />}
-                      </button>
+
                       
                       <div className="grid grid-cols-2 gap-2.5">
                         <button

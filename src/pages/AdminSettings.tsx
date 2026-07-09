@@ -466,7 +466,7 @@ export function AdminSettings() {
         const companyName = row["Organization Name"]?.toString().trim();
         const branchName = row["Branch Name"]?.toString().trim();
         let ipAddress = row["IP Address"]?.toString().trim() || "72.167.225.142";
-        if (!hasRole(["head_office"])) {
+        if (!hasRole(["super_admin"])) {
           ipAddress = "72.167.225.142";
         }
 
@@ -2686,7 +2686,7 @@ export function AdminSettings() {
                             errors.ipAddress ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., 72.167.225.142"
-                          disabled={panelFormLoading || !hasRole(["super_admin", "head_office"])}
+                          disabled={panelFormLoading || !hasRole(["super_admin"])}
                         />
                         {errors.ipAddress && (
                           <p className="mt-1 text-[12px] text-[var(--color-error)]">
@@ -2875,7 +2875,7 @@ export function AdminSettings() {
                             editPanelErrors.ipAddress ? "border-[var(--status-danger-border)]" : ""
                           }`}
                           placeholder="e.g., 72.167.225.142"
-                          disabled={editPanelFormLoading || !hasRole(["super_admin", "head_office"])}
+                          disabled={editPanelFormLoading || !hasRole(["super_admin"])}
                         />
                         {editPanelErrors.ipAddress && (
                           <p className="mt-1 text-[12px] text-[var(--color-error)]">
