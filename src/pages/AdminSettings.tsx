@@ -939,28 +939,6 @@ export function AdminSettings() {
           </button>
         )}
 
-                {/* API Provisioning Card */}
-        {hasRole(["super_admin"]) && (
-          <button
-            onClick={() => setActiveSection("api_keys")}
-            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
-          >
-            <div className="relative z-10">
-              <div className="mb-5 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
-                  <Key className="h-6 w-6 text-[var(--accent)]" />
-                </div>
-                <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
-              </div>
-              <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
-                API Provisioning
-              </h3>
-              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
-                Manage global and organization-specific API keys and webhooks.
-              </p>
-            </div>
-          </button>
-        )}
 
         {/* User Management Card */}
         <button
@@ -1033,6 +1011,29 @@ export function AdminSettings() {
             </div>
           </div>
         </button>
+
+                {/* API Provisioning Card */}
+        {hasRole(["super_admin"]) && (
+          <button
+            onClick={() => setActiveSection("api_keys")}
+            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
+          >
+            <div className="relative z-10">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                  <Key className="h-6 w-6 text-[var(--accent)]" />
+                </div>
+                <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
+              </div>
+              <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
+                API Provisioning
+              </h3>
+              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
+                Manage global and organization-specific API keys and webhooks.
+              </p>
+            </div>
+          </button>
+        )}
       </div>
 
       {/* â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â• â•  */}
@@ -2404,6 +2405,30 @@ export function AdminSettings() {
           </div>
         </div>,
         document.body
+      )}
+
+
+      {/* API Keys Overlay */}
+      {activeSection === "api_keys" && createPortal(
+        <div className="fixed inset-0 z-[200]">
+          <div
+            className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
+            onClick={() => setActiveSection(null)}
+          />
+          <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2.5vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
+            <div className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden relative">
+              <button
+                onClick={() => setActiveSection(null)}
+                className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="h-full overflow-y-auto">
+                <ApiKeysSection companies={companies} branches={branches} />
+              </div>
+            </div>
+          </div>
+        </div>, document.body
       )}
 
       {/* â”€â”€ Panel Provisioning Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
