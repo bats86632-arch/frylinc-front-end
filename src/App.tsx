@@ -32,6 +32,9 @@ const TermsOfService = lazy(() =>
 const MapZones = lazy(() =>
   import("./pages/MapZones").then((m) => ({ default: m.MapZones })),
 );
+const Reports = lazy(() =>
+  import("./pages/Reports").then((m) => ({ default: m.Reports })),
+);
 
 function App() {
   // Fire-and-forget prefetch for the most likely route chunks.
