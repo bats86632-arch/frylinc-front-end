@@ -42,6 +42,7 @@ import {
 import { CopyButton } from "../components/CopyButton";
 import { CreateUserModal } from "../components/CreateUserModal";
 import { ApiKeysSection } from "../components/ApiKeysSection";
+import { ApiKeyService } from "../api/ApiKeyService";
 import { Key } from "lucide-react";
 
 const panelSchema = z.object({
@@ -147,6 +148,8 @@ const addSyncedPanel = (serial: string) => {
 export function AdminSettings() {
   const [users, setUsers] = useState<User[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
+  const [apiKeysCount, setApiKeysCount] = useState(0);
+  const [apiKeysLoading, setApiKeysLoading] = useState(true);
   const [editingUserData, setEditingUserData] = useState<User | null>(null);
   const [companySearchQuery, setCompanySearchQuery] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
@@ -683,6 +686,7 @@ export function AdminSettings() {
   };
   useEffect(() => {
     loadUsers();
+    loadApiKeys();
   }, []);
 
   useEffect(() => {
@@ -731,12 +735,25 @@ export function AdminSettings() {
     }
   };
 
+  const loadApiKeys = async () => {
+    setApiKeysLoading(true);
+    try {
+      const data = await ApiKeyService.getApiKeys();
+      setApiKeysCount(data.length);
+    } catch (err) {
+      console.error("Failed to load api keys:", err);
+    } finally {
+      setApiKeysLoading(false);
+    }
+  };
+
   const handleGlobalRefresh = async () => {
     UserService.invalidateCache();
     CompanyService.invalidateCache();
     BranchService.invalidateCache();
     await Promise.all([
       loadUsers(),
+      loadApiKeys(),
       reloadCompanies(),
       reloadBranches(),
     ]);
@@ -1031,6 +1048,21 @@ export function AdminSettings() {
               <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
                 Manage global and organization-specific API keys and webhooks.
               </p>
+              
+              <div className="pt-5 mt-auto border-t border-[var(--border-subtle)] flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
+                  </span>
+                  <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
+                    {apiKeysLoading ? "-" : apiKeysCount}
+                  </span>
+                </div>
+                <span className="text-[12px] text-[var(--text-secondary)]">
+                  {apiKeysLoading ? "? Loading..." : `keys active`}
+                </span>
+              </div>
             </div>
           </button>
         )}
