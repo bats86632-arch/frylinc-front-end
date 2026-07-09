@@ -86,7 +86,10 @@ export const generateApiKeyDoc = (apiKey: ApiKeyRecord, orgName: string, actualK
   doc.setTextColor(200, 200, 200);
   doc.setFont("courier", "normal");
   doc.setFontSize(9);
-  doc.text(`curl -X GET "https://asia-south2-fyrlinc-project.cloudfunctions.net/api/panels" \\`, 20, yPos + 2);
+  
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "https://api.yourdomain.com";
+  
+  doc.text(`curl -X GET "${baseUrl}/panels" \\`, 20, yPos + 2);
   doc.text(`     -H "x-api-key: ${actualKey || 'YOUR_SECRET_API_KEY'}" \\`, 20, yPos + 8);
   doc.text(`     -H "Content-Type: application/json"`, 20, yPos + 14);
   
