@@ -6,108 +6,41 @@ export const generateApiKeyDoc = (apiKey: ApiKeyRecord, orgName: string, actualK
   const displayedKey = actualKey || `YOUR_SECRET_API_KEY (Ending in ${apiKey.last4})`;
 
   const htmlContent = `
-    <style>
-      #pdf-content {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        color: #1f2937 !important;
-        background-color: #ffffff !important;
-        line-height: 1.6 !important;
-        font-size: 14px !important;
-        margin: 0 !important;
-        padding: 40px !important;
-      }
-      #pdf-content h1, #pdf-content h2, #pdf-content h3, #pdf-content h4 { color: #111827 !important; }
-      #pdf-content h1 { font-size: 28px !important; border-bottom: 2px solid #e5e7eb !important; padding-bottom: 10px !important; margin-bottom: 20px !important; color: #dc2626 !important; }
-      #pdf-content h2 { font-size: 20px !important; margin-top: 30px !important; border-bottom: 1px solid #e5e7eb !important; padding-bottom: 5px !important; }
-      #pdf-content h3 { font-size: 16px !important; margin-top: 20px !important; color: #374151 !important; }
-      #pdf-content .meta-box {
-        background: #f9fafb !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 8px !important;
-        padding: 20px !important;
-        margin-bottom: 30px !important;
-      }
-      #pdf-content .meta-box strong { color: #4b5563 !important; }
-      #pdf-content .secret-box {
-        background: #fee2e2 !important;
-        border: 1px solid #f87171 !important;
-        border-radius: 8px !important;
-        padding: 15px !important;
-        margin-bottom: 30px !important;
-        color: #991b1b !important;
-      }
-      #pdf-content p { color: #1f2937 !important; }
-      #pdf-content pre {
-        background: #1e293b !important;
-        color: #f8fafc !important;
-        padding: 15px !important;
-        border-radius: 8px !important;
-        overflow-x: auto !important;
-        font-family: 'Courier New', Courier, monospace !important;
-        font-size: 12px !important;
-        line-height: 1.4 !important;
-      }
-      #pdf-content code {
-        background: #f1f5f9 !important;
-        color: #0f172a !important;
-        padding: 2px 6px !important;
-        border-radius: 4px !important;
-        font-family: 'Courier New', Courier, monospace !important;
-        font-size: 13px !important;
-      }
-      #pdf-content table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin-top: 15px !important;
-        margin-bottom: 30px !important;
-        font-size: 13px !important;
-      }
-      #pdf-content th, #pdf-content td {
-        border: 1px solid #e5e7eb !important;
-        padding: 10px !important;
-        text-align: left !important;
-        color: #1f2937 !important;
-      }
-      #pdf-content th { background-color: #f9fafb !important; font-weight: bold !important; }
-      #pdf-content .page-break { page-break-before: always !important; }
-      #pdf-content .footer { margin-top: 50px !important; font-size: 11px !important; color: #9ca3af !important; text-align: center !important; }
-    </style>
-    
-    <div id="pdf-content">
-      <h1>Fyrlinc API Integration Manual</h1>
+    <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2937; background-color: #ffffff; line-height: 1.6; font-size: 14px; padding: 40px; box-sizing: border-box;">
+      <h1 style="font-size: 28px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px; color: #dc2626; margin-top: 0; font-weight: bold;">Fyrlinc API Integration Manual</h1>
       
-      <div class="meta-box">
-        <p><strong>Organization:</strong> ${orgName}</p>
-        <p><strong>Key Label:</strong> ${apiKey.label}</p>
-        <p><strong>Key ID:</strong> ${apiKey.id}</p>
-        <p><strong>Permissions:</strong> ${apiKey.branchIds?.length ? "Scoped to specific branches" : "Global Scope"}</p>
-        ${apiKey.webhookUrl ? `<p><strong>Configured Webhook:</strong> ${apiKey.webhookUrl}</p>` : ""}
+      <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">Organization:</strong> ${orgName}</p>
+        <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">Key Label:</strong> ${apiKey.label}</p>
+        <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">Key ID:</strong> ${apiKey.id}</p>
+        <p style="margin: 0 0 10px 0;"><strong style="color: #4b5563;">Permissions:</strong> ${apiKey.branchIds?.length ? "Scoped to specific branches" : "Global Scope"}</p>
+        ${apiKey.webhookUrl ? `<p style="margin: 0;"><strong style="color: #4b5563;">Configured Webhook:</strong> ${apiKey.webhookUrl}</p>` : ""}
       </div>
 
       ${actualKey ? `
-      <div class="secret-box">
-        <strong>YOUR SECRET API KEY (DO NOT SHARE):</strong><br/>
-        <code style="background: transparent; color: #991b1b; font-size: 16px;">${actualKey}</code>
+      <div style="background: #fee2e2; border: 1px solid #f87171; border-radius: 8px; padding: 15px; margin-bottom: 30px; color: #991b1b;">
+        <strong style="display: block; margin-bottom: 8px;">YOUR SECRET API KEY (DO NOT SHARE):</strong>
+        <code style="background: transparent; color: #991b1b; font-size: 16px; font-family: 'Courier New', Courier, monospace;">${actualKey}</code>
       </div>
       ` : ""}
 
-      <h2>1. Authentication</h2>
-      <p>All API requests must be authenticated using the <code>x-api-key</code> HTTP header.</p>
-      <pre><code>Authorization-Header:
+      <h2 style="font-size: 20px; margin-top: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; color: #111827; font-weight: bold;">1. Authentication</h2>
+      <p style="margin-bottom: 10px;">All API requests must be authenticated using the <code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; font-size: 13px;">x-api-key</code> HTTP header.</p>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 10px; margin-bottom: 20px;"><code>Authorization-Header:
 x-api-key: ${displayedKey}</code></pre>
 
-      <div class="page-break"></div>
+      <div style="page-break-before: always;"></div>
 
-      <h2>2. Endpoints Overview</h2>
+      <h2 style="font-size: 20px; margin-top: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; color: #111827; font-weight: bold;">2. Endpoints Overview</h2>
 
-      <h3>GET /panels</h3>
-      <p>Retrieves a list of all fire panels scoped to your API key.</p>
-      <pre><code>curl -X GET "${baseUrl}/panels" \\
+      <h3 style="font-size: 16px; margin-top: 25px; margin-bottom: 10px; color: #374151; font-weight: bold;">GET /panels</h3>
+      <p style="margin-bottom: 10px;">Retrieves a list of all fire panels scoped to your API key.</p>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 10px; margin-bottom: 15px;"><code>curl -X GET "${baseUrl}/panels" \\
   -H "x-api-key: ${displayedKey}" \\
   -H "Content-Type: application/json"</code></pre>
       
-      <strong>Response Format:</strong>
-      <pre><code>{
+      <strong style="color: #4b5563; display: block; margin-bottom: 8px;">Response Format:</strong>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 5px; margin-bottom: 20px;"><code>{
   "panels": [
     {
       "serial": "P001",
@@ -119,15 +52,15 @@ x-api-key: ${displayedKey}</code></pre>
   ]
 }</code></pre>
 
-      <h3>GET /panels/:serial</h3>
-      <p>Retrieves detailed information, including active alarms and zones, for a specific panel.</p>
-      <pre><code>curl -X GET "${baseUrl}/panels/P001" \\
+      <h3 style="font-size: 16px; margin-top: 25px; margin-bottom: 10px; color: #374151; font-weight: bold;">GET /panels/:serial</h3>
+      <p style="margin-bottom: 10px;">Retrieves detailed information, including active alarms and zones, for a specific panel.</p>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 10px; margin-bottom: 20px;"><code>curl -X GET "${baseUrl}/panels/P001" \\
   -H "x-api-key: ${displayedKey}" \\
   -H "Content-Type: application/json"</code></pre>
 
-      <h3>PATCH /panels/:serial</h3>
-      <p>Updates the mutable fields of a specific panel.</p>
-      <pre><code>curl -X PATCH "${baseUrl}/panels/P001" \\
+      <h3 style="font-size: 16px; margin-top: 25px; margin-bottom: 10px; color: #374151; font-weight: bold;">PATCH /panels/:serial</h3>
+      <p style="margin-bottom: 10px;">Updates the mutable fields of a specific panel.</p>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 10px; margin-bottom: 20px;"><code>curl -X PATCH "${baseUrl}/panels/P001" \\
   -H "x-api-key: ${displayedKey}" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -135,25 +68,25 @@ x-api-key: ${displayedKey}</code></pre>
     "coordinates": { "lat": 40.7128, "lng": -74.0060 }
   }'</code></pre>
 
-      <div class="page-break"></div>
+      <div style="page-break-before: always;"></div>
 
-      <h3>GET /branches</h3>
-      <p>Retrieves a list of branches (facilities/locations) associated with the organization.</p>
-      <pre><code>curl -X GET "${baseUrl}/branches" \\
+      <h3 style="font-size: 16px; margin-top: 25px; margin-bottom: 10px; color: #374151; font-weight: bold;">GET /branches</h3>
+      <p style="margin-bottom: 10px;">Retrieves a list of branches (facilities/locations) associated with the organization.</p>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 10px; margin-bottom: 20px;"><code>curl -X GET "${baseUrl}/branches" \\
   -H "x-api-key: ${displayedKey}" \\
   -H "Content-Type: application/json"</code></pre>
 
-      <h3>GET /audit-logs</h3>
-      <p>Retrieves system audit logs. Useful for compliance monitoring.</p>
-      <pre><code>curl -X GET "${baseUrl}/audit-logs" \\
+      <h3 style="font-size: 16px; margin-top: 25px; margin-bottom: 10px; color: #374151; font-weight: bold;">GET /audit-logs</h3>
+      <p style="margin-bottom: 10px;">Retrieves system audit logs. Useful for compliance monitoring.</p>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 10px; margin-bottom: 20px;"><code>curl -X GET "${baseUrl}/audit-logs" \\
   -H "x-api-key: ${displayedKey}" \\
   -H "Content-Type: application/json"</code></pre>
 
-      <h2>3. Webhook Integration</h2>
-      <p>If you have configured a webhook URL for this API key, Fyrlinc will automatically push real-time events to your endpoint via HTTP POST. You must respond with a 2xx status code.</p>
+      <h2 style="font-size: 20px; margin-top: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; color: #111827; font-weight: bold;">3. Webhook Integration</h2>
+      <p style="margin-bottom: 15px;">If you have configured a webhook URL for this API key, Fyrlinc will automatically push real-time events to your endpoint via HTTP POST. You must respond with a 2xx status code.</p>
       
-      <strong>Payload Format:</strong>
-      <pre><code>{
+      <strong style="color: #4b5563; display: block; margin-bottom: 8px;">Payload Format:</strong>
+      <pre style="background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; margin-top: 5px; margin-bottom: 25px;"><code>{
   "event": "ALARM_TRIGGERED",
   "panelSerial": "P001",
   "companyId": "${apiKey.companyId || 'company_id'}",
@@ -164,35 +97,35 @@ x-api-key: ${displayedKey}</code></pre>
   }
 }</code></pre>
 
-      <strong>Common Event Types:</strong>
-      <table>
+      <strong style="color: #4b5563; display: block; margin-bottom: 10px;">Common Event Types:</strong>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 30px; font-size: 13px;">
         <thead>
           <tr>
-            <th>Event Code</th>
-            <th>Description</th>
+            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; background-color: #f9fafb; font-weight: bold; color: #1f2937;">Event Code</th>
+            <th style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; background-color: #f9fafb; font-weight: bold; color: #1f2937;">Description</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><code>PANEL_ONLINE</code></td>
-            <td>Emitted when a panel connects to the network.</td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">PANEL_ONLINE</code></td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;">Emitted when a panel connects to the network.</td>
           </tr>
           <tr>
-            <td><code>PANEL_OFFLINE</code></td>
-            <td>Emitted when a panel stops responding to heartbeats.</td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">PANEL_OFFLINE</code></td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;">Emitted when a panel stops responding to heartbeats.</td>
           </tr>
           <tr>
-            <td><code>ALARM_TRIGGERED</code></td>
-            <td>Emitted when a fire, smoke, or fault alarm is activated.</td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">ALARM_TRIGGERED</code></td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;">Emitted when a fire, smoke, or fault alarm is activated.</td>
           </tr>
           <tr>
-            <td><code>ALARM_CLEARED</code></td>
-            <td>Emitted when an alarm state is restored to normal.</td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;"><code style="background: #f1f5f9; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-family: 'Courier New', Courier, monospace;">ALARM_CLEARED</code></td>
+            <td style="border: 1px solid #e5e7eb; padding: 10px; text-align: left; color: #1f2937;">Emitted when an alarm state is restored to normal.</td>
           </tr>
         </tbody>
       </table>
 
-      <div class="footer">
+      <div style="margin-top: 50px; font-size: 11px; color: #9ca3af; text-align: center;">
         Generated on ${new Date().toLocaleString()} for ${orgName}. Confidential.
       </div>
     </div>
