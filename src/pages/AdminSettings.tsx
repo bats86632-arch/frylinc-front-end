@@ -16,7 +16,6 @@ import { useBranches } from "../hooks/useBranches";
 import { CompanyService, Company } from "../api/CompanyService";
 import { BranchService } from "../api/BranchService";
 import {
-  DEFAULT_PANEL_COMMANDS,
   normalizeAllowedCommands,
 } from "../config/panelDefaults";
 import {
@@ -126,24 +125,7 @@ function getApiErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
-const getSyncedPanels = (): Set<string> => {
-  try {
-    const data = localStorage.getItem("syncedPanels");
-    if (data) return new Set(JSON.parse(data));
-  } catch (e) {
-    // ignore
-  }
-  return new Set();
-};
-const syncedPanelsSet = getSyncedPanels();
-const addSyncedPanel = (serial: string) => {
-  syncedPanelsSet.add(serial);
-  try {
-    localStorage.setItem("syncedPanels", JSON.stringify(Array.from(syncedPanelsSet)));
-  } catch (e) {
-    // ignore
-  }
-};
+
 
 export function AdminSettings() {
   const [users, setUsers] = useState<User[]>([]);
@@ -173,9 +155,7 @@ export function AdminSettings() {
   const [inlineEditingBranchId, setInlineEditingBranchId] = useState<string | null>(null);
   const [inlineEditBranchForm, setInlineEditBranchForm] = useState<Partial<Branch>>({});
   const [inlineEditBranchLoading, setInlineEditBranchLoading] = useState(false);
-  
-  const [syncingPanelDefaults, setSyncingPanelDefaults] = useState(false);
-  
+
   // Bulk upload states
   const [bulkUploadModalOpen, setBulkUploadModalOpen] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
@@ -689,39 +669,7 @@ export function AdminSettings() {
     loadApiKeys();
   }, []);
 
-  useEffect(() => {
-    if (!panels || panels.length === 0 || syncingPanelDefaults) return;
-    const panelsMissingCommands = panels.filter(
-      (panel) =>
-        (!Array.isArray(panel.allowedCommands) ||
-        panel.allowedCommands.length === 0) &&
-        !syncedPanelsSet.has(panel.serial)
-    );
-    
-    if (panelsMissingCommands.length > 0) {
-      setSyncingPanelDefaults(true);
-      panelsMissingCommands.forEach(p => addSyncedPanel(p.serial));
-      
-      Promise.all(
-        panelsMissingCommands.map((panel) =>
-          PanelService.updatePanel(panel.serial, {
-            allowedCommands: [...DEFAULT_PANEL_COMMANDS],
-          }),
-        ),
-      )
-        .then(() => {
-          showSuccess(
-            `Applied default controls to ${panelsMissingCommands.length} panel${panelsMissingCommands.length === 1 ? "" : "s"}`
-          );
-        })
-        .catch((err) => {
-          console.error("Failed to sync default commands", err);
-        })
-        .finally(() => {
-          setSyncingPanelDefaults(false);
-        });
-    }
-  }, [panels, syncingPanelDefaults, showSuccess]);
+
 
   const loadUsers = async () => {
     setUsersLoading(true);
