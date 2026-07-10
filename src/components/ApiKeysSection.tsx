@@ -28,7 +28,6 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
 
   // Form state
   const [label, setLabel] = useState("");
-  const [webhookUrl, setWebhookUrl] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(companyId || "");
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
   
@@ -62,13 +61,11 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
         label,
         companyId: selectedCompanyId || undefined,
         branchIds: selectedBranches.length > 0 ? selectedBranches : undefined,
-        webhookUrl: webhookUrl || undefined,
       });
       setNewKey(result);
       await fetchKeys();
       // Reset form
       setLabel("");
-      setWebhookUrl("");
       setSelectedBranches([]);
       if (!companyId) setSelectedCompanyId("");
     } catch (err: any) {
@@ -102,7 +99,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
           </div>
           <div>
             <h3 className="text-[14px] font-bold text-[var(--text-primary)]">API Keys</h3>
-            <p className="text-[11px] text-[var(--text-secondary)]">Manage API keys and Webhooks</p>
+            <p className="text-[11px] text-[var(--text-secondary)]">Manage API keys</p>
           </div>
         </div>
         {!showCreateForm && !newKey && (
@@ -227,23 +224,6 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                    <Globe className="h-3 w-3" /> Webhook URL (Optional)
-                  </label>
-                  <input
-                    type="url"
-                    className="control-field h-9 w-full rounded-[6px] px-3 text-[13px]"
-                    value={webhookUrl}
-                    onChange={e => setWebhookUrl(e.target.value)}
-                    placeholder="https://your-server.com/webhook"
-                    disabled={creating}
-                  />
-                  <p className="mt-1 text-[10px] text-[var(--text-secondary)]">Live panel events will be POSTed here.</p>
-                </div>
-              </div>
-
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-subtle)]">
                 <button
                   type="button"
@@ -274,7 +254,7 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
             <Key className="h-10 w-10 text-[var(--text-secondary)] opacity-30 mb-3" />
             <p className="text-[14px] font-medium text-[var(--text-secondary)]">No API Keys Found</p>
             <p className="text-[12px] text-[var(--text-secondary)] opacity-60 mt-1 max-w-xs">
-              Create an API key to allow programmatic access or configure webhook event forwarding.
+              Create an API key to allow programmatic access.
             </p>
           </div>
         ) : (
@@ -333,12 +313,6 @@ export function ApiKeysSection({ companyId, companies = [], branches = [] }: Api
                     </span>
                   </div>
 
-                  {key.webhookUrl && (
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[var(--text-secondary)] font-semibold uppercase tracking-wider text-[9px]">Webhook</span>
-                      <span className="text-[var(--text-primary)] truncate max-w-[150px]" title={key.webhookUrl}>{key.webhookUrl}</span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between text-[10px] text-[var(--text-secondary)]">
