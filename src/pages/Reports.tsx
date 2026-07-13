@@ -16,6 +16,9 @@ const formatTimestamp = (ts: any) => {
   return 'Unknown';
 };
 
+// Module-level cache for Reports to prevent redundant loading spinners and re-renders
+const reportsCache = new Map<string, { logs: AuditLog[], nextPageToken: string | null }>();
+
 export function Reports() {
   const { hasRole, userData } = useAuth();
   const { companies } = useCompanies();
@@ -42,7 +45,17 @@ export function Reports() {
 
   const fetchLogs = async (resetPagination: boolean = false, token?: string) => {
     try {
-      setLoading(true);
+      const cacheKey = JSON.stringify({ companyId, branchId, type, dateRange, token });
+      const cached = reportsCache.get(cacheKey);
+      
+      if (cached) {
+        setLogs(cached.logs);
+        setPageToken(cached.nextPageToken);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+      
       setError(null);
 
       const filters: AuditLogFilters = {
@@ -72,8 +85,14 @@ export function Reports() {
         setPageHistory(prev => [...prev, token]);
       }
       
-      setLogs(data.logs);
-      setPageToken(data.nextPageToken);
+      const isUpdated = !cached || JSON.stringify(cached.logs) !== JSON.stringify(data.logs);
+      
+      if (isUpdated) {
+        reportsCache.set(cacheKey, { logs: data.logs, nextPageToken: data.nextPageToken });
+        setLogs(data.logs);
+        setPageToken(data.nextPageToken);
+      }
+      
     } catch (err: any) {
       setError(err.message || "Failed to load audit logs");
     } finally {
