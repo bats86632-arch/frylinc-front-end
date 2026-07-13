@@ -176,11 +176,18 @@ export function Dashboard() {
   const isEndUser = role === "end_user";
 
   // ── View calculation ────────────────────────────────────────────────────
+  const viewBranches = isSuperAdmin
+    ? (branches || []).filter((b) => b.companyId === selectedCompanyId)
+    : branches || [];
+  
+  const hasBranches = viewBranches.length > 0;
+
   const showCompanyView = isSuperAdmin && !selectedCompanyId;
   const showBranchView =
-    (isSuperAdmin && !!selectedCompanyId && selectedCompanyId !== "unassigned" && !selectedBranchId) ||
-    (isHoOrSi && !selectedBranchId);
-  const showPanelView = isEndUser || !!selectedBranchId || selectedCompanyId === "unassigned";
+    hasBranches &&
+    ((isSuperAdmin && !!selectedCompanyId && selectedCompanyId !== "unassigned" && !selectedBranchId) ||
+    (isHoOrSi && !selectedBranchId));
+  const showPanelView = !showCompanyView && !showBranchView;
 
   // ── Company stats ───────────────────────────────────────────────────────
   const getCompanyStats = (companyId: string) => {
@@ -252,10 +259,6 @@ export function Dashboard() {
   );
 
   // ── Branch filtering ────────────────────────────────────────────────────
-  const viewBranches = isSuperAdmin
-    ? (branches || []).filter((b) => b.companyId === selectedCompanyId)
-    : branches || [];
-
   const filteredBranches = viewBranches.filter((b) => {
     const q = searchQuery.toLowerCase();
     return (
