@@ -152,6 +152,7 @@ export function MapZones() {
   // Zoom state: null = not yet calculated (image not loaded), number = zoom factor
   const [zoom, setZoom] = useState<number | null>(null);
   const [fitZoom, setFitZoom] = useState<number>(1);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   /** Calculate and apply fit-to-screen zoom once the image dimensions are known */
   const applyFitZoom = useCallback(() => {
@@ -191,6 +192,7 @@ export function MapZones() {
     
     setFitZoom(fit);
     setZoom(fit);
+    setTimeout(() => setIsAnimating(true), 50);
 
     // If the image overflows horizontally due to the smart zoom boost, auto-center it
     if (isMobile && fit > scaleW) {
@@ -207,6 +209,7 @@ export function MapZones() {
   // Re-fit whenever a new panel map loads
   useEffect(() => {
     setZoom(null); // reset while loading
+    setIsAnimating(false);
   }, [selectedPanelId, panelMap?.imagePath]);
 
   // Keyboard Delete to remove selected zone
@@ -634,7 +637,7 @@ export function MapZones() {
         )}
         {/* Inner wrapper: explicitly sized so scrollbars work correctly and zones scale natively */}
         <div
-          className="relative transition-all duration-100 ease-out mx-auto"
+          className={`relative origin-top-left mx-auto ${isAnimating ? "transition-all duration-100 ease-out" : ""}`}
           style={{ 
             width: mapImageRef.current?.naturalWidth && zoom !== null ? mapImageRef.current.naturalWidth * zoom : 0,
             height: mapImageRef.current?.naturalHeight && zoom !== null ? mapImageRef.current.naturalHeight * zoom : 0,
