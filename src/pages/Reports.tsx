@@ -38,7 +38,7 @@ export function Reports() {
 
   useEffect(() => {
     fetchLogs(true);
-  }, [companyId, branchId, type, action, dateRange]);
+  }, [companyId, branchId, type, dateRange]);
 
   const fetchLogs = async (resetPagination: boolean = false, token?: string) => {
     try {
@@ -52,7 +52,7 @@ export function Reports() {
       if (companyId) filters.companyId = companyId;
       if (branchId) filters.branchId = branchId;
       if (type) filters.type = type;
-      if (action) filters.action = action;
+      // Do not send action to backend, we filter locally
 
       if (dateRange !== "all") {
         const fromDate = new Date();
@@ -95,9 +95,21 @@ export function Reports() {
     }
   };
 
+  const filteredLogs = logs.filter(log => {
+    if (!action) return true;
+    const searchLower = action.toLowerCase();
+    return (
+      (log.action || "").toLowerCase().includes(searchLower) ||
+      (log.command || "").toLowerCase().includes(searchLower) ||
+      (log.user || "").toLowerCase().includes(searchLower) ||
+      (log.actorEmail || "").toLowerCase().includes(searchLower) ||
+      (log.panelSerial || "").toLowerCase().includes(searchLower)
+    );
+  });
+
   const handleExport = () => {
-    if (logs.length === 0) return;
-    const exportData = logs.map(log => ({
+    if (filteredLogs.length === 0) return;
+    const exportData = filteredLogs.map(log => ({
       Timestamp: formatTimestamp(log.timestamp),
       Type: log.type,
       Action: log.action,
@@ -146,7 +158,7 @@ export function Reports() {
         </div>
         <button
           onClick={handleExport}
-          disabled={logs.length === 0}
+          disabled={filteredLogs.length === 0}
           className="flex h-[36px] items-center justify-center gap-2 rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)] px-4 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-hover)] disabled:opacity-50 shadow-sm"
         >
           <Download className="h-4 w-4" /> Export View
@@ -161,7 +173,7 @@ export function Reports() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Total Events (Page)</p>
-              <p className="text-3xl font-black text-[var(--text-primary)]">{logs.length}</p>
+              <p className="text-3xl font-black text-[var(--text-primary)]">{filteredLogs.length}</p>
             </div>
           </div>
           <div className="p-5 rounded-2xl border border-green-500/20 bg-green-500/5 flex items-center gap-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
@@ -170,7 +182,7 @@ export function Reports() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-green-600">Successful Events</p>
-              <p className="text-3xl font-black text-green-500">{logs.filter(l => l.result === 'SUCCESS').length}</p>
+              <p className="text-3xl font-black text-green-500">{filteredLogs.filter(l => l.result === 'SUCCESS').length}</p>
             </div>
           </div>
           <div className="p-5 rounded-2xl border border-red-500/20 bg-red-500/5 flex items-center gap-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
@@ -179,7 +191,7 @@ export function Reports() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-red-600">Failed Events</p>
-              <p className="text-3xl font-black text-red-500">{logs.filter(l => l.result === 'FAIL').length}</p>
+              <p className="text-3xl font-black text-red-500">{filteredLogs.filter(l => l.result === 'FAIL').length}</p>
             </div>
           </div>
           <div className="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/5 flex items-center gap-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
@@ -188,7 +200,7 @@ export function Reports() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Active Branches</p>
-              <p className="text-3xl font-black text-blue-500">{new Set(logs.map(l => l.branchId).filter(Boolean)).size}</p>
+              <p className="text-3xl font-black text-blue-500">{new Set(filteredLogs.map(l => l.branchId).filter(Boolean)).size}</p>
             </div>
           </div>
         </div>
@@ -207,7 +219,7 @@ export function Reports() {
                 <Building2 className="h-3 w-3" /> Organization
               </label>
               <select
-                className="control-field h-9 w-full rounded-[6px] px-3 text-[12px]"
+                className="control-field h-9 w-full rounded-[6px] px-3 pr-8 text-[12px]"
                 value={companyId}
                 onChange={e => {
                   setCompanyId(e.target.value);
@@ -225,7 +237,7 @@ export function Reports() {
               <MapPin className="h-3 w-3" /> Branch
             </label>
             <select
-              className="control-field h-9 w-full rounded-[6px] px-3 text-[12px]"
+              className="control-field h-9 w-full rounded-[6px] px-3 pr-8 text-[12px]"
               value={branchId}
               onChange={e => setBranchId(e.target.value)}
               disabled={!companyId && hasRole(["super_admin"])}
@@ -240,7 +252,7 @@ export function Reports() {
               Event Type
             </label>
             <select
-              className="control-field h-9 w-full rounded-[6px] px-3 text-[12px]"
+              className="control-field h-9 w-full rounded-[6px] px-3 pr-8 text-[12px]"
               value={type}
               onChange={e => setType(e.target.value)}
             >
@@ -253,7 +265,7 @@ export function Reports() {
 
           <div>
             <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-              Action
+              Search
             </label>
             <input
               type="text"
@@ -269,7 +281,7 @@ export function Reports() {
               <Clock className="h-3 w-3" /> Date Range
             </label>
             <select
-              className="control-field h-9 w-full rounded-[6px] px-3 text-[12px]"
+              className="control-field h-9 w-full rounded-[6px] px-3 pr-8 text-[12px]"
               value={dateRange}
               onChange={e => setDateRange(e.target.value as any)}
             >
@@ -295,7 +307,7 @@ export function Reports() {
               <p>{error}</p>
             </div>
           </div>
-        ) : logs.length === 0 ? (
+        ) : filteredLogs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Search className="h-12 w-12 text-[var(--text-secondary)] opacity-30 mb-4" />
             <p className="text-[15px] font-medium text-[var(--text-primary)]">No logs found</p>
@@ -317,7 +329,7 @@ export function Reports() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)]">
-                {logs.map(log => (
+                {filteredLogs.map(log => (
                   <tr key={log.id} className="hover:bg-[var(--surface-hover)] transition-colors">
                     <td className="px-5 py-3 whitespace-nowrap text-[var(--text-primary)] font-medium">
                       {formatTimestamp(log.timestamp)}
