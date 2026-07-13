@@ -547,7 +547,7 @@ export function PanelDetail() {
                 const isAlarmOrPre = zoneStatus === 4 || zoneStatus === 5;
                 
                 const resetCmd = `RESET ${zoneNum}`;
-                const isolateCmd = `ISOLATE ${zoneNum}`;
+                const isolateCmd = `ISO${zoneNum}`;
                 
                 const isEuRestricted = isStrictlyEndUser;
 
