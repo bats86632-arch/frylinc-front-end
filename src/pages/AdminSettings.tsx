@@ -2890,14 +2890,9 @@ export function AdminSettings() {
                       </div>
 
                       <div className="flex flex-col items-end gap-2 pt-2">
-                        {(watchedPanelType === "Security" || watchedPanelType === "GSM Module") && (
-                          <p className="text-[12px] text-[var(--status-danger-border)] font-medium">
-                            We are working on them, they'll be live soon
-                          </p>
-                        )}
                         <button
                           type="submit"
-                          disabled={panelFormLoading || watchedPanelType === "Security" || watchedPanelType === "GSM Module"}
+                          disabled={panelFormLoading}
                           className="flex h-[36px] items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
                         >
                           {panelFormLoading ? (

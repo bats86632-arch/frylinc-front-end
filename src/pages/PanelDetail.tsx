@@ -455,47 +455,47 @@ export function PanelDetail() {
                 {panel.panelType === "Security" ? (
                   <>
                     <button
-                      onClick={() => handleSendCommand("ARM_SYS")}
+                      onClick={() => handleSendCommand("ARM")}
                       disabled={commandLoading !== null}
                       className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
-                      {commandLoading === "ARM_SYS" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
-                      Arm System
+                      {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                      Arm
                     </button>
                     <button
-                      onClick={() => handleSendCommand("DISARM_SYS")}
+                      onClick={() => handleSendCommand("ZONE OFF")}
                       disabled={commandLoading !== null}
                       className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-success-border)] bg-[var(--status-success-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-success)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
-                      {commandLoading === "DISARM_SYS" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
-                      Disarm System
+                      {commandLoading === "ZONE OFF" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
+                      Disarm
                     </button>
                     <button
-                      onClick={() => handleSendCommand("PANIC")}
+                      onClick={() => handleSendCommand("EVAC")}
                       disabled={commandLoading !== null}
                       className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-warning)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
-                      {commandLoading === "PANIC" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
-                      Panic
+                      {commandLoading === "EVAC" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
+                      Evac
                     </button>
                   </>
                 ) : panel.panelType === "GSM Module" ? (
                   <>
                     <button
-                      onClick={() => handleSendCommand("PING")}
+                      onClick={() => handleSendCommand("ARM")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                      Arm
+                    </button>
+                    <button
+                      onClick={() => handleSendCommand("ZONE OFF")}
                       disabled={commandLoading !== null}
                       className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-success-border)] bg-[var(--status-success-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-success)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
-                      {commandLoading === "PING" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
-                      Ping Module
-                    </button>
-                    <button
-                      onClick={() => handleSendCommand("CHECK_SIG")}
-                      disabled={commandLoading !== null}
-                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
-                    >
-                      {commandLoading === "CHECK_SIG" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
-                      Check Signal
+                      {commandLoading === "ZONE OFF" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
+                      Zone Off
                     </button>
                   </>
                 ) : (
@@ -550,6 +550,7 @@ export function PanelDetail() {
                 const isolateCmd = `ISO${zoneNum}`;
                 
                 const isEuRestricted = isStrictlyEndUser;
+                const isOldIp = panel.ipAddress === "72.167.225.142";
 
                 return (
                   <div
@@ -579,7 +580,8 @@ export function PanelDetail() {
                       <div className="grid grid-cols-2 gap-2.5">
                         <button
                           onClick={() => handleSendCommand(isolateCmd)}
-                          disabled={!panel.ipAddress || commandLoading !== null || isEuRestricted}
+                          disabled={!panel.ipAddress || isOldIp || commandLoading !== null || isEuRestricted}
+                          title={isOldIp ? "Upgrade your panel to the new infrastructure to use this feature." : undefined}
                           className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                             isAlarmOrPre 
                               ? "border-[var(--color-warning)]/30 bg-[var(--status-warning-bg)] text-[var(--color-warning)] hover:border-[var(--color-warning)] hover:shadow-lg hover:shadow-[var(--color-warning)]/20" 
