@@ -1,105 +1,239 @@
-import { useState, useEffect } from "react";
-import { Activity, Shield, Flame, Smartphone, DoorOpen, Video, Info } from "lucide-react";
-
-const SYSTEMS = [
-  { id: "fire", name: "Fire Alarm Systems", icon: Flame, color: "text-red-500", bg: "bg-red-500/10" },
-  { id: "security", name: "Security Panels", icon: Shield, color: "text-blue-500", bg: "bg-blue-500/10" },
-  { id: "gsm", name: "GSM Dialers", icon: Smartphone, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-  { id: "access", name: "Access Control", icon: DoorOpen, color: "text-purple-500", bg: "bg-purple-500/10" },
-  { id: "cctv", name: "CCTV Network", icon: Video, color: "text-amber-500", bg: "bg-amber-500/10" },
-];
+import { useEffect, useState } from "react";
+import { usePanels } from "../hooks/usePanels";
+import { Activity, CheckCircle, AlertTriangle, ShieldAlert, Cpu, Network, Clock, Server } from "lucide-react";
+import { formatDateTime } from "../utils/formatters";
 
 export const HealthMonitor = () => {
+  const { panels, loading } = usePanels();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  const totalPanels = panels.length;
+  // A simplistic mock logic for 'online' vs 'offline'.
+  // We can assume panels with recent activity or something, but we'll use a mock metric for now based on ipAddress or a random function
+  // to show a beautiful UI. For a real app, it would use actual connection status.
+  const onlinePanels = panels.filter((p) => p.ipAddress).length;
+  const systemHealth = totalPanels > 0 ? Math.round((onlinePanels / totalPanels) * 100) : 100;
+
+  if (loading || !mounted) {
+    return (
+      <div className="animate-fade-in space-y-8 p-[32px]">
+        <div className="flex flex-col gap-2">
+          <div className="skeleton h-8 w-64 rounded-lg" />
+          <div className="skeleton h-4 w-48 rounded-lg" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="skeleton h-32 w-full rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-[var(--text-primary)] flex items-center gap-3">
-            <Activity className="h-8 w-8 text-[var(--accent)]" />
-            Health Monitoring System
-          </h1>
-          <p className="text-[var(--text-secondary)]">
-            Universal uptime and connectivity tracking for all branch systems.
+      {/* Coming Soon Banner */}
+      <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4 mb-2 flex items-start gap-3">
+        <div className="rounded-full bg-indigo-500/20 p-2 text-indigo-400 shrink-0">
+          <Activity className="h-5 w-5" />
+        </div>
+        <div>
+          <h3 className="font-bold text-indigo-400">Preview Mode — Coming Soon</h3>
+          <p className="text-sm text-indigo-400/80 mt-1">
+            This dashboard is a live preview of the upcoming design. Real-time data integration is currently being finalized. All interactions are disabled.
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm font-semibold text-indigo-400">
-          <Info className="h-4 w-4" />
-          Preview Mode — Coming Soon
-        </div>
       </div>
 
-      {/* Hero Banner for Coming Soon */}
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-gradient-to-br from-[var(--surface-raised)] to-[var(--surface-base)] p-8 shadow-lg">
-        <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1 space-y-4">
-            <h2 className="text-2xl font-bold text-[var(--text-primary)]">Data Integration Pending</h2>
-            <p className="text-[var(--text-secondary)] leading-relaxed max-w-2xl">
-              This dashboard will soon provide live heartbeat monitoring and 24-hour timeline charts for your top 5 infrastructure categories. The user interface below is a live preview of the upcoming design. Real-time data integration is currently being finalized.
-            </p>
-          </div>
-          <div className="shrink-0 flex gap-2">
-             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10 text-green-500 animate-pulse">
-               <Activity className="h-6 w-6" />
-             </div>
-          </div>
-        </div>
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[var(--accent)] blur-[100px] opacity-10 pointer-events-none" />
+      <div className="flex flex-col gap-1 mb-8">
+        <h1 className="text-3xl font-black tracking-tight text-[var(--text-primary)] flex items-center gap-3">
+          <Activity className="h-8 w-8 text-[var(--accent)]" />
+          System Health Monitor
+        </h1>
+        <p className="text-[var(--text-secondary)]">Real-time status of all configured panels and services.</p>
       </div>
 
-      {/* Systems Grid (Preview) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {SYSTEMS.map((sys, idx) => (
-          <div 
-            key={sys.id}
-            className="relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 shadow-sm hover:shadow-lg transition-all"
-            style={{ opacity: 0.7 }}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${sys.bg} ${sys.color}`}>
-                  <sys.icon className="h-5 w-5" />
-                </div>
-                <h3 className="font-bold text-[var(--text-primary)]">{sys.name}</h3>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className={`h-2 w-2 rounded-full bg-green-500 ${idx % 2 === 0 ? 'animate-pulse' : ''}`} />
-                <span className="text-xs font-bold uppercase tracking-wider text-green-500">Demo</span>
-              </div>
+      {/* View-Only Wrapper */}
+      <div className="relative">
+        <div className="absolute inset-0 z-50 cursor-not-allowed bg-[var(--surface-base)]/20 backdrop-blur-[1px]" title="Coming Soon"></div>
+        <div className="opacity-90 pointer-events-none">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Health Score Card */}
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 shadow-sm transition-all hover:shadow-lg">
+          <div className="flex items-center justify-between relative z-10">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)]">Health Score</h3>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full ${systemHealth > 80 ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+              <Activity className="h-5 w-5" />
             </div>
+          </div>
+          <div className="mt-4 relative z-10">
+            <div className="flex items-end gap-2">
+              <span className={`text-4xl font-black ${systemHealth > 80 ? 'text-green-500' : 'text-yellow-500'}`}>{systemHealth}%</span>
+            </div>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">Overall system uptime</p>
+          </div>
+          {/* Progress bar background */}
+          <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-overlay)]">
+            <div 
+              className={`h-full ${systemHealth > 80 ? 'bg-green-500' : 'bg-yellow-500'} transition-all duration-1000 ease-out`}
+              style={{ width: `${systemHealth}%` }}
+            />
+          </div>
+        </div>
 
-            {/* Mock Timeline */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-[var(--text-secondary)]">
-                <span>24h Timeline</span>
-                <span className="text-[var(--text-primary)] font-bold">99.{idx}% Uptime</span>
-              </div>
-              <div className="flex h-2 w-full gap-0.5 overflow-hidden rounded-full bg-[var(--surface-overlay)]">
-                {Array.from({ length: 24 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`h-full flex-1 ${Math.random() > 0.1 ? 'bg-green-500' : 'bg-red-500'}`} 
-                    style={{ opacity: i > 20 ? 0.3 : 1 }}
-                  />
+        {/* Connectivity Card */}
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 shadow-sm transition-all hover:shadow-lg">
+          <div className="flex items-center justify-between relative z-10">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)]">Connectivity</h3>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)]/10 text-[var(--accent)]">
+              <Network className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 relative z-10">
+            <div className="flex items-end gap-2">
+              <span className="text-4xl font-black text-[var(--text-primary)]">{onlinePanels}</span>
+              <span className="mb-1 text-sm font-medium text-[var(--text-secondary)]">/ {totalPanels} online</span>
+            </div>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">Active panel connections</p>
+          </div>
+        </div>
+
+        {/* Alerts Card */}
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--status-danger-border)] bg-gradient-to-br from-[var(--status-danger-bg)] to-[var(--surface-raised)] p-6 shadow-[0_0_15px_rgba(220,38,38,0.05)] transition-all hover:shadow-lg hover:shadow-[0_0_20px_rgba(220,38,38,0.1)]">
+          <div className="flex items-center justify-between relative z-10">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-error)]">Critical Alerts</h3>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-error)]/10 text-[var(--color-error)] animate-pulse">
+              <ShieldAlert className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 relative z-10">
+            <div className="flex items-end gap-2">
+              <span className="text-4xl font-black text-[var(--color-error)]">0</span>
+            </div>
+            <p className="mt-1 text-sm text-[var(--color-error)] opacity-80">Requires immediate action</p>
+          </div>
+          <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[var(--color-error)] blur-[50px] opacity-10 pointer-events-none" />
+        </div>
+
+        {/* Server Status Card */}
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 shadow-sm transition-all hover:shadow-lg">
+          <div className="flex items-center justify-between relative z-10">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)]">Server Status</h3>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-500">
+              <Server className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 relative z-10 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm font-bold text-[var(--text-primary)]">API Server: Online</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm font-bold text-[var(--text-primary)]">Database: Operational</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm font-bold text-[var(--text-primary)]">MQTT Broker: Connected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden">
+          <div className="border-b border-[var(--border-subtle)] px-6 py-4 bg-[var(--surface-hover)]">
+            <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <Cpu className="h-5 w-5 text-[var(--accent)]" />
+              Panel Status Overview
+            </h2>
+          </div>
+          <div className="p-0 overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[var(--surface-raised)] border-b border-[var(--border-subtle)]">
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Panel</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Type</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Status</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Last Sync</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {panels.slice(0, 10).map((p) => (
+                  <tr key={p.serial} className="hover:bg-[var(--surface-hover)] transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-[var(--text-primary)]">{p.name || p.serial}</span>
+                        <span className="text-xs text-[var(--text-secondary)] font-mono">{p.serial}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-[var(--text-secondary)]">{p.panelType || 'Fire Alarm'}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {p.ipAddress ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-500">
+                          <CheckCircle className="h-3 w-3" /> Online
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-500/10 px-2.5 py-1 text-xs font-semibold text-yellow-600">
+                          <AlertTriangle className="h-3 w-3" /> Offline
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5 text-sm text-[var(--text-secondary)]">
+                        <Clock className="h-3.5 w-3.5 opacity-70" />
+                        {formatDateTime(new Date().toISOString())} {/* Mock for now */}
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            </div>
-            
-            {/* Disabled overlay to clearly show it's a preview */}
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--surface-base)]/10 backdrop-blur-[1px] opacity-0 hover:opacity-100 transition-opacity rounded-2xl cursor-not-allowed">
-              <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-bold text-white shadow-xl backdrop-blur-md">
-                Coming Soon
-              </span>
+                {panels.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-sm text-[var(--text-secondary)]">
+                      No panels configured yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-base)] overflow-hidden flex flex-col">
+          <div className="border-b border-[var(--border-subtle)] px-6 py-4 bg-[var(--surface-hover)]">
+            <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <Activity className="h-5 w-5 text-indigo-500" />
+              Recent Activity Log
+            </h2>
+          </div>
+          <div className="p-6 flex-1 overflow-y-auto">
+            <div className="relative border-l border-[var(--border-subtle)] pl-6 space-y-6">
+              {[
+                { time: '2 mins ago', text: 'System health check completed.', type: 'info' },
+                { time: '15 mins ago', text: 'Backup completed successfully.', type: 'success' },
+                { time: '1 hour ago', text: 'Panel FP-2024-001 connected.', type: 'success' },
+                { time: '3 hours ago', text: 'Admin updated routing tables.', type: 'info' },
+                { time: '5 hours ago', text: 'Daily report generated.', type: 'info' },
+              ].map((log, i) => (
+                <div key={i} className="relative">
+                  <span className={`absolute -left-[31px] flex h-3 w-3 items-center justify-center rounded-full ring-4 ring-[var(--surface-base)] ${log.type === 'success' ? 'bg-green-500' : 'bg-[var(--accent)]'}`} />
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-[var(--text-secondary)] font-mono">{log.time}</span>
+                    <span className="text-sm font-medium text-[var(--text-primary)]">{log.text}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+        </div>
+      </div>
+        </div>
       </div>
     </div>
   );
