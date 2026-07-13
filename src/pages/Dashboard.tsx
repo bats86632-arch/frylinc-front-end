@@ -365,20 +365,22 @@ export function Dashboard() {
 
         {showPanelView && !isEndUser && (
           <div className="flex items-center gap-3 animate-fade-in-up">
-            <button
-              onClick={() => {
-                if (selectedCompanyId === "unassigned") {
-                  setSelectedCompanyId(null);
-                } else {
-                  setSelectedBranchId(null);
-                }
-                setSearchQuery("");
-                setFilter("all");
-              }}
-              className="group flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
+            {(isSuperAdmin || selectedBranchId) && (
+              <button
+                onClick={() => {
+                  if (selectedBranchId) {
+                    setSelectedBranchId(null);
+                  } else if (isSuperAdmin) {
+                    setSelectedCompanyId(null);
+                  }
+                  setSearchQuery("");
+                  setFilter("all");
+                }}
+                className="group flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+            )}
             <h2 className="text-[16px] font-bold text-[var(--text-primary)] flex items-center gap-2">
               {isSuperAdmin && selectedCompanyName && (
                 <>
@@ -386,22 +388,33 @@ export function Dashboard() {
                   <span className="text-[var(--text-secondary)] font-medium">
                     {selectedCompanyName}
                   </span>
-                  <ChevronRight className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
-                </>
-              )}
-              <MapPin className="h-4 w-4 text-[var(--text-secondary)]" />
-              {selectedBranchName ? (
-                <>
-                  {selectedBranchName}
-                  {selectedBranchBsr && (
-                    <span className="text-[var(--text-secondary)] font-normal text-[14px]">
-                      ({selectedBranchBsr})
-                    </span>
+                  {selectedBranchId && (
+                    <ChevronRight className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
                   )}
                 </>
-              ) : (
-                "Branch"
               )}
+              {selectedBranchId ? (
+                <>
+                  <MapPin className="h-4 w-4 text-[var(--text-secondary)]" />
+                  {selectedBranchName ? (
+                    <>
+                      {selectedBranchName}
+                      {selectedBranchBsr && (
+                        <span className="text-[var(--text-secondary)] font-normal text-[14px]">
+                          ({selectedBranchBsr})
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    "Branch"
+                  )}
+                </>
+              ) : !isSuperAdmin ? (
+                <>
+                  <Building2 className="h-4 w-4 text-[var(--text-secondary)]" />
+                  <span>All Panels</span>
+                </>
+              ) : null}
             </h2>
           </div>
         )}
