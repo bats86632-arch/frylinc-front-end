@@ -550,7 +550,7 @@ export function PanelDetail() {
                 const isolateCmd = `ISO${zoneNum}`;
                 
                 const isEuRestricted = isStrictlyEndUser;
-                const isOldIp = panel.ipAddress === "72.167.225.142";
+                const isNewIp = panel.ipAddress === "136.66.72.191";
 
                 return (
                   <div
@@ -580,8 +580,8 @@ export function PanelDetail() {
                       <div className="grid grid-cols-2 gap-2.5">
                         <button
                           onClick={() => handleSendCommand(isolateCmd)}
-                          disabled={!panel.ipAddress || isOldIp || commandLoading !== null || isEuRestricted}
-                          title={isOldIp ? "Upgrade your panel to the new infrastructure to use this feature." : undefined}
+                          disabled={!panel.ipAddress || !isNewIp || commandLoading !== null || isEuRestricted}
+                          title={!isNewIp ? "Upgrade your panel to the new infrastructure to use this feature." : undefined}
                           className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                             isAlarmOrPre 
                               ? "border-[var(--color-warning)]/30 bg-[var(--status-warning-bg)] text-[var(--color-warning)] hover:border-[var(--color-warning)] hover:shadow-lg hover:shadow-[var(--color-warning)]/20" 

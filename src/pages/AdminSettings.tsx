@@ -154,6 +154,7 @@ export function AdminSettings() {
   const [expandedUserBranches, setExpandedUserBranches] = useState<Record<string, boolean>>({});
 
   const [panelFormOpen, setPanelFormOpen] = useState(false);
+  const [provisionStep, setProvisionStep] = useState<1 | 2>(1);
   const [userFormOpen, setUserFormOpen] = useState(false);
   const [panelFormLoading, setPanelFormLoading] = useState(false);
   
@@ -169,6 +170,7 @@ export function AdminSettings() {
   const [bulkPanelUploading, setBulkPanelUploading] = useState(false);
 
   const [bulkUserUploading, setBulkUserUploading] = useState(false);
+  const [bulkUserUploadModalOpen, setBulkUserUploadModalOpen] = useState(false);
   const [userUploadSummary, setUserUploadSummary] = useState<{total: number, success: number, failed: number, errors: string[]} | null>(null);
 
   // Logo upload state
@@ -501,9 +503,36 @@ export function AdminSettings() {
       const XLSX = await import("xlsx");
       const templateData = [
         {
-          email: "user@example.com",
+          email: "superadmin@example.com",
           password: "password123",
-          displayName: "John Doe",
+          displayName: "Super Admin",
+          role: "super_admin",
+          companyId: "",
+          branchIds: "",
+          phone: "+1234567890"
+        },
+        {
+          email: "headoffice@example.com",
+          password: "password123",
+          displayName: "Head Office User",
+          role: "head_office",
+          companyId: "COMPANY_ID_HERE",
+          branchIds: "",
+          phone: "+1234567890"
+        },
+        {
+          email: "systemintegrator@example.com",
+          password: "password123",
+          displayName: "System Integrator",
+          role: "system_integrator",
+          companyId: "COMPANY_ID_HERE",
+          branchIds: "BRANCH_ID_1,BRANCH_ID_2",
+          phone: "+1234567890"
+        },
+        {
+          email: "enduser@example.com",
+          password: "password123",
+          displayName: "End User",
           role: "end_user",
           companyId: "COMPANY_ID_HERE",
           branchIds: "BRANCH_ID_1,BRANCH_ID_2",
@@ -552,6 +581,8 @@ export function AdminSettings() {
       if (response.data) {
         setUserUploadSummary(response.data);
       }
+      
+      setBulkUserUploadModalOpen(false);
       
       await loadUsers();
     } catch (err: unknown) {
@@ -804,6 +835,7 @@ export function AdminSettings() {
         allowedCommands: normalizeAllowedCommands(),
       });
       setPanelFormOpen(false);
+      setProvisionStep(1);
       reset();
       showSuccess("Panel created successfully");
     } catch (err: unknown) {
@@ -2195,27 +2227,12 @@ export function AdminSettings() {
                     />
                   </div>
                   <button
-                    onClick={downloadUserTemplate}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
+                    onClick={() => setBulkUserUploadModalOpen(true)}
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
                   >
-                    <Download className="h-[14px] w-[14px]" />
-                    Template
+                    <Plus className="h-[14px] w-[14px]" />
+                    Bulk Upload
                   </button>
-                  <button
-                    onClick={() => document.getElementById("user-excel-upload")?.click()}
-                    disabled={bulkUserUploading}
-                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)] disabled:opacity-50"
-                  >
-                    {bulkUserUploading ? <Loader2 className="h-[14px] w-[14px] animate-spin" /> : <Plus className="h-[14px] w-[14px]" />}
-                    Upload
-                  </button>
-                  <input
-                    id="user-excel-upload"
-                    type="file"
-                    accept=".xlsx, .xls"
-                    className="hidden"
-                    onChange={handleBulkUserUpload}
-                  />
                   <button
                     onClick={() => setUserFormOpen(true)}
                     className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
@@ -2245,6 +2262,73 @@ export function AdminSettings() {
                 </div>
               </div>
               {/* Scrollable content */}
+                {bulkUserUploadModalOpen && createPortal(
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center"
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget && !bulkUserUploading) {
+                        setBulkUserUploadModalOpen(false);
+                      }
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                    <div className="relative z-10 w-full max-w-[600px] mx-4 max-h-[90vh] flex flex-col animate-fade-in-up">
+                      <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
+                          <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                            Bulk Create Users
+                          </h3>
+                          <button
+                            type="button"
+                            onClick={() => setBulkUserUploadModalOpen(false)}
+                            disabled={bulkUserUploading}
+                            className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                          <p className="text-[13px] text-[var(--text-secondary)] mb-4 text-left">
+                            Download the template, fill in your data, and upload the Excel file to bulk-create users.
+                          </p>
+                          <div className="flex flex-col gap-3">
+                            <button
+                              onClick={downloadUserTemplate}
+                              disabled={bulkUserUploading}
+                              className="flex h-[36px] items-center justify-center rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-5 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-raised)] disabled:opacity-50"
+                            >
+                              Download Template
+                            </button>
+                            <div className="relative">
+                              <input
+                                type="file"
+                                accept=".xlsx, .xls"
+                                onChange={handleBulkUserUpload}
+                                disabled={bulkUserUploading}
+                                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                              />
+                              <button
+                                type="button"
+                                disabled={bulkUserUploading}
+                                className="flex h-[36px] w-full items-center justify-center rounded-[6px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-50"
+                              >
+                              {bulkUserUploading ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Uploading...
+                                </>
+                              ) : (
+                                "Upload Excel File"
+                              )}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>,
+                  document.body
+                )}
               <div className="flex-1 overflow-y-auto p-5 sm:p-7">
                 {usersLoading ? (
                   <div className="flex justify-center py-6">
@@ -2585,7 +2669,10 @@ export function AdminSettings() {
                     </button>
                   )}
                   <button
-                    onClick={() => setPanelFormOpen(true)}
+                    onClick={() => {
+                      setProvisionStep(1);
+                      setPanelFormOpen(true);
+                    }}
                     className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
                   >
                     <Plus className="h-[14px] w-[14px]" />
@@ -2687,6 +2774,7 @@ export function AdminSettings() {
                     onClick={(e) => {
                       if (e.target === e.currentTarget && !panelFormLoading) {
                         setPanelFormOpen(false);
+                        setProvisionStep(1);
                         reset();
                       }
                     }}
@@ -2695,13 +2783,25 @@ export function AdminSettings() {
                     <div className="relative z-10 w-full max-w-[600px] mx-4 max-h-[90vh] flex flex-col animate-fade-in-up">
                       <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
-                          <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
-                            Provision Panel
-                          </h3>
+                          <div className="flex items-center gap-3">
+                            {provisionStep === 2 && (
+                              <button
+                                type="button"
+                                onClick={() => setProvisionStep(1)}
+                                className="flex items-center justify-center rounded-[8px] p-1.5 text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+                              >
+                                <ChevronLeft className="h-5 w-5" />
+                              </button>
+                            )}
+                            <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
+                              {provisionStep === 1 ? "Select Panel Type" : "Provision Panel"}
+                            </h3>
+                          </div>
                           <button
                             type="button"
                             onClick={() => {
                               setPanelFormOpen(false);
+                              setProvisionStep(1);
                               reset();
                             }}
                             disabled={panelFormLoading}
@@ -2711,46 +2811,41 @@ export function AdminSettings() {
                           </button>
                         </div>
                         <div className="flex-1 overflow-y-auto px-6 py-5">
-                          <form
-                            onSubmit={handleSubmit(handleCreatePanel)}
-                            className="space-y-5"
-                          >
-                      <div>
-                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Panel Type
-                        </label>
-                        <div className="grid grid-cols-3 gap-3">
-                          {[
-                            { value: "Fire Alarm", label: "Fire Alarm", icon: Flame },
-                            { value: "Security", label: "Security Panel", icon: Shield },
-                            { value: "GSM Module", label: "GSM Dialer", icon: Smartphone },
-                          ].map((type) => {
-                            const Icon = type.icon;
-                            const isSelected = (watch("panelType") || "Fire Alarm") === type.value;
-                            return (
-                              <button
-                                type="button"
-                                key={type.value}
-                                onClick={() => {
-                                  setValue("panelType", type.value as any);
-                                  if (type.value === "GSM Module") setValue("zoneCount", 0);
-                                }}
-                                disabled={panelFormLoading}
-                                className={`flex flex-col items-center justify-center gap-2 rounded-[8px] border p-3 transition-all ${
-                                  isSelected
-                                    ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)] shadow-sm"
-                                    : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
-                                }`}
-                              >
-                                <Icon className={`h-6 w-6 ${isSelected ? "text-[var(--accent)]" : "text-[var(--text-tertiary)]"}`} />
-                                <span className="text-[11px] font-semibold text-center leading-tight">
-                                  {type.label}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
+                          {provisionStep === 1 ? (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                              {[
+                                { value: "Fire Alarm", label: "Fire Alarm", description: "Standard fire detection panels", icon: Flame },
+                                { value: "Security", label: "Security Panel", description: "Intrusion and alarm systems", icon: Shield },
+                                { value: "GSM Module", label: "GSM Dialer", description: "Cellular communication modules", icon: Smartphone },
+                              ].map((type) => {
+                                const Icon = type.icon;
+                                return (
+                                  <button
+                                    type="button"
+                                    key={type.value}
+                                    onClick={() => {
+                                      setValue("panelType", type.value as any);
+                                      if (type.value === "GSM Module") setValue("zoneCount", 0);
+                                      setProvisionStep(2);
+                                    }}
+                                    className="flex flex-col items-center justify-center gap-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] p-6 text-center transition-all hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-lg"
+                                  >
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)]/10">
+                                      <Icon className="h-6 w-6 text-[var(--accent)]" />
+                                    </div>
+                                    <div>
+                                      <h4 className="text-[14px] font-bold text-[var(--text-primary)]">{type.label}</h4>
+                                      <p className="mt-1 text-[12px] text-[var(--text-secondary)] leading-relaxed">{type.description}</p>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <form
+                              onSubmit={handleSubmit(handleCreatePanel)}
+                              className="space-y-5"
+                            >
 
                       <div>
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
@@ -2906,6 +3001,7 @@ export function AdminSettings() {
                         </button>
                       </div>
                           </form>
+                          )}
                         </div>
                       </div>
                     </div>
