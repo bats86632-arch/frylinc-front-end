@@ -636,9 +636,10 @@ export function MapZones() {
         <div
           className="relative transition-all duration-100 ease-out mx-auto"
           style={{ 
-            width: mapImageRef.current?.naturalWidth && zoom !== null ? mapImageRef.current.naturalWidth * zoom : "100%",
-            height: mapImageRef.current?.naturalHeight && zoom !== null ? mapImageRef.current.naturalHeight * zoom : "auto",
+            width: mapImageRef.current?.naturalWidth && zoom !== null ? mapImageRef.current.naturalWidth * zoom : 0,
+            height: mapImageRef.current?.naturalHeight && zoom !== null ? mapImageRef.current.naturalHeight * zoom : 0,
             opacity: zoom === null ? 0 : 1,
+            overflow: zoom === null ? "hidden" : "visible",
           }}
         >
           {/* Floor plan image */}
