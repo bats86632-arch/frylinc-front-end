@@ -98,24 +98,21 @@ export const HealthMonitor = () => {
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8 max-w-7xl mx-auto">
-      {/* Coming Soon Banner */}
-      <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4 mb-2 flex items-start gap-3">
-        <div className="rounded-full bg-indigo-500/20 p-2 text-indigo-400 shrink-0">
-          <Activity className="h-5 w-5" />
-        </div>
-        <div>
-          <h3 className="font-bold text-indigo-400">Preview Mode — Coming Soon</h3>
-          <p className="text-sm text-indigo-400/80 mt-1">
-            This dashboard is a live preview of the upcoming design. Real-time data integration is currently being finalized. All interactions are disabled.
+      {/* View-Only Wrapper with Overlay */}
+      <div className="relative flex items-center justify-center">
+        {/* Absolute Centered Overlay */}
+        <div className="absolute z-10 flex flex-col items-center justify-center text-center p-8">
+          <div className="rounded-full bg-indigo-500/10 border border-indigo-500/30 p-4 mb-4 backdrop-blur-md shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+            <Activity className="h-10 w-10 text-indigo-400" />
+          </div>
+          <h2 className="text-3xl font-black text-[var(--text-primary)] mb-2 drop-shadow-md tracking-tight">Coming Soon</h2>
+          <p className="text-lg text-[var(--text-secondary)] max-w-md mx-auto drop-shadow-sm">
+            We are fine-tuning the real-time data integration for the Health Monitoring System. Stay tuned!
           </p>
         </div>
-      </div>
 
-
-
-      {/* View-Only Wrapper */}
-      <div className="relative">
-        <div className="opacity-95">
+        {/* Blurry Content Underneath */}
+        <div className="opacity-40 blur-[4px] pointer-events-none select-none transition-all duration-700 w-full">
           
           <div className="flex flex-col lg:flex-row gap-8">
             
