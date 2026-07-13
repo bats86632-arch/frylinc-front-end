@@ -100,9 +100,13 @@ export function MainDashboardLayout() {
         ? "Your Profile"
         : location.pathname === "/map-zones"
           ? "Graphical Monitoring System (GMS)"
-          : location.pathname.startsWith("/panel")
-            ? "Panel Details"
-            : "Fire Alarm Panels";
+          : location.pathname === "/reports"
+            ? "Reports"
+            : location.pathname === "/health"
+              ? "Health Monitoring System"
+              : location.pathname.startsWith("/panel")
+                ? "Panel Details"
+                : "Fire Alarm Panels";
 
   const mobilePageTitle =
     location.pathname === "/admin"
@@ -111,9 +115,13 @@ export function MainDashboardLayout() {
         ? "Your Profile"
         : location.pathname === "/map-zones"
           ? "GMS"
-          : location.pathname.startsWith("/panel")
-            ? "Panel Details"
-            : "Dashboard";
+          : location.pathname === "/reports"
+            ? "Reports"
+            : location.pathname === "/health"
+              ? "Health Monitor"
+              : location.pathname.startsWith("/panel")
+                ? "Panel Details"
+                : "Dashboard";
 
   const roleLabel =
     userData?.role

@@ -146,24 +146,7 @@ export function Reports() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--surface-base)] relative">
-      <div className="px-6 py-5 border-b border-[var(--border-subtle)] flex items-center justify-between sticky top-0 bg-[var(--surface-base)] z-10 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--surface-raised)] border border-[var(--border-subtle)] shadow-sm">
-            <FileText className="h-5 w-5 text-[var(--accent)]" />
-          </div>
-          <div>
-            <h1 className="text-[18px] font-bold text-[var(--text-primary)]">Reports</h1>
-            <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">System-wide event and command logs</p>
-          </div>
-        </div>
-        <button
-          onClick={handleExport}
-          disabled={filteredLogs.length === 0}
-          className="flex h-[36px] items-center justify-center gap-2 rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)] px-4 text-[13px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-hover)] disabled:opacity-50 shadow-sm"
-        >
-          <Download className="h-4 w-4" /> Export View
-        </button>
-      </div>
+
 
       <div className="px-6 py-6 border-b border-[var(--border-subtle)] bg-[var(--surface-base)]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -208,10 +191,19 @@ export function Reports() {
 
       <div className="px-6 py-5 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)]">
         <div className="flex flex-col gap-4">
-          <h2 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Search className="h-4 w-4 text-[var(--accent)]" /> 
-            Advanced Filtering
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <Search className="h-4 w-4 text-[var(--accent)]" /> 
+              Advanced Filtering
+            </h2>
+            <button
+              onClick={handleExport}
+              disabled={filteredLogs.length === 0}
+              className="flex h-[32px] items-center justify-center gap-2 rounded-[6px] bg-[var(--surface-raised)] border border-[var(--border-subtle)] px-3 text-[12px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-hover)] disabled:opacity-50 shadow-sm"
+            >
+              <Download className="h-4 w-4" /> Export View
+            </button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {hasRole(["super_admin"]) && (
             <div>

@@ -111,13 +111,7 @@ export const HealthMonitor = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-[var(--text-primary)] flex items-center gap-3">
-          <Activity className="h-8 w-8 text-[var(--accent)]" />
-          Health Monitoring System
-        </h1>
-        <p className="text-[var(--text-secondary)]">Real-time status and historical uptime of all configured systems.</p>
-      </div>
+
 
       {/* View-Only Wrapper */}
       <div className="relative">
