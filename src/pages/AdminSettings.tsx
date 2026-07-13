@@ -2969,14 +2969,34 @@ export function AdminSettings() {
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           IP Address (Default is autofilled)
                         </label>
-                        <input
-                          {...register("ipAddress")}
-                          className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            errors.ipAddress ? "border-[var(--status-danger-border)]" : ""
-                          }`}
-                          placeholder="e.g., 72.167.225.142"
-                          disabled={panelFormLoading || !hasRole(["super_admin"])}
-                        />
+                        {hasRole(["super_admin"]) ? (
+                          <>
+                            <input
+                              {...register("ipAddress")}
+                              list="ipAddress-options"
+                              className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                                errors.ipAddress ? "border-[var(--status-danger-border)]" : ""
+                              }`}
+                              placeholder="e.g., 72.167.225.142"
+                              disabled={panelFormLoading}
+                            />
+                            <datalist id="ipAddress-options">
+                              <option value="136.66.72.191">136.66.72.191 (new)</option>
+                              <option value="72.167.225.142">72.167.225.142 (old)</option>
+                            </datalist>
+                          </>
+                        ) : (
+                          <select
+                            {...register("ipAddress")}
+                            className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                              errors.ipAddress ? "border-[var(--status-danger-border)]" : ""
+                            }`}
+                            disabled={panelFormLoading}
+                          >
+                            <option value="136.66.72.191">136.66.72.191 (new)</option>
+                            <option value="72.167.225.142">72.167.225.142 (old)</option>
+                          </select>
+                        )}
                         {errors.ipAddress && (
                           <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {errors.ipAddress.message}
@@ -3154,14 +3174,34 @@ export function AdminSettings() {
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           IP Address (Default is autofilled)
                         </label>
-                        <input
-                          {...registerEditPanel("ipAddress")}
-                          className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            editPanelErrors.ipAddress ? "border-[var(--status-danger-border)]" : ""
-                          }`}
-                          placeholder="e.g., 72.167.225.142"
-                          disabled={editPanelFormLoading || !hasRole(["super_admin"])}
-                        />
+                        {hasRole(["super_admin"]) ? (
+                          <>
+                            <input
+                              {...registerEditPanel("ipAddress")}
+                              list="edit-ipAddress-options"
+                              className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                                editPanelErrors.ipAddress ? "border-[var(--status-danger-border)]" : ""
+                              }`}
+                              placeholder="e.g., 72.167.225.142"
+                              disabled={editPanelFormLoading}
+                            />
+                            <datalist id="edit-ipAddress-options">
+                              <option value="136.66.72.191">136.66.72.191 (new)</option>
+                              <option value="72.167.225.142">72.167.225.142 (old)</option>
+                            </datalist>
+                          </>
+                        ) : (
+                          <select
+                            {...registerEditPanel("ipAddress")}
+                            className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                              editPanelErrors.ipAddress ? "border-[var(--status-danger-border)]" : ""
+                            }`}
+                            disabled={editPanelFormLoading}
+                          >
+                            <option value="136.66.72.191">136.66.72.191 (new)</option>
+                            <option value="72.167.225.142">72.167.225.142 (old)</option>
+                          </select>
+                        )}
                         {editPanelErrors.ipAddress && (
                           <p className="mt-1 text-[12px] text-[var(--color-error)]">
                             {editPanelErrors.ipAddress.message}
