@@ -4,7 +4,7 @@ import { useCompanies } from "../hooks/useCompanies";
 import { useBranches } from "../hooks/useBranches";
 import { ReportsService, AuditLogFilters } from "../api/ReportsService";
 import { AuditLog } from "../types";
-import { Loader2, Search, FileText, AlertCircle, Building2, MapPin, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { Loader2, Search, FileText, AlertCircle, Building2, MapPin, ChevronLeft, ChevronRight, Download, CheckCircle, Clock } from "lucide-react";
 import * as xlsx from "xlsx";
 
 
@@ -153,8 +153,54 @@ export function Reports() {
         </button>
       </div>
 
-      <div className="px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)]">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="px-6 py-6 border-b border-[var(--border-subtle)] bg-[var(--surface-base)]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] flex items-center gap-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+            <div className="h-12 w-12 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+              <FileText className="h-6 w-6 text-[var(--accent)]" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Total Events (Page)</p>
+              <p className="text-3xl font-black text-[var(--text-primary)]">{logs.length}</p>
+            </div>
+          </div>
+          <div className="p-5 rounded-2xl border border-green-500/20 bg-green-500/5 flex items-center gap-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+            <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+              <CheckCircle className="h-6 w-6 text-green-500" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-green-600">Successful Events</p>
+              <p className="text-3xl font-black text-green-500">{logs.filter(l => l.result === 'SUCCESS').length}</p>
+            </div>
+          </div>
+          <div className="p-5 rounded-2xl border border-red-500/20 bg-red-500/5 flex items-center gap-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+            <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-red-500" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-red-600">Failed Events</p>
+              <p className="text-3xl font-black text-red-500">{logs.filter(l => l.result === 'FAIL').length}</p>
+            </div>
+          </div>
+          <div className="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/5 flex items-center gap-5 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+            <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <Building2 className="h-6 w-6 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Active Branches</p>
+              <p className="text-3xl font-black text-blue-500">{new Set(logs.map(l => l.branchId).filter(Boolean)).size}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-6 py-5 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)]">
+        <div className="flex flex-col gap-4">
+          <h2 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <Search className="h-4 w-4 text-[var(--accent)]" /> 
+            Advanced Filtering
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {hasRole(["super_admin"]) && (
             <div>
               <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
@@ -219,8 +265,8 @@ export function Reports() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-              Date Range
+            <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              <Clock className="h-3 w-3" /> Date Range
             </label>
             <select
               className="control-field h-9 w-full rounded-[6px] px-3 text-[12px]"
@@ -233,6 +279,7 @@ export function Reports() {
               <option value="all">All Time</option>
             </select>
           </div>
+        </div>
         </div>
       </div>
 
@@ -308,11 +355,13 @@ export function Reports() {
                       {log.command || '-'}
                     </td>
                     <td className="px-5 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-[6px] text-[10px] font-bold tracking-wide uppercase ${
-                        log.result === 'SUCCESS' ? 'bg-[var(--status-success-bg)] text-[var(--color-success)]' :
-                        log.result === 'FAIL' ? 'bg-[var(--status-danger-bg)] text-[var(--color-error)]' :
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold tracking-wide uppercase shadow-sm transition-all ${
+                        log.result === 'SUCCESS' ? 'bg-green-500/10 text-green-600 border border-green-500/20' :
+                        log.result === 'FAIL' ? 'bg-red-500/10 text-red-600 border border-red-500/20' :
                         'bg-[var(--surface-raised)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
                       }`}>
+                        {log.result === 'SUCCESS' && <CheckCircle className="h-3 w-3" />}
+                        {log.result === 'FAIL' && <AlertCircle className="h-3 w-3" />}
                         {log.result}
                       </span>
                     </td>

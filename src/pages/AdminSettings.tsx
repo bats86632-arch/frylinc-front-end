@@ -37,7 +37,12 @@ import {
   MapPin,
   ChevronRight,
   Camera,
+  Flame,
+  Shield,
+  Smartphone,
+  Download,
 } from "lucide-react";
+import apiClient from "../api/axios";
 import { CopyButton } from "../components/CopyButton";
 import { CreateUserModal } from "../components/CreateUserModal";
 import { ApiKeysSection } from "../components/ApiKeysSection";
@@ -163,6 +168,9 @@ export function AdminSettings() {
   const [bulkPanelUploadModalOpen, setBulkPanelUploadModalOpen] = useState(false);
   const [bulkPanelUploading, setBulkPanelUploading] = useState(false);
 
+  const [bulkUserUploading, setBulkUserUploading] = useState(false);
+  const [userUploadSummary, setUserUploadSummary] = useState<{total: number, success: number, failed: number, errors: string[]} | null>(null);
+
   // Logo upload state
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
@@ -195,6 +203,7 @@ export function AdminSettings() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<PanelFormData>({
     resolver: zodResolver(panelSchema),
@@ -483,6 +492,72 @@ export function AdminSettings() {
       setError(getApiErrorMessage(err, "Bulk panel upload failed"));
     } finally {
       setBulkPanelUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const downloadUserTemplate = async () => {
+    try {
+      const XLSX = await import("xlsx");
+      const templateData = [
+        {
+          email: "user@example.com",
+          password: "password123",
+          displayName: "John Doe",
+          role: "end_user",
+          companyId: "COMPANY_ID_HERE",
+          branchIds: "BRANCH_ID_1,BRANCH_ID_2",
+          phone: "+1234567890"
+        }
+      ];
+      
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(templateData);
+      XLSX.utils.book_append_sheet(wb, ws, "Users");
+      XLSX.writeFile(wb, "Users_Template.xlsx");
+    } catch (err) {
+      console.error("Error creating template", err);
+    }
+  };
+
+  const handleBulkUserUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setBulkUserUploading(true);
+    setUserUploadSummary(null);
+    try {
+      const XLSX = await import("xlsx");
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data);
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+
+      const usersToCreate = rows.map((row: any) => ({
+        email: row.email?.toString().trim(),
+        password: row.password?.toString().trim(),
+        displayName: row.displayName?.toString().trim(),
+        role: row.role?.toString().trim(),
+        companyId: row.companyId?.toString().trim(),
+        branchIds: row.branchIds ? row.branchIds.toString().split(",").map((s: string) => s.trim()) : [],
+        phone: row.phone?.toString().trim(),
+      })).filter((u: any) => u.email && u.password && u.role);
+
+      if (usersToCreate.length === 0) {
+        throw new Error("No valid users found in excel.");
+      }
+
+      const response = await apiClient.post('/users/bulk', { users: usersToCreate });
+      
+      if (response.data) {
+        setUserUploadSummary(response.data);
+      }
+      
+      await loadUsers();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Bulk user upload failed"));
+    } finally {
+      setBulkUserUploading(false);
       e.target.value = "";
     }
   };
@@ -2120,6 +2195,28 @@ export function AdminSettings() {
                     />
                   </div>
                   <button
+                    onClick={downloadUserTemplate}
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
+                  >
+                    <Download className="h-[14px] w-[14px]" />
+                    Template
+                  </button>
+                  <button
+                    onClick={() => document.getElementById("user-excel-upload")?.click()}
+                    disabled={bulkUserUploading}
+                    className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)] disabled:opacity-50"
+                  >
+                    {bulkUserUploading ? <Loader2 className="h-[14px] w-[14px] animate-spin" /> : <Plus className="h-[14px] w-[14px]" />}
+                    Upload
+                  </button>
+                  <input
+                    id="user-excel-upload"
+                    type="file"
+                    accept=".xlsx, .xls"
+                    className="hidden"
+                    onChange={handleBulkUserUpload}
+                  />
+                  <button
                     onClick={() => setUserFormOpen(true)}
                     className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
                   >
@@ -2381,6 +2478,34 @@ export function AdminSettings() {
 </div>
                 )}
               </div>
+              {userUploadSummary && (
+                <div className="absolute inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                  <div className="w-full max-w-md rounded-[16px] bg-[var(--surface-overlay)] p-6 shadow-2xl border border-[var(--border-subtle)] animate-fade-in-up">
+                    <h3 className="mb-4 text-[16px] font-bold text-[var(--text-primary)]">Upload Summary</h3>
+                    <div className="space-y-3 text-[13px] text-[var(--text-secondary)]">
+                      <p>Total processed: <span className="font-semibold text-[var(--text-primary)]">{userUploadSummary.total}</span></p>
+                      <p>Successfully created: <span className="font-semibold text-[var(--color-success)]">{userUploadSummary.success}</span></p>
+                      <p>Failed: <span className="font-semibold text-[var(--color-error)]">{userUploadSummary.failed}</span></p>
+                      {userUploadSummary.errors && userUploadSummary.errors.length > 0 && (
+                        <div className="mt-4 max-h-[150px] overflow-y-auto rounded bg-[var(--surface-base)] p-3 border border-[var(--border-subtle)] text-[12px]">
+                          <p className="font-semibold mb-2">Errors:</p>
+                          <ul className="list-disc pl-4 space-y-1 text-[var(--color-error)]">
+                            {userUploadSummary.errors.map((err, i) => (
+                              <li key={i}>{err}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setUserUploadSummary(null)}
+                      className="mt-6 w-full rounded-[8px] bg-[var(--accent)] py-2 text-[13px] font-medium text-[var(--text-on-accent)] transition-colors hover:bg-[var(--accent-hover)]"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>,
@@ -2594,15 +2719,37 @@ export function AdminSettings() {
                         <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
                           Panel Type
                         </label>
-                        <select
-                          {...register("panelType")}
-                          className="control-field w-full rounded-[6px] px-3 h-[36px] text-[13px]"
-                          disabled={panelFormLoading}
-                        >
-                          <option value="Fire Alarm">Fire Alarm</option>
-                          <option value="Security">Security</option>
-                          <option value="GSM Module">GSM Module</option>
-                        </select>
+                        <div className="grid grid-cols-3 gap-3">
+                          {[
+                            { value: "Fire Alarm", label: "Fire Alarm", icon: Flame },
+                            { value: "Security", label: "Security Panel", icon: Shield },
+                            { value: "GSM Module", label: "GSM Dialer", icon: Smartphone },
+                          ].map((type) => {
+                            const Icon = type.icon;
+                            const isSelected = (watch("panelType") || "Fire Alarm") === type.value;
+                            return (
+                              <button
+                                type="button"
+                                key={type.value}
+                                onClick={() => {
+                                  setValue("panelType", type.value as any);
+                                  if (type.value === "GSM Module") setValue("zoneCount", 0);
+                                }}
+                                disabled={panelFormLoading}
+                                className={`flex flex-col items-center justify-center gap-2 rounded-[8px] border p-3 transition-all ${
+                                  isSelected
+                                    ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)] shadow-sm"
+                                    : "border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-secondary)] hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
+                                }`}
+                              >
+                                <Icon className={`h-6 w-6 ${isSelected ? "text-[var(--accent)]" : "text-[var(--text-tertiary)]"}`} />
+                                <span className="text-[11px] font-semibold text-center leading-tight">
+                                  {type.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
 
                       <div>
@@ -2643,27 +2790,29 @@ export function AdminSettings() {
                         )}
                       </div>
 
-                      <div>
-                        <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                          Number of Zones (1-16)
-                        </label>
-                        <input
-                          type="number"
-                          {...register("zoneCount")}
-                          className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
-                            errors.zoneCount ? "border-[var(--status-danger-border)]" : ""
-                          }`}
-                          placeholder="8"
-                          min={1}
-                          max={8}
-                          disabled={panelFormLoading}
-                        />
-                        {errors.zoneCount && (
-                          <p className="mt-1 text-[12px] text-[var(--color-error)]">
-                            {errors.zoneCount.message}
-                          </p>
-                        )}
-                      </div>
+                      {watch("panelType") !== "GSM Module" && (
+                        <div>
+                          <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
+                            Number of Zones (1-16)
+                          </label>
+                          <input
+                            type="number"
+                            {...register("zoneCount")}
+                            className={`control-field w-full rounded-[6px] px-3 h-[36px] text-[13px] ${
+                              errors.zoneCount ? "border-[var(--status-danger-border)]" : ""
+                            }`}
+                            placeholder="8"
+                            min={1}
+                            max={16}
+                            disabled={panelFormLoading}
+                          />
+                          {errors.zoneCount && (
+                            <p className="mt-1 text-[12px] text-[var(--color-error)]">
+                              {errors.zoneCount.message}
+                            </p>
+                          )}
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>

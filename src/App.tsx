@@ -26,6 +26,9 @@ const Profile = lazy(() =>
 const PrivacyPolicy = lazy(() =>
   import("./pages/PrivacyPolicy").then((m) => ({ default: m.PrivacyPolicy })),
 );
+const HealthMonitor = lazy(() =>
+  import("./pages/HealthMonitor").then((m) => ({ default: m.HealthMonitor })),
+);
 const TermsOfService = lazy(() =>
   import("./pages/TermsOfService").then((m) => ({ default: m.TermsOfService })),
 );
@@ -74,6 +77,7 @@ function App() {
                   <Route path="/panel/:serial" element={<PanelDetail />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/map-zones" element={<MapZones />} />
+                  <Route path="/health" element={<HealthMonitor />} />
                   <Route
                     path="/reports"
                     element={

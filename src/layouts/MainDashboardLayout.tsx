@@ -12,6 +12,7 @@ import {
   Settings,
   User as UserIcon,
   X,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
@@ -50,6 +51,13 @@ const navigation: Array<{
     href: "/reports",
     icon: FileText,
     roles: ["super_admin", "head_office"],
+  },
+  {
+    name: "Health Monitoring System",
+    mobileName: "Health",
+    href: "/health",
+    icon: Activity,
+    roles: ["super_admin", "head_office", "system_integrator", "end_user"],
   },
 ];
 

@@ -22,12 +22,80 @@ import {
   BellOff,
   RotateCcw,
   Map,
-  ShieldOff
+  ShieldOff,
+  Wifi,
+  Activity
 } from "lucide-react";
 import { formatDateTime } from "../utils/formatters";
 import { Event } from "../types";
 
 type Tab = "zones" | "history" | "contacts";
+
+const getZoneStatusColors = (status: number) => {
+  switch(status) {
+    case 5: // Alarm
+      return {
+        bg: "bg-gradient-to-br from-[var(--status-danger-bg)] to-[var(--surface-raised)]",
+        border: "border-[var(--color-error)]",
+        text: "text-[var(--color-error)]",
+        shadow: "shadow-[0_0_20px_rgba(220,38,38,0.15)]",
+        blob: "bg-[var(--color-error)]",
+        icon: AlertTriangle,
+        iconBg: "bg-[var(--color-error)]/10 text-[var(--color-error)] animate-pulse",
+        label: "Status",
+        statusText: "Alarm"
+      };
+    case 4: // Pre-alarm
+      return {
+        bg: "bg-gradient-to-br from-[var(--status-warning-bg)] to-[var(--surface-raised)]",
+        border: "border-[var(--color-warning)]",
+        text: "text-[var(--color-warning)]",
+        shadow: "shadow-[0_0_20px_rgba(245,158,11,0.15)]",
+        blob: "bg-[var(--color-warning)]",
+        icon: AlertTriangle,
+        iconBg: "bg-[var(--color-warning)]/10 text-[var(--color-warning)] animate-pulse",
+        label: "Status",
+        statusText: "Pre-alarm"
+      };
+    case 3: // Fault
+      return {
+        bg: "bg-gradient-to-br from-yellow-500/10 to-[var(--surface-raised)]",
+        border: "border-yellow-500",
+        text: "text-yellow-600",
+        shadow: "shadow-[0_0_20px_rgba(234,179,8,0.15)]",
+        blob: "bg-yellow-500",
+        icon: AlertTriangle,
+        iconBg: "bg-yellow-500/10 text-yellow-600",
+        label: "Status",
+        statusText: "Fault"
+      };
+    case 2: // Isolated
+      return {
+        bg: "bg-[var(--surface-raised)]",
+        border: "border-sky-500",
+        text: "text-sky-500",
+        shadow: "shadow-none",
+        blob: "bg-sky-500",
+        icon: ShieldOff,
+        iconBg: "bg-sky-500/10 text-sky-500",
+        label: "Status",
+        statusText: "Isolated"
+      };
+    case 1: // Normal
+    default:
+      return {
+        bg: "bg-[var(--surface-raised)] hover:border-[var(--border-strong)]",
+        border: "border-[var(--border-subtle)]",
+        text: "text-[var(--text-primary)]",
+        shadow: "shadow-none",
+        blob: "",
+        icon: Shield,
+        iconBg: "bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)]",
+        label: "Status",
+        statusText: "Normal"
+      };
+  }
+};
 
 const tabs: Array<{ id: Tab; label: string; icon: typeof Settings }> = [
   { id: "zones", label: "Zones", icon: Settings },
@@ -72,12 +140,7 @@ export function PanelDetail() {
     commandSuccessTimeoutRef.current = setTimeout(() => setCommandSuccess(null), 2000);
   }, []);
 
-  const commandErrorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const showCommandError = useCallback((err: string) => {
-    setCommandError(err);
-    if (commandErrorTimeoutRef.current) clearTimeout(commandErrorTimeoutRef.current);
-    commandErrorTimeoutRef.current = setTimeout(() => setCommandError(null), 2000);
-  }, []);
+
 
   const syncSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const showSyncSuccess = useCallback((slot: string) => {
@@ -242,7 +305,7 @@ export function PanelDetail() {
 
   const normalizedPanel = {
     ...panel,
-    zones: Array.isArray(panel.zones) ? panel.zones : [],
+    zones: Array.isArray(panel.zones) ? panel.zones.map(z => typeof z === 'boolean' ? (z ? 5 : 1) : (typeof z === 'number' ? z : 1)) : [],
     allowedCommands: Array.isArray(panel.allowedCommands)
       ? panel.allowedCommands
       : [],
@@ -389,22 +452,73 @@ export function PanelDetail() {
               </div>
               {/* All action buttons on one row, wrapping on very small screens */}
               <div className="flex flex-wrap items-center gap-3">
-                <button
-                  onClick={() => handleSendCommand("ZONE OFF")}
-                  disabled={commandLoading !== null}
-                  className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
-                >
-                  {commandLoading === "ZONE OFF" ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellOff className="h-4 w-4" />}
-                  Silence All
-                </button>
-                <button
-                  onClick={() => handleSendCommand("ARM")}
-                  disabled={commandLoading !== null}
-                  className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
-                >
-                  {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
-                  Evacuate
-                </button>
+                {panel.panelType === "Security" ? (
+                  <>
+                    <button
+                      onClick={() => handleSendCommand("ARM_SYS")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "ARM_SYS" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                      Arm System
+                    </button>
+                    <button
+                      onClick={() => handleSendCommand("DISARM_SYS")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-success-border)] bg-[var(--status-success-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-success)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "DISARM_SYS" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
+                      Disarm System
+                    </button>
+                    <button
+                      onClick={() => handleSendCommand("PANIC")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-warning)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "PANIC" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
+                      Panic
+                    </button>
+                  </>
+                ) : panel.panelType === "GSM Module" ? (
+                  <>
+                    <button
+                      onClick={() => handleSendCommand("PING")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-success-border)] bg-[var(--status-success-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-success)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "PING" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
+                      Ping Module
+                    </button>
+                    <button
+                      onClick={() => handleSendCommand("CHECK_SIG")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "CHECK_SIG" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Activity className="h-4 w-4" />}
+                      Check Signal
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleSendCommand("ZONE OFF")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "ZONE OFF" ? <Loader2 className="h-4 w-4 animate-spin" /> : <BellOff className="h-4 w-4" />}
+                      Silence All
+                    </button>
+                    <button
+                      onClick={() => handleSendCommand("ARM")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                      Evacuate
+                    </button>
+                  </>
+                )}
+                
                 <button
                   onClick={() => setActiveTab("contacts")}
                   className="flex items-center justify-center gap-2 rounded-[8px] border px-4 py-2 text-[13px] font-semibold transition-all duration-200 border-[var(--border-subtle)] bg-[var(--surface-raised)] text-[var(--text-primary)] hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)] shadow-sm"
@@ -412,74 +526,67 @@ export function PanelDetail() {
                   <Settings className="h-4 w-4 text-[var(--accent)]" />
                   Configure MOB
                 </button>
-                <Link
-                  to={`/map-zones?panelId=${serial}`}
-                  className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-4 py-2 text-[13px] font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
-                >
-                  <Map className="h-4 w-4" />
-                  View GMS
-                </Link>
+                {panel.panelType !== "GSM Module" && (
+                  <Link
+                    to={`/map-zones?panelId=${serial}`}
+                    className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-4 py-2 text-[13px] font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
+                  >
+                    <Map className="h-4 w-4" />
+                    View GMS
+                  </Link>
+                )}
               </div>
             </div>
 
+            {panel.panelType !== "GSM Module" && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {Array.from({ length: visibleZones }).map((_, idx) => {
                 const zoneNum = idx + 1;
-                const zoneAlarm = normalizedPanel.zones[idx] || false;
+                const zoneStatus = normalizedPanel.zones[idx] || 1;
+                const statusStyles = getZoneStatusColors(zoneStatus);
+                const isAlarmOrPre = zoneStatus === 4 || zoneStatus === 5;
                 
-                const armCmd = `ARM ${zoneNum}`;
                 const resetCmd = `RESET ${zoneNum}`;
+                const isolateCmd = `ISOLATE ${zoneNum}`;
                 
                 const isEuRestricted = isStrictlyEndUser;
 
                 return (
                   <div
                     key={idx}
-                    className={`relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${
-                      zoneAlarm
-                        ? "border-[var(--color-error)] shadow-[0_0_20px_rgba(220,38,38,0.15)] bg-gradient-to-br from-[var(--status-danger-bg)] to-[var(--surface-raised)]"
-                        : "border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:border-[var(--border-strong)]"
-                    }`}
+                    className={`relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${statusStyles.bg} ${statusStyles.border} ${statusStyles.shadow}`}
                   >
                     {/* Top status bar */}
                     <div className="flex items-center justify-between relative z-10">
                       <div className="flex flex-col">
-                        <span className={`text-xs font-bold tracking-widest uppercase ${zoneAlarm ? "text-[var(--color-error)]" : "text-[var(--text-tertiary)]"}`}>
-                          Status
+                        <span className={`text-xs font-bold tracking-widest uppercase ${statusStyles.text}`}>
+                          {statusStyles.label} - {statusStyles.statusText}
                         </span>
-                        <span className={`text-xl font-black tracking-tight ${zoneAlarm ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
+                        <span className={`text-xl font-black tracking-tight ${isAlarmOrPre ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
                           Zone {zoneNum}
                         </span>
                       </div>
-                      {zoneAlarm ? (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-error)]/10 text-[var(--color-error)] animate-pulse">
-                          <AlertTriangle className="h-5 w-5" />
-                        </div>
-                      ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-                          <Shield className="h-4 w-4" />
-                        </div>
-                      )}
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${statusStyles.iconBg}`}>
+                        <statusStyles.icon className="h-5 w-5" />
+                      </div>
                     </div>
 
                     {/* Controls Divider */}
-                    <div className={`h-[1px] w-full ${zoneAlarm ? 'bg-[var(--color-error)]/20' : 'bg-[var(--border-subtle)]'}`} />
+                    <div className={`h-[1px] w-full ${isAlarmOrPre ? 'bg-[var(--color-error)]/20' : 'bg-[var(--border-subtle)]'}`} />
 
                     {/* Control Panel Buttons */}
                     <div className="grid grid-cols-1 gap-2.5 relative z-10 mt-auto">
-                      {/* Action buttons with glassmorphic aesthetic */}
-
-                      
                       <div className="grid grid-cols-2 gap-2.5">
                         <button
-                          onClick={() => showCommandError("This feature is coming soon. We are working on it.")}
-                          className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 ${
-                            zoneAlarm 
+                          onClick={() => handleSendCommand(isolateCmd)}
+                          disabled={!panel.ipAddress || commandLoading !== null || isEuRestricted}
+                          className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            isAlarmOrPre 
                               ? "border-[var(--color-warning)]/30 bg-[var(--status-warning-bg)] text-[var(--color-warning)] hover:border-[var(--color-warning)] hover:shadow-lg hover:shadow-[var(--color-warning)]/20" 
                               : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 text-[var(--text-secondary)] hover:border-[var(--color-warning)] hover:text-[var(--color-warning)]"
                           }`}
                         >
-                           <ShieldOff className="h-4 w-4" />
+                           {commandLoading === isolateCmd ? <Loader2 className="h-4 w-4 animate-spin" /> : commandSuccess === isolateCmd ? <CheckCircle className="h-4 w-4" /> : <ShieldOff className="h-4 w-4" />}
                            <span className="text-xs font-bold uppercase tracking-wider">Isolate</span>
                         </button>
                         
@@ -487,7 +594,7 @@ export function PanelDetail() {
                           onClick={() => handleResetZone(idx)}
                           disabled={commandLoading !== null || isEuRestricted}
                           className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                            zoneAlarm 
+                            isAlarmOrPre 
                               ? "border-[var(--color-success)]/30 bg-[var(--status-success-bg)] text-[var(--color-success)] hover:border-[var(--color-success)] hover:shadow-lg hover:shadow-[var(--color-success)]/20" 
                               : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 text-[var(--text-secondary)] hover:border-[var(--color-success)] hover:text-[var(--color-success)]"
                           }`}
@@ -499,13 +606,14 @@ export function PanelDetail() {
                     </div>
                     
                     {/* Background decorative blob for alarm state */}
-                    {zoneAlarm && (
-                      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[var(--color-error)] blur-[50px] opacity-20 pointer-events-none" />
+                    {statusStyles.blob && (
+                      <div className={`absolute -right-10 -top-10 h-32 w-32 rounded-full ${statusStyles.blob} blur-[50px] opacity-20 pointer-events-none`} />
                     )}
                   </div>
                 );
               })}
             </div>
+            )}
           </section>
         </div>
       )}
