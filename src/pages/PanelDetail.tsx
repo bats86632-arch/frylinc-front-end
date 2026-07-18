@@ -684,7 +684,7 @@ export function PanelDetail() {
                             className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide ${
                               event.type.includes("alarm")
                                 ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] text-[var(--color-error)]"
-                                : event.type.includes("warning")
+                                : event.type.includes("warning") || event.type === "fault"
                                   ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)]"
                                   : "border-[var(--border-subtle)] bg-[var(--surface-overlay)] text-[var(--text-secondary)]"
                             }`}
@@ -711,13 +711,18 @@ export function PanelDetail() {
                             </span>
                           )}
                           {event.raw && <span className="font-mono text-xs">{event.raw}</span>}
-                          {event.zone && <span>Zone {event.zone}</span>}
-                          {event.details && <span>{event.details}</span>}
-                          {(!event.command && !event.raw && !event.zone && !event.details) && <span className="text-[var(--text-secondary)]">-</span>}
                           
-                          {event.zoneNumber && (
+                          {/* If it's a fault, display the faultType prominently */}
+                          {(event as any).faultType && (
+                            <span className="capitalize font-medium text-[var(--color-warning)] mr-2">{(event as any).faultType}</span>
+                          )}
+                          
+                          {event.details && <span>{event.details}</span>}
+                          {(!event.command && !event.raw && !(event as any).faultType && !event.details) && <span className="text-[var(--text-secondary)]">-</span>}
+                          
+                          {(event.zone || event.zoneNumber) && (
                             <span className="ml-2 font-mono tabular-nums text-[var(--text-secondary)]">
-                              (Zone {event.zoneNumber})
+                              (Zone {event.zone || event.zoneNumber})
                             </span>
                           )}
                         </td>
