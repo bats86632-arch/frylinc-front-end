@@ -270,6 +270,11 @@ export function MapZones() {
     (index: number): boolean => (selectedPanel?.zones?.[index] === 2 || selectedPanel?.zones?.[index] === true),
     [selectedPanel]
   );
+  
+  const zoneIsIsolated = useCallback(
+    (index: number): boolean => (selectedPanel?.zones?.[index] === 5),
+    [selectedPanel]
+  );
   const anyAlarm = Boolean(selectedPanel?.alarm);
 
   // ── Zone change handler ──────────────────────────────────────────────────
@@ -683,6 +688,7 @@ export function MapZones() {
                   <ZoneRect
                     zone={zone}
                     isAlarm={zoneIsAlarm(idx)}
+                    isIsolated={zoneIsIsolated(idx)}
                     isSelected={selectedZoneIdx === idx}
                     isReadOnly={!canEdit}
                     isOrphan={isOrphan}

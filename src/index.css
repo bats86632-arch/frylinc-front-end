@@ -460,6 +460,9 @@ button, input, select, textarea {
     .zone-alarm-pulse {
         animation: zone-alarm-pulse 0.55s ease-in-out infinite;
     }
+    .zone-isolated-pulse {
+        animation: zone-isolated-pulse 0.75s ease-in-out infinite;
+    }
     .map-border-alarm {
         animation: map-border-alarm 0.65s ease-in-out infinite;
         border: 2px solid rgba(209, 52, 56, 0.6) !important;
@@ -538,6 +541,20 @@ button, input, select, textarea {
         opacity: 0.82;
         box-shadow: 0 0 0 4px rgba(209, 52, 56, 0.3),
                     0 0 24px 8px rgba(209, 52, 56, 0.7);
+    }
+}
+
+/* Yellow strobe-like blink for isolated zones */
+@keyframes zone-isolated-pulse {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(212, 148, 14, 0),
+                    0 0 12px 2px rgba(212, 148, 14, 0.4);
+    }
+    50% {
+        opacity: 0.85;
+        box-shadow: 0 0 0 4px rgba(212, 148, 14, 0.25),
+                    0 0 24px 8px rgba(212, 148, 14, 0.6);
     }
 }
 

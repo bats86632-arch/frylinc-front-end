@@ -6,6 +6,8 @@ interface ZoneRectProps {
   zone: ZoneLayout;
   /** Whether this zone is currently in fire alarm state */
   isAlarm: boolean;
+  /** Whether this zone is isolated */
+  isIsolated?: boolean;
   /** Whether this zone is selected for editing */
   isSelected: boolean;
   /** If true, drag/resize interactions are disabled */
@@ -32,6 +34,7 @@ type ResizeHandle =
 export function ZoneRect({
   zone,
   isAlarm,
+  isIsolated,
   isSelected,
   isReadOnly,
   isOrphan = false,
@@ -155,6 +158,10 @@ export function ZoneRect({
     // Solid red fill, white label, aggressive pulse glow
     rectClass +=
       "bg-[var(--color-error)] border-2 border-[rgba(209,52,56,0.9)] zone-alarm-pulse ";
+  } else if (isIsolated) {
+    // Yellow pulse
+    rectClass +=
+      "bg-[var(--color-warning)] border-2 border-[var(--color-warning)] zone-isolated-pulse ";
   } else if (isOrphan) {
     // Dashed red border, reduced opacity — orphaned zone warning
     rectClass +=
