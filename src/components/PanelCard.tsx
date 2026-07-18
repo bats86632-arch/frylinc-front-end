@@ -65,11 +65,12 @@ interface PanelCardProps {
               )}
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-sans text-[1.1rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
                   {panel.name}
                 </h3>
-                {/* 8px inline dot */}
+                <PanelTypeBadge type={panel.panelType} size="sm" />
+                {/* status dot */}
                 {!panel.alarm && (
                   <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
                 )}
@@ -79,10 +80,7 @@ interface PanelCardProps {
                   </span>
                 )}
               </div>
-              <div className="mt-1 flex items-center gap-2">
-                <PanelTypeBadge type={panel.panelType} size="sm" />
-              </div>
-              <div className="mt-2 flex items-center gap-2 text-[12px] font-medium tracking-wide text-[var(--text-secondary)]">
+              <div className="mt-1.5 flex items-center gap-2 text-[12px] font-medium tracking-wide text-[var(--text-secondary)]">
                 <Hash className="h-3 w-3" />
                 <span>{panel.serial}</span>
               </div>
