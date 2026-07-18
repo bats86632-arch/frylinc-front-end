@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { formatDateTime } from "../utils/formatters";
 import { Event } from "../types";
+import { PanelTypeBadge } from "../components/PanelTypeBadge";
 
 type Tab = "zones" | "history" | "contacts";
 
@@ -346,6 +347,7 @@ export function PanelDetail() {
                 <h1 className="font-sans text-[22px] font-bold tracking-tight text-[var(--text-primary)]">
                   {normalizedPanel.name}
                 </h1>
+                <PanelTypeBadge type={normalizedPanel.panelType} size="md" className="ml-2" />
 
                 {hasAlarm && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-1.5 text-sm font-bold tracking-wide text-[var(--color-error)]">

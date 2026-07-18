@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Panel } from "../types";
-import { Activity, RadioTower, AlertTriangle, MapPin, Hash, CheckCircle, Clock } from "lucide-react";
+import { Activity, AlertTriangle, Hash } from "lucide-react";
 import { PanelService } from "../api/PanelService";
+import { PanelTypeBadge } from "./PanelTypeBadge";
 
 interface PanelCardProps {
   panel: Panel;
@@ -78,7 +79,10 @@ interface PanelCardProps {
                   </span>
                 )}
               </div>
-              <div className="mt-1 flex items-center gap-2 text-[12px] font-medium tracking-wide text-[var(--text-secondary)]">
+              <div className="mt-1 flex items-center gap-2">
+                <PanelTypeBadge type={panel.panelType} size="sm" />
+              </div>
+              <div className="mt-2 flex items-center gap-2 text-[12px] font-medium tracking-wide text-[var(--text-secondary)]">
                 <Hash className="h-3 w-3" />
                 <span>{panel.serial}</span>
               </div>

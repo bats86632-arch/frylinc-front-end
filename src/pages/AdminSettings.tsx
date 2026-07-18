@@ -48,6 +48,7 @@ import { CreateUserModal } from "../components/CreateUserModal";
 import { ApiKeysSection } from "../components/ApiKeysSection";
 import { ApiKeyService } from "../api/ApiKeyService";
 import { Key } from "lucide-react";
+import { PanelTypeBadge } from "../components/PanelTypeBadge";
 
 const panelSchema = z.object({
   serial: z.string().min(1, "Serial is required"),
@@ -3330,9 +3331,12 @@ export function AdminSettings() {
             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] bg-[var(--surface-muted)] border border-[var(--border-subtle)]">
               <div className={`h-[6px] w-[6px] rounded-full ${statusColor} shadow-sm`} />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate">{panel.name || "Unknown Panel"}</p>
-              <p className="text-[9px] text-[var(--text-secondary)] truncate">S/N: {panel.serial}</p>
+            <div className="flex-1 min-w-0 flex items-center justify-between mr-2">
+              <div>
+                <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate">{panel.name || "Unknown Panel"}</p>
+                <p className="text-[9px] text-[var(--text-secondary)] truncate">S/N: {panel.serial}</p>
+              </div>
+              <PanelTypeBadge type={panel.panelType} size="sm" />
             </div>
             {panel.serial && hasRole([
                                   "super_admin",
