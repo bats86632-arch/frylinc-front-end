@@ -266,13 +266,30 @@ export function MapZones() {
   }, [selectedPanel?.serial, selectedPanel?.zoneCount, panelMap]);
 
   // ── Zone alarm state (live from PanelsContext) ───────────────────────────
+  const getZoneIndexFromId = (zoneId: string) => {
+    const parts = zoneId.split('-Z');
+    if (parts.length > 1) {
+      const zNum = parseInt(parts[1], 10);
+      if (!isNaN(zNum)) return zNum - 1;
+    }
+    return -1;
+  };
+
   const zoneIsAlarm = useCallback(
-    (index: number): boolean => (selectedPanel?.zones?.[index] === 2 || selectedPanel?.zones?.[index] === true),
+    (zoneId: string): boolean => {
+      const idx = getZoneIndexFromId(zoneId);
+      if (idx === -1) return false;
+      return selectedPanel?.zones?.[idx] === 2 || selectedPanel?.zones?.[idx] === true;
+    },
     [selectedPanel]
   );
   
   const zoneIsIsolated = useCallback(
-    (index: number): boolean => (selectedPanel?.zones?.[index] === 5),
+    (zoneId: string): boolean => {
+      const idx = getZoneIndexFromId(zoneId);
+      if (idx === -1) return false;
+      return selectedPanel?.zones?.[idx] === 5;
+    },
     [selectedPanel]
   );
   const anyAlarm = Boolean(selectedPanel?.alarm);
@@ -687,8 +704,8 @@ export function MapZones() {
                 >
                   <ZoneRect
                     zone={zone}
-                    isAlarm={zoneIsAlarm(idx)}
-                    isIsolated={zoneIsIsolated(idx)}
+                    isAlarm={zoneIsAlarm(zone.zoneId)}
+                    isIsolated={zoneIsIsolated(zone.zoneId)}
                     isSelected={selectedZoneIdx === idx}
                     isReadOnly={!canEdit}
                     isOrphan={isOrphan}
