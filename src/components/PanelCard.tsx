@@ -23,7 +23,7 @@ interface PanelCardProps {
   };
 
   const zonesArray = Array.from({ length: targetCount }, (_, i) => {
-    const isAlarm = panel.zones && i < panel.zones.length ? Boolean(panel.zones[i]) : false;
+    const isAlarm = panel.zones && i < panel.zones.length ? (panel.zones[i] === 2 || panel.zones[i] === true) : false;
     return {
       index: i,
       name: `Zone ${i + 1}`,

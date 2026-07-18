@@ -267,7 +267,7 @@ export function MapZones() {
 
   // ── Zone alarm state (live from PanelsContext) ───────────────────────────
   const zoneIsAlarm = useCallback(
-    (index: number): boolean => Boolean(selectedPanel?.zones?.[index]),
+    (index: number): boolean => (selectedPanel?.zones?.[index] === 2 || selectedPanel?.zones?.[index] === true),
     [selectedPanel]
   );
   const anyAlarm = Boolean(selectedPanel?.alarm);

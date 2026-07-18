@@ -35,7 +35,7 @@ type Tab = "zones" | "history" | "contacts";
 
 const getZoneStatusColors = (status: number) => {
   switch(status) {
-    case 5: // Alarm
+    case 2: // Alarm
       return {
         bg: "bg-gradient-to-br from-[var(--status-danger-bg)] to-[var(--surface-raised)]",
         border: "border-[var(--color-error)]",
@@ -71,7 +71,7 @@ const getZoneStatusColors = (status: number) => {
         label: "Status",
         statusText: "Fault"
       };
-    case 2: // Isolated
+    case 5: // Isolated
       return {
         bg: "bg-[var(--surface-raised)]",
         border: "border-sky-500",
@@ -307,7 +307,7 @@ export function PanelDetail() {
 
   const normalizedPanel = {
     ...panel,
-    zones: Array.isArray(panel.zones) ? panel.zones.map(z => typeof z === 'boolean' ? (z ? 5 : 1) : (typeof z === 'number' ? z : 1)) : [],
+    zones: Array.isArray(panel.zones) ? panel.zones.map(z => typeof z === 'boolean' ? (z ? 2 : 1) : (typeof z === 'number' ? z : 1)) : [],
     allowedCommands: Array.isArray(panel.allowedCommands)
       ? panel.allowedCommands
       : [],
@@ -318,7 +318,7 @@ export function PanelDetail() {
 
   const isOffline = normalizedPanel.manuallyMarkedOffline === true;
   const hasAlarm = normalizedPanel.alarm;
-  const activeZones = normalizedPanel.zones.filter(z => z === 4 || z === 5).length;
+  const activeZones = normalizedPanel.zones.filter(z => z === 4 || z === 2).length;
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
@@ -547,7 +547,7 @@ export function PanelDetail() {
                 const zoneNum = idx + 1;
                 const zoneStatus = normalizedPanel.zones[idx] || 1;
                 const statusStyles = getZoneStatusColors(zoneStatus);
-                const isAlarmOrPre = zoneStatus === 4 || zoneStatus === 5;
+                const isAlarmOrPre = zoneStatus === 4 || zoneStatus === 2;
                 
                 const resetCmd = `RESET ${zoneNum}`;
                 const isolateCmd = `ISO${zoneNum}`;
