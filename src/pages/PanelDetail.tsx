@@ -62,13 +62,13 @@ const getZoneStatusColors = (status: number) => {
       };
     case 5: // Isolated
       return {
-        bg: "bg-[var(--surface-raised)] hover:border-[var(--border-strong)]",
-        border: "border-[var(--border-subtle)]",
-        text: "text-[var(--text-primary)]",
+        bg: "bg-[var(--status-warning-bg)] hover:border-[var(--color-warning)]",
+        border: "border-[var(--status-warning-border)]",
+        text: "text-[var(--color-warning)]",
         shadow: "shadow-none",
         blob: "",
         icon: ShieldOff,
-        iconBg: "bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)]",
+        iconBg: "bg-[var(--surface-overlay)] text-[var(--color-warning)] border border-[var(--status-warning-border)]",
         label: "Status",
         statusText: "Isolated"
       };
@@ -302,7 +302,7 @@ export function PanelDetail() {
 
   const normalizedPanel = {
     ...panel,
-    zones: Array.isArray(panel.zones) ? panel.zones.map(z => typeof z === 'boolean' ? (z ? 5 : 1) : (typeof z === 'number' ? z : 1)) : [],
+    zones: Array.isArray(panel.zones) ? panel.zones.map(z => typeof z === 'boolean' ? (z ? 5 : 1) : (!isNaN(Number(z)) ? Number(z) : 1)) : [],
     allowedCommands: Array.isArray(panel.allowedCommands)
       ? panel.allowedCommands
       : [],
@@ -580,7 +580,7 @@ export function PanelDetail() {
                           title={!isNewIp ? "Upgrade your panel to the new infrastructure to use this feature." : undefined}
                           className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                             isIsolated 
-                              ? "border-[var(--color-warning)]/30 bg-[var(--status-warning-bg)] text-[var(--color-warning)] hover:border-[var(--color-warning)] hover:shadow-lg hover:shadow-[var(--color-warning)]/20" 
+                              ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[var(--color-warning)] hover:border-[var(--color-warning)] hover:shadow-lg hover:shadow-[var(--color-warning)]/20" 
                               : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 text-[var(--text-secondary)] hover:border-[var(--color-warning)] hover:text-[var(--color-warning)]"
                           }`}
                         >
