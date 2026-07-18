@@ -35,7 +35,7 @@ type Tab = "zones" | "history" | "contacts";
 
 const getZoneStatusColors = (status: number) => {
   switch(status) {
-    case 5: // Alarm
+    case 2: // Alarm (Fire)
       return {
         bg: "bg-gradient-to-br from-[var(--status-danger-bg)] to-[var(--surface-raised)]",
         border: "border-[var(--color-error)]",
@@ -47,19 +47,8 @@ const getZoneStatusColors = (status: number) => {
         label: "Status",
         statusText: "Alarm"
       };
-    case 4: // Pre-alarm
-      return {
-        bg: "bg-gradient-to-br from-[var(--status-warning-bg)] to-[var(--surface-raised)]",
-        border: "border-[var(--color-warning)]",
-        text: "text-[var(--color-warning)]",
-        shadow: "shadow-[0_0_20px_rgba(245,158,11,0.15)]",
-        blob: "bg-[var(--color-warning)]",
-        icon: AlertTriangle,
-        iconBg: "bg-[var(--color-warning)]/10 text-[var(--color-warning)] animate-pulse",
-        label: "Status",
-        statusText: "Pre-alarm"
-      };
-    case 3: // Fault
+    case 3: // Short / Fault
+    case 4: // Open / Fault
       return {
         bg: "bg-gradient-to-br from-yellow-500/10 to-[var(--surface-raised)]",
         border: "border-yellow-500",
@@ -71,15 +60,15 @@ const getZoneStatusColors = (status: number) => {
         label: "Status",
         statusText: "Fault"
       };
-    case 2: // Isolated
+    case 5: // Isolated
       return {
-        bg: "bg-[var(--surface-raised)]",
-        border: "border-sky-500",
-        text: "text-sky-500",
+        bg: "bg-[var(--surface-raised)] hover:border-[var(--border-strong)]",
+        border: "border-[var(--border-subtle)]",
+        text: "text-[var(--text-primary)]",
         shadow: "shadow-none",
-        blob: "bg-sky-500",
+        blob: "",
         icon: ShieldOff,
-        iconBg: "bg-sky-500/10 text-sky-500",
+        iconBg: "bg-[var(--surface-overlay)] text-[var(--text-secondary)] border border-[var(--border-subtle)]",
         label: "Status",
         statusText: "Isolated"
       };
@@ -218,6 +207,12 @@ export function PanelDetail() {
     try {
       await PanelService.resolveZoneAlarm(serial, zoneIndex);
       
+      // Optimistically send the command to the panel without waiting for acknowledgment
+      PanelService.sendCommand(serial, `RESET ${zoneIndex + 1}`).catch(err => {
+        console.error("Failed to send RESET command to panel:", err);
+      });
+      
+
       showCommandSuccess(commandId);
     } catch (err: unknown) {
       setCommandError(getApiErrorMessage(err, "Failed to reset zone"));
@@ -547,7 +542,8 @@ export function PanelDetail() {
                 const zoneNum = idx + 1;
                 const zoneStatus = normalizedPanel.zones[idx] || 1;
                 const statusStyles = getZoneStatusColors(zoneStatus);
-                const isAlarmOrPre = zoneStatus === 4 || zoneStatus === 5;
+                const isAlarmOrPre = zoneStatus === 2 || zoneStatus === 3 || zoneStatus === 4;
+                const isIsolated = zoneStatus === 5;
                 
                 const resetCmd = `RESET ${zoneNum}`;
                 const isolateCmd = `ISO${zoneNum}`;
@@ -583,7 +579,7 @@ export function PanelDetail() {
                           disabled={!panel.ipAddress || !isNewIp || commandLoading !== null || isEuRestricted}
                           title={!isNewIp ? "Upgrade your panel to the new infrastructure to use this feature." : undefined}
                           className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                            isAlarmOrPre 
+                            isIsolated 
                               ? "border-[var(--color-warning)]/30 bg-[var(--status-warning-bg)] text-[var(--color-warning)] hover:border-[var(--color-warning)] hover:shadow-lg hover:shadow-[var(--color-warning)]/20" 
                               : "border-[var(--border-subtle)] bg-[var(--surface-overlay)]/50 text-[var(--text-secondary)] hover:border-[var(--color-warning)] hover:text-[var(--color-warning)]"
                           }`}
