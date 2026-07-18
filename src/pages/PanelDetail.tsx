@@ -701,7 +701,7 @@ export function PanelDetail() {
                                   : "border-[var(--border-subtle)] bg-[var(--surface-overlay)] text-[var(--text-secondary)]"
                             }`}
                           >
-                            {event.type}
+                            {((event as any).faultType === "isolate" ? "isolate" : event.type)}
                           </span>
                         </td>
                         <td className="px-5 py-3.5">
