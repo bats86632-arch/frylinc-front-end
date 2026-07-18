@@ -5,6 +5,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { formatPanelName } from "../utils/formatters";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 import { UserService } from "../api/UserService";
 import { PanelService } from "../api/PanelService";
@@ -3333,7 +3335,7 @@ export function AdminSettings() {
             </div>
             <div className="flex-1 min-w-0 flex items-center justify-between mr-2">
               <div>
-                <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate">{panel.name || "Unknown Panel"}</p>
+                <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate">{formatPanelName(panel.name || "Unknown Panel", panel.panelType)}</p>
                 <p className="text-[9px] text-[var(--text-secondary)] truncate">S/N: {panel.serial}</p>
               </div>
               <PanelTypeBadge type={panel.panelType} size="sm" />

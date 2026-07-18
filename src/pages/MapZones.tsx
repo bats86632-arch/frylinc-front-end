@@ -1,3 +1,4 @@
+import { formatPanelName } from '../utils/formatters';
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -82,7 +83,7 @@ function PanelListItem({
             }`}
           />
           <span className="text-[12px] font-semibold truncate text-[var(--text-primary)]">
-            {panel.name}
+            {formatPanelName(panel.name || "", panel.panelType)}
           </span>
           <div className="ml-auto flex items-center justify-center mr-2">
             <PanelTypeIcon type={panel.panelType} className="h-3 w-3" />
@@ -743,7 +744,7 @@ export function MapZones() {
         <AlertTriangle className="h-4 w-4 text-[var(--color-error)] flex-shrink-0 animate-pulse" />
         <div className="min-w-0">
           <p className="text-[12px] font-bold text-[var(--color-error)]">
-            FIRE ALARM — {selectedPanel.name}
+            FIRE ALARM — {formatPanelName(selectedPanel.name || "", selectedPanel.panelType)}
           </p>
           <p className="text-[11px] text-[var(--status-danger-text)] mt-0.5">
             Active zones:{" "}

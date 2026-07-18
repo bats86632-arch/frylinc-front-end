@@ -1,3 +1,4 @@
+import { formatPanelName } from '../utils/formatters';
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
@@ -232,7 +233,7 @@ export function Dashboard() {
   const filteredPanels = activePanels.filter((panel) => {
     if (!panel) return false;
     const matchesSearch =
-      (panel.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      formatPanelName(panel.name || "", panel.panelType).toLowerCase().includes(searchQuery.toLowerCase()) ||
       (panel.serial || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus =
       filter === "all" ||

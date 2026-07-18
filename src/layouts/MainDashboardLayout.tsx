@@ -1,3 +1,4 @@
+import { formatPanelName } from '../utils/formatters';
 import { useMemo, useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -136,7 +137,7 @@ export function MainDashboardLayout() {
         .filter((panel) => panel && panel.alarm && !panel.clearedBy?.[userData?.uid || ""])
         .map((panel) => ({
           id: panel.serial,
-          title: panel.name || "Unknown Panel",
+          title: formatPanelName(panel.name || "Unknown Panel", panel.panelType),
           message: `Alarm active on ${panel.serial || "unknown"}`,
           seen: !!panel.seenBy?.[userData?.uid || ""]
         })),

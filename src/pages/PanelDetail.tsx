@@ -1,3 +1,4 @@
+import { formatPanelName } from '../utils/formatters';
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { usePanel } from "../hooks/usePanels";
@@ -345,7 +346,7 @@ export function PanelDetail() {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="font-sans text-[22px] font-bold tracking-tight text-[var(--text-primary)]">
-                  {normalizedPanel.name}
+                  {formatPanelName(normalizedPanel.name || "", normalizedPanel.panelType)}
                 </h1>
                 <PanelTypeBadge type={normalizedPanel.panelType} size="md" className="ml-2" />
 
