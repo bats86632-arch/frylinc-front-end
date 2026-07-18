@@ -8,9 +8,11 @@ interface PanelTypeBadgeProps {
 }
 
 export function PanelTypeBadge({ type, className = "", size = "md" }: PanelTypeBadgeProps) {
+  if (!type) return null;
+
   let bgClass = "bg-[var(--surface-raised)] border-[var(--border-subtle)]";
   let textClass = "text-[var(--text-secondary)]";
-  let label = type || "Standard";
+  let label = type;
 
   if (type === "Fire Alarm") {
     bgClass = "bg-red-500/10 border-red-500/20";

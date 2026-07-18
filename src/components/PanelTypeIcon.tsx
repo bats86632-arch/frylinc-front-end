@@ -7,6 +7,8 @@ interface PanelTypeIconProps {
 }
 
 export function PanelTypeIcon({ type, className = "h-4 w-4" }: PanelTypeIconProps) {
+  if (!type) return null;
+
   switch (type) {
     case "Fire Alarm":
       return <Flame className={`${className} text-[var(--color-error)]`} />;
@@ -15,6 +17,6 @@ export function PanelTypeIcon({ type, className = "h-4 w-4" }: PanelTypeIconProp
     case "GSM Module":
       return <Radio className={`${className} text-[var(--color-success)]`} />;
     default:
-      return <Cpu className={`${className} text-[var(--text-secondary)]`} />;
+      return null;
   }
 }
