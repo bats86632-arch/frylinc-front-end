@@ -562,9 +562,6 @@ export function PanelDetail() {
                     {/* Top status bar */}
                     <div className="flex items-center justify-between relative z-10">
                       <div className="flex flex-col">
-                        <span className={`text-xs font-bold tracking-widest uppercase ${statusStyles.text}`}>
-                          {statusStyles.label} - {statusStyles.statusText}
-                        </span>
                         <span className={`text-xl font-black tracking-tight ${isAlarmOrPre ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
                           Zone {zoneNum}
                         </span>
