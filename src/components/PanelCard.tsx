@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Panel } from "../types";
-import { Activity, AlertTriangle, Hash } from "lucide-react";
+import { Activity, AlertTriangle, Hash, MapPin, RadioTower, Clock, CheckCircle } from "lucide-react";
 import { PanelService } from "../api/PanelService";
 import { PanelTypeBadge } from "./PanelTypeBadge";
 
