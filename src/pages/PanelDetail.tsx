@@ -316,7 +316,7 @@ export function PanelDetail() {
 
   const isOffline = normalizedPanel.manuallyMarkedOffline === true;
   const hasAlarm = normalizedPanel.alarm;
-  const activeZones = normalizedPanel.zones.filter(Boolean).length;
+  const activeZones = normalizedPanel.zones.filter(z => z === 4 || z === 5).length;
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
