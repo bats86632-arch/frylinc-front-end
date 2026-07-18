@@ -478,7 +478,7 @@ export function PanelDetail() {
                       className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-warning)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
                       {commandLoading === "EVAC" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
-                      Evac
+                      Evacuate
                     </button>
                   </>
                 ) : panel.panelType === "GSM Module" ? (
