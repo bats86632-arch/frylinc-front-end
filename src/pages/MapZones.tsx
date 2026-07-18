@@ -841,17 +841,19 @@ export function MapZones() {
             </button>
 
             {selectedPanel ? (
-              <div className="min-w-0 flex items-center gap-2">
-                <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate">
-                  {selectedPanel.name}
-                </p>
-                <PanelTypeBadge type={selectedPanel.panelType} size="sm" />
-              </div>
-              <div className="mt-1">
-                <p className="text-[11px] text-[var(--text-secondary)] font-mono">
-                  {selectedPanel.serial} &middot; {selectedPanel.zoneCount}{" "}
-                  zone{selectedPanel.zoneCount !== 1 ? "s" : ""}
-                </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate">
+                    {selectedPanel.name}
+                  </p>
+                  <PanelTypeBadge type={selectedPanel.panelType} size="sm" />
+                </div>
+                <div className="mt-1">
+                  <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+                    {selectedPanel.serial} &middot; {selectedPanel.zoneCount}{" "}
+                    zone{selectedPanel.zoneCount !== 1 ? "s" : ""}
+                  </p>
+                </div>
               </div>
             ) : (
               <p className="text-[13px] font-medium text-[var(--text-secondary)]">
