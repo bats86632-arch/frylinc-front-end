@@ -302,7 +302,11 @@ export function PanelDetail() {
 
   const normalizedPanel = {
     ...panel,
-    zones: Array.isArray(panel.zones) ? panel.zones.map(z => typeof z === 'boolean' ? (z ? 5 : 1) : (!isNaN(Number(z)) ? Number(z) : 1)) : [],
+    zones: Array.isArray(panel.zones) ? panel.zones.map(z => {
+      if (typeof z === 'boolean') return z ? 2 : 1; // true = Alarm, false = Normal
+      const n = Number(z);
+      return !isNaN(n) && n > 0 ? n : 1; // valid number passes through, else Normal
+    }) : [],
     allowedCommands: Array.isArray(panel.allowedCommands)
       ? panel.allowedCommands
       : [],
@@ -559,7 +563,11 @@ export function PanelDetail() {
                     {/* Top status bar */}
                     <div className="flex items-center justify-between relative z-10">
                       <div className="flex flex-col">
-                        <span className={`text-xl font-black tracking-tight ${isAlarmOrPre ? "text-[var(--color-error)]" : "text-[var(--text-primary)]"}`}>
+                        <span className={`text-xl font-black tracking-tight ${
+                          isAlarmOrPre ? "text-[var(--color-error)]" 
+                          : isIsolated ? "text-[var(--color-warning)]" 
+                          : "text-[var(--text-primary)]"
+                        }`}>
                           Zone {zoneNum}
                         </span>
                       </div>
@@ -569,7 +577,11 @@ export function PanelDetail() {
                     </div>
 
                     {/* Controls Divider */}
-                    <div className={`h-[1px] w-full ${isAlarmOrPre ? 'bg-[var(--color-error)]/20' : 'bg-[var(--border-subtle)]'}`} />
+                    <div className={`h-[1px] w-full ${
+                      isAlarmOrPre ? 'bg-[var(--color-error)]/20' 
+                      : isIsolated ? 'bg-[var(--color-warning)]/20' 
+                      : 'bg-[var(--border-subtle)]'
+                    }`} />
 
                     {/* Control Panel Buttons */}
                     <div className="grid grid-cols-1 gap-2.5 relative z-10 mt-auto">
