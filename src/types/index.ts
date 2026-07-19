@@ -106,13 +106,22 @@ export interface ApiResponse<T> {
 
 // ── Map Zones ──────────────────────────────────────────────────────────────
 
+/** A single 2-D point, stored as percentages (0–100) of the container dimensions. */
+export interface PolyPoint {
+  x: number;
+  y: number;
+}
+
 export interface ZoneLayout {
   zoneId: string;    // e.g. "219111-Z3"
   label: string;     // e.g. "219111 — Zone 3"
-  x: number;         // percentage (0–100) from left of container
-  y: number;         // percentage (0–100) from top of container
-  width: number;     // percentage of container width
-  height: number;    // percentage of container height
+  /** Ordered closed polygon (last point connects back to first). Canonical shape. */
+  points: PolyPoint[];
+  // ── Legacy rect fields kept for auditability. Ignored by the polygon renderer. ──
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
 }
 
 export interface PanelMap {

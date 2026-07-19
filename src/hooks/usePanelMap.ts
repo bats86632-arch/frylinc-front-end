@@ -15,6 +15,7 @@ import { db, storage } from "../config/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { PanelMap, ZoneLayout } from "../types";
 import imageCompression from "browser-image-compression";
+import { migrateZone } from "../utils/polygonGeom";
 
 interface UsePanelMapReturn {
   panelMap: PanelMap | null;
@@ -49,7 +50,10 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
       mapDocRef,
       (snapshot) => {
         if (snapshot.exists()) {
-          setPanelMap(snapshot.data() as PanelMap);
+          const raw = snapshot.data() as PanelMap;
+          // Migrate legacy rect zones → polygon points transparently
+          const migratedZones = (raw.zones ?? []).map(migrateZone);
+          setPanelMap({ ...raw, zones: migratedZones });
         } else {
           setPanelMap(null);
         }
@@ -188,12 +192,14 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     if (!currentUser) throw new Error("Not authenticated");
     setSaving(true);
     try {
+      // Strip legacy rect fields — Firestore progressively migrates to polygon-only
+      const cleanZones = zones.map(({ zoneId, label, points }) => ({ zoneId, label, points }));
       const mapDocRef = doc(db, "panelMaps", panelId);
       // Merge so imageUrl/imagePath are not accidentally overwritten
       await setDoc(
         mapDocRef,
         {
-          zones,
+          zones: cleanZones,
           updatedAt: serverTimestamp(),
           updatedBy: currentUser.uid,
         },

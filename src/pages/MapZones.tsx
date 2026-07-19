@@ -23,12 +23,13 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
 import { usePanelMap } from "../hooks/usePanelMap";
-import { ZoneRect } from "../components/ZoneRect";
+import { ZonePoly } from "../components/ZonePoly";
 import { CopyButton } from "../components/CopyButton";
 import { PanelTypeIcon } from "../components/PanelTypeIcon";
 
 import { Panel, ZoneLayout } from "../types";
 import { PanelService } from "../api/PanelService";
+import { rectToPoints } from "../utils/polygonGeom";
 
 // Roles that can edit (upload, drag, resize, save)
 const EDIT_ROLES = ["super_admin", "secret_super_admin", "head_office", "system_integrator"] as const;
@@ -49,11 +50,12 @@ function buildZonesFromSaved(
   }));
 }
 
-/** Create a single new zone box at a sensible default position */
-function newZonePos(existingCount: number): Pick<ZoneLayout, "x" | "y" | "width" | "height"> {
+/** Create a single new zone box at a sensible default position, returned as a polygon. */
+function newZonePos(existingCount: number): Pick<ZoneLayout, "points"> {
   // Stagger new zones diagonally so they don't all pile up
   const offset = (existingCount % 8) * 5;
-  return { x: 5 + offset, y: 5 + offset, width: 20, height: 15 };
+  const x = 5 + offset, y = 5 + offset, w = 20, h = 15;
+  return { points: rectToPoints(x, y, w, h) };
 }
 
 // ── Panel Selector item ───────────────────────────────────────────────────────
@@ -149,6 +151,8 @@ export function MapZones() {
 
   // Container ref for coordinate system
   const containerRef = useRef<HTMLDivElement>(null);
+  // SVG overlay ref — shared by all ZonePoly instances
+  const svgRef = useRef<SVGSVGElement>(null);
 
   // Canvas outer scroll container ref
   const canvasScrollRef = useRef<HTMLDivElement>(null);
@@ -296,7 +300,7 @@ export function MapZones() {
 
   // ── Zone change handler ──────────────────────────────────────────────────
   const handleZoneChange = useCallback(
-    (idx: number, updated: Partial<ZoneLayout>) => {
+    (idx: number, updated: Pick<ZoneLayout, "points">) => {
       setLocalZones((prev) => {
         const next = [...prev];
         next[idx] = { ...next[idx], ...updated };
@@ -634,7 +638,7 @@ export function MapZones() {
           {/* Info tip */}
           <div className="flex items-center gap-1 text-[10px] text-[var(--text-quaternary)]">
             <Info className="h-3 w-3" />
-            <span>Drag to move · Drag corners to resize · Select a zone and press Delete to remove</span>
+            <span>Drag to move &middot; Drag vertices to reshape &middot; Hover edge + drag to add a bend &middot; Double-click vertex to remove it &middot; Select a zone and press Delete to remove</span>
           </div>
         </div>
       )}
@@ -685,42 +689,45 @@ export function MapZones() {
             style={{ width: "100%", height: "100%", display: "block", userSelect: "none" }}
           />
 
-          {/* Zone rectangle overlay — absolute-positioned container matching the image */}
+          {/* Zone SVG overlay — absolute-positioned, spans the full image */}
           <div
             ref={containerRef}
             className="absolute inset-0"
             style={{ pointerEvents: "none" }}
           >
-          <div className="relative w-full h-full" style={{ pointerEvents: "none" }}>
+          <svg
+            ref={svgRef}
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full"
+            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible" }}
+            onClick={handleCanvasClick}
+          >
             {localZones.map((zone, idx) => {
-              // Determine if this zone index exists in the panel's actual zones
               const isOrphan =
                 selectedPanel !== null && idx >= (selectedPanel.zoneCount ?? 0);
+              const zoneIdx = zone.zoneId ? parseInt(zone.zoneId.split('-Z')[1] || '0', 10) - 1 : idx;
 
               return (
-                <div
+                <ZonePoly
                   key={zone.zoneId}
-                  style={{ pointerEvents: canEdit ? "all" : "none", position: "absolute", inset: 0 }}
-                >
-                  <ZoneRect
-                    zone={zone}
-                    isAlarm={zoneIsAlarm(zone.zoneId)}
-                    isIsolated={zoneIsIsolated(zone.zoneId)}
-                    isEvacuatePulse={selectedPanel?.zones?.[5] === 2 || selectedPanel?.zones?.[5] === true}
-                    additionalLabel={(zoneIsAlarm(zone.zoneId) && idx === 4) ? " (Earth Fault)" : (zoneIsAlarm(zone.zoneId) && idx === 5) ? " (Evacuate)" : (zoneIsAlarm(zone.zoneId) && idx === 6) ? " (Low Battery)" : ""}
-                    isSelected={selectedZoneIdx === idx}
-                    isReadOnly={!canEdit}
-                    isOrphan={isOrphan}
-                    containerRef={containerRef as React.RefObject<HTMLDivElement>}
-                    onSelect={() => setSelectedZoneIdx(idx)}
-                    onChange={(updated) => handleZoneChange(idx, updated)}
-                    onRemove={canEdit ? () => handleRemoveZone(idx) : undefined}
-                  />
-                </div>
+                  zone={zone}
+                  isAlarm={zoneIsAlarm(zone.zoneId)}
+                  isIsolated={zoneIsIsolated(zone.zoneId)}
+                  isEvacuatePulse={selectedPanel?.zones?.[5] === 2 || selectedPanel?.zones?.[5] === true}
+                  additionalLabel={(zoneIsAlarm(zone.zoneId) && zoneIdx === 4) ? " (Earth Fault)" : (zoneIsAlarm(zone.zoneId) && zoneIdx === 5) ? " (Evacuate)" : (zoneIsAlarm(zone.zoneId) && zoneIdx === 6) ? " (Low Battery)" : ""}
+                  isSelected={selectedZoneIdx === idx}
+                  isReadOnly={!canEdit}
+                  isOrphan={isOrphan}
+                  svgRef={svgRef}
+                  onSelect={() => setSelectedZoneIdx(idx)}
+                  onChange={(updated) => handleZoneChange(idx, updated)}
+                  onRemove={canEdit ? () => handleRemoveZone(idx) : undefined}
+                />
               );
             })}
+          </svg>
           </div>
-        </div>
       </div>
     </div>
 
