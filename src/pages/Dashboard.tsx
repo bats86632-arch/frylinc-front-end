@@ -173,21 +173,24 @@ export function Dashboard() {
   // ── Role flags ──────────────────────────────────────────────────────────
   const role = userData?.role;
   const isSuperAdmin = role === "super_admin";
-  const isHoOrSi = role === "head_office" || role === "system_integrator";
+  const isSystemIntegrator = role === "system_integrator";
+  const isHoOrSi = role === "head_office" || isSystemIntegrator;
   const isEndUser = role === "end_user";
 
+  const canViewCompanies = isSuperAdmin || (isSystemIntegrator && (companies || []).length > 1);
+
   // ── View calculation ────────────────────────────────────────────────────
-  const viewBranches = isSuperAdmin
+  const viewBranches = canViewCompanies
     ? (branches || []).filter((b) => b.companyId === selectedCompanyId)
     : branches || [];
   
   const hasBranches = viewBranches.length > 0;
 
-  const showCompanyView = isSuperAdmin && !selectedCompanyId;
+  const showCompanyView = canViewCompanies && !selectedCompanyId;
   const showBranchView =
     hasBranches &&
-    ((isSuperAdmin && !!selectedCompanyId && selectedCompanyId !== "unassigned" && !selectedBranchId) ||
-    (isHoOrSi && !selectedBranchId));
+    ((canViewCompanies && !!selectedCompanyId && selectedCompanyId !== "unassigned" && !selectedBranchId) ||
+    (isHoOrSi && !canViewCompanies && !selectedBranchId));
   const showPanelView = !showCompanyView && !showBranchView;
 
   // ── Company stats ───────────────────────────────────────────────────────
@@ -216,7 +219,7 @@ export function Dashboard() {
 
   // ── Panel filtering ─────────────────────────────────────────────────────
   let activePanels = panels || [];
-  if (isSuperAdmin && selectedCompanyId) {
+  if (canViewCompanies && selectedCompanyId) {
     if (selectedCompanyId === "unassigned") {
       activePanels = activePanels.filter((p) => !p.companyId);
     } else {
@@ -284,7 +287,7 @@ export function Dashboard() {
   // ── Loading ─────────────────────────────────────────────────────────────
   const loading =
     panelsLoading ||
-    (isSuperAdmin && companiesLoading && showCompanyView) ||
+    (canViewCompanies && companiesLoading && showCompanyView) ||
     (showBranchView && branchesLoading);
 
   // ── Breadcrumb helpers ──────────────────────────────────────────────────
@@ -335,7 +338,7 @@ export function Dashboard() {
         {/* Breadcrumb / Back button */}
         {showBranchView && (
           <div className="flex items-center gap-3 animate-fade-in-up">
-            {isSuperAdmin && (
+            {canViewCompanies && (
               <button
                 onClick={() => {
                   setSelectedCompanyId(null);
@@ -349,7 +352,7 @@ export function Dashboard() {
               </button>
             )}
             <h2 className="text-[16px] font-bold text-[var(--text-primary)] flex items-center gap-2">
-              {isSuperAdmin ? (
+              {canViewCompanies ? (
                 <>
                   <Building2 className="h-4 w-4 text-[var(--text-secondary)]" />
                   {selectedCompanyName || "Branches"}
@@ -366,12 +369,12 @@ export function Dashboard() {
 
         {showPanelView && !isEndUser && (
           <div className="flex items-center gap-3 animate-fade-in-up">
-            {(isSuperAdmin || selectedBranchId) && (
+            {(canViewCompanies || selectedBranchId) && (
               <button
                 onClick={() => {
                   if (selectedBranchId) {
                     setSelectedBranchId(null);
-                  } else if (isSuperAdmin) {
+                  } else if (canViewCompanies) {
                     setSelectedCompanyId(null);
                   }
                   setSearchQuery("");
@@ -383,7 +386,7 @@ export function Dashboard() {
               </button>
             )}
             <h2 className="text-[16px] font-bold text-[var(--text-primary)] flex items-center gap-2">
-              {isSuperAdmin && selectedCompanyName && (
+              {canViewCompanies && selectedCompanyName && (
                 <>
                   <Building2 className="h-4 w-4 text-[var(--text-secondary)]" />
                   <span className="text-[var(--text-secondary)] font-medium">

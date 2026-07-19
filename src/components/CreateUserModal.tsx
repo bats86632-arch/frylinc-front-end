@@ -145,8 +145,12 @@ function getAvailableBranches(
   return [];
 }
 
-function isCompanyAutoSet(actorRole: Role): boolean {
-  return actorRole === "head_office" || actorRole === "system_integrator";
+function isCompanyAutoSet(actorRole: Role, actorData: any): boolean {
+  if (actorRole === "head_office") return true;
+  if (actorRole === "system_integrator") {
+    return !actorData?.assignments || Object.keys(actorData.assignments).length <= 1;
+  }
+  return false;
 }
 
 // ─── Helper: API Error Extraction ───────────────────────────────────────────
@@ -215,8 +219,8 @@ export function CreateUserModal({
   );
 
   const actorCompanyAutoSet = useMemo(
-    () => (actorRole ? isCompanyAutoSet(actorRole) : false),
-    [actorRole],
+    () => (actorRole ? isCompanyAutoSet(actorRole, actorData) : false),
+    [actorRole, actorData],
   );
 
   // ── Reset/populate on open or user change ──

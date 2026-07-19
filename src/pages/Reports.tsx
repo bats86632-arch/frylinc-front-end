@@ -172,7 +172,7 @@ export function Reports() {
     xlsx.writeFile(wb, `Audit_Logs_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  if (!hasRole(["super_admin", "head_office"])) {
+  if (!hasRole(["super_admin", "head_office", "system_integrator"])) {
     return (
       <div className="flex-1 p-8 flex items-center justify-center">
         <div className="text-center">
@@ -276,7 +276,7 @@ export function Reports() {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-          {hasRole(["super_admin"]) && (
+          {(hasRole(["super_admin"]) || (hasRole(["system_integrator"]) && companies.length > 1)) && (
             <div>
               <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                 <Building2 className="h-3 w-3" /> Organization

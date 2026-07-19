@@ -51,7 +51,7 @@ const navigation: Array<{
     name: "Reports",
     href: "/reports",
     icon: FileText,
-    roles: ["super_admin", "head_office"],
+    roles: ["super_admin", "head_office", "system_integrator"],
   },
   {
     name: "Health Monitoring System",
