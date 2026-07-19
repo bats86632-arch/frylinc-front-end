@@ -25,7 +25,7 @@ import { usePanels } from "../hooks/usePanels";
 import { usePanelMap } from "../hooks/usePanelMap";
 import { ZonePoly } from "../components/ZonePoly";
 import { CopyButton } from "../components/CopyButton";
-import { PanelTypeIcon } from "../components/PanelTypeIcon";
+
 
 import { Panel, ZoneLayout } from "../types";
 import { PanelService } from "../api/PanelService";
@@ -87,9 +87,6 @@ function PanelListItem({
           <span className="text-[12px] font-semibold truncate text-[var(--text-primary)]">
             {formatPanelName(panel.name || "", panel.panelType)}
           </span>
-          <div className="ml-auto flex items-center justify-center mr-2">
-            <PanelTypeIcon type={panel.panelType} className="h-3 w-3" />
-          </div>
         </div>
         <ChevronRight
           className={`flex-shrink-0 h-3.5 w-3.5 transition-colors ${
