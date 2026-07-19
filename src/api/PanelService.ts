@@ -17,9 +17,26 @@ export const PanelService = {
   },
 
   async sendCommand(serial: string, command: string): Promise<CommandResponse> {
-    console.log(`[BRIDGE] We're sending the commands thrice using the bridge: "${command}" to panel ${serial}`);
-    const response = await apiClient.post(`/panels/${serial}/commands`, { command, repeatCount: 3 });
-    return response.data;
+    if (command === "ZONE OFF") {
+      console.log(`[BRIDGE] We're sending the silence command 5 times over 5 seconds: "${command}" to panel ${serial}`);
+      // Send the first command immediately and wait for its response so the UI gets a prompt reply
+      const response = await apiClient.post(`/panels/${serial}/commands`, { command, repeatCount: 1 });
+      
+      // Fire and forget the remaining 4 commands, spaced 1 second apart
+      for (let i = 1; i < 5; i++) {
+        setTimeout(() => {
+          console.log(`[BRIDGE] Sending silence command (retry ${i}/4): "${command}" to panel ${serial}`);
+          apiClient.post(`/panels/${serial}/commands`, { command, repeatCount: 1 }).catch(e => {
+            console.error(`Failed to send silence command retry ${i}`, e);
+          });
+        }, i * 1000);
+      }
+      return response.data;
+    } else {
+      console.log(`[BRIDGE] We're sending the commands thrice using the bridge: "${command}" to panel ${serial}`);
+      const response = await apiClient.post(`/panels/${serial}/commands`, { command, repeatCount: 3 });
+      return response.data;
+    }
   },
 
   waitForCommandConfirmation(serial: string, commandId: string, timeoutMs: number = 15000): Promise<void> {
