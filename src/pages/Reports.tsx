@@ -275,9 +275,9 @@ export function Reports() {
             <Download className="h-3.5 w-3.5" /> Export
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="flex flex-col md:flex-row flex-wrap gap-4">
           {(hasRole(["super_admin"]) || (hasRole(["system_integrator"]) && companies.length > 1)) && (
-            <div>
+            <div className="flex-1 min-w-[200px]">
               <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                 <Building2 className="h-3 w-3" /> Organization
               </label>
@@ -292,7 +292,7 @@ export function Reports() {
             </div>
           )}
 
-          <div>
+          <div className="flex-1 min-w-[200px]">
             <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
               <MapPin className="h-3 w-3" /> Branch
             </label>
@@ -307,7 +307,7 @@ export function Reports() {
             </select>
           </div>
 
-          <div>
+          <div className="flex-1 min-w-[200px]">
             <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
               Search
             </label>
@@ -323,7 +323,7 @@ export function Reports() {
             </div>
           </div>
 
-          <div>
+          <div className="flex-1 min-w-[200px]">
             <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
               <Clock className="h-3 w-3" /> Date Range
             </label>
