@@ -334,13 +334,13 @@ export function ZonePoly({
 
       {/* ── Zone label ── */}
       <text
-        x={minX + 1}
-        y={minY + 1.5}
+        x={minX + 1.5}
+        y={minY + 2}
         textAnchor="start"
         dominantBaseline="central"
         fill="white"
         style={{
-          fontSize: "1.2%",
+          fontSize: "2.5",
           fontWeight: 700,
           fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
           pointerEvents: "none",
