@@ -1,5 +1,4 @@
 import { useRef, useCallback, useState } from "react";
-import { Trash2 } from "lucide-react";
 import { ZoneLayout, PolyPoint } from "../types";
 import {
   toSvgPoints,
@@ -309,9 +308,6 @@ export function ZonePoly({
   const zoneNumber = zone.zoneId.split("-Z")[1] || zone.label;
   const labelText = zoneNumber + (additionalLabel ?? "");
 
-  // Trash button position — centroid, offset up slightly
-  const trashX = centroid.x;
-  const trashY = Math.max(centroid.y - 5, 2);
 
   if (pts.length < 3) return null; // Cannot render degenerate zone
 
@@ -396,51 +392,6 @@ export function ZonePoly({
               title={pts.length > MIN_VERTICES ? "Double-click to remove point" : "Minimum 3 points"}
             />
           ))}
-
-          {/* Remove zone button — rendered as a foreignObject so we can use a real button */}
-          {onRemove && (
-            <foreignObject
-              x={trashX - 2}
-              y={trashY - 2}
-              width={4}
-              height={4}
-              style={{ pointerEvents: "all", overflow: "visible" }}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <button
-                  style={{
-                    width: "18px",
-                    height: "18px",
-                    borderRadius: "50%",
-                    background: "var(--color-error, #d13438)",
-                    border: "none",
-                    color: "white",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
-                    transform: "translate(-50%, -50%)",
-                    transition: "transform 100ms ease, background 100ms ease",
-                    padding: 0,
-                  }}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                  title="Remove zone"
-                >
-                  <Trash2 style={{ width: 9, height: 9 }} />
-                </button>
-              </div>
-            </foreignObject>
-          )}
         </>
       )}
 
