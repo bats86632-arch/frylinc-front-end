@@ -30,9 +30,9 @@ export function AuthLayout() {
           </div>
 
           {/* Hero - warm, non-techy messaging */}
-          <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-12 xl:pb-20">
+          <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-12 xl:pb-20 w-full">
             {/* Scrim wrapper for hero text */}
-            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)]/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-w-2xl w-full">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)]/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-full">
               <h1 className="font-sans text-[2.5rem] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] text-balance xl:text-[3.25rem]">
                 Your fire safety,
                 <br />
@@ -40,7 +40,7 @@ export function AuthLayout() {
                   always monitored.
                 </span>
               </h1>
-              <p className="mt-5 text-[1rem] leading-[1.6] text-[var(--text-secondary)] font-medium xl:text-[1.1rem]">
+              <p className="mt-5 text-[1rem] leading-[1.6] text-[var(--text-secondary)] font-medium xl:text-[1.1rem] max-w-3xl">
                 Fyrlinc keeps you connected to every fire alarm panel - so you can
                 respond faster when it matters most.
               </p>
