@@ -30,8 +30,14 @@ const trustPoints = [
 
 export function AuthLayout() {
   return (
-    <div className="auth-screen relative min-h-screen overflow-hidden bg-[var(--surface-base)] text-[var(--text-primary)]">
-      <div className="absolute inset-x-0 top-0 h-px bg-[var(--surface-hover)]" />
+    <div className="auth-screen relative min-h-screen overflow-hidden text-white">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/agni-building.jpeg')" }}
+      />
+      {/* Overlay to ensure readability */}
+      <div className="absolute inset-0 z-0 bg-black/60 dark:bg-black/70 backdrop-blur-[2px]" />
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
         {/* ── Left info panel (desktop only) ──────────────────────────────── */}
@@ -111,7 +117,7 @@ export function AuthLayout() {
         </section>
 
         {/* ── Right auth panel ────────────────────────────────────────────── */}
-        <main className="relative z-10 flex min-h-screen items-center justify-center bg-[var(--surface-base)] px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:border-l lg:border-[var(--border-subtle)] lg:px-12">
+        <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:border-l lg:border-[var(--border-subtle)] lg:px-12 lg:bg-[var(--surface-base)]/10 lg:backdrop-blur-md">
           <div className="relative z-10 w-full max-w-md animate-fade-in-up lg:max-w-[460px]">
             {/* Mobile brand */}
             <div className="mb-10 flex items-center justify-center gap-3 lg:hidden">

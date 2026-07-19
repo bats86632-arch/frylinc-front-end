@@ -133,7 +133,7 @@ export function Login() {
   };
 
   return (
-    <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in lg:rounded-[16px] lg:border-[var(--border-subtle)] lg:bg-[var(--surface-panel)] lg:p-11 lg:shadow-2xl">
+    <div className="surface-panel w-full rounded-[20px] p-8 sm:p-10 animate-fade-in border border-[var(--border-subtle)] bg-[var(--surface-panel)] shadow-xl lg:rounded-[16px] lg:p-11 lg:shadow-2xl">
       {/* Header */}
       <div className="mb-8 lg:mb-9">
         <div className="mb-6">
