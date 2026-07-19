@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useCompanies } from "../hooks/useCompanies";
 import { useBranches } from "../hooks/useBranches";
+import { usePanels } from "../hooks/usePanels";
 import { ReportsService, AuditLogFilters } from "../api/ReportsService";
 import { AuditLog } from "../types";
 import {
@@ -28,6 +29,7 @@ export function Reports() {
   const { hasRole, userData } = useAuth();
   const { companies } = useCompanies();
   const { branches } = useBranches();
+  const { panels, loading: panelsLoading } = usePanels();
 
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -385,87 +387,89 @@ export function Reports() {
           </div>
         ) : viewMode === 'matrix' ? (
           <div className="min-w-[1000px] w-full">
-            <table className="w-full text-left text-[12px]">
-              <thead className="bg-[var(--surface-overlay)] sticky top-0 border-b border-[var(--border-subtle)] z-10">
-                <tr>
-                  <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] w-12">S No.</th>
-                  <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Panel Id</th>
-                  <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Bank</th>
-                  <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Branch Name</th>
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <th key={i} className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Zone {i + 1}</th>
-                  ))}
-                  <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-right">Created On Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border-subtle)] bg-[var(--surface-base)]">
-                {filteredLogs.map((log, idx) => {
-                  let zoneNum: number | null = null;
-                  let faultType = 'N';
+            {(() => {
+              const activePanels = panels.filter(p => {
+                if (companyId && p.companyId !== companyId) return false;
+                if (branchId && p.branchId !== branchId) return false;
+                if (action) {
+                  const searchLower = action.toLowerCase();
+                  return p.serial.toLowerCase().includes(searchLower) || p.name.toLowerCase().includes(searchLower);
+                }
+                return true;
+              });
+              
+              const maxZones = Math.max(1, ...activePanels.map(p => p.zoneCount || 8));
 
-                  const details = log.command || '';
-                  if (details) {
-                    if (typeof details === 'string') {
-                      if (details.startsWith('ISO')) {
-                        zoneNum = parseInt(details.substring(3), 10);
-                        faultType = 'Isolate';
-                      } else if (details.startsWith('RST')) {
-                        faultType = 'Reset';
-                      }
-                    }
-                    try {
-                      const parsedDetails = JSON.parse(details);
-                      if (parsedDetails.zone) zoneNum = parseInt(parsedDetails.zone, 10);
-                      if (parsedDetails.faultType) faultType = parsedDetails.faultType;
-                      if (parsedDetails.event) faultType = parsedDetails.event;
-                    } catch(e) {}
-                  }
-
-                  if (log.zone !== undefined && log.zone !== null) {
-                    zoneNum = parseInt(String(log.zone), 10);
-                  }
-
-                  if (log.action === 'ALARM') faultType = 'F';
-                  else if (log.action === 'CLEAR') faultType = 'N';
-                  else if (faultType === 'Fire') faultType = 'F';
-                  else if (faultType === 'Normal') faultType = 'N';
-                  
-                  const displayCode = (faultType === 'N' || faultType === 'F') ? faultType : faultType ? faultType.substring(0, 1).toUpperCase() : 'N';
-                  
-                  const bankName = companies.find(c => c.id === log.companyId)?.name || log.companyId || '';
-                  const branchName = branches.find(b => b.id === log.branchId)?.name || log.branchId || '';
-
-                  return (
-                    <tr key={log.id} className="hover:bg-[var(--surface-hover)] transition-colors group">
-                      <td className="px-4 py-3.5 whitespace-nowrap text-[11px] font-mono text-[var(--text-secondary)]">{idx + 1}</td>
-                      <td className="px-4 py-3.5 whitespace-nowrap font-bold text-[13px] text-[var(--text-primary)]">{log.panelSerial || '—'}</td>
-                      <td className="px-4 py-3.5 whitespace-nowrap text-[12px] font-medium text-[var(--text-secondary)]">{bankName}</td>
-                      <td className="px-4 py-3.5 whitespace-nowrap text-[12px] font-medium text-[var(--text-secondary)]">{branchName}</td>
-                      {Array.from({ length: 8 }).map((_, i) => {
-                        const isThisZone = zoneNum === (i + 1);
-                        const code = isThisZone ? displayCode : 'N';
-                        
-                        let badgeClass = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_6px_rgba(16,185,129,0.15)]'; 
-                        if (code === 'F') {
-                          badgeClass = 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-[0_0_6px_rgba(249,115,22,0.15)]';
-                        } else if (code !== 'N') {
-                          badgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-[0_0_6px_rgba(99,102,241,0.15)]';
-                        }
-
-                        return (
-                          <td key={i} className="px-2 py-3.5 text-center">
-                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-md border font-bold text-[11px] transition-all ${badgeClass}`}>
-                              {code}
-                            </span>
-                          </td>
-                        );
-                      })}
-                      <td className="px-4 py-3.5 whitespace-nowrap text-right font-mono text-[11px] text-[var(--text-secondary)]">{formatTimestamp(log.timestamp)}</td>
+              return (
+                <table className="w-full text-left text-[12px]">
+                  <thead className="bg-[var(--surface-overlay)] sticky top-0 border-b border-[var(--border-subtle)] z-10">
+                    <tr>
+                      <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] w-12">S No.</th>
+                      <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Panel Id</th>
+                      <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Bank</th>
+                      <th className="px-4 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Branch Name</th>
+                      {Array.from({ length: maxZones }).map((_, i) => (
+                        <th key={i} className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Zone {i + 1}</th>
+                      ))}
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border-subtle)] bg-[var(--surface-base)]">
+                    {activePanels.map((panel, idx) => {
+                      const bankName = companies.find(c => c.id === panel.companyId)?.name || panel.companyId || '';
+                      const branchName = branches.find(b => b.id === panel.branchId)?.name || panel.branchId || '';
+
+                      return (
+                        <tr key={panel.serial} className="hover:bg-[var(--surface-hover)] transition-colors group">
+                          <td className="px-4 py-3.5 whitespace-nowrap text-[11px] font-mono text-[var(--text-secondary)]">{idx + 1}</td>
+                          <td className="px-4 py-3.5 whitespace-nowrap font-bold text-[13px] text-[var(--text-primary)]">{panel.serial}</td>
+                          <td className="px-4 py-3.5 whitespace-nowrap text-[12px] font-medium text-[var(--text-secondary)]">{bankName}</td>
+                          <td className="px-4 py-3.5 whitespace-nowrap text-[12px] font-medium text-[var(--text-secondary)]">{branchName}</td>
+                          {Array.from({ length: maxZones }).map((_, i) => {
+                            if (i >= (panel.zoneCount || 8)) {
+                              return (
+                                <td key={i} className="px-2 py-3.5 text-center">
+                                  <span className="text-[var(--text-secondary)] opacity-30 text-[10px]">—</span>
+                                </td>
+                              );
+                            }
+
+                            const zoneStatus = panel.zones?.[i] || 1;
+                            let code = 'N';
+                            let badgeClass = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_6px_rgba(16,185,129,0.15)]'; 
+
+                            if (zoneStatus === 2) {
+                              code = 'F';
+                              badgeClass = 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-[0_0_6px_rgba(249,115,22,0.15)]';
+                            } else if (zoneStatus === 3 || zoneStatus === 4) {
+                              code = 'Flt';
+                              badgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-[0_0_6px_rgba(99,102,241,0.15)]';
+                            } else if (zoneStatus === 5) {
+                              code = 'I';
+                              badgeClass = 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 shadow-[0_0_6px_rgba(234,179,8,0.15)] dark:text-yellow-400';
+                            }
+
+                            return (
+                              <td key={i} className="px-2 py-3.5 text-center">
+                                <span className={`inline-flex items-center justify-center w-8 h-6 rounded-md border font-bold text-[11px] transition-all ${badgeClass}`}>
+                                  {code}
+                                </span>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                    {activePanels.length === 0 && (
+                      <tr>
+                        <td colSpan={maxZones + 4} className="px-4 py-10 text-center text-[13px] text-[var(--text-secondary)]">
+                          No panels match your filters.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              );
+            })()}
           </div>
         ) : (
           <div className="min-w-[1000px] w-full">
