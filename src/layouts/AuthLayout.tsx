@@ -9,11 +9,18 @@ export function AuthLayout() {
   const desktopSubtitleRef = useRef<HTMLParagraphElement>(null);
   const mobileTitleRef = useRef<HTMLParagraphElement>(null);
   const mobileSubtitleRef = useRef<HTMLParagraphElement>(null);
+  
+  const heroTitleRef = useRef<HTMLHeadingElement>(null);
+  const heroSubtitleRef = useRef<HTMLParagraphElement>(null);
+  const footerRef = useRef<HTMLParagraphElement>(null);
 
   useAdaptiveTextColor(desktopTitleRef, bgRef);
   useAdaptiveTextColor(desktopSubtitleRef, bgRef);
   useAdaptiveTextColor(mobileTitleRef, bgRef);
   useAdaptiveTextColor(mobileSubtitleRef, bgRef);
+  useAdaptiveTextColor(heroTitleRef, bgRef);
+  useAdaptiveTextColor(heroSubtitleRef, bgRef);
+  useAdaptiveTextColor(footerRef, bgRef);
 
   return (
     <div className="auth-screen relative min-h-screen overflow-hidden text-white">
@@ -50,14 +57,14 @@ export function AuthLayout() {
           <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-4 w-full">
             {/* Scrim wrapper for hero text */}
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)]/90 backdrop-blur-md p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-full">
-              <h1 className="font-sans text-[2.5rem] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] text-balance xl:text-[3.25rem]">
+              <h1 ref={heroTitleRef} className="font-sans text-[2.5rem] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] text-balance xl:text-[3.25rem] transition-colors duration-200">
                 Your fire safety,
                 <br />
                 <span className="text-[var(--accent)]">
                   always monitored.
                 </span>
               </h1>
-              <p className="mt-5 text-[1rem] leading-[1.6] text-[var(--text-secondary)] font-medium xl:text-[1.1rem] max-w-3xl">
+              <p ref={heroSubtitleRef} className="mt-5 text-[1rem] leading-[1.6] text-[var(--text-secondary)] font-medium xl:text-[1.1rem] max-w-3xl transition-colors duration-200">
                 Fyrlinc keeps you connected to every fire alarm panel - so you can
                 respond faster when it matters most.
               </p>
@@ -66,7 +73,7 @@ export function AuthLayout() {
 
           {/* Footer */}
           <div className="shrink-0 pt-4">
-            <p className="text-[12px] text-[var(--text-secondary)] font-medium">
+            <p ref={footerRef} className="text-[12px] text-[var(--text-secondary)] font-medium transition-colors duration-200">
               © {new Date().getFullYear()} Fyrlinc · All rights reserved
             </p>
           </div>
