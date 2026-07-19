@@ -218,7 +218,7 @@ export function AdminSettings() {
       zoneCount: 8,
       companyId: "",
       branchId: "",
-      ipAddress: "72.167.225.142",
+      ipAddress: "136.66.72.191",
     },
   });
 
@@ -320,6 +320,7 @@ export function AdminSettings() {
         "Organization Name": "Acme Corp",
         "Organization Description": "Global Manufacturing",
         "Branch Name": "HQ",
+        "Branch BSR Code": "HQ-01",
         "Branch Address": "123 Main St, NY",
         "Branch Supervisor": "John Doe",
         "Branch Contact": "1234567890",
@@ -329,6 +330,7 @@ export function AdminSettings() {
         "Organization Name": "Acme Corp",
         "Organization Description": "Global Manufacturing",
         "Branch Name": "West Coast Facility",
+        "Branch BSR Code": "WC-02",
         "Branch Address": "456 Market St, CA",
         "Branch Supervisor": "Jane Smith",
         "Branch Contact": "1234567891",
@@ -338,6 +340,7 @@ export function AdminSettings() {
         "Organization Name": "TechNova",
         "Organization Description": "Software Solutions",
         "Branch Name": "Main Office",
+        "Branch BSR Code": "TX-01",
         "Branch Address": "789 Tech Blvd, TX",
         "Branch Supervisor": "Alice Johnson",
         "Branch Contact": "1234567892",
@@ -378,6 +381,7 @@ export function AdminSettings() {
         if (branchName) {
           companyMap.get(companyName).branches.push({
             name: branchName,
+            bsrCode: row["Branch BSR Code"]?.toString().trim(),
             address: row["Branch Address"]?.toString().trim(),
             supervisorName: row["Branch Supervisor"]?.toString().trim(),
             contactNumber: row["Branch Contact"]?.toString().trim(),
@@ -429,7 +433,6 @@ export function AdminSettings() {
         "Organization Name": "TechNova",
         "Branch Name": "Main Office",
         "MOB Numbers": "1234567890, 0987654321",
-        ...(!isSI && { "IP Address": "72.167.225.142" })
       },
       {
         "Panel ID": "123457",
@@ -439,7 +442,6 @@ export function AdminSettings() {
         "Organization Name": "TechNova",
         "Branch Name": "Main Office",
         "MOB Numbers": "",
-        ...(!isSI && { "IP Address": "72.167.225.142" })
       },
       {
         "Panel ID": "123458",
@@ -449,7 +451,6 @@ export function AdminSettings() {
         "Organization Name": "TechNova",
         "Branch Name": "Main Office",
         "MOB Numbers": "1112223333",
-        ...(!isSI && { "IP Address": "72.167.225.142" })
       }
     ];
 
@@ -482,10 +483,7 @@ export function AdminSettings() {
         const zoneCount = panelType === "gsm_module" ? 0 : (parseInt(row["Zone Count"]?.toString().trim()) || 8);
         const companyName = row["Organization Name"]?.toString().trim();
         const branchName = row["Branch Name"]?.toString().trim();
-        let ipAddress = row["IP Address"]?.toString().trim() || "72.167.225.142";
-        if (!hasRole(["super_admin"])) {
-          ipAddress = "72.167.225.142";
-        }
+        let ipAddress = "136.66.72.191";
         
         const mobNumbersRaw = row["MOB Numbers"]?.toString().trim();
         let config: any = undefined;
