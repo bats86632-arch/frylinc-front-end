@@ -18,7 +18,6 @@ export function AuthLayout() {
   useAdaptiveTextColor(mobileTitleRef, bgRef);
   useAdaptiveTextColor(mobileSubtitleRef, bgRef);
   useAdaptiveTextColor(heroTitleRef, bgRef);
-  useAdaptiveTextColor(footerRef, bgRef);
 
   return (
     <div className="auth-screen relative min-h-screen overflow-hidden text-white">
@@ -67,7 +66,7 @@ export function AuthLayout() {
 
           {/* Footer */}
           <div className="shrink-0 pt-4">
-            <p ref={footerRef} className="text-[13px] text-[var(--text-secondary)] font-medium transition-colors duration-200">
+            <p className="text-[13px] text-black font-medium">
               © {new Date().getFullYear()} Fyrlinc · All rights reserved
             </p>
           </div>
