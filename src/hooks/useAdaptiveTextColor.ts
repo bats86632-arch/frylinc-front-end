@@ -64,9 +64,6 @@ export function useAdaptiveTextColor(
     
     if (!el) return;
 
-    // Apply smooth color transition initially so changes don't snap
-    el.style.transition = "color 200ms ease";
-
     const sampleRegion = () => {
       if (!elementRef.current || !backgroundSourceRef.current) return;
       
@@ -130,19 +127,12 @@ export function useAdaptiveTextColor(
         
         const avgLuminance = totalLuminance / pixelCount;
         
-        // Map luminance to grayscale color: inverted.
-        // Dark background (L close to 0) -> white text (255)
-        // Light background (L close to 1) -> black text (0)
-        let targetIntensity = (1 - avgLuminance) * 255;
+        // Map luminance to color: default to black, switch to white ONLY if background is very dark.
+        let targetIntensity = 0; // default black
         
-        // Clamp to hit WCAG AA (ensure text isn't a medium grey that fails contrast)
-        // If background is middle-grey (L=0.5), we force it lighter or darker.
-        if (avgLuminance > 0.4) {
-          // Background is relatively light, force text darker
-          targetIntensity = Math.min(targetIntensity, 60);
-        } else {
-          // Background is relatively dark, force text lighter
-          targetIntensity = Math.max(targetIntensity, 220);
+        if (avgLuminance < 0.25) {
+          // Background is very dark
+          targetIntensity = 255;
         }
 
         const newColor = `rgb(${targetIntensity}, ${targetIntensity}, ${targetIntensity})`;
@@ -164,6 +154,17 @@ export function useAdaptiveTextColor(
         activeSubscribers.delete(sampleRegion);
       }
     };
+
+    // Set initial color to black instantly before any sampling occurs to prevent white flashes
+    if (lastColorRef.current === null) {
+      el.style.color = "black";
+      lastColorRef.current = "black";
+    }
+
+    // Apply smooth color transition on the next frame so the initial black is instant
+    requestAnimationFrame(() => {
+      if (el) el.style.transition = "color 200ms ease";
+    });
 
     activeSubscribers.add(sampleRegion);
     if (activeSubscribers.size === 1) {
