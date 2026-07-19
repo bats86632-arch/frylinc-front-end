@@ -58,18 +58,21 @@ export function AuthLayout() {
           </div>
 
           {/* Hero - warm, non-techy messaging */}
-          <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-12 xl:pb-20">
-            <h1 className="font-sans max-w-xl text-[3rem] font-bold leading-[1.05] tracking-[-0.04em] text-[var(--text-primary)] text-balance xl:text-[3.75rem]">
-              Your fire safety,
-              <br />
-              <span className="text-[var(--accent)]">
-                always monitored.
-              </span>
-            </h1>
-            <p className="mt-6 max-w-md text-[1rem] leading-[1.75] text-[var(--text-secondary)] font-medium xl:text-[1.05rem]">
-              Fyrlinc keeps you connected to every fire alarm panel - so you can
-              respond faster when it matters most.
-            </p>
+          <div className="animate-fade-in flex flex-1 flex-col items-start justify-start pt-16">
+            {/* Scrim wrapper for hero text */}
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)]/90 backdrop-blur-md p-8 shadow-lg max-w-xl">
+              <h1 className="font-sans text-[2.25rem] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] text-balance xl:text-[2.75rem]">
+                Your fire safety,
+                <br />
+                <span className="text-[var(--accent)]">
+                  always monitored.
+                </span>
+              </h1>
+              <p className="mt-4 text-[0.95rem] leading-[1.6] text-[var(--text-secondary)] font-medium xl:text-[1rem]">
+                Fyrlinc keeps you connected to every fire alarm panel - so you can
+                respond faster when it matters most.
+              </p>
+            </div>
 
             {/* Trust points */}
             <div className="mt-10 grid max-w-md gap-3.5 w-full">
@@ -115,7 +118,7 @@ export function AuthLayout() {
         </section>
 
         {/* ── Right auth panel ────────────────────────────────────────────── */}
-        <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:px-12 lg:items-end lg:pb-12 xl:pb-20">
+        <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:px-12">
           <div className="relative z-10 w-full max-w-md animate-fade-in-up lg:max-w-[460px]">
             {/* Mobile brand */}
             <div className="mb-10 flex items-center justify-center gap-3 lg:hidden">
