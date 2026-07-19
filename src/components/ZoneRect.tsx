@@ -8,6 +8,10 @@ interface ZoneRectProps {
   isAlarm: boolean;
   /** Whether this zone is isolated */
   isIsolated?: boolean;
+  /** Whether the evacuate pulse should be applied */
+  isEvacuatePulse?: boolean;
+  /** Additional text to show in the label */
+  additionalLabel?: string;
   /** Whether this zone is selected for editing */
   isSelected: boolean;
   /** If true, drag/resize interactions are disabled */
@@ -35,6 +39,8 @@ export function ZoneRect({
   zone,
   isAlarm,
   isIsolated,
+  isEvacuatePulse,
+  additionalLabel,
   isSelected,
   isReadOnly,
   isOrphan = false,
@@ -154,7 +160,7 @@ export function ZoneRect({
   let rectClass =
     "rounded-[4px] flex items-center justify-center overflow-hidden select-none ";
 
-  if (isAlarm) {
+  if (isAlarm || isEvacuatePulse) {
     // Solid red fill, white label, aggressive pulse glow
     rectClass +=
       "bg-[var(--color-error)] border-2 border-[rgba(209,52,56,0.9)] zone-alarm-pulse ";
@@ -244,7 +250,7 @@ export function ZoneRect({
       >
         <span
           className={`text-right font-semibold leading-none ${
-            isAlarm
+            isAlarm || isEvacuatePulse
               ? "text-white"
               : isOrphan
               ? "text-white opacity-90"
@@ -259,10 +265,10 @@ export function ZoneRect({
               <span className="text-[7px] uppercase tracking-wider opacity-70">
                 Orphaned
               </span>
-              <span>{zone.zoneId.split('-Z')[1] || zone.label}</span>
+              <span>{zone.zoneId.split('-Z')[1] || zone.label}{additionalLabel}</span>
             </span>
           ) : (
-            zone.zoneId.split('-Z')[1] || zone.label
+            (zone.zoneId.split('-Z')[1] || zone.label) + (additionalLabel || "")
           )}
         </span>
       </div>

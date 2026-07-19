@@ -706,6 +706,8 @@ export function MapZones() {
                     zone={zone}
                     isAlarm={zoneIsAlarm(zone.zoneId)}
                     isIsolated={zoneIsIsolated(zone.zoneId)}
+                    isEvacuatePulse={selectedPanel?.zones?.[5] === 2 || selectedPanel?.zones?.[5] === true}
+                    additionalLabel={(zoneIsAlarm(zone.zoneId) && idx === 4) ? " (Earth Fault)" : (zoneIsAlarm(zone.zoneId) && idx === 5) ? " (Evacuate)" : (zoneIsAlarm(zone.zoneId) && idx === 6) ? " (Low Battery)" : ""}
                     isSelected={selectedZoneIdx === idx}
                     isReadOnly={!canEdit}
                     isOrphan={isOrphan}
