@@ -30,7 +30,7 @@ export function AuthLayout() {
           </div>
 
           {/* Hero - warm, non-techy messaging */}
-          <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-12 xl:pb-20 w-full">
+          <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-4 w-full">
             {/* Scrim wrapper for hero text */}
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)]/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-full">
               <h1 className="font-sans text-[2.5rem] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] text-balance xl:text-[3.25rem]">
