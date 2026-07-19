@@ -50,7 +50,7 @@ import { CreateUserModal } from "../components/CreateUserModal";
 import { ApiKeysSection } from "../components/ApiKeysSection";
 import { ApiKeyService } from "../api/ApiKeyService";
 import { Key } from "lucide-react";
-import { PanelTypeBadge } from "../components/PanelTypeBadge";
+
 
 const panelSchema = z.object({
   serial: z.string().min(1, "Serial is required"),
@@ -3338,7 +3338,6 @@ export function AdminSettings() {
                 <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate">{formatPanelName(panel.name || "Unknown Panel", panel.panelType)}</p>
                 <p className="text-[9px] text-[var(--text-secondary)] truncate">S/N: {panel.serial}</p>
               </div>
-              <PanelTypeBadge type={panel.panelType} size="sm" />
             </div>
             {panel.serial && hasRole([
                                   "super_admin",

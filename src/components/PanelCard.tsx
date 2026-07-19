@@ -4,7 +4,7 @@ import { Panel } from "../types";
 import { formatPanelName } from "../utils/formatters";
 import { Activity, AlertTriangle, Hash, MapPin, RadioTower, Clock, CheckCircle } from "lucide-react";
 import { PanelService } from "../api/PanelService";
-import { PanelTypeBadge } from "./PanelTypeBadge";
+import { getZoneStatusColors } from "../utils/zoneUtils";
 
 interface PanelCardProps {
   panel: Panel;
@@ -70,7 +70,6 @@ interface PanelCardProps {
                 <h3 className="font-sans text-[1.1rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
                   {formatPanelName(panel.name, panel.panelType)}
                 </h3>
-                <PanelTypeBadge type={panel.panelType} size="sm" />
                 {/* status dot */}
                 {!panel.alarm && (
                   <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />

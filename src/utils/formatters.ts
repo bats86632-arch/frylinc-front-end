@@ -83,8 +83,5 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
 
 export function formatPanelName(name: string, type?: string): string {
   const baseName = name || "Unknown Panel";
-  if (type === "Fire Alarm") return `[F] - ${baseName}`;
-  if (type === "Security") return `[SEC] - ${baseName}`;
-  if (type === "GSM Module") return `[GSM] - ${baseName}`;
   return baseName;
 }

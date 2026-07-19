@@ -26,7 +26,7 @@ import { usePanelMap } from "../hooks/usePanelMap";
 import { ZoneRect } from "../components/ZoneRect";
 import { CopyButton } from "../components/CopyButton";
 import { PanelTypeIcon } from "../components/PanelTypeIcon";
-import { PanelTypeBadge } from "../components/PanelTypeBadge";
+
 import { Panel, ZoneLayout } from "../types";
 import { PanelService } from "../api/PanelService";
 
@@ -870,7 +870,6 @@ export function MapZones() {
                   <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate">
                     {selectedPanel.name}
                   </p>
-                  <PanelTypeBadge type={selectedPanel.panelType} size="sm" />
                 </div>
                 <div className="mt-1">
                   <p className="text-[11px] text-[var(--text-secondary)] font-mono">
