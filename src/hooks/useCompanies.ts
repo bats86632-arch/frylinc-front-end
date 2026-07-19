@@ -16,7 +16,16 @@ export function useCompanies() {
     }
     try {
       setLoading(true);
-      const data = await CompanyService.getCompanies();
+      let data = await CompanyService.getCompanies();
+      
+      if (userData.role === 'system_integrator' || userData.role === 'end_user') {
+        const assignedIds = Object.keys(userData.assignments || {});
+        data = data.filter(c => assignedIds.includes(c.id));
+      } else if (userData.role === 'head_office') {
+        const hoId = userData.companyId || Object.keys(userData.assignments || {})[0];
+        data = data.filter(c => c.id === hoId);
+      }
+      
       setCompanies(data);
       setError(null);
     } catch (err: unknown) {

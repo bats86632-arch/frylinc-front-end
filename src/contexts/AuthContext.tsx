@@ -13,6 +13,7 @@ import {
 import { auth } from "../config/firebase";
 import { User, Role } from "../types";
 import apiClient from "../api/axios";
+import { CompanyService } from "../api/CompanyService";
 
 interface ProfileUpdateData {
   displayName?: string;
@@ -205,6 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     clearCachedUser();
+    CompanyService.invalidateCache();
     await signOut(auth);
     setCurrentUser(null);
     setUserData(null);
