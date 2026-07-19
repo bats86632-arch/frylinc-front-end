@@ -60,7 +60,7 @@ export function AuthLayout() {
               <h1 ref={heroTitleRef} className="font-sans text-[2.5rem] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] text-balance xl:text-[3.25rem] transition-colors duration-200">
                 Your fire safety,
                 <br />
-                <span className="text-[var(--accent)]">
+                <span>
                   always monitored.
                 </span>
               </h1>
