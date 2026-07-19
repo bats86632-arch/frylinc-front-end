@@ -5,7 +5,7 @@ export function AuthLayout() {
     <div className="auth-screen relative min-h-screen overflow-hidden text-white">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 z-0 bg-cover bg-[position:65%_top] lg:bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/agni-building.jpeg')" }}
       />
 
