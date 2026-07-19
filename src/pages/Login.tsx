@@ -151,13 +151,13 @@ export function Login() {
       <div className="mb-8 lg:mb-9">
         <div className="mb-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-[var(--border-default)] bg-[var(--surface-overlay)] lg:h-14 lg:w-14 lg:rounded-[12px]">
-            <LockKeyhole className="h-5 w-5 text-black lg:h-6 lg:w-6" />
+            <LockKeyhole className="h-5 w-5 text-white lg:h-6 lg:w-6" />
           </div>
         </div>
-        <h2 className="font-sans text-[2rem] font-bold leading-tight tracking-tight text-black text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
+        <h2 className="font-sans text-[2rem] font-bold leading-tight tracking-tight text-white text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
           Welcome back
         </h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-black font-medium lg:mt-3 lg:max-w-sm">
+        <p className="mt-2 text-[15px] leading-relaxed text-white font-medium lg:mt-3 lg:max-w-sm">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
@@ -191,7 +191,7 @@ export function Login() {
           <div>
             <label
               htmlFor="email"
-              className="mb-2.5 block text-[13px] font-semibold text-black"
+              className="mb-2.5 block text-[13px] font-semibold text-white"
             >
               Email address
             </label>
@@ -200,7 +200,7 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] text-black ${
+                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] text-white ${
                   errors.email
                     ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] pr-10"
                     : ""
@@ -224,14 +224,14 @@ export function Login() {
             <div className="mb-2.5 flex items-center justify-between">
               <label
                 htmlFor="password"
-                className="block text-[13px] font-semibold text-black"
+                className="block text-[13px] font-semibold text-white"
               >
                 Password
               </label>
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-[12px] font-medium text-black hover:opacity-80 transition-opacity duration-200"
+                className="text-[12px] font-medium text-white hover:opacity-80 transition-opacity duration-200"
               >
                 Forgot password?
               </button>
@@ -241,7 +241,7 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] text-black ${
+                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] text-white ${
                   errors.password
                     ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]"
                     : ""
@@ -252,7 +252,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-black hover:bg-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -278,13 +278,13 @@ export function Login() {
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-[18px] w-[18px] animate-spin text-black" />
-              <span className="text-black">Signing in…</span>
+              <Loader2 className="h-[18px] w-[18px] animate-spin text-white" />
+              <span className="text-white">Signing in…</span>
             </>
           ) : (
             <>
-              <span className="text-black">Sign In</span>
-              <ArrowRight className="h-[18px] w-[18px] text-black" />
+              <span className="text-white">Sign In</span>
+              <ArrowRight className="h-[18px] w-[18px] text-white" />
             </>
           )}
         </button>
