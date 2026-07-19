@@ -1,32 +1,4 @@
 import { Outlet } from "react-router-dom";
-import { Bell, Clock, BarChart3 } from "lucide-react";
-
-const trustPoints = [
-  {
-    label: "24/7 Monitoring",
-    description: "Round-the-clock visibility into every panel.",
-    icon: Clock,
-    accentBg: "var(--status-success-bg)",
-    accentBorder: "var(--status-success-border)",
-    iconColor: "text-[var(--color-success)]",
-  },
-  {
-    label: "Instant Alerts",
-    description: "Get notified the moment something needs attention.",
-    icon: Bell,
-    accentBg: "var(--status-warning-bg)",
-    accentBorder: "var(--status-warning-border)",
-    iconColor: "text-[var(--color-warning)]",
-  },
-  {
-    label: "Live Status",
-    description: "Real-time updates on all your connected panels.",
-    icon: BarChart3,
-    accentBg: "var(--surface-raised)",
-    accentBorder: "var(--border-default)",
-    iconColor: "text-[var(--text-secondary)]",
-  },
-];
 
 export function AuthLayout() {
   return (
@@ -58,54 +30,20 @@ export function AuthLayout() {
           </div>
 
           {/* Hero - warm, non-techy messaging */}
-          <div className="animate-fade-in flex flex-1 flex-col items-start justify-start pt-16">
+          <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-12 xl:pb-20">
             {/* Scrim wrapper for hero text */}
-            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)]/90 backdrop-blur-md p-8 shadow-lg max-w-xl">
-              <h1 className="font-sans text-[2.25rem] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] text-balance xl:text-[2.75rem]">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)]/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-w-2xl w-full">
+              <h1 className="font-sans text-[2.5rem] font-bold leading-[1.1] tracking-[-0.03em] text-[var(--text-primary)] text-balance xl:text-[3.25rem]">
                 Your fire safety,
                 <br />
                 <span className="text-[var(--accent)]">
                   always monitored.
                 </span>
               </h1>
-              <p className="mt-4 text-[0.95rem] leading-[1.6] text-[var(--text-secondary)] font-medium xl:text-[1rem]">
+              <p className="mt-5 text-[1rem] leading-[1.6] text-[var(--text-secondary)] font-medium xl:text-[1.1rem]">
                 Fyrlinc keeps you connected to every fire alarm panel - so you can
                 respond faster when it matters most.
               </p>
-            </div>
-
-            {/* Trust points */}
-            <div className="mt-10 grid max-w-md gap-3.5 w-full">
-              {trustPoints.map((point, idx) => (
-               <div
-                  key={point.label}
-                  className="flex items-start gap-4 rounded-[8px] border px-5 py-4 animate-fade-in-up bg-[var(--surface-raised)]"
-                  style={{
-                    borderColor: point.accentBorder,
-                    animationDelay: `${idx * 100}ms`,
-                  }}
-                >
-                  <div
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[6px] shadow-sm mt-0.5"
-                    style={{
-                      background: point.accentBg,
-                      border: `1px solid ${point.accentBorder}`,
-                    }}
-                  >
-                    <point.icon
-                      className={`h-[18px] w-[18px] ${point.iconColor}`}
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-[var(--text-primary)]">
-                      {point.label}
-                    </p>
-                    <p className="mt-0.5 text-[12.5px] leading-relaxed text-[var(--text-secondary)] font-medium">
-                      {point.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
