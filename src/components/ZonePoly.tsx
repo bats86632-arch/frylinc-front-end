@@ -7,7 +7,6 @@ import {
   translatePolygon,
   splitEdge,
   clampPoint,
-  polygonCentroid,
   distToSegment,
   projectPointOnSegment,
 } from "../utils/polygonGeom";
@@ -303,8 +302,9 @@ export function ZonePoly({
   const strokeWidth = isSelected ? 0.5 : 0.35;
   const strokeDasharray = isOrphan ? "1.2,0.8" : undefined;
 
-  // Centroid for label positioning
-  const centroid = pts.length >= 3 ? polygonCentroid(pts) : { x: 50, y: 50 };
+  // Bounding box for label positioning
+  const minX = pts.length > 0 ? Math.min(...pts.map(p => p.x)) : 50;
+  const minY = pts.length > 0 ? Math.min(...pts.map(p => p.y)) : 50;
   const zoneNumber = zone.zoneId.split("-Z")[1] || zone.label;
   const labelText = zoneNumber + (additionalLabel ?? "");
 
@@ -334,13 +334,13 @@ export function ZonePoly({
 
       {/* ── Zone label ── */}
       <text
-        x={centroid.x}
-        y={centroid.y}
-        textAnchor="middle"
+        x={minX + 1}
+        y={minY + 1.5}
+        textAnchor="start"
         dominantBaseline="central"
         fill="white"
         style={{
-          fontSize: "1.8%",
+          fontSize: "1.2%",
           fontWeight: 700,
           fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
           pointerEvents: "none",
