@@ -58,7 +58,7 @@ export function AuthLayout() {
           </div>
 
           {/* Hero - warm, non-techy messaging */}
-          <div className="animate-fade-in flex flex-1 flex-col items-start justify-center">
+          <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-12 xl:pb-20">
             <h1 className="font-sans max-w-xl text-[3rem] font-bold leading-[1.05] tracking-[-0.04em] text-[var(--text-primary)] text-balance xl:text-[3.75rem]">
               Your fire safety,
               <br />
@@ -115,7 +115,7 @@ export function AuthLayout() {
         </section>
 
         {/* ── Right auth panel ────────────────────────────────────────────── */}
-        <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:px-12">
+        <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:px-12 lg:items-end lg:pb-12 xl:pb-20">
           <div className="relative z-10 w-full max-w-md animate-fade-in-up lg:max-w-[460px]">
             {/* Mobile brand */}
             <div className="mb-10 flex items-center justify-center gap-3 lg:hidden">
