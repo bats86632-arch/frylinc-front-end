@@ -1,12 +1,29 @@
 import { Outlet } from "react-router-dom";
+import { useRef } from "react";
+import { useAdaptiveTextColor } from "../hooks/useAdaptiveTextColor";
 
 export function AuthLayout() {
+  const bgRef = useRef<HTMLImageElement>(null);
+  
+  const desktopTitleRef = useRef<HTMLParagraphElement>(null);
+  const desktopSubtitleRef = useRef<HTMLParagraphElement>(null);
+  const mobileTitleRef = useRef<HTMLParagraphElement>(null);
+  const mobileSubtitleRef = useRef<HTMLParagraphElement>(null);
+
+  useAdaptiveTextColor(desktopTitleRef, bgRef);
+  useAdaptiveTextColor(desktopSubtitleRef, bgRef);
+  useAdaptiveTextColor(mobileTitleRef, bgRef);
+  useAdaptiveTextColor(mobileSubtitleRef, bgRef);
+
   return (
     <div className="auth-screen relative min-h-screen overflow-hidden text-white">
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 z-0 bg-cover bg-[position:65%_top] lg:bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/agni-building.jpeg')" }}
+      <img 
+        ref={bgRef}
+        src="/agni-building.jpeg"
+        alt="Background"
+        crossOrigin="anonymous"
+        className="absolute inset-0 z-0 h-full w-full object-cover object-[65%_top] lg:object-center"
       />
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
@@ -19,11 +36,11 @@ export function AuthLayout() {
               alt="Fyrlinc"
               className="h-11 w-11 rounded-[8px] object-cover border border-[var(--border-subtle)]"
             />
-            <div className="mix-blend-difference">
-              <p className="font-sans text-[1.1rem] font-semibold tracking-tight text-white leading-none">
+            <div>
+              <p ref={desktopTitleRef} className="font-sans text-[1.1rem] font-semibold tracking-tight text-white leading-none">
                 Fyrlinc
               </p>
-              <p className="mt-1 text-[12px] text-gray-300 tracking-wide font-medium">
+              <p ref={desktopSubtitleRef} className="mt-1 text-[12px] text-gray-300 tracking-wide font-medium">
                 Fire Alarm Panel Monitoring
               </p>
             </div>
@@ -65,16 +82,16 @@ export function AuthLayout() {
                 alt="Fyrlinc"
                 className="h-12 w-12 rounded-[8px] object-cover border border-[var(--border-subtle)]"
               />
-              <div className="mix-blend-difference">
-                <p className="font-sans text-[1.25rem] font-semibold tracking-tight text-white leading-none">
+              <div>
+                <p ref={mobileTitleRef} className="font-sans text-[1.25rem] font-semibold tracking-tight text-white leading-none">
                   Fyrlinc
                 </p>
-                <p className="mt-1 text-[13px] text-gray-300 font-medium">
+                <p ref={mobileSubtitleRef} className="mt-1 text-[13px] text-gray-300 font-medium">
                   Fire Alarm Panel Monitoring
                 </p>
               </div>
             </div>
-            <Outlet />
+            <Outlet context={{ bgRef }} />
           </div>
         </main>
       </div>

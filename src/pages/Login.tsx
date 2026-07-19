@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useRef } from "react";
+import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
+import { useAdaptiveTextColor } from "../hooks/useAdaptiveTextColor";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -46,6 +47,28 @@ export function Login() {
 
   const from =
     (location.state as LoginLocationState | null)?.from?.pathname || "/";
+
+  const { bgRef } = useOutletContext<{ bgRef: React.RefObject<HTMLImageElement> }>();
+
+  const lockRef = useRef<SVGSVGElement>(null);
+  const welcomeRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const emailLabelRef = useRef<HTMLLabelElement>(null);
+  const passwordLabelRef = useRef<HTMLLabelElement>(null);
+  const forgotPasswordRef = useRef<HTMLButtonElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const signInTextRef = useRef<HTMLSpanElement>(null);
+
+  useAdaptiveTextColor(lockRef, bgRef);
+  useAdaptiveTextColor(welcomeRef, bgRef);
+  useAdaptiveTextColor(subtitleRef, bgRef);
+  useAdaptiveTextColor(emailLabelRef, bgRef);
+  useAdaptiveTextColor(passwordLabelRef, bgRef);
+  useAdaptiveTextColor(forgotPasswordRef, bgRef);
+  useAdaptiveTextColor(emailInputRef, bgRef);
+  useAdaptiveTextColor(passwordInputRef, bgRef);
+  useAdaptiveTextColor(signInTextRef, bgRef);
 
   const {
     register,
@@ -138,13 +161,13 @@ export function Login() {
       <div className="mb-8 lg:mb-9">
         <div className="mb-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-[var(--border-default)] bg-[var(--surface-overlay)] lg:h-14 lg:w-14 lg:rounded-[12px]">
-            <LockKeyhole className="h-5 w-5 text-[var(--text-primary)] lg:h-6 lg:w-6" />
+            <LockKeyhole ref={lockRef} className="h-5 w-5 text-[var(--text-primary)] lg:h-6 lg:w-6 transition-colors duration-200" />
           </div>
         </div>
-        <h2 className="font-sans text-[2rem] font-bold leading-tight tracking-tight text-[var(--text-primary)] text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
+        <h2 ref={welcomeRef} className="font-sans text-[2rem] font-bold leading-tight tracking-tight text-[var(--text-primary)] text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em] transition-colors duration-200">
           Welcome back
         </h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-[var(--text-secondary)] font-medium lg:mt-3 lg:max-w-sm">
+        <p ref={subtitleRef} className="mt-2 text-[15px] leading-relaxed text-[var(--text-secondary)] font-medium lg:mt-3 lg:max-w-sm transition-colors duration-200">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
@@ -178,7 +201,8 @@ export function Login() {
           <div>
             <label
               htmlFor="email"
-              className="mb-2.5 block text-[13px] font-semibold text-[var(--text-primary)]/80"
+              ref={emailLabelRef}
+              className="mb-2.5 block text-[13px] font-semibold text-[var(--text-primary)]/80 transition-colors duration-200"
             >
               Email address
             </label>
@@ -187,7 +211,11 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] ${
+                ref={(e) => {
+                  register("email").ref(e);
+                  emailInputRef.current = e;
+                }}
+                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] transition-colors duration-200 ${
                   errors.email
                     ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] pr-10"
                     : ""
@@ -211,14 +239,16 @@ export function Login() {
             <div className="mb-2.5 flex items-center justify-between">
               <label
                 htmlFor="password"
-                className="block text-[13px] font-semibold text-[var(--text-primary)]/80"
+                ref={passwordLabelRef}
+                className="block text-[13px] font-semibold text-[var(--text-primary)]/80 transition-colors duration-200"
               >
                 Password
               </label>
               <button
                 type="button"
+                ref={forgotPasswordRef}
                 onClick={handleForgotPassword}
-                className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors"
+                className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors duration-200"
               >
                 Forgot password?
               </button>
@@ -228,7 +258,11 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] ${
+                ref={(e) => {
+                  register("password").ref(e);
+                  passwordInputRef.current = e;
+                }}
+                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] transition-colors duration-200 ${
                   errors.password
                     ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]"
                     : ""
@@ -266,11 +300,11 @@ export function Login() {
           {isLoading ? (
             <>
               <Loader2 className="h-[18px] w-[18px] animate-spin" />
-              <span>Signing in…</span>
+              <span ref={signInTextRef} className="transition-colors duration-200">Signing in…</span>
             </>
           ) : (
             <>
-              <span>Sign In</span>
+              <span ref={signInTextRef} className="transition-colors duration-200">Sign In</span>
               <ArrowRight className="h-[18px] w-[18px]" />
             </>
           )}
