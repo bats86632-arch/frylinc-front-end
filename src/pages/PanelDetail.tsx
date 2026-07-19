@@ -180,6 +180,7 @@ export function PanelDetail() {
       if (command.startsWith("ARM")) apiCommand = "ARM";
       if (command.startsWith("ZONE OFF")) apiCommand = "ZONE OFF";
       
+      console.log(`[DEBUG] Sending command: ${apiCommand} to panel ${serial}`);
       const response = await PanelService.sendCommand(serial, apiCommand);
       
       if (response.commandId) {
@@ -472,11 +473,11 @@ export function PanelDetail() {
                       Disarm
                     </button>
                     <button
-                      onClick={() => handleSendCommand("EVAC")}
+                      onClick={() => handleSendCommand("EVA")}
                       disabled={commandLoading !== null}
                       className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-warning)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
-                      {commandLoading === "EVAC" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
+                      {commandLoading === "EVA" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
                       Evacuate
                     </button>
                   </>
@@ -510,12 +511,20 @@ export function PanelDetail() {
                       Silence All
                     </button>
                     <button
+                      onClick={() => handleSendCommand("EVA")}
+                      disabled={commandLoading !== null}
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
+                    >
+                      {commandLoading === "EVA" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                      Evacuate
+                    </button>
+                    <button
                       onClick={() => handleSendCommand("ARM")}
                       disabled={commandLoading !== null}
                       className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
                       {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
-                      Evacuate
+                      Test ARM
                     </button>
                   </>
                 )}
