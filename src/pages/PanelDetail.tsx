@@ -548,29 +548,49 @@ export function PanelDetail() {
                 const isAlarmOrPre = zoneStatus === 2 || zoneStatus === 3 || zoneStatus === 4;
                 const isIsolated = zoneStatus === 5;
                 
+                const isEvacuateActive = normalizedPanel.zones[5] === 2; // Zone 6 is in alarm
+                const isEvacuatePulse = isEvacuateActive;
+
                 const resetCmd = `RESET ${zoneNum}`;
                 const isolateCmd = `ISO${zoneNum}`;
                 
                 const isEuRestricted = isStrictlyEndUser;
                 const isNewIp = panel.ipAddress === "136.66.72.191";
 
+                let additionalLabel = "";
+                if (zoneStatus === 2) {
+                  if (idx === 4) additionalLabel = " - Earth Fault";
+                  if (idx === 5) additionalLabel = " - Evacuate";
+                  if (idx === 6) additionalLabel = " - Low Battery";
+                }
+
+                let containerClasses = `relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${statusStyles.bg} ${statusStyles.border} ${statusStyles.shadow}`;
+                if (isEvacuatePulse) {
+                  containerClasses = `relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] shadow-[var(--status-danger-bg)] animate-[pulse_1s_ease-in-out_infinite]`;
+                }
+
                 return (
                   <div
                     key={idx}
-                    className={`relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${statusStyles.bg} ${statusStyles.border} ${statusStyles.shadow}`}
+                    className={containerClasses}
                   >
                     {/* Top status bar */}
                     <div className="flex items-center justify-between relative z-10">
                       <div className="flex flex-col">
                         <span className={`text-xl font-black tracking-tight ${
-                          isAlarmOrPre ? "text-[var(--color-error)]" 
+                          isAlarmOrPre || isEvacuatePulse ? "text-[var(--color-error)]" 
                           : isIsolated ? "text-[var(--color-warning)]" 
                           : "text-[var(--text-primary)]"
                         }`}>
                           Zone {zoneNum}
                         </span>
+                        {additionalLabel && (
+                          <span className={`text-xs font-bold mt-1 ${isAlarmOrPre || isEvacuatePulse ? "text-[var(--color-error)]" : "text-[var(--text-secondary)]"}`}>
+                            {additionalLabel}
+                          </span>
+                        )}
                       </div>
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${statusStyles.iconBg}`}>
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isEvacuatePulse ? "bg-[var(--color-error)]/20 text-[var(--color-error)]" : statusStyles.iconBg}`}>
                         <statusStyles.icon className="h-5 w-5" />
                       </div>
                     </div>

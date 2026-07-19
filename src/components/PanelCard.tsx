@@ -147,47 +147,61 @@ interface PanelCardProps {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              {zonesArray.map((zone) => (
-                <button
-                  key={zone.index}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (zone.state === "alarm") setResolvingZone(zone.index);
-                  }}
-                  className={`relative flex items-center justify-between rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${
-                    zone.state === "alarm"
-                      ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] cursor-pointer hover:bg-[color-mix(in_srgb,var(--status-danger-bg)_80%,transparent)]"
-                      : zone.state === "warning"
-                      ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] cursor-default"
-                      : zone.state === "offline"
-                      ? "border-[var(--border-subtle)] border-dashed bg-transparent cursor-default opacity-50"
-                      : "border-[var(--border-subtle)] bg-[var(--surface-overlay)] cursor-default group-hover:border-[var(--border-default)]"
-                  }`}
-                  disabled={zone.state !== "alarm"}
-                >
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <span className={`text-[11px] font-bold ${zone.state === "alarm" ? "text-[var(--color-error)]" : zone.state === "warning" ? "text-[var(--color-warning)]" : "text-[var(--text-secondary)]"}`}>
-                      Z{zone.index + 1}
-                    </span>
-                    <span className={`truncate text-[12px] font-medium ${
-                      zone.state === "alarm" ? "text-[var(--text-primary)]" :
-                      zone.state === "warning" ? "text-[var(--text-primary)]" :
-                      zone.state === "offline" ? "text-[var(--text-quaternary)] line-through" :
-                      "text-[var(--text-secondary)]"
-                    }`}>
-                      {zone.name}
-                    </span>
-                  </div>
-                  {zone.state === "alarm" && (
-                    <span className="relative flex h-[6px] w-[6px] shrink-0">
-                      <span className="relative h-full w-full rounded-full bg-[var(--color-error)]" />
-                    </span>
-                  )}
-                  {zone.state === "warning" && (
-                    <span className="h-[6px] w-[6px] rounded-full bg-[var(--color-warning)] shrink-0" />
-                  )}
-                </button>
-              ))}
+              {zonesArray.map((zone) => {
+                const isEvacuateActive = zonesArray.some(z => z.index === 5 && z.state === "alarm");
+                const isEvacuatePulse = isEvacuateActive;
+                
+                let additionalLabel = "";
+                if (zone.state === "alarm") {
+                  if (zone.index === 4) additionalLabel = " - Earth Fault";
+                  if (zone.index === 5) additionalLabel = " - Evacuate";
+                  if (zone.index === 6) additionalLabel = " - Low Battery";
+                }
+
+                return (
+                  <button
+                    key={zone.index}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (zone.state === "alarm") setResolvingZone(zone.index);
+                    }}
+                    className={`relative flex items-center justify-between rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${
+                      isEvacuatePulse
+                        ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] animate-[pulse_1s_ease-in-out_infinite] cursor-pointer"
+                        : zone.state === "alarm"
+                        ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] cursor-pointer hover:bg-[color-mix(in_srgb,var(--status-danger-bg)_80%,transparent)]"
+                        : zone.state === "warning"
+                        ? "border-[var(--status-warning-border)] bg-[var(--status-warning-bg)] cursor-default"
+                        : zone.state === "offline"
+                        ? "border-[var(--border-subtle)] border-dashed bg-transparent cursor-default opacity-50"
+                        : "border-[var(--border-subtle)] bg-[var(--surface-overlay)] cursor-default group-hover:border-[var(--border-default)]"
+                    }`}
+                    disabled={zone.state !== "alarm"}
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className={`text-[11px] font-bold ${zone.state === "alarm" || isEvacuatePulse ? "text-[var(--color-error)]" : zone.state === "warning" ? "text-[var(--color-warning)]" : "text-[var(--text-secondary)]"}`}>
+                        Z{zone.index + 1}
+                      </span>
+                      <span className={`truncate text-[12px] font-medium ${
+                        zone.state === "alarm" || isEvacuatePulse ? "text-[var(--text-primary)]" :
+                        zone.state === "warning" ? "text-[var(--text-primary)]" :
+                        zone.state === "offline" ? "text-[var(--text-quaternary)] line-through" :
+                        "text-[var(--text-secondary)]"
+                      }`}>
+                        {zone.name}{additionalLabel}
+                      </span>
+                    </div>
+                    {(zone.state === "alarm" || isEvacuatePulse) && (
+                      <span className="relative flex h-[6px] w-[6px] shrink-0">
+                        <span className="relative h-full w-full rounded-full bg-[var(--color-error)]" />
+                      </span>
+                    )}
+                    {zone.state === "warning" && !isEvacuatePulse && (
+                      <span className="h-[6px] w-[6px] rounded-full bg-[var(--color-warning)] shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
