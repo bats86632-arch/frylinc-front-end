@@ -117,7 +117,7 @@ export function AuthLayout() {
         </section>
 
         {/* ── Right auth panel ────────────────────────────────────────────── */}
-        <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:border-l lg:border-[var(--border-subtle)] lg:px-12 lg:bg-[var(--surface-base)]/10 lg:backdrop-blur-md">
+        <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12 sm:px-8 lg:h-screen lg:min-h-0 lg:px-12">
           <div className="relative z-10 w-full max-w-md animate-fade-in-up lg:max-w-[460px]">
             {/* Mobile brand */}
             <div className="mb-10 flex items-center justify-center gap-3 lg:hidden">
