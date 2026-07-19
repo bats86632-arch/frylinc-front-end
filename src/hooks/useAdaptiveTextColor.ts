@@ -130,7 +130,7 @@ export function useAdaptiveTextColor(
         // Map luminance to color: default to black, switch to white ONLY if background is very dark.
         let targetIntensity = 0; // default black
         
-        if (avgLuminance < 0.25) {
+        if (avgLuminance < 0.1) {
           // Background is very dark
           targetIntensity = 255;
         }

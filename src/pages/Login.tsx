@@ -58,6 +58,7 @@ export function Login() {
   const forgotPasswordRef = useRef<HTMLButtonElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
+  const eyeIconRef = useRef<HTMLButtonElement>(null);
   const signInTextRef = useRef<HTMLSpanElement>(null);
 
   useAdaptiveTextColor(lockRef, bgRef);
@@ -68,6 +69,7 @@ export function Login() {
   useAdaptiveTextColor(forgotPasswordRef, bgRef);
   useAdaptiveTextColor(emailInputRef, bgRef);
   useAdaptiveTextColor(passwordInputRef, bgRef);
+  useAdaptiveTextColor(eyeIconRef, bgRef);
   useAdaptiveTextColor(signInTextRef, bgRef);
 
   const {
@@ -272,8 +274,9 @@ export function Login() {
               />
               <button
                 type="button"
+                ref={eyeIconRef}
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-[var(--text-quaternary)] transition-all duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-default)]"
+                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-[var(--text-quaternary)] transition-colors duration-200 hover:bg-[var(--surface-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-default)]"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
