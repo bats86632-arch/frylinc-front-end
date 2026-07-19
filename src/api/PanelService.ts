@@ -61,6 +61,7 @@ export const PanelService = {
     branchId: string;
     ipAddress?: string;
     allowedCommands?: string[];
+    config?: any;
   }): Promise<Panel> {
     const response = await apiClient.post('/panels', data);
     return response.data;

@@ -421,21 +421,34 @@ export function AdminSettings() {
     const XLSX = await import("xlsx");
     const isSI = !hasRole(["head_office"]);
 
-    const templateData = [
       {
         "Panel ID": "123456",
         "Panel Name": "Main Lobby Panel",
+        "Panel Type": "fire_alarm",
         "Zone Count": 8,
         "Organization Name": "TechNova",
         "Branch Name": "Main Office",
+        "MOB Numbers": "1234567890, 0987654321",
         ...(!isSI && { "IP Address": "72.167.225.142" })
       },
       {
         "Panel ID": "123457",
         "Panel Name": "Warehouse Panel",
+        "Panel Type": "security",
         "Zone Count": 4,
         "Organization Name": "TechNova",
         "Branch Name": "Main Office",
+        "MOB Numbers": "",
+        ...(!isSI && { "IP Address": "72.167.225.142" })
+      },
+      {
+        "Panel ID": "123458",
+        "Panel Name": "Gate Controller",
+        "Panel Type": "gsm_module",
+        "Zone Count": 0,
+        "Organization Name": "TechNova",
+        "Branch Name": "Main Office",
+        "MOB Numbers": "1112223333",
         ...(!isSI && { "IP Address": "72.167.225.142" })
       }
     ];
@@ -458,15 +471,35 @@ export function AdminSettings() {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws);
 
-      for (const row of rows as any[]) {
         const serial = row["Panel ID"]?.toString().trim();
         const name = row["Panel Name"]?.toString().trim();
-        const zoneCount = parseInt(row["Zone Count"]?.toString().trim()) || 8;
+        
+        const panelTypeRaw = row["Panel Type"]?.toString().trim().toLowerCase();
+        let panelType = "fire_alarm";
+        if (panelTypeRaw === "security") panelType = "security";
+        else if (panelTypeRaw === "gsm_module" || panelTypeRaw === "gsm module") panelType = "gsm_module";
+        
+        const zoneCount = panelType === "gsm_module" ? 0 : (parseInt(row["Zone Count"]?.toString().trim()) || 8);
         const companyName = row["Organization Name"]?.toString().trim();
         const branchName = row["Branch Name"]?.toString().trim();
         let ipAddress = row["IP Address"]?.toString().trim() || "72.167.225.142";
         if (!hasRole(["super_admin"])) {
           ipAddress = "72.167.225.142";
+        }
+        
+        const mobNumbersRaw = row["MOB Numbers"]?.toString().trim();
+        let config: any = undefined;
+        if (mobNumbersRaw) {
+          const numbers = mobNumbersRaw.split(",").map((n: string) => n.trim()).filter((n: string) => n.length > 0);
+          if (numbers.length > 0) {
+            config = {
+              device_type: panelType,
+              mob_numbers: numbers.reduce((acc: any, curr: string, i: number) => {
+                acc[`mob${i + 1}`] = curr;
+                return acc;
+              }, {})
+            };
+          }
         }
 
         if (!serial || !name || !companyName) continue;
@@ -483,10 +516,12 @@ export function AdminSettings() {
         await PanelService.createPanel({
           serial,
           name,
+          panelType,
           zoneCount,
           companyId: company.id,
           branchId,
-          ipAddress
+          ipAddress,
+          ...(config ? { config } : {})
         });
       }
 

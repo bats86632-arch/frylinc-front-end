@@ -139,18 +139,47 @@ export function Reports() {
 
   const handleExport = () => {
     if (filteredLogs.length === 0) return;
-    const exportData = filteredLogs.map(log => ({
-      Timestamp: formatTimestamp(log.timestamp),
-      Type: log.type,
-      Action: log.action,
-      Result: log.result,
-      Panel_Serial: log.panelSerial || 'N/A',
-      Organization: companyId ? companies.find(c => c.id === log.companyId)?.name : (log.companyId || 'N/A'),
-      Branch: branchId ? branches.find(b => b.id === log.branchId)?.name : (log.branchId || 'N/A'),
-      Account: log.actorEmail || log.user || 'System',
-      Role: log.actorRole || log.role || 'N/A',
-      Details: log.command || 'N/A'
-    }));
+    const exportData = filteredLogs.map(log => {
+      let zoneNum = log.zone !== undefined && log.zone !== null ? String(log.zone) : 'N/A';
+      let faultType = 'N/A';
+      
+      const details = log.command || '';
+      
+      if (details) {
+        if (typeof details === 'string') {
+          if (details.startsWith('ISO')) {
+            zoneNum = details.substring(3);
+            faultType = 'Isolate';
+          } else if (details.startsWith('RST')) {
+            faultType = 'Reset';
+          }
+        }
+        try {
+          const parsedDetails = JSON.parse(details);
+          if (parsedDetails.zone) zoneNum = String(parsedDetails.zone);
+          if (parsedDetails.faultType) faultType = parsedDetails.faultType;
+          if (parsedDetails.event) faultType = parsedDetails.event;
+        } catch(e) {}
+      }
+
+      if (log.action === 'ALARM') faultType = 'Fire';
+      if (log.action === 'CLEAR') faultType = 'Normal';
+
+      return {
+        Timestamp: formatTimestamp(log.timestamp),
+        Type: log.type,
+        Action: log.action,
+        Result: log.result,
+        Panel_Serial: log.panelSerial || 'N/A',
+        Organization: companies.find(c => c.id === log.companyId)?.name || log.companyId || 'N/A',
+        Branch: branches.find(b => b.id === log.branchId)?.name || log.branchId || 'N/A',
+        "Zone Number": zoneNum,
+        "Event/Fault Type": faultType,
+        Account: log.actorEmail || log.user || 'System',
+        Role: log.actorRole || log.role || 'N/A',
+        Details: log.command || 'N/A'
+      };
+    });
 
     const ws = xlsx.utils.json_to_sheet(exportData);
     const wb = xlsx.utils.book_new();
