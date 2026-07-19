@@ -7,7 +7,6 @@ import { AuditLog } from "../types";
 import {
   Loader2, Search, FileText, AlertCircle, Building2, MapPin,
   ChevronLeft, ChevronRight, Download, CheckCircle, Clock,
-  ShieldAlert, Activity,
 } from "lucide-react";
 import * as xlsx from "xlsx";
 
@@ -23,18 +22,6 @@ const formatTimestamp = (ts: any) => {
 // Module-level cache for Reports to prevent redundant loading spinners and re-renders
 const reportsCache = new Map<string, { logs: AuditLog[], nextPageToken: string | null }>();
 
-const getEventTypeStyle = (type: string) => {
-  switch (type) {
-    case 'panel_event':
-      return { bg: 'bg-orange-500/10 border-orange-500/20', text: 'text-orange-400', label: 'Panel Event', icon: Activity };
-    case 'command':
-      return { bg: 'bg-blue-500/10 border-blue-500/20', text: 'text-blue-400', label: 'Command', icon: ShieldAlert };
-    case 'admin_action':
-      return { bg: 'bg-purple-500/10 border-purple-500/20', text: 'text-purple-400', label: 'Admin', icon: Building2 };
-    default:
-      return { bg: 'bg-[var(--surface-raised)] border-[var(--border-subtle)]', text: 'text-[var(--text-secondary)]', label: type, icon: FileText };
-  }
-};
 
 export function Reports() {
   const { hasRole, userData } = useAuth();
@@ -48,7 +35,6 @@ export function Reports() {
   // Filters
   const [companyId, setCompanyId] = useState<string>(userData?.companyId || "");
   const [branchId, setBranchId] = useState<string>("");
-  const [type, setType] = useState<string>("");
   const [action, setAction] = useState<string>("");
   const [dateRange, setDateRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
   
@@ -58,11 +44,11 @@ export function Reports() {
 
   useEffect(() => {
     fetchLogs(true);
-  }, [companyId, branchId, type, dateRange]);
+  }, [companyId, branchId, dateRange]);
 
   const fetchLogs = async (resetPagination: boolean = false, token?: string) => {
     try {
-      const cacheKey = JSON.stringify({ companyId, branchId, type, dateRange, token });
+      const cacheKey = JSON.stringify({ companyId, branchId, dateRange, token });
       const cached = reportsCache.get(cacheKey);
       
       if (cached) {
@@ -79,7 +65,6 @@ export function Reports() {
 
       if (companyId) filters.companyId = companyId;
       if (branchId) filters.branchId = branchId;
-      if (type) filters.type = type;
 
       if (dateRange !== "all") {
         const fromDate = new Date();
@@ -324,22 +309,6 @@ export function Reports() {
 
           <div>
             <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-              Event Type
-            </label>
-            <select
-              className="control-field h-9 w-full rounded-[8px] px-3 pr-8 text-[12px]"
-              value={type}
-              onChange={e => setType(e.target.value)}
-            >
-              <option value="">All Types</option>
-              <option value="admin_action">Admin Action</option>
-              <option value="command">Command</option>
-              <option value="panel_event">Panel Event</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
               Search
             </label>
             <div className="relative">
@@ -402,7 +371,7 @@ export function Reports() {
               <thead className="bg-[var(--surface-overlay)] sticky top-0 border-b border-[var(--border-subtle)] z-10">
                 <tr>
                   <th className="px-5 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Timestamp</th>
-                  <th className="px-5 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Type / Action</th>
+                  <th className="px-5 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Action</th>
                   <th className="px-5 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Panel / Zone</th>
                   <th className="px-5 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Account</th>
                   <th className="px-5 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px]">Details</th>
@@ -411,21 +380,13 @@ export function Reports() {
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)]">
                 {filteredLogs.map(log => {
-                  const typeStyle = getEventTypeStyle(log.type);
-                  const TypeIcon = typeStyle.icon;
                   return (
                     <tr key={log.id} className="hover:bg-[var(--surface-hover)] transition-colors group">
                       <td className="px-5 py-3.5 whitespace-nowrap">
                         <span className="font-mono text-[11px] text-[var(--text-secondary)]">{formatTimestamp(log.timestamp)}</span>
                       </td>
                       <td className="px-5 py-3.5 whitespace-nowrap">
-                        <div className="flex flex-col gap-1.5">
-                          <span className="font-bold text-[13px] text-[var(--text-primary)]">{log.action}</span>
-                          <span className={`inline-flex w-fit items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-bold uppercase tracking-widest ${typeStyle.bg} ${typeStyle.text}`}>
-                            <TypeIcon className="h-2.5 w-2.5" />
-                            {typeStyle.label}
-                          </span>
-                        </div>
+                        <span className="font-bold text-[13px] text-[var(--text-primary)]">{log.action}</span>
                       </td>
                       <td className="px-5 py-3.5 whitespace-nowrap">
                         {log.panelSerial ? (

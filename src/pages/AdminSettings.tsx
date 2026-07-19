@@ -425,6 +425,7 @@ export function AdminSettings() {
     const XLSX = await import("xlsx");
     const isSI = !hasRole(["head_office"]);
 
+    const templateData = [
       {
         "Panel ID": "123456",
         "Panel Name": "Main Lobby Panel",
@@ -453,6 +454,7 @@ export function AdminSettings() {
         "MOB Numbers": "1112223333",
       }
     ];
+
 
     const ws = XLSX.utils.json_to_sheet(templateData);
     const wb = XLSX.utils.book_new();
