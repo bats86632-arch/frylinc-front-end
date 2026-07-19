@@ -36,12 +36,10 @@ export function AuthLayout() {
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/agni-building.jpeg')" }}
       />
-      {/* Overlay to ensure readability */}
-      <div className="absolute inset-0 z-0 bg-black/60 dark:bg-black/70 backdrop-blur-[2px]" />
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
         {/* ── Left info panel (desktop only) ──────────────────────────────── */}
-        <section className="relative hidden h-screen flex-col overflow-hidden border-r border-[var(--border-subtle)] px-10 py-10 lg:flex xl:px-16">
+        <section className="relative hidden h-screen flex-col overflow-hidden px-10 py-10 lg:flex xl:px-16">
           {/* Brand lock-up */}
           <div className="flex shrink-0 items-center gap-3.5">
             <img
