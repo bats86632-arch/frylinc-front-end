@@ -19,11 +19,11 @@ export function AuthLayout() {
               alt="Fyrlinc"
               className="h-11 w-11 rounded-[8px] object-cover border border-[var(--border-subtle)]"
             />
-            <div>
-              <p className="font-sans text-[1.1rem] font-semibold tracking-tight text-[var(--text-primary)] leading-none">
+            <div className="mix-blend-difference">
+              <p className="font-sans text-[1.1rem] font-semibold tracking-tight text-white leading-none">
                 Fyrlinc
               </p>
-              <p className="mt-1 text-[12px] text-[var(--text-secondary)] tracking-wide font-medium">
+              <p className="mt-1 text-[12px] text-gray-300 tracking-wide font-medium">
                 Fire Alarm Panel Monitoring
               </p>
             </div>
@@ -65,11 +65,11 @@ export function AuthLayout() {
                 alt="Fyrlinc"
                 className="h-12 w-12 rounded-[8px] object-cover border border-[var(--border-subtle)]"
               />
-              <div>
-                <p className="font-sans text-[1.25rem] font-semibold tracking-tight text-[var(--text-primary)] leading-none">
+              <div className="mix-blend-difference">
+                <p className="font-sans text-[1.25rem] font-semibold tracking-tight text-white leading-none">
                   Fyrlinc
                 </p>
-                <p className="mt-1 text-[13px] text-[var(--text-secondary)] font-medium">
+                <p className="mt-1 text-[13px] text-gray-300 font-medium">
                   Fire Alarm Panel Monitoring
                 </p>
               </div>
