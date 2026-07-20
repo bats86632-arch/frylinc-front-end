@@ -33,7 +33,8 @@ import {
   Zap,
   ZapOff
 } from "lucide-react";
-import { formatDateTime } from "../utils/formatters";
+import { formatDateTime, formatZoneLabel } from "../utils/formatters";
+import { getZoneStatusColors } from "../utils/zoneUtils";
 import { Event } from "../types";
 
 
@@ -348,9 +349,14 @@ export function PanelDetail() {
   const hasAlarm = normalizedPanel.alarm;
   const activeZones = normalizedPanel.zones.filter(z => z === 4 || z === 5).length;
 
-  // Mock states for future implementation
-  const isBatteryLow = false; // Will be driven by panel data later
-  const hasEarthFault = false; // Will be driven by panel data later
+  const isFire = normalizedPanel.panelType === 'Fire Alarm';
+  const isSecurity = normalizedPanel.panelType === 'Security';
+  
+  const hasEarthFault = isFire && normalizedPanel.zones[8] === 2;
+  const isEvacuateActive = (isFire || isSecurity) && normalizedPanel.zones[9] === 2;
+  const isBatteryLow = (isFire || isSecurity) && normalizedPanel.zones[10] === 2;
+  const hasSirenCut = isSecurity && normalizedPanel.zones[8] === 2;
+  const isNightZone = isSecurity && normalizedPanel.zones[11] === 2;
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
@@ -448,6 +454,7 @@ export function PanelDetail() {
             </span>
           </div>
           
+          {(isFire || (!isFire && !isSecurity)) && (
           <div className={`flex items-center gap-2 overflow-hidden rounded-[8px] border px-3 py-3 transition-all duration-200 text-left ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
             {hasEarthFault ? (
               <ZapOff className="h-5 w-5 text-[var(--color-error)] shrink-0" />
@@ -458,6 +465,28 @@ export function PanelDetail() {
               {hasEarthFault ? 'Earth Fault!' : 'Earth Normal'}
             </span>
           </div>
+          )}
+          
+          {isSecurity && (
+          <>
+          <div className={`flex items-center gap-2 overflow-hidden rounded-[8px] border px-3 py-3 transition-all duration-200 text-left ${hasSirenCut ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            {hasSirenCut ? (
+              <AlertTriangle className="h-5 w-5 text-[var(--color-error)] shrink-0" />
+            ) : (
+              <Shield className="h-5 w-5 text-[var(--color-success)] shrink-0" />
+            )}
+            <span className={`truncate text-[12px] font-semibold tracking-wide ${hasSirenCut ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+              {hasSirenCut ? 'Siren Cut!' : 'Siren Normal'}
+            </span>
+          </div>
+          <div className={`flex items-center gap-2 overflow-hidden rounded-[8px] border px-3 py-3 transition-all duration-200 text-left ${isNightZone ? 'border-blue-500/20 bg-blue-500/10' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            <Activity className={`h-5 w-5 shrink-0 ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`} />
+            <span className={`truncate text-[12px] font-semibold tracking-wide ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`}>
+              {isNightZone ? 'Night Zone: ON' : 'Night Zone: OFF'}
+            </span>
+          </div>
+          </>
+          )}
         </div>
       </section>
 
@@ -516,10 +545,10 @@ export function PanelDetail() {
                     <button
                       onClick={() => handleSendCommand("ARM")}
                       disabled={commandLoading !== null}
-                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-[13px] font-semibold text-blue-500 transition-all hover:shadow-lg disabled:opacity-50"
                     >
                       {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
-                      Arm
+                      Night zone arm
                     </button>
                     <button
                       onClick={() => handleSendCommand("ZONE OFF")}
@@ -527,12 +556,12 @@ export function PanelDetail() {
                       className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-success-border)] bg-[var(--status-success-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-success)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
                       {commandLoading === "ZONE OFF" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
-                      Disarm
+                      Night zone disarm
                     </button>
                     <button
                       onClick={() => handleSendCommand("EVA")}
                       disabled={commandLoading !== null}
-                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-warning)] bg-[var(--status-warning-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-warning)] transition-all hover:shadow-lg disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
                     >
                       {commandLoading === "EVA" ? <Loader2 className="h-4 w-4 animate-spin" /> : <AlertTriangle className="h-4 w-4" />}
                       Evacuate
@@ -614,7 +643,6 @@ export function PanelDetail() {
                 const isAlarmOrPre = zoneStatus === 2 || zoneStatus === 3 || zoneStatus === 4;
                 const isIsolated = zoneStatus === 5;
                 
-                const isEvacuateActive = normalizedPanel.zones[5] === 2; // Zone 6 is in alarm
                 const isEvacuatePulse = isEvacuateActive;
 
                 const resetCmd = `RESET ${zoneNum}`;
@@ -665,8 +693,8 @@ export function PanelDetail() {
                               isAlarmOrPre || isEvacuatePulse ? "text-[var(--color-error)]" 
                               : isIsolated ? "text-[var(--color-warning)]" 
                               : "text-[var(--text-primary)]"
-                            }`} title={normalizedPanel.zoneNames?.[idx.toString()] || `Zone ${zoneNum}`}>
-                              {normalizedPanel.zoneNames?.[idx.toString()] || `Zone ${zoneNum}`}
+                            }`} title={formatZoneLabel(idx, normalizedPanel.zoneNames?.[idx.toString()])}>
+                              {formatZoneLabel(idx, normalizedPanel.zoneNames?.[idx.toString()])}
                             </span>
                             {!isStrictlyEndUser && (
                               <button

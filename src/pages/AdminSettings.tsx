@@ -57,7 +57,7 @@ const panelSchema = z.object({
   serial: z.string().min(1, "Serial is required"),
   name: z.string().min(1, "Name is required"),
   panelType: z.enum(["Fire Alarm", "Security", "GSM Module"]).optional(),
-  zoneCount: z.coerce.number().min(1).max(16, "Max 16 zones"),
+  zoneCount: z.coerce.number().min(1).max(8, "Max 8 zones"),
   companyId: z.string().optional(),
   branchId: z.string().optional(),
   ipAddress: z.string().optional(),
@@ -2951,8 +2951,8 @@ export function AdminSettings() {
                           {provisionStep === 1 ? (
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                               {[
-                                { value: "Fire Alarm", label: "Fire Alarm", description: "Standard fire detection panels", icon: Flame },
-                                { value: "Security", label: "Security Panel", description: "Intrusion and alarm systems", icon: Shield },
+                                { value: "Fire Alarm", label: "Fire Alarm Panel", description: "Standard fire detection panels", icon: Flame },
+                                { value: "Security", label: "Security Alarm Panel", description: "Intrusion and alarm systems", icon: Shield },
                                 { value: "GSM Module", label: "GSM Dialer", description: "Cellular communication modules", icon: Smartphone },
                               ].map((type) => {
                                 const Icon = type.icon;
@@ -3025,7 +3025,7 @@ export function AdminSettings() {
                       {watch("panelType") !== "GSM Module" && (
                         <div>
                           <label className="mb-2 block text-[13px] text-[var(--text-secondary)]">
-                            Number of Zones (1-16)
+                            Number of Zones (1-8)
                           </label>
                           <input
                             type="number"

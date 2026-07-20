@@ -1,4 +1,4 @@
-import { formatPanelName } from '../utils/formatters';
+import { formatPanelName, formatZoneLabel } from '../utils/formatters';
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import {
@@ -50,7 +50,7 @@ function buildZonesFromSaved(
     const customName = zoneNames?.[zoneIdx.toString()];
     return {
       ...z,
-      label: customName ? `${panelSerial} \u2014 ${customName} (Zone ${zoneIdx + 1})` : `${panelSerial} \u2014 Zone ${zoneIdx + 1}`,
+      label: `${panelSerial} \u2014 ${formatZoneLabel(zoneIdx, customName)}`,
     };
   });
 }
@@ -337,7 +337,8 @@ export function MapZones() {
     if (localZones.length >= maxZones) return;
     const nextNum = localZones.length + 1;
     const zoneId = `${selectedPanel.serial}-Z${nextNum}`;
-    const label = `${selectedPanel.serial} \u2014 Zone ${nextNum}`;
+    const customName = selectedPanel.zoneNames?.[(nextNum - 1).toString()];
+    const label = `${selectedPanel.serial} \u2014 ${formatZoneLabel(nextNum - 1, customName)}`;
     const newZone: ZoneLayout = { zoneId, label, ...newZonePos(localZones.length) };
     setLocalZones((prev) => [...prev, newZone]);
     setIsDirty(true);
@@ -784,8 +785,8 @@ export function MapZones() {
           <p className="text-[11px] text-[var(--status-danger-text)] mt-0.5">
             Active zones:{" "}
             {alarmZones.length > 0
-              ? alarmZones.map((z) => `Zone ${z}`).join(", ")
-              : "—"}
+              ? alarmZones.map((z) => formatZoneLabel(z - 1, selectedPanel.zoneNames?.[(z - 1).toString()])).join(", ")
+              : "-"}
           </p>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useCompanies } from "../hooks/useCompanies";
 import { useBranches } from "../hooks/useBranches";
+import { formatDateTime, formatZoneLabel } from "../utils/formatters";
 import { usePanels } from "../hooks/usePanels";
 import { ReportsService, AuditLogFilters } from "../api/ReportsService";
 import { AuditLog } from "../types";
@@ -24,6 +25,12 @@ const formatTimestamp = (ts: any) => {
 // Module-level cache for Reports to prevent redundant loading spinners and re-renders
 const reportsCache = new Map<string, { logs: AuditLog[], nextPageToken: string | null }>();
 
+const getPanelTypeBadge = (type?: string) => {
+  if (type === 'Fire Alarm') return { text: 'FAP', colorClass: 'bg-red-500/10 text-red-500 border-red-500/20' };
+  if (type === 'Security') return { text: 'SAP', colorClass: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+  if (type === 'GSM Module') return { text: 'GSM', colorClass: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+  return { text: 'UNK', colorClass: 'bg-gray-500/10 text-gray-400 border-gray-500/20' };
+};
 
 export function Reports() {
   const { hasRole, userData } = useAuth();
@@ -40,7 +47,7 @@ export function Reports() {
   const [branchId, setBranchId] = useState<string>("");
   const [action, setAction] = useState<string>("");
   const [dateRange, setDateRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
-  const [viewMode, setViewMode] = useState<"list" | "matrix">("list");
+  const [viewMode, setViewMode] = useState<"list" | "matrix">("matrix");
   
   // Pagination
   const [pageToken, setPageToken] = useState<string | null>(null);
@@ -195,6 +202,16 @@ export function Reports() {
   const totalSuccess = filteredLogs.filter(l => l.result === 'SUCCESS').length;
   const totalFail = filteredLogs.filter(l => l.result === 'FAIL').length;
   const successRate = filteredLogs.length > 0 ? Math.round((totalSuccess / filteredLogs.length) * 100) : 0;
+
+  const activePanels = panels.filter(p => {
+    if (companyId && p.companyId !== companyId) return false;
+    if (branchId && p.branchId !== branchId) return false;
+    if (action) {
+      const searchLower = action.toLowerCase();
+      return p.serial.toLowerCase().includes(searchLower) || p.name.toLowerCase().includes(searchLower);
+    }
+    return true;
+  });
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--surface-base)] relative">
@@ -388,17 +405,7 @@ export function Reports() {
         ) : viewMode === 'matrix' ? (
           <div className="min-w-[1000px] w-full">
             {(() => {
-              const activePanels = panels.filter(p => {
-                if (companyId && p.companyId !== companyId) return false;
-                if (branchId && p.branchId !== branchId) return false;
-                if (action) {
-                  const searchLower = action.toLowerCase();
-                  return p.serial.toLowerCase().includes(searchLower) || p.name.toLowerCase().includes(searchLower);
-                }
-                return true;
-              });
-              
-              const maxZones = Math.max(1, ...activePanels.map(p => p.zoneCount || 8));
+              const maxZones = Math.min(8, Math.max(1, ...activePanels.map(p => p.zoneCount || 8)));
 
               return (
                 <table className="w-full text-left text-[12px]">
@@ -411,6 +418,11 @@ export function Reports() {
                       {Array.from({ length: maxZones }).map((_, i) => (
                         <th key={i} className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Zone {i + 1}</th>
                       ))}
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Siren Cut</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Evacuate</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Bat. Low</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Earth Fault</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Night Zone</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)] bg-[var(--surface-base)]">
@@ -421,7 +433,14 @@ export function Reports() {
                       return (
                         <tr key={panel.serial} className="hover:bg-[var(--surface-hover)] transition-colors group">
                           <td className="px-4 py-3.5 whitespace-nowrap text-[11px] font-mono text-[var(--text-secondary)]">{idx + 1}</td>
-                          <td className="px-4 py-3.5 whitespace-nowrap font-bold text-[13px] text-[var(--text-primary)]">{panel.serial}</td>
+                          <td className="px-4 py-3.5 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-[4px] border font-bold text-[9px] tracking-widest ${getPanelTypeBadge(panel.panelType).colorClass}`}>
+                                {getPanelTypeBadge(panel.panelType).text}
+                              </span>
+                              <span className="font-bold text-[13px] text-[var(--text-primary)]">{panel.serial}</span>
+                            </div>
+                          </td>
                           <td className="px-4 py-3.5 whitespace-nowrap text-[12px] font-medium text-[var(--text-secondary)]">{bankName}</td>
                           <td className="px-4 py-3.5 whitespace-nowrap text-[12px] font-medium text-[var(--text-secondary)]">{branchName}</td>
                           {Array.from({ length: maxZones }).map((_, i) => {
@@ -456,12 +475,47 @@ export function Reports() {
                               </td>
                             );
                           })}
+                          
+                          {/* Special Events */}
+                          {(() => {
+                            const isFire = panel.panelType === 'Fire Alarm';
+                            const isSecurity = panel.panelType === 'Security';
+                            
+                            const hasEarthFault = isFire && panel.zones?.[8] === 2;
+                            const isEvacuateActive = (isFire || isSecurity) && panel.zones?.[9] === 2;
+                            const isBatteryLow = (isFire || isSecurity) && panel.zones?.[10] === 2;
+                            const hasSirenCut = isSecurity && panel.zones?.[8] === 2;
+                            const isNightZone = isSecurity && panel.zones?.[11] === 2;
+
+                            const renderBadge = (active: boolean, codeActive: string, codeInactive: string, activeClass: string, inactiveClass: string) => (
+                              <td className="px-2 py-3.5 text-center">
+                                <span className={`inline-flex items-center justify-center w-8 h-6 rounded-md border font-bold text-[11px] transition-all ${active ? activeClass : inactiveClass}`}>
+                                  {active ? codeActive : codeInactive}
+                                </span>
+                              </td>
+                            );
+
+                            const activeDanger = 'bg-red-500/10 text-red-500 border-red-500/20 shadow-[0_0_6px_rgba(239,68,68,0.15)]';
+                            const activeWarning = 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-[0_0_6px_rgba(249,115,22,0.15)]';
+                            const activeInfo = 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-[0_0_6px_rgba(59,130,246,0.15)]';
+                            const inactiveBadge = 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border-[var(--border-subtle)]';
+
+                            return (
+                              <>
+                                {renderBadge(hasSirenCut, 'F', 'N', activeDanger, inactiveBadge)}
+                                {renderBadge(isEvacuateActive, 'F', 'N', activeDanger, inactiveBadge)}
+                                {renderBadge(isBatteryLow, 'F', 'N', activeWarning, inactiveBadge)}
+                                {renderBadge(hasEarthFault, 'F', 'N', activeDanger, inactiveBadge)}
+                                {renderBadge(isNightZone, 'ON', 'OFF', activeInfo, inactiveBadge)}
+                              </>
+                            );
+                          })()}
                         </tr>
                       );
                     })}
                     {activePanels.length === 0 && (
                       <tr>
-                        <td colSpan={maxZones + 4} className="px-4 py-10 text-center text-[13px] text-[var(--text-secondary)]">
+                        <td colSpan={maxZones + 4 + 5} className="px-4 py-10 text-center text-[13px] text-[var(--text-secondary)]">
                           No panels match your filters.
                         </td>
                       </tr>
@@ -498,10 +552,29 @@ export function Reports() {
                       </td>
                       <td className="px-5 py-3.5 whitespace-nowrap">
                         {log.panelSerial ? (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="font-mono font-semibold text-[var(--text-primary)]">{log.panelSerial}</span>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              {(() => {
+                                const p = panels.find(p => p.serial === log.panelSerial);
+                                if (p && p.panelType) {
+                                  const badge = getPanelTypeBadge(p.panelType);
+                                  return (
+                                    <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-[4px] border font-bold text-[8px] tracking-widest ${badge.colorClass}`}>
+                                      {badge.text}
+                                    </span>
+                                  );
+                                }
+                                return null;
+                              })()}
+                              <span className="font-mono font-semibold text-[var(--text-primary)]">{log.panelSerial}</span>
+                            </div>
                             {log.zone !== undefined && log.zone !== null && (
-                              <span className="text-[10px] text-[var(--text-secondary)]">Zone {log.zone}</span>
+                              <span className="text-[10px] text-[var(--text-secondary)]">
+                                {(() => {
+                                  const p = panels.find(p => p.serial === log.panelSerial);
+                                  return formatZoneLabel(log.zone - 1, p?.zoneNames?.[(log.zone - 1).toString()]);
+                                })()}
+                              </span>
                             )}
                           </div>
                         ) : (
@@ -577,10 +650,30 @@ export function Reports() {
                       <div className="flex flex-col gap-1">
                         <span className="text-[9px] text-[var(--text-quaternary)] uppercase font-bold tracking-wider">Panel / Zone</span>
                         {log.panelSerial ? (
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                            {(() => {
+                              const p = panels.find(p => p.serial === log.panelSerial);
+                              if (p && p.panelType) {
+                                const badge = getPanelTypeBadge(p.panelType);
+                                return (
+                                  <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-[4px] border font-bold text-[8px] tracking-widest ${badge.colorClass}`}>
+                                    {badge.text}
+                                  </span>
+                                );
+                              }
+                              return null;
+                            })()}
                             <span className="font-mono font-semibold text-[11px] text-[var(--text-primary)] truncate">{log.panelSerial}</span>
                             {log.zone !== undefined && log.zone !== null && (
-                              <span className="text-[10px] text-[var(--text-secondary)] shrink-0">Z{log.zone}</span>
+                              <span className="text-[10px] text-[var(--text-secondary)] shrink-0 truncate max-w-[120px]" title={(() => {
+                                  const p = panels.find(p => p.serial === log.panelSerial);
+                                  return formatZoneLabel(log.zone - 1, p?.zoneNames?.[(log.zone - 1).toString()]);
+                                })()}>
+                                {(() => {
+                                  const p = panels.find(p => p.serial === log.panelSerial);
+                                  return formatZoneLabel(log.zone - 1, p?.zoneNames?.[(log.zone - 1).toString()]);
+                                })()}
+                              </span>
                             )}
                           </div>
                         ) : (
@@ -615,11 +708,36 @@ export function Reports() {
       </div>
 
       {/* ── Pagination ────────────────────────────────────────────────────── */}
-      {!loading && logs.length > 0 && (
+      {((!loading && logs.length > 0 && viewMode === 'list') || (viewMode === 'matrix' && activePanels.length > 0)) && (
         <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] flex items-center justify-between sticky bottom-0 z-10">
-          <p className="text-[12px] text-[var(--text-secondary)] font-medium">
-            Showing <span className="text-[var(--text-primary)] font-bold">{filteredLogs.length}</span> results
-          </p>
+          <div className="flex items-center gap-6">
+            <p className="text-[12px] text-[var(--text-secondary)] font-medium">
+              Showing <span className="text-[var(--text-primary)] font-bold">
+                {viewMode === 'matrix' ? activePanels.length : filteredLogs.length}
+              </span> {viewMode === 'matrix' ? 'panels' : 'results'}
+            </p>
+
+            {viewMode === 'matrix' && (
+              <div className="hidden sm:flex items-center gap-4 border-l border-[var(--border-subtle)] pl-6">
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">N</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Normal</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-orange-500/10 text-orange-500 border-orange-500/20">F</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fire</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-indigo-500/10 text-indigo-400 border-indigo-500/20">Flt</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fault</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:text-yellow-400">I</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Isolate</span>
+                </div>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrevPage}

@@ -90,3 +90,10 @@ export function formatPanelName(name: string, type?: string): string {
   else if (t === "gsm module" || t === "gsm") suffix = " (GSM)";
   return `${baseName}${suffix}`;
 }
+
+export function formatZoneLabel(zoneIndex: number, customName?: string): string {
+  if (customName && customName.trim().length > 0) {
+    return `Zone ${zoneIndex + 1}: ${customName.trim()}`;
+  }
+  return `Zone ${zoneIndex + 1}`;
+}
