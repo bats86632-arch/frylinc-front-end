@@ -20,7 +20,9 @@ const VERTEX_R = IS_TOUCH ? 2.4 : 1.2;
 /** Edge ghost-handle radius — slightly smaller. */
 const EDGE_R = IS_TOUCH ? 1.6 : 0.85;
 /** Max distance (in % units) to the edge midpoint to show the ghost handle. */
-const EDGE_HOVER_THRESHOLD = IS_TOUCH ? 6 : 3.5;
+const EDGE_HOVER_THRESHOLD = IS_TOUCH ? 8 : 3.5;
+/** Max distance (in % units) to a vertex to prefer vertex dragging over edge dragging on touch. */
+const VERTEX_TOUCH_THRESHOLD = IS_TOUCH ? 4.5 : 2.0;
 /** Minimum vertices before a vertex can be deleted. */
 const MIN_VERTICES = 3;
 
@@ -208,6 +210,56 @@ export function ZonePoly({
     e.preventDefault();
     onSelect();
     const cur = toSvgPct(e);
+
+    // On touch devices: detect if the pointer landed near an edge
+    // (but not on an existing vertex). If so, start an edge drag instead
+    // of a body move — this gives mobile users the same flexibility as desktop hover+drag.
+    if (IS_TOUCH && pts.length >= 3) {
+      const n = pts.length;
+
+      // First check: is the pointer close to an existing vertex?
+      let nearVertex = false;
+      for (let i = 0; i < n; i++) {
+        const dx = cur.x - pts[i].x;
+        const dy = cur.y - pts[i].y;
+        if (Math.sqrt(dx * dx + dy * dy) < VERTEX_TOUCH_THRESHOLD) {
+          nearVertex = true;
+          break;
+        }
+      }
+
+      // Second check: is the pointer close to an edge?
+      if (!nearVertex) {
+        let closestEdge: number | null = null;
+        let closestDist = EDGE_HOVER_THRESHOLD;
+        for (let i = 0; i < n; i++) {
+          const d = distToSegment(cur, pts[i], pts[(i + 1) % n]);
+          if (d < closestDist) {
+            closestDist = d;
+            closestEdge = i;
+          }
+        }
+
+        if (closestEdge !== null) {
+          // Start an edge drag
+          dragRef.current = {
+            type: "edge",
+            edgeIdx: closestEdge,
+            vertexInserted: false,
+            startPts: [...pts],
+            startX: cur.x,
+            startY: cur.y,
+          };
+          dragStartPts.current = [...pts];
+          (e.target as Element).setPointerCapture(e.pointerId);
+          svgRef.current?.addEventListener("pointermove", handleGlobalPointerMove);
+          svgRef.current?.addEventListener("pointerup", handleGlobalPointerUp, { once: true });
+          return;
+        }
+      }
+    }
+
+    // Default: body move drag
     dragStartPts.current = [...pts];
     dragRef.current = {
       type: "move",
