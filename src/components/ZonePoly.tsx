@@ -36,8 +36,9 @@ interface ZonePolyProps {
   isIsolated?: boolean;
   /** Whether the evacuate pulse should be applied (from Zone 6 alarm) */
   isEvacuatePulse?: boolean;
-  /** Additional text to append to the zone label */
   additionalLabel?: string;
+  /** Custom name for the zone from panel.zoneNames */
+  customName?: string;
   /** Whether this zone is selected for editing */
   isSelected: boolean;
   /** If true, drag/resize interactions are disabled */
@@ -114,6 +115,7 @@ export function ZonePoly({
   isIsolated,
   isEvacuatePulse = false,
   additionalLabel,
+  customName,
   isSelected,
   isReadOnly,
   isOrphan = false,
@@ -362,9 +364,14 @@ export function ZonePoly({
   // Bounding box for label positioning
   const minX = pts.length > 0 ? Math.min(...pts.map(p => p.x)) : 50;
   const minY = pts.length > 0 ? Math.min(...pts.map(p => p.y)) : 50;
+  const centroid = pts.length > 0 
+    ? { 
+        x: pts.reduce((sum, p) => sum + p.x, 0) / pts.length, 
+        y: pts.reduce((sum, p) => sum + p.y, 0) / pts.length 
+      }
+    : { x: 50, y: 50 };
   const zoneNumber = zone.zoneId.split("-Z")[1] || zone.label;
-  const labelText = zoneNumber + (additionalLabel ?? "");
-
+  const labelText = customName ? `${customName} (Z${zoneNumber})${additionalLabel ?? ""}` : `Zone ${zoneNumber}${additionalLabel ?? ""}`;
 
   if (pts.length < 3) return null; // Cannot render degenerate zone
 
