@@ -10,6 +10,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: [
         "fyrlinc-logo.png",
+        "cmp.png",
+        "cmp-phone.png",
         "icon-192x192.png",
         "icon-512x512.png",
       ],
