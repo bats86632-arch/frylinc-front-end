@@ -12,6 +12,8 @@ import {
   ArrowRight,
   Loader2,
   CheckCircle,
+  Mail,
+  Lock
 } from "lucide-react";
 
 const loginSchema = z.object({
@@ -47,17 +49,6 @@ export function Login() {
     (location.state as LoginLocationState | null)?.from?.pathname || "/";
 
   const { bgRef } = useOutletContext<{ bgRef: React.RefObject<HTMLImageElement> }>();
-
-  const lockRef = useRef<SVGSVGElement>(null);
-  const welcomeRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const emailLabelRef = useRef<HTMLLabelElement>(null);
-  const passwordLabelRef = useRef<HTMLLabelElement>(null);
-  const forgotPasswordRef = useRef<HTMLButtonElement>(null);
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const passwordInputRef = useRef<HTMLInputElement>(null);
-  const eyeIconRef = useRef<HTMLButtonElement>(null);
-  const signInTextRef = useRef<HTMLSpanElement>(null);
 
   const {
     register,
@@ -145,13 +136,13 @@ export function Login() {
   };
 
   return (
-    <div className="w-full rounded-[20px] p-8 sm:p-10 animate-fade-in border border-[var(--border-subtle)] bg-[#1a1c1f]/60 backdrop-blur-md lg:bg-[var(--surface-raised)] lg:backdrop-blur-none shadow-xl lg:rounded-[16px] lg:p-11 lg:shadow-2xl">
-      {/* Header */}
-      <div className="mb-8 lg:mb-9">
-        <h2 className="font-sans text-[2rem] font-bold leading-tight tracking-tight text-white text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
+    <div className="w-full animate-fade-in lg:rounded-[16px] lg:border lg:border-[var(--border-subtle)] lg:bg-[var(--surface-raised)] lg:p-11 lg:shadow-2xl">
+      {/* Header (Desktop Only) */}
+      <div className="hidden lg:block mb-9">
+        <h2 className="font-sans text-[2.45rem] font-bold leading-tight tracking-[-0.045em] text-white text-balance drop-shadow-sm">
           Welcome back
         </h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-white font-medium lg:mt-3 lg:max-w-sm">
+        <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white font-medium">
           Sign in to access your monitoring dashboard.
         </p>
       </div>
@@ -160,7 +151,7 @@ export function Login() {
       {error && (
         <div className="mb-7 flex items-start gap-3 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] p-4 animate-fade-in">
           <AlertCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--color-error)]" />
-          <p className="text-[13px] font-medium leading-6 text-[var(--color-error)]">
+          <p className="text-[13px] font-medium leading-6 text-[var(--color-error)] lg:text-white">
             {error}
           </p>
         </div>
@@ -170,36 +161,37 @@ export function Login() {
       {success && (
         <div className="mb-7 flex items-start gap-3 rounded-[8px] border border-[var(--status-success-border)] bg-[var(--status-success-bg)] p-4 animate-fade-in">
           <CheckCircle className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--color-success)]" />
-          <p className="text-[13px] font-medium leading-6 text-[var(--color-success)]">
+          <p className="text-[13px] font-medium leading-6 text-[var(--color-success)] lg:text-white">
             {success}
           </p>
         </div>
       )}
 
-      {/* Divider */}
-      <div className="mb-8 border-t border-[var(--border-subtle)] lg:border-[var(--border-default)]" />
+      {/* Divider (Desktop Only) */}
+      <div className="hidden lg:block mb-8 border-t border-[var(--border-default)]" />
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-6">
+        <div className="space-y-6 lg:space-y-6">
           {/* Email */}
           <div>
             <label
               htmlFor="email"
-              className="mb-2.5 block text-[13px] font-semibold text-white"
+              className="hidden lg:block mb-2.5 text-[13px] font-semibold text-white"
             >
-              Email address
+              Email Address
             </label>
-            <div className="relative">
+            <div className="relative flex items-center border-b border-white/60 lg:border-none">
+              <Mail className="absolute left-1 h-[22px] w-[22px] text-white lg:hidden" />
               <input
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`control-field w-full px-4 py-3.5 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] text-white ${
+                className={`w-full bg-transparent px-10 py-3 text-[16px] text-white placeholder:text-white/80 lg:control-field lg:px-4 lg:py-3.5 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] ${
                   errors.email
-                    ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] pr-10"
+                    ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)] pr-10"
                     : ""
-                }`}
-                placeholder="you@example.com"
+                } focus:outline-none`}
+                placeholder="Email Address"
                 disabled={isLoading}
               />
               {errors.email && (
@@ -207,7 +199,7 @@ export function Login() {
               )}
             </div>
             {errors.email && (
-              <p className="mt-2 text-[13px] font-medium text-[var(--color-error)] animate-fade-in">
+              <p className="mt-2 text-[13px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
                 {errors.email.message}
               </p>
             )}
@@ -215,7 +207,7 @@ export function Login() {
 
           {/* Password */}
           <div>
-            <div className="mb-2.5 flex items-center justify-between">
+            <div className="hidden lg:flex mb-2.5 items-center justify-between">
               <label
                 htmlFor="password"
                 className="block text-[13px] font-semibold text-white"
@@ -230,23 +222,35 @@ export function Login() {
                 Forgot password?
               </button>
             </div>
-            <div className="relative">
+            <div className="relative flex items-center border-b border-white/60 lg:border-none">
+              <Lock className="absolute left-1 h-[22px] w-[22px] text-white lg:hidden" />
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`control-field w-full px-4 py-3.5 pr-12 text-[13px] font-medium lg:h-[48px] lg:rounded-[8px] text-white ${
+                className={`w-full bg-transparent px-10 py-3 pr-24 text-[16px] text-white placeholder:text-white/80 lg:control-field lg:px-4 lg:py-3.5 lg:pr-12 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] ${
                   errors.password
-                    ? "border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]"
+                    ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)]"
                     : ""
-                }`}
-                placeholder="Enter your password"
+                } focus:outline-none`}
+                placeholder="Password"
                 disabled={isLoading}
               />
+              
+              {/* Mobile Forgot Link inside input space */}
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="absolute right-1 text-[15px] font-medium text-white hover:opacity-80 transition-opacity duration-200 lg:hidden"
+              >
+                Forgot?
+              </button>
+
+              {/* Desktop Show/Hide Password */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="hidden lg:flex absolute right-2.5 top-1/2 h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -257,7 +261,7 @@ export function Login() {
               </button>
             </div>
             {errors.password && (
-              <p className="mt-2 text-[13px] font-medium text-[var(--color-error)] animate-fade-in">
+              <p className="mt-2 text-[13px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
                 {errors.password.message}
               </p>
             )}
@@ -268,20 +272,29 @@ export function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="btn-primary mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-4 text-[15px] font-bold lg:h-[48px] rounded-[8px]"
+          className="mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-[18px] text-[16px] font-bold text-white tracking-widest rounded-[8px] bg-[#d32f2f] hover:bg-[#b72424] transition-colors lg:bg-[var(--accent)] lg:hover:bg-[var(--accent-hover)] lg:normal-case lg:tracking-normal lg:h-[48px] lg:py-0 lg:text-[15px] lg:border lg:border-transparent lg:shadow-none shadow-[0_4px_14px_0_rgba(211,47,47,0.39)]"
         >
           {isLoading ? (
             <>
               <Loader2 className="h-[18px] w-[18px] animate-spin text-white" />
-              <span className="text-white">Signing in…</span>
+              <span className="text-white lg:hidden">LOGGING IN...</span>
+              <span className="hidden lg:inline text-white">Signing in...</span>
             </>
           ) : (
             <>
-              <span className="text-white">Sign In</span>
-              <ArrowRight className="h-[18px] w-[18px] text-white" />
+              <span className="text-white lg:hidden">LOGIN</span>
+              <span className="hidden lg:inline text-white">Sign In</span>
+              <ArrowRight className="hidden lg:block h-[18px] w-[18px] text-white" />
             </>
           )}
         </button>
+
+        {/* Mobile Sign Up Text */}
+        <div className="mt-6 text-center lg:hidden">
+          <p className="text-[14px] text-white/90 drop-shadow-md">
+            Don't have an account? <span className="font-bold text-white cursor-pointer hover:underline">Sign up</span>
+          </p>
+        </div>
       </form>
     </div>
   );

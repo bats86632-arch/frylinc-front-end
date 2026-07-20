@@ -121,21 +121,14 @@ export function AuthLayout() {
           }}
         >
           <div className="relative z-10 w-full max-w-md animate-fade-in-up lg:max-w-[460px]">
-            {/* Mobile brand */}
-            <div className="mb-10 flex items-center justify-center gap-3 lg:hidden">
-              <img
-                src="/fyrlinc-logo.png"
-                alt="Fyrlinc"
-                className="h-12 w-12 rounded-[8px] object-cover border border-[var(--border-subtle)]"
-              />
-              <div>
-                <p ref={mobileTitleRef} className="font-sans text-[1.25rem] font-semibold tracking-tight text-white leading-none">
-                  Fyrlinc
-                </p>
-                <p ref={mobileSubtitleRef} className="mt-1 text-[13px] text-gray-300 font-medium">
-                  Fire Alarm Panel Monitoring
-                </p>
-              </div>
+            {/* Mobile brand - large centered text like reference image */}
+            <div className="mb-24 flex flex-col items-center justify-center lg:hidden">
+              <h1 className="font-sans text-[4.5rem] font-bold tracking-tight text-white leading-none drop-shadow-md">
+                Fyrlinc
+              </h1>
+              <p className="mt-3 text-[14px] text-white font-bold tracking-[0.15em] uppercase drop-shadow-md">
+                Fire Alarm Panel Monitoring
+              </p>
             </div>
             <Outlet context={{ bgRef }} />
           </div>
