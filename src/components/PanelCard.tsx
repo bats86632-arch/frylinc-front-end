@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Panel } from "../types";
 import { formatPanelName } from "../utils/formatters";
-import { Activity, AlertTriangle, Hash, MapPin, RadioTower, Clock, CheckCircle } from "lucide-react";
+import { Activity, AlertTriangle, Hash, MapPin, RadioTower, Clock, CheckCircle, BatteryMedium, BatteryWarning, Zap, ZapOff } from "lucide-react";
 import { PanelService } from "../api/PanelService";
 import { getZoneStatusColors } from "../utils/zoneUtils";
 
@@ -16,6 +16,10 @@ interface PanelCardProps {
 
   // Ensure we always have exactly 8 zones (or zoneCount) to render
   const targetCount = panel.zoneCount || 8;
+
+  // Mock states for future implementation
+  const isBatteryLow = false; // Will be driven by panel data later
+  const hasEarthFault = false; // Will be driven by panel data later
   
   const getZoneState = (isAlarm: boolean) => {
     if (isAlarm) return "alarm";
@@ -120,7 +124,7 @@ interface PanelCardProps {
           </div>
 
           {/* Mock Connection Data */}
-          <div className="flex items-center justify-between rounded-md bg-[var(--surface-overlay)] p-3 border border-[var(--border-subtle)] mb-6">
+          <div className="flex items-center justify-between rounded-md bg-[var(--surface-overlay)] p-3 border border-[var(--border-subtle)] mb-4">
             <div className="flex items-center gap-2 text-[12px] font-medium text-[var(--text-secondary)]">
               <Clock className="h-3.5 w-3.5" />
               Synced 2s ago
@@ -132,6 +136,31 @@ interface PanelCardProps {
                 <div className="w-1 h-2.5 bg-[var(--color-success)] rounded-[1px]" />
                 <div className="w-1 h-3.5 bg-[var(--surface-hover)] rounded-[1px]" />
               </div>
+            </div>
+          </div>
+
+          {/* System Indicators */}
+          <div className="grid grid-cols-2 gap-2 mb-6">
+            <div className={`flex items-center gap-2 overflow-hidden rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${isBatteryLow ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+              {isBatteryLow ? (
+                <BatteryWarning className="h-4 w-4 text-[var(--color-error)] shrink-0" />
+              ) : (
+                <BatteryMedium className="h-4 w-4 text-[var(--color-success)] shrink-0" />
+              )}
+              <span className={`truncate text-[11px] font-semibold tracking-wide ${isBatteryLow ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+                {isBatteryLow ? 'Battery Low' : 'Battery life is okay'}
+              </span>
+            </div>
+            
+            <div className={`flex items-center gap-2 overflow-hidden rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+              {hasEarthFault ? (
+                <ZapOff className="h-4 w-4 text-[var(--color-error)] shrink-0" />
+              ) : (
+                <Zap className="h-4 w-4 text-[var(--color-success)] shrink-0" />
+              )}
+              <span className={`truncate text-[11px] font-semibold tracking-wide ${hasEarthFault ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+                {hasEarthFault ? 'Earth Fault!' : 'Earth fault okay'}
+              </span>
             </div>
           </div>
 
