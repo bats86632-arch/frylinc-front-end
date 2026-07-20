@@ -71,6 +71,10 @@
     --duration-normal: 200ms;
     --duration-slow: 300ms;
 
+    /* ── Safe Areas ── */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+
     /* ── Typography ── */
     font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
     color: var(--text-primary);
@@ -134,6 +138,13 @@
     --overlay-backdrop: rgba(0, 20, 40, 0.3);
 
     color-scheme: light;
+}
+
+@media (max-width: 1023px) {
+    :root {
+        --safe-top: max(env(safe-area-inset-top), 32px);
+        --safe-bottom: max(env(safe-area-inset-bottom), 16px);
+    }
 }
 
 html {

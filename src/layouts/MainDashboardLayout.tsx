@@ -175,8 +175,8 @@ export function MainDashboardLayout() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: 'env(safe-area-inset-bottom)'
+          paddingTop: 'var(--safe-top)',
+          paddingBottom: 'var(--safe-bottom)'
         }}
       >
         {/* Logo */}
@@ -247,14 +247,14 @@ export function MainDashboardLayout() {
       {/* ── Main content ─────────────────────────────────────────────────────── */}
       <div 
         className="lg:pl-[260px] relative z-10"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        style={{ paddingBottom: 'var(--safe-bottom)' }}
       >
         {/* Header - Solid background with border */}
         <header
           className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--surface-base)] px-4 transition-colors duration-300 sm:px-6 lg:px-8"
           style={{
-            paddingTop: 'env(safe-area-inset-top)',
-            minHeight: 'calc(72px + env(safe-area-inset-top))'
+            paddingTop: 'var(--safe-top)',
+            minHeight: 'calc(72px + var(--safe-top))'
           }}
         >
           <div className="flex min-w-0 items-center gap-4 h-[72px]">

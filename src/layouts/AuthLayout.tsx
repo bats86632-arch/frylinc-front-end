@@ -96,8 +96,8 @@ export function AuthLayout() {
         <main
           className="relative z-10 flex min-h-screen flex-col justify-between px-6 sm:px-8 lg:h-screen lg:min-h-0 lg:flex-row lg:items-center lg:justify-center lg:px-12 lg:py-12"
           style={{
-            paddingTop: 'calc(4rem + env(safe-area-inset-top))',
-            paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))',
+            paddingTop: 'calc(4rem + var(--safe-top))',
+            paddingBottom: 'calc(2rem + var(--safe-bottom))',
           }}
         >
           {/* Mobile brand - pushed to top with glassmorphism */}
