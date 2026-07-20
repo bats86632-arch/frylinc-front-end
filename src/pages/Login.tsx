@@ -9,7 +9,6 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  ArrowRight,
   Loader2,
   CheckCircle,
   Mail,
@@ -133,15 +132,12 @@ export function Login() {
   };
 
   return (
-    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/30 p-6 backdrop-blur-md shadow-2xl lg:rounded-[16px] lg:border-[var(--border-subtle)] lg:bg-[var(--surface-raised)] lg:p-11 lg:backdrop-blur-none">
+    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/30 p-6 backdrop-blur-md shadow-2xl lg:rounded-[12px] lg:border-[var(--border-subtle)] lg:bg-[#1a1c1f] lg:p-10 lg:backdrop-blur-none lg:shadow-2xl">
       {/* Header (Desktop Only) */}
-      <div className="hidden lg:block mb-9">
-        <h2 className="font-sans text-[2.45rem] font-bold leading-tight tracking-[-0.045em] text-white text-balance drop-shadow-sm">
+      <div className="hidden lg:block mb-8">
+        <h2 className="font-sans text-[1.85rem] font-light leading-tight tracking-[-0.02em] text-white/90 drop-shadow-sm">
           Welcome back
         </h2>
-        <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white font-medium">
-          Sign in to access your monitoring dashboard.
-        </p>
       </div>
 
       {/* Error banner */}
@@ -164,16 +160,13 @@ export function Login() {
         </div>
       )}
 
-      {/* Divider (Desktop Only) */}
-      <div className="hidden lg:block mb-8 border-t border-[var(--border-default)]" />
-
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-4 lg:space-y-6">
+        <div className="space-y-4 lg:space-y-5">
           {/* Email */}
           <div>
             <label
               htmlFor="email"
-              className="hidden lg:block mb-2.5 text-[13px] font-semibold text-white"
+              className="hidden lg:block mb-2 text-[12px] font-normal text-white/80"
             >
               Email Address
             </label>
@@ -183,20 +176,20 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`w-full bg-transparent px-8 py-2.5 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[var(--surface-elevated)] lg:border lg:border-[var(--border-default)] lg:px-4 lg:py-3.5 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] lg:focus:border-[var(--border-focus)] lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_var(--surface-elevated)_inset] ${
+                className={`w-full bg-transparent px-8 py-2.5 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[#222528] lg:border lg:border-white/10 lg:px-3.5 lg:text-[13px] lg:font-light lg:h-[40px] lg:rounded-[6px] lg:placeholder:text-white/40 lg:focus:border-white/30 lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_#222528_inset] ${
                   errors.email
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)] pr-10"
                     : ""
-                } focus:outline-none`}
+                } focus:outline-none transition-colors`}
                 placeholder="Email Address"
                 disabled={isLoading}
               />
               {errors.email && (
-                <AlertCircle className="pointer-events-none absolute right-2 top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[var(--color-error)] lg:right-4 lg:h-[18px] lg:w-[18px]" />
+                <AlertCircle className="pointer-events-none absolute right-2 top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[var(--color-error)] lg:right-3 lg:h-[16px] lg:w-[16px]" />
               )}
             </div>
             {errors.email && (
-              <p className="mt-2 text-[12px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[13px] lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
+              <p className="mt-2 text-[12px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[12px] lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
                 {errors.email.message}
               </p>
             )}
@@ -204,32 +197,23 @@ export function Login() {
 
           {/* Password */}
           <div>
-            <div className="hidden lg:flex mb-2.5 items-center justify-between">
-              <label
-                htmlFor="password"
-                className="block text-[13px] font-semibold text-white"
-              >
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="text-[12px] font-medium text-white hover:opacity-80 transition-opacity duration-200"
-              >
-                Forgot password?
-              </button>
-            </div>
+            <label
+              htmlFor="password"
+              className="hidden lg:block mb-2 text-[12px] font-normal text-white/80"
+            >
+              Password
+            </label>
             <div className="relative flex items-center border-b border-white/60 lg:border-none">
               <Lock className="absolute left-0.5 h-[18px] w-[18px] text-white lg:hidden" />
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`w-full bg-transparent px-8 py-2.5 pr-20 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[var(--surface-elevated)] lg:border lg:border-[var(--border-default)] lg:px-4 lg:py-3.5 lg:pr-12 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] lg:focus:border-[var(--border-focus)] lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_var(--surface-elevated)_inset] ${
+                className={`w-full bg-transparent px-8 py-2.5 pr-20 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[#222528] lg:border lg:border-white/10 lg:px-3.5 lg:pr-10 lg:text-[13px] lg:font-light lg:h-[40px] lg:rounded-[6px] lg:placeholder:text-white/40 lg:focus:border-white/30 lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_#222528_inset] ${
                   errors.password
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)]"
                     : ""
-                } focus:outline-none`}
+                } focus:outline-none transition-colors`}
                 placeholder="Password"
                 disabled={isLoading}
               />
@@ -247,21 +231,32 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="hidden lg:flex absolute right-2.5 top-1/2 h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[6px] text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="hidden lg:flex absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[4px] text-white/60 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-3.5 w-3.5" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-3.5 w-3.5" />
                 )}
               </button>
             </div>
             {errors.password && (
-              <p className="mt-2 text-[12px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[13px] lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
+              <p className="mt-2 text-[12px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[12px] lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
                 {errors.password.message}
               </p>
             )}
+
+            {/* Desktop Forgot Password Link */}
+            <div className="mt-2.5 hidden lg:flex justify-end">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-[12px] font-light text-white/60 hover:text-white transition-colors duration-200"
+              >
+                Forgot password?
+              </button>
+            </div>
           </div>
         </div>
 
@@ -269,19 +264,18 @@ export function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-3 text-[14px] font-bold text-white tracking-widest rounded-[8px] bg-[#d32f2f] hover:bg-[#b72424] transition-colors lg:bg-[var(--accent)] lg:hover:bg-[var(--accent-hover)] lg:normal-case lg:tracking-normal lg:h-[48px] lg:py-0 lg:text-[15px] lg:border lg:border-transparent lg:shadow-none shadow-[0_4px_14px_0_rgba(211,47,47,0.39)]"
+          className="mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-3 text-[14px] font-bold text-white tracking-widest rounded-[8px] bg-[#d32f2f] hover:bg-[#b72424] transition-colors lg:bg-white lg:hover:bg-gray-100 lg:text-black lg:font-medium lg:normal-case lg:tracking-normal lg:h-[40px] lg:py-0 lg:text-[13px] lg:rounded-[6px] lg:border-none shadow-[0_4px_14px_0_rgba(211,47,47,0.39)] lg:shadow-none"
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-[16px] w-[16px] animate-spin text-white lg:h-[18px] lg:w-[18px]" />
+              <Loader2 className="h-[16px] w-[16px] animate-spin text-white lg:text-black" />
               <span className="text-white lg:hidden">LOGGING IN...</span>
-              <span className="hidden lg:inline text-white">Signing in...</span>
+              <span className="hidden lg:inline lg:text-black">Signing in...</span>
             </>
           ) : (
             <>
               <span className="text-white lg:hidden">LOGIN</span>
-              <span className="hidden lg:inline text-white">Sign In</span>
-              <ArrowRight className="hidden lg:block h-[18px] w-[18px] text-white" />
+              <span className="hidden lg:inline lg:text-black">Sign In</span>
             </>
           )}
         </button>

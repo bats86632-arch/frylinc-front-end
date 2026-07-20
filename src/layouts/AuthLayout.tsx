@@ -34,70 +34,68 @@ export function AuthLayout() {
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
         {/* ── Left info panel (desktop only) ──────────────────────────────── */}
-        <section className="relative hidden h-screen flex-col overflow-hidden px-10 py-10 lg:flex xl:px-16">
+        <section className="relative hidden h-screen flex-col overflow-hidden px-12 py-12 lg:flex xl:px-20 justify-center">
           {/* Brand lock-up */}
-          <div className="flex shrink-0 items-center gap-3.5">
-            <img
-              src="/fyrlinc-logo.png"
-              alt="Fyrlinc"
-              className="h-11 w-11 rounded-[8px] object-cover border border-[var(--border-subtle)]"
-            />
+          <div className="absolute top-12 left-12 xl:left-20 flex shrink-0 items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-white">
+              <img
+                src="/fyrlinc-logo.png"
+                alt="Fyrlinc"
+                className="h-6 w-6 object-contain"
+              />
+            </div>
             <div>
-              <p ref={desktopTitleRef} className="font-sans text-[1.1rem] font-semibold tracking-tight text-white leading-none">
+              <p className="font-sans text-[15px] font-medium tracking-wide text-white leading-none">
                 Fyrlinc
               </p>
-              <p ref={desktopSubtitleRef} className="mt-1 text-[12px] text-gray-300 tracking-wide font-medium">
+              <p className="mt-1 text-[11px] text-white/60 tracking-wider">
                 Fire Alarm Panel Monitoring
               </p>
             </div>
           </div>
 
-          {/* Hero + feature cards pushed to bottom */}
-          <div className="animate-fade-in flex flex-1 flex-col items-start justify-end pb-4 w-full">
+          {/* Hero + feature cards */}
+          <div className="animate-fade-in flex flex-col items-start justify-center w-full mt-10">
             <div className="w-full">
-              <h1
-                ref={heroTitleRef}
-                className="font-sans text-[3rem] font-bold leading-[1.15] tracking-[-0.02em] text-white text-balance xl:text-[4.25rem] drop-shadow-md"
-              >
-                Your fire safety,
-                <br />
-                <span className="text-[#4db6d4]">always monitored.</span>
+              <h1 className="font-sans text-[2.75rem] font-light leading-tight tracking-tight text-white xl:text-[3.25rem]">
+                Your fire safety,<br />
+                always monitored.
               </h1>
 
-              <p className="mt-4 text-[15px] leading-relaxed text-white/80 font-medium max-w-sm drop-shadow-sm">
+              <p className="mt-5 text-[14px] leading-relaxed text-white/70 font-light max-w-sm">
                 Fyrlinc keeps you connected to every fire alarm panel —
                 so you can respond faster when it matters most.
               </p>
 
               {/* Feature cards */}
-              <div className="mt-8 space-y-3 w-full max-w-sm">
-                <div className="flex items-start gap-4 rounded-[12px] border border-white/10 bg-black/30 backdrop-blur-sm px-4 py-3.5">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[#4db6d4]/15">
-                    <Clock className="h-4 w-4 text-[#4db6d4]" />
+              <div className="mt-12 space-y-6 w-full max-w-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-white/5 bg-white/5 backdrop-blur-sm">
+                    <Clock className="h-4 w-4 text-white/70" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-semibold text-white leading-none">24/7 Monitoring</p>
-                    <p className="mt-1 text-[12px] text-white/60">Round-the-clock visibility into every panel.</p>
+                    <p className="text-[13px] font-medium text-white/90 leading-none">24/7 Monitoring</p>
+                    <p className="mt-1.5 text-[12px] text-white/50 font-light">Round-the-clock visibility into every panel.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 rounded-[12px] border border-white/10 bg-black/30 backdrop-blur-sm px-4 py-3.5">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-amber-400/15">
-                    <Bell className="h-4 w-4 text-amber-400" />
+                <div className="flex items-center gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-white/5 bg-white/5 backdrop-blur-sm">
+                    <Bell className="h-4 w-4 text-white/70" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-semibold text-white leading-none">Instant Alerts</p>
-                    <p className="mt-1 text-[12px] text-white/60">Get notified the moment something needs attention.</p>
+                    <p className="text-[13px] font-medium text-white/90 leading-none">Instant Alerts</p>
+                    <p className="mt-1.5 text-[12px] text-white/50 font-light">Get notified the moment something needs attention.</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 rounded-[12px] border border-white/10 bg-black/30 backdrop-blur-sm px-4 py-3.5">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-white/10">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-white/5 bg-white/5 backdrop-blur-sm">
                     <BarChart2 className="h-4 w-4 text-white/70" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-semibold text-white leading-none">Live Status</p>
-                    <p className="mt-1 text-[12px] text-white/60">Real-time updates on all your connected panels.</p>
+                    <p className="text-[13px] font-medium text-white/90 leading-none">Live Status</p>
+                    <p className="mt-1.5 text-[12px] text-white/50 font-light">Real-time updates on all your connected panels.</p>
                   </div>
                 </div>
               </div>
@@ -105,8 +103,8 @@ export function AuthLayout() {
           </div>
 
           {/* Footer */}
-          <div className="shrink-0 pt-4">
-            <p className="text-[13px] text-white/50 font-medium">
+          <div className="absolute bottom-12 left-0 right-0 flex justify-center">
+            <p className="text-[11px] text-white/40 font-light tracking-wide">
               © {new Date().getFullYear()} Fyrlinc · All rights reserved
             </p>
           </div>
