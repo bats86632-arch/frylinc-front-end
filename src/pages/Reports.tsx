@@ -200,62 +200,62 @@ export function Reports() {
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--surface-base)] relative">
 
       {/* ── Stats Row ──────────────────────────────────────────────────── */}
-      <div className="px-6 pt-6 pb-5 border-b border-[var(--border-subtle)]">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="px-4 pt-4 pb-3 sm:px-6 sm:pt-6 sm:pb-5 border-b border-[var(--border-subtle)]">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
 
           {/* Total Events */}
-          <div className="relative overflow-hidden p-5 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+          <div className="relative overflow-hidden p-3 sm:p-5 rounded-[12px] sm:rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/5 to-transparent pointer-events-none" />
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-2">Total Events</p>
-                <p className="text-[32px] font-black text-[var(--text-primary)] leading-none">{filteredLogs.length}</p>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1.5">on this page</p>
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-1.5 sm:mb-2">Total Events</p>
+                <p className="text-[22px] sm:text-[32px] font-black text-[var(--text-primary)] leading-none">{filteredLogs.length}</p>
+                <p className="text-[10px] sm:text-[11px] text-[var(--text-secondary)] mt-1 sm:mt-1.5">on this page</p>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <FileText className="h-5 w-5 text-[var(--accent)]" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-[10px] sm:rounded-xl bg-[var(--accent)]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-[var(--accent)]" />
               </div>
             </div>
           </div>
 
           {/* Success */}
-          <div className="relative overflow-hidden p-5 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/8 to-transparent shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+          <div className="relative overflow-hidden p-3 sm:p-5 rounded-[12px] sm:rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/8 to-transparent shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500/80 mb-2">Successful</p>
-                <p className="text-[32px] font-black text-emerald-400 leading-none">{totalSuccess}</p>
-                <p className="text-[11px] text-emerald-500/70 mt-1.5">{successRate}% success rate</p>
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-500/80 mb-1.5 sm:mb-2">Successful</p>
+                <p className="text-[22px] sm:text-[32px] font-black text-emerald-400 leading-none">{totalSuccess}</p>
+                <p className="text-[10px] sm:text-[11px] text-emerald-500/70 mt-1 sm:mt-1.5">{successRate}% success rate</p>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <CheckCircle className="h-5 w-5 text-emerald-400" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-[10px] sm:rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
               </div>
             </div>
           </div>
 
           {/* Failed */}
-          <div className="relative overflow-hidden p-5 rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-500/8 to-transparent shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+          <div className="relative overflow-hidden p-3 sm:p-5 rounded-[12px] sm:rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-500/8 to-transparent shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-red-500/80 mb-2">Failed</p>
-                <p className="text-[32px] font-black text-red-400 leading-none">{totalFail}</p>
-                <p className="text-[11px] text-red-500/70 mt-1.5">{filteredLogs.length > 0 ? 100 - successRate : 0}% failure rate</p>
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-red-500/80 mb-1.5 sm:mb-2">Failed</p>
+                <p className="text-[22px] sm:text-[32px] font-black text-red-400 leading-none">{totalFail}</p>
+                <p className="text-[10px] sm:text-[11px] text-red-500/70 mt-1 sm:mt-1.5">{filteredLogs.length > 0 ? 100 - successRate : 0}% failure rate</p>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <AlertCircle className="h-5 w-5 text-red-400" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-[10px] sm:rounded-xl bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
               </div>
             </div>
           </div>
 
           {/* Active Branches */}
-          <div className="relative overflow-hidden p-5 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/8 to-transparent shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+          <div className="relative overflow-hidden p-3 sm:p-5 rounded-[12px] sm:rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/8 to-transparent shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-500/80 mb-2">Active Branches</p>
-                <p className="text-[32px] font-black text-blue-400 leading-none">{new Set(filteredLogs.map(l => l.branchId).filter(Boolean)).size}</p>
-                <p className="text-[11px] text-blue-500/70 mt-1.5">in this view</p>
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-blue-500/80 mb-1.5 sm:mb-2">Active Branches</p>
+                <p className="text-[22px] sm:text-[32px] font-black text-blue-400 leading-none">{new Set(filteredLogs.map(l => l.branchId).filter(Boolean)).size}</p>
+                <p className="text-[10px] sm:text-[11px] text-blue-500/70 mt-1 sm:mt-1.5">in this view</p>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Building2 className="h-5 w-5 text-blue-400" />
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-[10px] sm:rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
               </div>
             </div>
           </div>
@@ -263,15 +263,15 @@ export function Reports() {
       </div>
 
       {/* ── Filters ──────────────────────────────────────────────────────── */}
-      <div className="px-6 py-4 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)]">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
+      <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-[var(--border-subtle)] bg-[var(--surface-overlay)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="hidden sm:flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center">
               <Search className="h-3.5 w-3.5 text-[var(--accent)]" />
             </div>
             <h2 className="text-[13px] font-bold text-[var(--text-primary)]">Advanced Filtering</h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
             <div className="flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)]">
               <button
                 onClick={() => setViewMode("list")}
@@ -472,7 +472,9 @@ export function Reports() {
             })()}
           </div>
         ) : (
-          <div className="min-w-[1000px] w-full">
+          <div className="w-full">
+            {/* Desktop Table */}
+            <div className="hidden md:block min-w-[1000px] w-full">
             <table className="w-full text-left text-[12px]">
               <thead className="bg-[var(--surface-overlay)] sticky top-0 border-b border-[var(--border-subtle)] z-10">
                 <tr>
@@ -546,13 +548,75 @@ export function Reports() {
                 })}
               </tbody>
             </table>
+            </div>
+            
+            {/* Mobile Cards */}
+            <div className="md:hidden flex flex-col p-4 gap-3">
+              {filteredLogs.map(log => {
+                return (
+                  <div key={log.id} className="bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded-[12px] p-3.5 shadow-sm flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-[13px] text-[var(--text-primary)]">{log.action}</span>
+                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase border ${
+                          log.result === 'SUCCESS'
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : log.result === 'FAIL'
+                            ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                            : 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border-[var(--border-subtle)]'
+                        }`}>
+                          {log.result === 'SUCCESS' && <CheckCircle className="h-2.5 w-2.5" />}
+                          {log.result === 'FAIL' && <AlertCircle className="h-2.5 w-2.5" />}
+                          {log.result}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px] text-[var(--text-secondary)] shrink-0">{formatTimestamp(log.timestamp)}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 bg-[var(--surface-overlay)] rounded-[8px] border border-[var(--border-subtle)] p-2.5">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] text-[var(--text-quaternary)] uppercase font-bold tracking-wider">Panel / Zone</span>
+                        {log.panelSerial ? (
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono font-semibold text-[11px] text-[var(--text-primary)] truncate">{log.panelSerial}</span>
+                            {log.zone !== undefined && log.zone !== null && (
+                              <span className="text-[10px] text-[var(--text-secondary)] shrink-0">Z{log.zone}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[var(--text-secondary)] text-[11px] italic opacity-50">—</span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-1 overflow-hidden">
+                        <span className="text-[9px] text-[var(--text-quaternary)] uppercase font-bold tracking-wider">Account</span>
+                        <div className="flex flex-col leading-tight">
+                          <span className="font-medium text-[11px] text-[var(--text-primary)] truncate">
+                            {log.actorEmail || log.user || 'System'}
+                          </span>
+                          <span className="text-[9px] text-[var(--text-secondary)] opacity-70 truncate">
+                            {log.actorRole || log.role || 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {log.command && (
+                      <div className="bg-[var(--surface-base)] border border-[var(--border-subtle)] rounded-[6px] p-2 overflow-hidden">
+                        <span className="font-mono text-[10px] text-[var(--text-secondary)] truncate block">{log.command}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
 
       {/* ── Pagination ────────────────────────────────────────────────────── */}
       {!loading && logs.length > 0 && (
-        <div className="px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] flex items-center justify-between sticky bottom-0 z-10">
+        <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] flex items-center justify-between sticky bottom-0 z-10">
           <p className="text-[12px] text-[var(--text-secondary)] font-medium">
             Showing <span className="text-[var(--text-primary)] font-bold">{filteredLogs.length}</span> results
           </p>
