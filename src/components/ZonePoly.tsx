@@ -13,12 +13,14 @@ import {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
+const IS_TOUCH = typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0);
+
 /** Radius of vertex handles in SVG units (= % of container). */
-const VERTEX_R = 1.2;
+const VERTEX_R = IS_TOUCH ? 2.4 : 1.2;
 /** Edge ghost-handle radius — slightly smaller. */
-const EDGE_R = 0.85;
+const EDGE_R = IS_TOUCH ? 1.6 : 0.85;
 /** Max distance (in % units) to the edge midpoint to show the ghost handle. */
-const EDGE_HOVER_THRESHOLD = 3.5;
+const EDGE_HOVER_THRESHOLD = IS_TOUCH ? 6 : 3.5;
 /** Minimum vertices before a vertex can be deleted. */
 const MIN_VERTICES = 3;
 
@@ -203,6 +205,7 @@ export function ZonePoly({
   const handleBodyPointerDown = useCallback((e: React.PointerEvent) => {
     if (isReadOnly) return;
     e.stopPropagation();
+    e.preventDefault();
     onSelect();
     const cur = toSvgPct(e);
     dragStartPts.current = [...pts];
@@ -221,6 +224,7 @@ export function ZonePoly({
   const handleVertexPointerDown = useCallback((e: React.PointerEvent, vertexIdx: number) => {
     if (isReadOnly) return;
     e.stopPropagation();
+    e.preventDefault();
     const cur = toSvgPct(e);
     dragStartPts.current = [...pts];
     dragRef.current = {
@@ -247,6 +251,7 @@ export function ZonePoly({
   const handleEdgePointerDown = useCallback((e: React.PointerEvent, edgeIdx: number) => {
     if (isReadOnly) return;
     e.stopPropagation();
+    e.preventDefault();
     const cur = toSvgPct(e);
     dragRef.current = {
       type: "edge",
@@ -326,6 +331,7 @@ export function ZonePoly({
         strokeDasharray={strokeDasharray}
         style={{
           pointerEvents: isReadOnly ? "none" : "all",
+          touchAction: "none",
           transition: isAlarm ? "none" : "fill 200ms ease, stroke 200ms ease",
         }}
         onPointerDown={handleBodyPointerDown}
@@ -365,7 +371,7 @@ export function ZonePoly({
               fill="white"
               stroke="var(--accent, #1e6b8a)"
               strokeWidth={0.4}
-              style={{ cursor: "crosshair", pointerEvents: "all" }}
+              style={{ cursor: "crosshair", pointerEvents: "all", touchAction: "none" }}
               onPointerDown={(e) => {
                 e.stopPropagation();
                 handleEdgePointerDown(e, hoverEdge.edgeIdx);
@@ -383,7 +389,7 @@ export function ZonePoly({
               fill="white"
               stroke="var(--accent, #1e6b8a)"
               strokeWidth={0.45}
-              style={{ cursor: "grab", pointerEvents: "all" }}
+              style={{ cursor: "grab", pointerEvents: "all", touchAction: "none" }}
               onPointerDown={(e) => {
                 e.stopPropagation();
                 handleVertexPointerDown(e, i);

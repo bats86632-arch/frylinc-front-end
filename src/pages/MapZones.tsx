@@ -697,7 +697,7 @@ export function MapZones() {
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full"
-            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible" }}
+            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible", touchAction: canEdit ? "none" : "auto" }}
             onClick={handleCanvasClick}
           >
             {localZones.map((zone, idx) => {
