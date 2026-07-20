@@ -163,7 +163,17 @@ export function ZonePoly({
       // Move always stays valid (translatePolygon clamps to bounds)
       onChange({ points: candidate });
     } else if (ds.type === "vertex") {
-      const clamped = clampPoint(cur);
+      let clamped = clampPoint(cur);
+      
+      // Dynamic snapping for straight lines
+      const SNAP_T = 1.5;
+      const prev = ds.startPts[(ds.vertexIdx - 1 + ds.startPts.length) % ds.startPts.length];
+      const next = ds.startPts[(ds.vertexIdx + 1) % ds.startPts.length];
+      if (Math.abs(clamped.x - prev.x) < SNAP_T) clamped.x = prev.x;
+      if (Math.abs(clamped.y - prev.y) < SNAP_T) clamped.y = prev.y;
+      if (Math.abs(clamped.x - next.x) < SNAP_T) clamped.x = next.x;
+      if (Math.abs(clamped.y - next.y) < SNAP_T) clamped.y = next.y;
+
       const candidate = ds.startPts.map((p, i) =>
         i === ds.vertexIdx ? clamped : p
       );
@@ -188,7 +198,17 @@ export function ZonePoly({
       } else {
         // Drag the inserted vertex
         const vertexIdx = ds.edgeIdx;
-        const clamped = clampPoint(cur);
+        let clamped = clampPoint(cur);
+        
+        // Dynamic snapping for straight lines
+        const SNAP_T = 1.5;
+        const prev = ds.startPts[(vertexIdx - 1 + ds.startPts.length) % ds.startPts.length];
+        const next = ds.startPts[(vertexIdx + 1) % ds.startPts.length];
+        if (Math.abs(clamped.x - prev.x) < SNAP_T) clamped.x = prev.x;
+        if (Math.abs(clamped.y - prev.y) < SNAP_T) clamped.y = prev.y;
+        if (Math.abs(clamped.x - next.x) < SNAP_T) clamped.x = next.x;
+        if (Math.abs(clamped.y - next.y) < SNAP_T) clamped.y = next.y;
+
         const candidate = ds.startPts.map((p, i) =>
           i === vertexIdx ? clamped : p
         );
