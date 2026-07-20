@@ -171,7 +171,7 @@ export function Login() {
       <div className="hidden lg:block mb-8 border-t border-[var(--border-default)]" />
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-6 lg:space-y-6">
+        <div className="space-y-4 lg:space-y-6">
           {/* Email */}
           <div>
             <label
@@ -186,7 +186,7 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`w-full bg-transparent px-10 py-3 text-[16px] text-white placeholder:text-white/80 lg:control-field lg:px-4 lg:py-3.5 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] ${
+                className={`w-full bg-transparent px-10 py-3 text-[16px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[var(--surface-elevated)] lg:border lg:border-[var(--border-default)] lg:px-4 lg:py-3.5 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] lg:focus:border-[var(--border-focus)] lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_var(--surface-elevated)_inset] ${
                   errors.email
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)] pr-10"
                     : ""
@@ -228,7 +228,7 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`w-full bg-transparent px-10 py-3 pr-24 text-[16px] text-white placeholder:text-white/80 lg:control-field lg:px-4 lg:py-3.5 lg:pr-12 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] ${
+                className={`w-full bg-transparent px-10 py-3 pr-24 text-[16px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[var(--surface-elevated)] lg:border lg:border-[var(--border-default)] lg:px-4 lg:py-3.5 lg:pr-12 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] lg:focus:border-[var(--border-focus)] lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_var(--surface-elevated)_inset] ${
                   errors.password
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)]"
                     : ""

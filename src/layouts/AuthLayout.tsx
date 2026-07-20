@@ -114,22 +114,23 @@ export function AuthLayout() {
 
         {/* ── Right auth panel ────────────────────────────────────────────── */}
         <main
-          className="relative z-10 flex min-h-screen items-center justify-center px-6 sm:px-8 lg:h-screen lg:min-h-0 lg:px-12 lg:py-12"
+          className="relative z-10 flex min-h-screen flex-col justify-between px-6 sm:px-8 lg:h-screen lg:min-h-0 lg:flex-row lg:items-center lg:justify-center lg:px-12 lg:py-12"
           style={{
-            paddingTop: 'calc(3rem + env(safe-area-inset-top))',
-            paddingBottom: 'calc(3rem + env(safe-area-inset-bottom))',
+            paddingTop: 'calc(4rem + env(safe-area-inset-top))',
+            paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))',
           }}
         >
-          <div className="relative z-10 w-full max-w-md animate-fade-in-up lg:max-w-[460px]">
-            {/* Mobile brand - large centered text like reference image */}
-            <div className="mb-24 flex flex-col items-center justify-center lg:hidden">
-              <h1 className="font-sans text-[4.5rem] font-bold tracking-tight text-white leading-none drop-shadow-md">
-                Fyrlinc
-              </h1>
-              <p className="mt-3 text-[14px] text-white font-bold tracking-[0.15em] uppercase drop-shadow-md">
-                Fire Alarm Panel Monitoring
-              </p>
-            </div>
+          {/* Mobile brand - pushed to top */}
+          <div className="flex flex-col items-center justify-start pt-6 lg:hidden">
+            <h1 className="font-sans text-[4.5rem] font-bold tracking-tight text-white leading-none drop-shadow-md">
+              Fyrlinc
+            </h1>
+            <p className="mt-3 text-[14px] text-white font-bold tracking-[0.15em] uppercase drop-shadow-md text-center">
+              Fire Alarm Panel Monitoring
+            </p>
+          </div>
+
+          <div className="relative z-10 w-full max-w-md animate-fade-in-up lg:max-w-[460px] pb-8 lg:pb-0">
             <Outlet context={{ bgRef }} />
           </div>
         </main>
