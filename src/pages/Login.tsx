@@ -11,7 +11,6 @@ import {
   EyeOff,
   ArrowRight,
   Loader2,
-  LockKeyhole,
   CheckCircle,
 } from "lucide-react";
 
@@ -149,11 +148,6 @@ export function Login() {
     <div className="w-full rounded-[20px] p-8 sm:p-10 animate-fade-in border border-[var(--border-subtle)] bg-[#1a1c1f]/60 backdrop-blur-md lg:bg-[var(--surface-raised)] lg:backdrop-blur-none shadow-xl lg:rounded-[16px] lg:p-11 lg:shadow-2xl">
       {/* Header */}
       <div className="mb-8 lg:mb-9">
-        <div className="mb-6">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-[var(--border-default)] bg-[var(--surface-overlay)] lg:h-14 lg:w-14 lg:rounded-[12px]">
-            <LockKeyhole className="h-5 w-5 text-white lg:h-6 lg:w-6" />
-          </div>
-        </div>
         <h2 className="font-sans text-[2rem] font-bold leading-tight tracking-tight text-white text-balance drop-shadow-sm lg:text-[2.45rem] lg:tracking-[-0.045em]">
           Welcome back
         </h2>
