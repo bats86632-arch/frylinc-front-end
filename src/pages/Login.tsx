@@ -132,10 +132,10 @@ export function Login() {
   };
 
   return (
-    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/40 p-6 backdrop-blur-xl shadow-2xl lg:rounded-[12px] lg:border-[var(--border-subtle)] lg:bg-[#1a1c1f] lg:p-10 lg:backdrop-blur-none lg:shadow-2xl">
+    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/40 p-6 backdrop-blur-xl shadow-2xl lg:rounded-[20px] lg:border-white/5 lg:bg-white/5 lg:p-12 lg:backdrop-blur-md lg:shadow-2xl">
       {/* Header (Desktop Only) */}
-      <div className="hidden lg:block mb-8">
-        <h2 className="font-sans text-[1.85rem] font-light leading-tight tracking-[-0.02em] text-white/90 drop-shadow-sm">
+      <div className="hidden lg:block mb-10">
+        <h2 className="font-sans text-[1.75rem] font-normal leading-tight tracking-[-0.01em] text-white drop-shadow-sm">
           Welcome back
         </h2>
       </div>
@@ -161,22 +161,22 @@ export function Login() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-4 lg:space-y-5">
+        <div className="space-y-4 lg:space-y-8">
           {/* Email */}
           <div>
             <label
               htmlFor="email"
-              className="hidden lg:block mb-2 text-[12px] font-normal text-white/80"
+              className="hidden lg:block mb-2 text-[11px] font-medium text-white/70 tracking-wide"
             >
               Email Address
             </label>
-            <div className="relative flex items-center border-b border-white/60 lg:border-none">
+            <div className="relative flex items-center border-b border-white/60 lg:border-white/20">
               <Mail className="absolute left-0.5 h-[18px] w-[18px] text-white lg:hidden" />
               <input
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`w-full bg-transparent px-8 py-2.5 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[#222528] lg:border lg:border-white/10 lg:px-3.5 lg:text-[13px] lg:font-light lg:h-[40px] lg:rounded-[6px] lg:placeholder:text-white/40 lg:focus:border-white/30 lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_#222528_inset] ${
+                className={`w-full bg-transparent px-8 py-2.5 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-transparent lg:border-none lg:px-1 lg:py-2 lg:text-[13px] lg:font-light lg:h-auto lg:rounded-none lg:placeholder:text-transparent lg:focus:border-transparent lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_transparent_inset] ${
                   errors.email
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)] pr-10"
                     : ""
@@ -199,17 +199,17 @@ export function Login() {
           <div>
             <label
               htmlFor="password"
-              className="hidden lg:block mb-2 text-[12px] font-normal text-white/80"
+              className="hidden lg:block mb-2 text-[11px] font-medium text-white/70 tracking-wide"
             >
               Password
             </label>
-            <div className="relative flex items-center border-b border-white/60 lg:border-none">
+            <div className="relative flex items-center border-b border-white/60 lg:border-white/20">
               <Lock className="absolute left-0.5 h-[18px] w-[18px] text-white lg:hidden" />
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`w-full bg-transparent px-8 py-2.5 pr-20 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[#222528] lg:border lg:border-white/10 lg:px-3.5 lg:pr-10 lg:text-[13px] lg:font-light lg:h-[40px] lg:rounded-[6px] lg:placeholder:text-white/40 lg:focus:border-white/30 lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_#222528_inset] ${
+                className={`w-full bg-transparent px-8 py-2.5 pr-20 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-transparent lg:border-none lg:px-1 lg:py-2 lg:pr-10 lg:text-[13px] lg:font-light lg:h-auto lg:rounded-none lg:placeholder:text-transparent lg:focus:border-transparent lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_transparent_inset] ${
                   errors.password
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)]"
                     : ""
@@ -231,13 +231,13 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="hidden lg:flex absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[4px] text-white/60 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 transition-colors"
+                className="hidden lg:flex absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[4px] text-white/40 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <EyeOff className="h-3.5 w-3.5" />
+                  <EyeOff className="h-4 w-4" />
                 ) : (
-                  <Eye className="h-3.5 w-3.5" />
+                  <Eye className="h-4 w-4" />
                 )}
               </button>
             </div>
@@ -252,7 +252,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-[12px] font-light text-white/60 hover:text-white transition-colors duration-200"
+                className="text-[11px] font-light text-white/60 hover:text-white transition-colors duration-200"
               >
                 Forgot password?
               </button>
@@ -264,7 +264,7 @@ export function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-3 text-[14px] font-bold text-white tracking-widest rounded-[8px] bg-[#d32f2f] hover:bg-[#b72424] transition-colors lg:bg-white lg:hover:bg-gray-100 lg:text-black lg:font-medium lg:normal-case lg:tracking-normal lg:h-[40px] lg:py-0 lg:text-[13px] lg:rounded-[6px] lg:border-none shadow-[0_4px_14px_0_rgba(211,47,47,0.39)] lg:shadow-none"
+          className="mt-10 flex w-full items-center justify-center gap-2.5 px-5 py-3 text-[14px] font-bold text-white tracking-widest rounded-[8px] bg-[#d32f2f] hover:bg-[#b72424] transition-colors lg:bg-white lg:hover:bg-gray-100 lg:text-black lg:font-semibold lg:normal-case lg:tracking-wide lg:h-[42px] lg:py-0 lg:text-[14px] lg:rounded-full lg:border-none shadow-[0_4px_14px_0_rgba(211,47,47,0.39)] lg:shadow-md lg:mt-12"
         >
           {isLoading ? (
             <>
