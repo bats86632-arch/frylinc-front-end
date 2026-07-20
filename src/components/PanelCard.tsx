@@ -148,7 +148,7 @@ interface PanelCardProps {
                 <BatteryMedium className="h-4 w-4 text-[var(--color-success)] shrink-0" />
               )}
               <span className={`truncate text-[11px] font-semibold tracking-wide ${isBatteryLow ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
-                {isBatteryLow ? 'Battery Low' : 'Battery life is okay'}
+                {isBatteryLow ? 'Battery Low' : 'Battery Normal'}
               </span>
             </div>
             
@@ -159,7 +159,7 @@ interface PanelCardProps {
                 <Zap className="h-4 w-4 text-[var(--color-success)] shrink-0" />
               )}
               <span className={`truncate text-[11px] font-semibold tracking-wide ${hasEarthFault ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
-                {hasEarthFault ? 'Earth Fault!' : 'Earth fault okay'}
+                {hasEarthFault ? 'Earth Fault!' : 'Earth Normal'}
               </span>
             </div>
           </div>
