@@ -141,10 +141,7 @@
 }
 
 @media (max-width: 1023px) {
-    :root {
-        --safe-top: max(env(safe-area-inset-top), 32px);
-        --safe-bottom: max(env(safe-area-inset-bottom), 16px);
-    }
+    /* Safe area handled natively by browser env variables */
 }
 
 html {
