@@ -43,6 +43,7 @@ import {
   Shield,
   Smartphone,
   Download,
+  Upload,
 } from "lucide-react";
 import apiClient from "../api/axios";
 import { CopyButton } from "../components/CopyButton";
