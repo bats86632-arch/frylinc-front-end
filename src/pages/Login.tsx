@@ -132,7 +132,7 @@ export function Login() {
   };
 
   return (
-    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/30 p-6 backdrop-blur-md shadow-2xl lg:rounded-[12px] lg:border-[var(--border-subtle)] lg:bg-[#1a1c1f] lg:p-10 lg:backdrop-blur-none lg:shadow-2xl">
+    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/40 p-6 backdrop-blur-xl shadow-2xl lg:rounded-[12px] lg:border-[var(--border-subtle)] lg:bg-[#1a1c1f] lg:p-10 lg:backdrop-blur-none lg:shadow-2xl">
       {/* Header (Desktop Only) */}
       <div className="hidden lg:block mb-8">
         <h2 className="font-sans text-[1.85rem] font-light leading-tight tracking-[-0.02em] text-white/90 drop-shadow-sm">

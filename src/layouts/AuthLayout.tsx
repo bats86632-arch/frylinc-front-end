@@ -119,7 +119,7 @@ export function AuthLayout() {
           }}
         >
           {/* Mobile brand - pushed to top with glassmorphism */}
-          <div className="mt-4 flex w-full max-w-sm flex-col items-center justify-center rounded-[24px] border border-white/10 bg-black/30 p-6 backdrop-blur-md shadow-2xl lg:hidden mx-auto">
+          <div className="mt-4 flex w-full max-w-sm flex-col items-center justify-center rounded-[24px] border border-white/10 bg-black/40 p-6 backdrop-blur-xl shadow-2xl lg:hidden mx-auto">
             <div className="flex items-center justify-center gap-3">
               <img
                 src="/fyrlinc-logo.png"
