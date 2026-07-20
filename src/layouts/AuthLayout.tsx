@@ -26,7 +26,7 @@ export function AuthLayout() {
         ref={bgRef}
         src="/cmp.jpg"
         alt="Background"
-        className="absolute inset-0 z-0 h-full w-full object-cover object-[65%_top] lg:object-center"
+        className="absolute inset-0 z-0 h-full w-full object-cover object-left-top"
       />
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
