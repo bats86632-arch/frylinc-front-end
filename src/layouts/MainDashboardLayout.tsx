@@ -241,12 +241,12 @@ export function MainDashboardLayout() {
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
-      <div className="lg:pl-[260px] relative z-10">
+      <div className="lg:pl-[260px] relative z-10 pb-[env(safe-area-inset-bottom)]">
         {/* Header - Solid background with border */}
         <header
           className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--surface-base)] px-4 transition-colors duration-300 sm:px-6 lg:px-8"
         >
-          <div className="flex min-w-0 items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4 h-[72px]">
             <button
               onClick={() => setSidebarOpen(true)}
               className="flex h-10 w-10 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] lg:hidden"
