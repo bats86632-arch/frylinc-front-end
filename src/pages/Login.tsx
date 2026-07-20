@@ -170,7 +170,6 @@ export function Login() {
       {/* Divider (Desktop Only) */}
       <div className="hidden lg:block mb-8 border-t border-[var(--border-default)]" />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-4 lg:space-y-6">
           {/* Email */}
           <div>
@@ -181,12 +180,12 @@ export function Login() {
               Email Address
             </label>
             <div className="relative flex items-center border-b border-white/60 lg:border-none">
-              <Mail className="absolute left-1 h-[22px] w-[22px] text-white lg:hidden" />
+              <Mail className="absolute left-0.5 h-[18px] w-[18px] text-white lg:hidden" />
               <input
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`w-full bg-transparent px-10 py-3 text-[16px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[var(--surface-elevated)] lg:border lg:border-[var(--border-default)] lg:px-4 lg:py-3.5 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] lg:focus:border-[var(--border-focus)] lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_var(--surface-elevated)_inset] ${
+                className={`w-full bg-transparent px-8 py-2.5 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[var(--surface-elevated)] lg:border lg:border-[var(--border-default)] lg:px-4 lg:py-3.5 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] lg:focus:border-[var(--border-focus)] lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_var(--surface-elevated)_inset] ${
                   errors.email
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)] pr-10"
                     : ""
@@ -195,11 +194,11 @@ export function Login() {
                 disabled={isLoading}
               />
               {errors.email && (
-                <AlertCircle className="pointer-events-none absolute right-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[var(--color-error)]" />
+                <AlertCircle className="pointer-events-none absolute right-2 top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[var(--color-error)] lg:right-4 lg:h-[18px] lg:w-[18px]" />
               )}
             </div>
             {errors.email && (
-              <p className="mt-2 text-[13px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
+              <p className="mt-2 text-[12px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[13px] lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
                 {errors.email.message}
               </p>
             )}
@@ -223,12 +222,12 @@ export function Login() {
               </button>
             </div>
             <div className="relative flex items-center border-b border-white/60 lg:border-none">
-              <Lock className="absolute left-1 h-[22px] w-[22px] text-white lg:hidden" />
+              <Lock className="absolute left-0.5 h-[18px] w-[18px] text-white lg:hidden" />
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`w-full bg-transparent px-10 py-3 pr-24 text-[16px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[var(--surface-elevated)] lg:border lg:border-[var(--border-default)] lg:px-4 lg:py-3.5 lg:pr-12 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] lg:focus:border-[var(--border-focus)] lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_var(--surface-elevated)_inset] ${
+                className={`w-full bg-transparent px-8 py-2.5 pr-20 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-[var(--surface-elevated)] lg:border lg:border-[var(--border-default)] lg:px-4 lg:py-3.5 lg:pr-12 lg:text-[13px] lg:font-medium lg:h-[48px] lg:rounded-[8px] lg:placeholder:text-[var(--text-tertiary)] lg:focus:border-[var(--border-focus)] lg:[&:-webkit-autofill]:duration-0 lg:[&:-webkit-autofill]:delay-0 lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_var(--surface-elevated)_inset] ${
                   errors.password
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)]"
                     : ""
@@ -241,7 +240,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="absolute right-1 text-[15px] font-medium text-white hover:opacity-80 transition-opacity duration-200 lg:hidden"
+                className="absolute right-0 text-[13px] font-medium text-white hover:opacity-80 transition-opacity duration-200 lg:hidden"
               >
                 Forgot?
               </button>
@@ -261,7 +260,7 @@ export function Login() {
               </button>
             </div>
             {errors.password && (
-              <p className="mt-2 text-[13px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
+              <p className="mt-2 text-[12px] font-medium text-[var(--color-error)] animate-fade-in lg:text-[13px] lg:text-[var(--color-error)] text-red-400 drop-shadow-md lg:drop-shadow-none">
                 {errors.password.message}
               </p>
             )}
@@ -272,11 +271,11 @@ export function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-[18px] text-[16px] font-bold text-white tracking-widest rounded-[8px] bg-[#d32f2f] hover:bg-[#b72424] transition-colors lg:bg-[var(--accent)] lg:hover:bg-[var(--accent-hover)] lg:normal-case lg:tracking-normal lg:h-[48px] lg:py-0 lg:text-[15px] lg:border lg:border-transparent lg:shadow-none shadow-[0_4px_14px_0_rgba(211,47,47,0.39)]"
+          className="mt-8 flex w-full items-center justify-center gap-2.5 px-5 py-3 text-[14px] font-bold text-white tracking-widest rounded-[8px] bg-[#d32f2f] hover:bg-[#b72424] transition-colors lg:bg-[var(--accent)] lg:hover:bg-[var(--accent-hover)] lg:normal-case lg:tracking-normal lg:h-[48px] lg:py-0 lg:text-[15px] lg:border lg:border-transparent lg:shadow-none shadow-[0_4px_14px_0_rgba(211,47,47,0.39)]"
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-[18px] w-[18px] animate-spin text-white" />
+              <Loader2 className="h-[16px] w-[16px] animate-spin text-white lg:h-[18px] lg:w-[18px]" />
               <span className="text-white lg:hidden">LOGGING IN...</span>
               <span className="hidden lg:inline text-white">Signing in...</span>
             </>
@@ -288,13 +287,6 @@ export function Login() {
             </>
           )}
         </button>
-
-        {/* Mobile Sign Up Text */}
-        <div className="mt-6 text-center lg:hidden">
-          <p className="text-[14px] text-white/90 drop-shadow-md">
-            Don't have an account? <span className="font-bold text-white cursor-pointer hover:underline">Sign up</span>
-          </p>
-        </div>
       </form>
     </div>
   );

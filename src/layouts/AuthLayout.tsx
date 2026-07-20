@@ -122,10 +122,17 @@ export function AuthLayout() {
         >
           {/* Mobile brand - pushed to top */}
           <div className="flex flex-col items-center justify-start pt-6 lg:hidden">
-            <h1 className="font-sans text-[4.5rem] font-bold tracking-tight text-white leading-none drop-shadow-md">
-              Fyrlinc
-            </h1>
-            <p className="mt-3 text-[14px] text-white font-bold tracking-[0.15em] uppercase drop-shadow-md text-center">
+            <div className="flex items-center justify-center gap-3">
+              <img
+                src="/fyrlinc-logo.png"
+                alt="Fyrlinc"
+                className="h-10 w-10 rounded-[8px] object-cover border border-[var(--border-subtle)] shadow-sm"
+              />
+              <h1 className="font-sans text-[2.75rem] font-bold tracking-tight text-white leading-none drop-shadow-md">
+                Fyrlinc
+              </h1>
+            </div>
+            <p className="mt-3 text-[11px] text-white/90 font-bold tracking-[0.2em] uppercase drop-shadow-md text-center">
               Fire Alarm Panel Monitoring
             </p>
           </div>
