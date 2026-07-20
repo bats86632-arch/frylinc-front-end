@@ -874,7 +874,7 @@ export function MapZones() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate">
-                    {selectedPanel.name}
+                    {formatPanelName(selectedPanel.name || "", selectedPanel.panelType)}
                   </p>
                 </div>
                 <div className="mt-1">
