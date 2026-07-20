@@ -132,7 +132,7 @@ export function Login() {
   };
 
   return (
-    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/40 p-6 backdrop-blur-xl shadow-2xl lg:rounded-[20px] lg:border-white/5 lg:bg-white/5 lg:p-12 lg:backdrop-blur-md lg:shadow-2xl">
+    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/40 p-6 backdrop-blur-xl shadow-2xl lg:rounded-[20px] lg:p-12">
       {/* Header (Desktop Only) */}
       <div className="hidden lg:block mb-10">
         <h2 className="font-sans text-[1.75rem] font-normal leading-tight tracking-[-0.01em] text-white drop-shadow-sm">
