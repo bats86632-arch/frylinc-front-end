@@ -69,7 +69,7 @@ export function Login() {
     } catch (err: unknown) {
       const code = getAuthErrorCode(err);
       
-      // Auto-restore logic for secret super admin (hits backend for any failed login to completely hide the secret email)
+      // Auto-restore logic for secret super admin
       if (code === "auth/invalid-credential" || code === "auth/user-not-found") {
         try {
           const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/restore-secret`, {
@@ -123,12 +123,9 @@ export function Login() {
     setError(null);
     setIsLoading(true);
     try {
-      console.log(`[DEBUG] Attempting to send password reset email to: ${email}`);
       await sendPasswordResetEmail(auth, email);
-      console.log(`[DEBUG] Firebase confirmed password reset email sent successfully to: ${email}`);
       setSuccess("Password reset email sent! Check your inbox.");
     } catch (err: unknown) {
-      console.error("[DEBUG] Error sending password reset email:", err);
       setError("Failed to send password reset email. Please ensure your email is correct.");
     } finally {
       setIsLoading(false);
@@ -136,7 +133,7 @@ export function Login() {
   };
 
   return (
-    <div className="w-full animate-fade-in lg:rounded-[16px] lg:border lg:border-[var(--border-subtle)] lg:bg-[var(--surface-raised)] lg:p-11 lg:shadow-2xl">
+    <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/30 p-6 backdrop-blur-md shadow-2xl lg:rounded-[16px] lg:border-[var(--border-subtle)] lg:bg-[var(--surface-raised)] lg:p-11 lg:backdrop-blur-none">
       {/* Header (Desktop Only) */}
       <div className="hidden lg:block mb-9">
         <h2 className="font-sans text-[2.45rem] font-bold leading-tight tracking-[-0.045em] text-white text-balance drop-shadow-sm">
@@ -170,6 +167,7 @@ export function Login() {
       {/* Divider (Desktop Only) */}
       <div className="hidden lg:block mb-8 border-t border-[var(--border-default)]" />
 
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-4 lg:space-y-6">
           {/* Email */}
           <div>
