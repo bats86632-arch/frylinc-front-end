@@ -145,47 +145,47 @@ interface PanelCardProps {
           </div>
 
           {/* System Indicators */}
-          <div className="grid grid-cols-2 gap-2 mb-6">
-            <div className={`flex items-center gap-2 overflow-hidden rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${isBatteryLow ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+          <div className={`grid ${isSecurity ? 'grid-cols-3 gap-1.5' : 'grid-cols-2 gap-2'} mb-6`}>
+            <div className={`flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center xl:text-left ${isBatteryLow ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
               {isBatteryLow ? (
-                <BatteryWarning className="h-4 w-4 text-[var(--color-error)] shrink-0" />
+                <BatteryWarning className="h-3.5 w-3.5 text-[var(--color-error)] shrink-0" />
               ) : (
-                <BatteryMedium className="h-4 w-4 text-[var(--color-success)] shrink-0" />
+                <BatteryMedium className="h-3.5 w-3.5 text-[var(--color-success)] shrink-0" />
               )}
-              <span className={`truncate text-[11px] font-semibold tracking-wide ${isBatteryLow ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+              <span className={`truncate text-[10px] font-semibold tracking-tight ${isBatteryLow ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
                 {isBatteryLow ? 'Battery Low' : 'Battery Normal'}
               </span>
             </div>
             
             {(isFire || (!isFire && !isSecurity)) && (
-            <div className={`flex items-center gap-2 overflow-hidden rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            <div className={`flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center xl:text-left ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
               {hasEarthFault ? (
-                <ZapOff className="h-4 w-4 text-[var(--color-error)] shrink-0" />
+                <ZapOff className="h-3.5 w-3.5 text-[var(--color-error)] shrink-0" />
               ) : (
-                <Zap className="h-4 w-4 text-[var(--color-success)] shrink-0" />
+                <Zap className="h-3.5 w-3.5 text-[var(--color-success)] shrink-0" />
               )}
-              <span className={`truncate text-[11px] font-semibold tracking-wide ${hasEarthFault ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
-                {hasEarthFault ? 'Earth Fault!' : 'Earth Normal'}
+              <span className={`truncate text-[10px] font-semibold tracking-tight ${hasEarthFault ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+                {hasEarthFault ? 'Earth Fault' : 'Earth Normal'}
               </span>
             </div>
             )}
             
             {isSecurity && (
             <>
-            <div className={`flex items-center gap-2 overflow-hidden rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${hasSirenCut ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            <div className={`flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center xl:text-left ${hasSirenCut ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
               {hasSirenCut ? (
-                <AlertTriangle className="h-4 w-4 text-[var(--color-error)] shrink-0" />
+                <AlertTriangle className="h-3.5 w-3.5 text-[var(--color-error)] shrink-0" />
               ) : (
-                <Shield className="h-4 w-4 text-[var(--color-success)] shrink-0" />
+                <Shield className="h-3.5 w-3.5 text-[var(--color-success)] shrink-0" />
               )}
-              <span className={`truncate text-[11px] font-semibold tracking-wide ${hasSirenCut ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+              <span className={`truncate text-[10px] font-semibold tracking-tight ${hasSirenCut ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
                 {hasSirenCut ? 'Siren Cut!' : 'Siren Normal'}
               </span>
             </div>
-            <div className={`flex items-center gap-2 overflow-hidden rounded-[6px] border px-3 py-2 transition-all duration-200 text-left ${isNightZone ? 'border-blue-500/20 bg-blue-500/10' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
-              <Activity className={`h-4 w-4 shrink-0 ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`} />
-              <span className={`truncate text-[11px] font-semibold tracking-wide ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`}>
-                {isNightZone ? 'Night Zone: ON' : 'Night Zone: OFF'}
+            <div className={`flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center xl:text-left ${isNightZone ? 'border-blue-500/20 bg-blue-500/10' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+              <Activity className={`h-3.5 w-3.5 shrink-0 ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`} />
+              <span className={`truncate text-[10px] font-semibold tracking-tight ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`}>
+                {isNightZone ? 'Night: ON' : 'Night: OFF'}
               </span>
             </div>
             </>
