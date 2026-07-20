@@ -675,7 +675,7 @@ export function AdminSettings() {
     let failedCount = 0;
 
     try {
-      const targetCompanyId = selectedCompany?.id;
+      const targetCompanyId = selectedCompanyId;
       if (!targetCompanyId) throw new Error("No company selected.");
 
       const data = await file.arrayBuffer();
@@ -3827,7 +3827,7 @@ export function AdminSettings() {
                 </div>
                 <div>
                   <h3 className="text-[16px] font-bold text-[var(--text-primary)]">Bulk Upload Branches</h3>
-                  <p className="text-[12px] text-[var(--text-secondary)]">Add multiple branches via Excel to {selectedCompany?.name}</p>
+                  <p className="text-[12px] text-[var(--text-secondary)]">Add multiple branches via Excel to {companies.find(c => c.id === selectedCompanyId)?.name}</p>
                 </div>
               </div>
               <button 
