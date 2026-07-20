@@ -53,7 +53,7 @@ export default defineConfig({
         skipWaiting: true,
         maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
         // Include woff/woff2 in the precache so self-hosted fonts work offline
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2}"],
         navigateFallback: "/index.html",
         // Runtime caching for Google Fonts — CacheFirst means the CSS and font
         // files are fetched once and served from the SW cache on all repeat visits,
