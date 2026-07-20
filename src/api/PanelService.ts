@@ -53,6 +53,10 @@ export const PanelService = {
             clearTimeout(timeoutId);
             unsubscribe();
             resolve();
+          } else if (data.status === 'failed') {
+            clearTimeout(timeoutId);
+            unsubscribe();
+            reject(new Error(data.error || 'VM Bridge failed to send command'));
           }
         },
         (error) => {
