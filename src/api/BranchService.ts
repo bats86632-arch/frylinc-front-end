@@ -23,6 +23,25 @@ export const BranchService = {
     return branches;
   },
 
+  
+  async createBranchesBulk(branches: {
+    name: string;
+    companyId: string;
+    bsrCode?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    supervisorName?: string;
+    contactNumber?: string;
+    emailAddress?: string;
+  }[]): Promise<{ ok: boolean; addedCount: number }> {
+    const response = await apiClient.post('/branches/bulk', { branches });
+    this.invalidateCache();
+    return response.data;
+  },
+
   async createBranch(data: {
     name: string;
     companyId: string;

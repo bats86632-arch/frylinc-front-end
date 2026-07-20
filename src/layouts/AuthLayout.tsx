@@ -26,7 +26,6 @@ export function AuthLayout() {
         ref={bgRef}
         src="/agni-building.png"
         alt="Background"
-        crossOrigin="anonymous"
         className="absolute inset-0 z-0 h-full w-full object-cover object-[65%_top] lg:object-center"
       />
 
