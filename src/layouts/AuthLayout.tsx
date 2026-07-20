@@ -34,7 +34,7 @@ export function AuthLayout() {
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
         {/* ── Left info panel (desktop only) ──────────────────────────────── */}
-        <section className="relative hidden h-screen flex-col overflow-hidden px-12 py-12 lg:flex xl:px-20 justify-center bg-gradient-to-r from-black/80 via-black/40 to-transparent">
+        <section className="relative hidden h-screen flex-col overflow-hidden px-12 py-12 lg:flex xl:px-20 justify-center bg-gradient-to-r from-black/95 from-10% via-black/60 via-40% to-transparent to-60%">
           {/* Hero + feature cards */}
           <div className="animate-fade-in flex flex-col items-start justify-center w-full mt-[-4rem]">
             <div className="w-full">
