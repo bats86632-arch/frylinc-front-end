@@ -27,7 +27,11 @@ import {
   Wifi,
   Activity,
   Edit2,
-  X
+  X,
+  BatteryMedium,
+  BatteryWarning,
+  Zap,
+  ZapOff
 } from "lucide-react";
 import { formatDateTime } from "../utils/formatters";
 import { Event } from "../types";
@@ -344,6 +348,10 @@ export function PanelDetail() {
   const hasAlarm = normalizedPanel.alarm;
   const activeZones = normalizedPanel.zones.filter(z => z === 4 || z === 5).length;
 
+  // Mock states for future implementation
+  const isBatteryLow = false; // Will be driven by panel data later
+  const hasEarthFault = false; // Will be driven by panel data later
+
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
       {/* Header card */}
@@ -424,6 +432,31 @@ export function PanelDetail() {
                 {panelCommands.length + 1}
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* System Indicators */}
+        <div className="mt-4 grid grid-cols-2 gap-3 lg:w-[440px] lg:ml-auto">
+          <div className={`flex items-center gap-2 overflow-hidden rounded-[8px] border px-3 py-3 transition-all duration-200 text-left ${isBatteryLow ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            {isBatteryLow ? (
+              <BatteryWarning className="h-5 w-5 text-[var(--color-error)] shrink-0" />
+            ) : (
+              <BatteryMedium className="h-5 w-5 text-[var(--color-success)] shrink-0" />
+            )}
+            <span className={`truncate text-[12px] font-semibold tracking-wide ${isBatteryLow ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+              {isBatteryLow ? 'Battery Low' : 'Battery Normal'}
+            </span>
+          </div>
+          
+          <div className={`flex items-center gap-2 overflow-hidden rounded-[8px] border px-3 py-3 transition-all duration-200 text-left ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            {hasEarthFault ? (
+              <ZapOff className="h-5 w-5 text-[var(--color-error)] shrink-0" />
+            ) : (
+              <Zap className="h-5 w-5 text-[var(--color-success)] shrink-0" />
+            )}
+            <span className={`truncate text-[12px] font-semibold tracking-wide ${hasEarthFault ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+              {hasEarthFault ? 'Earth Fault!' : 'Earth Normal'}
+            </span>
           </div>
         </div>
       </section>
