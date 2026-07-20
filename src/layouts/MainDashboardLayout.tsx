@@ -174,6 +174,10 @@ export function MainDashboardLayout() {
         className={`fixed left-0 top-0 z-50 flex h-full w-[260px] flex-col border-r border-[var(--border-subtle)] bg-[var(--surface-overlay)] transition-transform duration-300 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)'
+        }}
       >
         {/* Logo */}
         <div className="flex h-[72px] items-center justify-between border-b border-[var(--border-subtle)] px-5">
@@ -241,10 +245,17 @@ export function MainDashboardLayout() {
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
-      <div className="lg:pl-[260px] relative z-10 pb-[env(safe-area-inset-bottom)]">
+      <div 
+        className="lg:pl-[260px] relative z-10"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         {/* Header - Solid background with border */}
         <header
-          className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--surface-base)] px-4 transition-colors duration-300 sm:px-6 lg:px-8"
+          className="sticky top-0 z-30 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--surface-base)] px-4 transition-colors duration-300 sm:px-6 lg:px-8"
+          style={{
+            paddingTop: 'env(safe-area-inset-top)',
+            minHeight: 'calc(72px + env(safe-area-inset-top))'
+          }}
         >
           <div className="flex min-w-0 items-center gap-4 h-[72px]">
             <button
