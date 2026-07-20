@@ -82,6 +82,13 @@ export function useAdaptiveTextColor(
         canvas.height = bgRect.height;
       }
 
+      // Ensure the image or video is fully loaded before drawing to avoid InvalidStateError
+      if (bgElement instanceof HTMLImageElement) {
+        if (!bgElement.complete || bgElement.naturalWidth === 0) return;
+      } else if (bgElement instanceof HTMLVideoElement) {
+        if (bgElement.readyState < 2) return;
+      }
+
       try {
         // Draw the current frame of the background onto the canvas
         // This handles <img>, <video>, and <canvas> uniformly
