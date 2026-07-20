@@ -176,6 +176,16 @@ export function AdminSettings() {
   const [bulkUserUploadModalOpen, setBulkUserUploadModalOpen] = useState(false);
   const [userUploadSummary, setUserUploadSummary] = useState<{total: number, success: number, failed: number, errors: string[]} | null>(null);
 
+  // Bulk upload branches
+  const [bulkUploadBranchModalOpen, setBulkUploadBranchModalOpen] = useState(false);
+  const [bulkUploadingBranches, setBulkUploadingBranches] = useState(false);
+  const bulkBranchFileInputRef = useRef<HTMLInputElement>(null);
+  const [bulkUploadBranchResults, setBulkUploadBranchResults] = useState<{
+    success: number;
+    failed: number;
+    errors: string[];
+  } | null>(null);
+
   // Logo upload state
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
@@ -629,6 +639,86 @@ export function AdminSettings() {
     } finally {
       setBulkUserUploading(false);
       e.target.value = "";
+    }
+  };
+
+  const downloadBranchTemplate = async () => {
+    const XLSX = await import("xlsx");
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        "Branch Name": "Mumbai South Branch",
+        "BSR Code": "MUM-01",
+        "Address Line 1": "Nariman Point",
+        "Address Line 2": "",
+        "City": "Mumbai",
+        "State": "Maharashtra",
+        "Zip Code": "400021",
+        "Supervisor Name": "John Doe",
+        "Contact Number": "9876543210",
+        "Email Address": "mumbai.south@example.com",
+      }
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Branches");
+    XLSX.writeFile(wb, "branch_bulk_template.xlsx");
+  };
+
+  const handleBranchBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setBulkUploadingBranches(true);
+    setBulkUploadBranchResults(null);
+    const errors: string[] = [];
+    let successCount = 0;
+    let failedCount = 0;
+
+    try {
+      const targetCompanyId = selectedCompany?.id;
+      if (!targetCompanyId) throw new Error("No company selected.");
+
+      const data = await file.arrayBuffer();
+      const XLSX = await import("xlsx");
+      const wb = XLSX.read(data, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<any>(ws);
+
+      if (rows.length === 0) throw new Error("The uploaded file is empty.");
+
+      for (const [index, row] of rows.entries()) {
+        const rowNum = index + 2;
+        try {
+          const branchName = row["Branch Name"]?.toString().trim();
+          if (!branchName) throw new Error("Branch Name is required.");
+
+          await BranchService.createBranch({
+            name: branchName,
+            companyId: targetCompanyId,
+            bsrCode: row["BSR Code"]?.toString(),
+            addressLine1: row["Address Line 1"]?.toString(),
+            addressLine2: row["Address Line 2"]?.toString(),
+            city: row["City"]?.toString(),
+            state: row["State"]?.toString(),
+            zipCode: row["Zip Code"]?.toString(),
+            supervisorName: row["Supervisor Name"]?.toString(),
+            contactNumber: row["Contact Number"]?.toString(),
+            emailAddress: row["Email Address"]?.toString(),
+          });
+          successCount++;
+        } catch (err: any) {
+          failedCount++;
+          errors.push(`Row ${rowNum} (${row["Branch Name"] || "Unknown"}): ${err.response?.data?.error || err.message}`);
+        }
+      }
+
+      await reloadBranches();
+      setBulkUploadBranchResults({ success: successCount, failed: failedCount, errors });
+    } catch (err: any) {
+      errors.push(`Upload failed: ${err.message}`);
+      setBulkUploadBranchResults({ success: 0, failed: 1, errors });
+    } finally {
+      setBulkUploadingBranches(false);
+      if (bulkBranchFileInputRef.current) bulkBranchFileInputRef.current.value = "";
     }
   };
 
@@ -1852,6 +1942,13 @@ export function AdminSettings() {
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => setBulkUploadBranchModalOpen(true)}
+                                    className="flex h-[28px] items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] px-2.5 text-[11px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-hover)] shadow-sm"
+                                  >
+                                    <Upload className="h-3.5 w-3.5" />
+                                    Bulk Upload Branches
+                                  </button>
                                   <button
                                     onClick={() => setAddingBranchToCompany(selectedCompany.id)}
                                     className="flex h-[28px] items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-base)] px-2.5 text-[11px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-hover)] shadow-sm"
@@ -3278,7 +3375,7 @@ export function AdminSettings() {
                   </div>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
-  {/* ââ Left Panel: Company List ââ */}
+  {/* â”€â”€ Left Panel: Company List â”€â”€ */}
   <div className={`${selectedPanelCompanyId ? 'hidden md:flex' : 'flex'} flex-col md:w-[240px] lg:w-[280px] shrink-0 border-r border-[var(--border-subtle)] overflow-hidden`}>
     <div className="flex-1 overflow-y-auto">
       <div className="divide-y divide-[var(--border-subtle)]">
@@ -3329,7 +3426,7 @@ export function AdminSettings() {
     </div>
   </div>
 
-  {/* ââ Right Panel: Company Detail & Branches ââ */}
+  {/* â”€â”€ Right Panel: Company Detail & Branches â”€â”€ */}
   <div className={`${selectedPanelCompanyId ? 'flex' : 'hidden md:flex'} flex-col flex-1 min-h-0 overflow-hidden`}>
     {(() => {
       if (!selectedPanelCompanyId) {
@@ -3494,7 +3591,7 @@ export function AdminSettings() {
         document.body
       )}
 
-      {/* ð Delete Company Modal ð */}
+      {/* ðŸ›‘ Delete Company Modal ðŸ›‘ */}
       {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && createPortal(
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
@@ -3648,37 +3745,28 @@ export function AdminSettings() {
       />
 
       {/* 🛑 Delete Branch Modal 🛑 */}
-      {deleteBranchModalState.isOpen && deleteBranchModalState.branch && createPortal(
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4">
-              <h3 className="text-[15px] font-medium text-[var(--text-primary)]">
-                Delete Branch
-              </h3>
-              <button
-                onClick={() =>
-                  setDeleteBranchModalState((prev) => ({
-                    ...prev,
-                    isOpen: false,
-                  }))
-                }
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
+      {deleteBranchModalState.isOpen && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setDeleteBranchModalState(prev => ({...prev, isOpen: false}))} />
+          <div className="relative w-full max-w-md rounded-[16px] bg-[var(--surface-base)] shadow-2xl overflow-hidden animate-fade-in-up">
+            <div className="flex items-center gap-3 border-b border-[var(--border-subtle)] px-6 py-4 bg-[var(--surface-overlay)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-error)]/10">
+                <AlertCircle className="h-5 w-5 text-[var(--color-error)]" />
+              </div>
+              <div>
+                <h2 className="text-[18px] font-bold text-[var(--text-primary)]">Delete Branch</h2>
+                <p className="text-[13px] text-[var(--text-secondary)]">This action cannot be undone</p>
+              </div>
             </div>
-            <div className="px-5 py-5 text-[13px] text-[var(--text-primary)]">
-              <p className="mb-4">
-                Are you sure you want to delete branch{" "}
-                <strong className="text-white">
-                  {deleteBranchModalState.branch.name}
-                </strong>
-                ?
+
+            <div className="p-6">
+              <p className="text-[14px] text-[var(--text-primary)] mb-6">
+                Are you sure you want to delete <span className="font-bold">{deleteBranchModalState.branchName}</span>?
               </p>
-              
+
               {deleteBranchModalState.associatedPanels.length > 0 && (
-                <div className="mb-4 rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-base)] p-4">
-                  <label className="flex items-start gap-3 cursor-pointer">
+                <div className="mb-6 p-4 rounded-[12px] bg-[#2a1f1a] border border-[var(--status-danger-border)] flex items-start gap-3">
+                  <label className="flex items-start gap-3 cursor-pointer mt-0.5">
                     <input
                       type="checkbox"
                       checked={deleteBranchModalState.deletePanelsAlso}
@@ -3721,6 +3809,138 @@ export function AdminSettings() {
                   Confirm Delete
                 </button>
               </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Bulk Upload Branches Modal ── */}
+      {bulkUploadBranchModalOpen && createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[var(--surface-raised)] rounded-[16px] border border-[var(--border-subtle)] shadow-2xl w-full max-w-xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-[12px] bg-[var(--accent)]/10 flex items-center justify-center">
+                  <Upload className="h-5 w-5 text-[var(--accent)]" />
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-bold text-[var(--text-primary)]">Bulk Upload Branches</h3>
+                  <p className="text-[12px] text-[var(--text-secondary)]">Add multiple branches via Excel to {selectedCompany?.name}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  if (!bulkUploadingBranches) {
+                    setBulkUploadBranchModalOpen(false);
+                    setBulkUploadBranchResults(null);
+                  }
+                }}
+                disabled={bulkUploadingBranches}
+                className="p-2 rounded-[8px] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto custom-scrollbar">
+              {!bulkUploadBranchResults ? (
+                <div className="space-y-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-start gap-4 p-4 rounded-[12px] bg-[var(--surface-overlay)] border border-[var(--border-subtle)]">
+                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] font-bold text-sm shrink-0">1</div>
+                      <div className="flex-1">
+                        <h4 className="text-[14px] font-semibold text-[var(--text-primary)] mb-1">Download Template</h4>
+                        <p className="text-[12px] text-[var(--text-secondary)] mb-3">Get the standard Excel format with required columns.</p>
+                        <button 
+                          onClick={downloadBranchTemplate}
+                          className="btn-secondary inline-flex items-center gap-2 px-3 py-1.5 text-[12px] rounded-[8px]"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Download Template
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-4 rounded-[12px] bg-[var(--surface-overlay)] border border-[var(--border-subtle)]">
+                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] font-bold text-sm shrink-0">2</div>
+                      <div className="flex-1">
+                        <h4 className="text-[14px] font-semibold text-[var(--text-primary)] mb-1">Upload Data</h4>
+                        <p className="text-[12px] text-[var(--text-secondary)] mb-3">Upload the filled Excel file to create branches.</p>
+                        
+                        <label className={`relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-[12px] transition-colors ${bulkUploadingBranches ? 'border-[var(--border-subtle)] bg-[var(--surface-base)] cursor-not-allowed opacity-50' : 'border-[var(--border-default)] hover:border-[var(--accent)] hover:bg-[var(--surface-base)] cursor-pointer'}`}>
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept=".xlsx, .xls"
+                            ref={bulkBranchFileInputRef}
+                            onChange={handleBranchBulkUpload}
+                            disabled={bulkUploadingBranches}
+                          />
+                          {bulkUploadingBranches ? (
+                            <div className="flex flex-col items-center text-[var(--text-secondary)]">
+                              <Loader2 className="h-6 w-6 animate-spin mb-2" />
+                              <span className="text-[12px] font-medium">Processing upload...</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center text-center p-4">
+                              <Upload className="mb-3 h-8 w-8 text-[var(--text-secondary)]" />
+                              <span className="text-[13px] font-medium text-[var(--text-primary)]">Click to upload completed Excel file</span>
+                              <span className="text-[11px] text-[var(--text-tertiary)] mt-1">.xlsx or .xls files only</span>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex flex-col items-center justify-center text-center p-6 bg-[var(--surface-overlay)] rounded-[12px] border border-[var(--border-subtle)]">
+                    {bulkUploadBranchResults.failed === 0 ? (
+                      <CheckCircle className="h-12 w-12 text-[var(--color-success)] mb-3" />
+                    ) : (
+                      <AlertCircle className="h-12 w-12 text-[var(--color-warning)] mb-3" />
+                    )}
+                    <h3 className="text-[18px] font-bold text-[var(--text-primary)] mb-1">Upload Complete</h3>
+                    <div className="flex gap-4 mt-2">
+                      <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full text-[13px] font-semibold">
+                        <CheckCircle className="h-4 w-4" />
+                        {bulkUploadBranchResults.success} created
+                      </div>
+                      {bulkUploadBranchResults.failed > 0 && (
+                        <div className="flex items-center gap-1.5 text-red-400 bg-red-400/10 px-3 py-1 rounded-full text-[13px] font-semibold">
+                          <AlertCircle className="h-4 w-4" />
+                          {bulkUploadBranchResults.failed} failed
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {bulkUploadBranchResults.errors.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">Errors</h4>
+                      <div className="bg-[var(--surface-base)] border border-[var(--status-danger-border)] rounded-[8px] max-h-48 overflow-y-auto custom-scrollbar p-1">
+                        {bulkUploadBranchResults.errors.map((err, i) => (
+                          <div key={i} className="px-3 py-2 text-[12px] text-[var(--text-secondary)] border-b border-[var(--border-subtle)] last:border-0 font-mono">
+                            {err}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      setBulkUploadBranchModalOpen(false);
+                      setBulkUploadBranchResults(null);
+                    }}
+                    className="w-full btn-primary py-2.5 rounded-[8px]"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>,
