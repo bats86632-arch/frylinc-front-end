@@ -84,8 +84,9 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
 export function formatPanelName(name: string, type?: string): string {
   const baseName = name || "Unknown Panel";
   let suffix = "";
-  if (type === "fire") suffix = " (FAP)";
-  else if (type === "security") suffix = " (SAP)";
-  else if (type === "gsm") suffix = " (GSM)";
+  const t = (type ?? "").toLowerCase();
+  if (t === "fire alarm" || t === "fire") suffix = " (FAP)";
+  else if (t === "security") suffix = " (SAP)";
+  else if (t === "gsm module" || t === "gsm") suffix = " (GSM)";
   return `${baseName}${suffix}`;
 }
