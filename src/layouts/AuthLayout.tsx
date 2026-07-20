@@ -22,12 +22,16 @@ export function AuthLayout() {
   return (
     <div className="auth-screen relative min-h-screen overflow-hidden text-white">
       {/* Background Image */}
-      <img 
-        ref={bgRef}
-        src="/cmp.jpg"
-        alt="Background"
-        className="absolute inset-0 z-0 h-full w-full object-cover object-[0%_15%]"
-      />
+      <picture className="absolute inset-0 z-0 h-full w-full">
+        <source media="(max-width: 1023px)" srcSet="/cmp-phone.png" />
+        <source media="(min-width: 1024px)" srcSet="/cmp.png" />
+        <img 
+          ref={bgRef}
+          src="/cmp.png"
+          alt="Background"
+          className="h-full w-full object-cover object-center"
+        />
+      </picture>
 
       <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
         {/* ── Left info panel (desktop only) ──────────────────────────────── */}
