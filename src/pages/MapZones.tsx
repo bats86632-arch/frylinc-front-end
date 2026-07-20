@@ -42,12 +42,17 @@ const MAX_FILE_MB = 20;
 /** Build the working zone array reconciling ONLY the zones already saved (ignore panel zoneCount for initialization) */
 function buildZonesFromSaved(
   panelSerial: string,
-  savedZones: ZoneLayout[]
+  savedZones: ZoneLayout[],
+  zoneNames?: Record<string, string>
 ): ZoneLayout[] {
-  return savedZones.map((z, i) => ({
-    ...z,
-    label: `${panelSerial} \u2014 Zone ${z.zoneId.split('-Z')[1] || (i + 1)}`,
-  }));
+  return savedZones.map((z, i) => {
+    const zoneIdx = z.zoneId.split('-Z')[1] ? parseInt(z.zoneId.split('-Z')[1], 10) - 1 : i;
+    const customName = zoneNames?.[zoneIdx.toString()];
+    return {
+      ...z,
+      label: customName ? `${panelSerial} \u2014 ${customName} (Zone ${zoneIdx + 1})` : `${panelSerial} \u2014 Zone ${zoneIdx + 1}`,
+    };
+  });
 }
 
 /** Create a single new zone box at a sensible default position, returned as a polygon. */
@@ -260,7 +265,7 @@ export function MapZones() {
     }
     const saved = panelMap?.zones ?? [];
     // Only load zones that were explicitly saved — don't auto-populate all panel zones
-    setLocalZones(buildZonesFromSaved(selectedPanel.serial, saved));
+    setLocalZones(buildZonesFromSaved(selectedPanel.serial, saved, selectedPanel.zoneNames));
     setIsDirty(false);
     setSelectedZoneIdx(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -320,7 +325,7 @@ export function MapZones() {
   const handleDiscard = () => {
     if (!selectedPanel) return;
     const saved = panelMap?.zones ?? [];
-    setLocalZones(buildZonesFromSaved(selectedPanel.serial, saved));
+    setLocalZones(buildZonesFromSaved(selectedPanel.serial, saved, selectedPanel.zoneNames));
     setIsDirty(false);
     setSelectedZoneIdx(null);
   };
@@ -713,6 +718,7 @@ export function MapZones() {
                   isIsolated={zoneIsIsolated(zone.zoneId)}
                   isEvacuatePulse={selectedPanel?.zones?.[5] === 2 || selectedPanel?.zones?.[5] === true}
                   additionalLabel={(zoneIsAlarm(zone.zoneId) && zoneIdx === 4) ? " (Earth Fault)" : (zoneIsAlarm(zone.zoneId) && zoneIdx === 5) ? " (Evacuate)" : (zoneIsAlarm(zone.zoneId) && zoneIdx === 6) ? " (Low Battery)" : ""}
+                  customName={selectedPanel?.zoneNames?.[zoneIdx.toString()]}
                   isSelected={selectedZoneIdx === idx}
                   isReadOnly={!canEdit}
                   isOrphan={isOrphan}
@@ -859,9 +865,10 @@ export function MapZones() {
       {/* ── Right: Map Canvas ─────────────────────────────────────────────── */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-[var(--surface-base)]">
         {/* Canvas header */}
-        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-4 py-3 flex-shrink-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between border-b border-[var(--border-subtle)] px-4 py-2.5 lg:py-3 flex-shrink-0 gap-2">
+          {/* Row 1: toggle + panel name */}
           <div className="flex items-center gap-3 min-w-0">
-            {/* Mobile toggle */}
+            {/* Mobile sidebar toggle */}
             <button
               onClick={() => setSidebarOpen((v) => !v)}
               className="lg:hidden flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] flex-shrink-0"
@@ -877,7 +884,7 @@ export function MapZones() {
                     {formatPanelName(selectedPanel.name || "", selectedPanel.panelType)}
                   </p>
                 </div>
-                <div className="mt-1">
+                <div className="mt-0.5">
                   <p className="text-[11px] text-[var(--text-secondary)] font-mono">
                     {selectedPanel.serial} &middot; {selectedPanel.zoneCount}{" "}
                     zone{selectedPanel.zoneCount !== 1 ? "s" : ""}
@@ -891,12 +898,12 @@ export function MapZones() {
             )}
           </div>
 
-          {/* Status chips */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Row 2 (mobile) / right side (desktop): action buttons + status chips */}
+          <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap lg:flex-shrink-0">
             {selectedPanel && (
               <Link
                 to={`/panel/${selectedPanel.serial}`}
-                className="inline-flex items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-3 py-1 text-[11px] font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)] mr-2"
+                className="inline-flex items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-2.5 py-1 text-[11px] font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)]"
               >
                 <RadioTower className="h-3 w-3" />
                 View Panel
@@ -907,7 +914,7 @@ export function MapZones() {
                 <button
                   onClick={() => setDeletePanelConfirm(true)}
                   disabled={isDeletingPanel}
-                  className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1 text-[11px] rounded-[6px] border-[var(--status-danger-border)] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)]"
+                  className="btn-secondary inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] rounded-[6px] border-[var(--status-danger-border)] text-[var(--color-error)] hover:bg-[var(--status-danger-bg)]"
                 >
                   <Trash2 className="h-3 w-3" />
                   Delete Panel
@@ -944,7 +951,7 @@ export function MapZones() {
                 </div>
               )
             )}
-            
+
             {selectedPanel && anyAlarm && (
               <span className="badge-alarm animate-pulse">
                 <AlertTriangle className="h-3 w-3" />

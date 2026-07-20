@@ -50,6 +50,7 @@ export interface Panel {
   enabled: boolean;
   panelType?: "Fire Alarm" | "Security" | "GSM Module";
   zoneCount: number;
+  zoneNames?: Record<string, string>;
   zones: (boolean | number)[];
   alarm: boolean;
   companyId: string;

@@ -25,7 +25,9 @@ import {
   Map,
   ShieldOff,
   Wifi,
-  Activity
+  Activity,
+  Edit2,
+  X
 } from "lucide-react";
 import { formatDateTime } from "../utils/formatters";
 import { Event } from "../types";
@@ -123,6 +125,8 @@ export function PanelDetail() {
   const [commandLoading, setCommandLoading] = useState<string | null>(null);
   const [commandSuccess, setCommandSuccess] = useState<string | null>(null);
   const [commandError, setCommandError] = useState<string | null>(null);
+  const [editingZoneIdx, setEditingZoneIdx] = useState<number | null>(null);
+  const [editedZoneName, setEditedZoneName] = useState<string>("");
 
   const commandSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const showCommandSuccess = useCallback((cmd: string) => {
@@ -219,6 +223,26 @@ export function PanelDetail() {
       setCommandError(getApiErrorMessage(err, "Failed to reset zone"));
     } finally {
       setCommandLoading(null);
+    }
+  };
+
+  const handleSaveZoneName = async (zoneIndex: number) => {
+    if (!serial || !panel) return;
+    const newName = editedZoneName.trim();
+    const updatedZoneNames = { ...(panel.zoneNames || {}) };
+    
+    if (newName) {
+      updatedZoneNames[zoneIndex.toString()] = newName;
+    } else {
+      delete updatedZoneNames[zoneIndex.toString()];
+    }
+
+    try {
+      await PanelService.updatePanel(serial, { zoneNames: updatedZoneNames });
+    } catch (err: unknown) {
+      setCommandError(getApiErrorMessage(err, "Failed to update zone name"));
+    } finally {
+      setEditingZoneIdx(null);
     }
   };
 
@@ -585,14 +609,46 @@ export function PanelDetail() {
                   >
                     {/* Top status bar */}
                     <div className="flex items-center justify-between relative z-10">
-                      <div className="flex flex-col">
-                        <span className={`text-xl font-black tracking-tight ${
-                          isAlarmOrPre || isEvacuatePulse ? "text-[var(--color-error)]" 
-                          : isIsolated ? "text-[var(--color-warning)]" 
-                          : "text-[var(--text-primary)]"
-                        }`}>
-                          Zone {zoneNum}
-                        </span>
+                      <div className="flex flex-col flex-1">
+                        {editingZoneIdx === idx ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={editedZoneName}
+                              onChange={(e) => setEditedZoneName(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleSaveZoneName(idx);
+                                if (e.key === "Escape") setEditingZoneIdx(null);
+                              }}
+                              className="w-[120px] rounded-md border border-[var(--border-strong)] bg-transparent px-2 py-1 text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none"
+                              autoFocus
+                            />
+                            <button onClick={() => handleSaveZoneName(idx)} className="text-[var(--color-success)] hover:opacity-80 flex-shrink-0"><CheckCircle className="h-4 w-4" /></button>
+                            <button onClick={() => setEditingZoneIdx(null)} className="text-[var(--color-error)] hover:opacity-80 flex-shrink-0"><X className="h-4 w-4" /></button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 group">
+                            <span className={`text-xl font-black tracking-tight truncate max-w-[120px] sm:max-w-[150px] ${
+                              isAlarmOrPre || isEvacuatePulse ? "text-[var(--color-error)]" 
+                              : isIsolated ? "text-[var(--color-warning)]" 
+                              : "text-[var(--text-primary)]"
+                            }`} title={normalizedPanel.zoneNames?.[idx.toString()] || `Zone ${zoneNum}`}>
+                              {normalizedPanel.zoneNames?.[idx.toString()] || `Zone ${zoneNum}`}
+                            </span>
+                            {!isStrictlyEndUser && (
+                              <button
+                                onClick={() => {
+                                  setEditedZoneName(normalizedPanel.zoneNames?.[idx.toString()] || "");
+                                  setEditingZoneIdx(idx);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-[var(--surface-hover)] rounded flex-shrink-0"
+                                title="Edit zone name"
+                              >
+                                <Edit2 className="h-3.5 w-3.5 text-[var(--text-secondary)]" />
+                              </button>
+                            )}
+                          </div>
+                        )}
                         {additionalLabel && (
                           <span className={`text-xs font-bold mt-1 ${isAlarmOrPre || isEvacuatePulse ? "text-[var(--color-error)]" : "text-[var(--text-secondary)]"}`}>
                             {additionalLabel}
