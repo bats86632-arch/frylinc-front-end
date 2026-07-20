@@ -1,6 +1,6 @@
 import { formatPanelName } from '../utils/formatters';
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   Map,
   Upload,
@@ -893,6 +893,15 @@ export function MapZones() {
 
           {/* Status chips */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            {selectedPanel && (
+              <Link
+                to={`/panel/${selectedPanel.serial}`}
+                className="inline-flex items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--surface-raised)] px-3 py-1 text-[11px] font-semibold text-[var(--text-primary)] transition-all hover:bg-[var(--surface-hover)] mr-2"
+              >
+                <RadioTower className="h-3 w-3" />
+                View Panel
+              </Link>
+            )}
             {selectedPanel && canEdit && (
               !deletePanelConfirm ? (
                 <button
