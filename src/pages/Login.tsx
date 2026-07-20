@@ -264,18 +264,18 @@ export function Login() {
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-10 flex w-full items-center justify-center gap-2.5 px-5 py-3 text-[14px] font-bold text-white tracking-widest rounded-[8px] bg-[#d32f2f] hover:bg-[#b72424] transition-colors lg:bg-white lg:hover:bg-gray-100 lg:text-black lg:font-semibold lg:normal-case lg:tracking-wide lg:h-[42px] lg:py-0 lg:text-[14px] lg:rounded-full lg:border-none shadow-[0_4px_14px_0_rgba(211,47,47,0.39)] lg:shadow-md lg:mt-12"
+          className="mt-10 flex w-full items-center justify-center gap-2.5 px-5 py-3 text-[14px] font-bold text-white tracking-widest rounded-[8px] bg-[#A92828] hover:bg-[#8F2222] transition-colors lg:font-semibold lg:normal-case lg:tracking-wide lg:h-[42px] lg:py-0 lg:text-[14px] lg:rounded-full lg:border-none shadow-[0_4px_14px_0_rgba(169,40,40,0.39)] lg:shadow-md lg:mt-12"
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-[16px] w-[16px] animate-spin text-white lg:text-black" />
+              <Loader2 className="h-[16px] w-[16px] animate-spin text-white" />
               <span className="text-white lg:hidden">LOGGING IN...</span>
-              <span className="hidden lg:inline lg:text-black">Signing in...</span>
+              <span className="hidden lg:inline text-white">Signing in...</span>
             </>
           ) : (
             <>
               <span className="text-white lg:hidden">LOGIN</span>
-              <span className="hidden lg:inline lg:text-black">Sign In</span>
+              <span className="hidden lg:inline text-white">Sign In</span>
             </>
           )}
         </button>
