@@ -1,6 +1,7 @@
 import { formatPanelName } from '../utils/formatters';
 import { useMemo, useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import {
   Bell,
   ChevronDown,
   ChevronLeft,
