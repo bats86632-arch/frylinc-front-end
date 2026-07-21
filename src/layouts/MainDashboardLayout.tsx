@@ -305,15 +305,12 @@ export function MainDashboardLayout() {
         </nav>
 
         {/* Toggle Footer */}
-        <div className="hidden lg:flex mt-auto border-t border-[var(--border-subtle)] p-3">
+        <div className={`hidden lg:flex mt-auto border-t border-[var(--border-subtle)] p-3 ${isDesktopSidebarCollapsed ? 'justify-center' : 'justify-end'}`}>
           <button
             onClick={toggleDesktopSidebar}
-            className={`flex w-full items-center rounded-[6px] p-2.5 text-[var(--text-secondary)] transition-all duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] ${isDesktopSidebarCollapsed ? 'justify-center' : 'justify-between'}`}
+            className="flex items-center justify-center rounded-[6px] p-2 text-[var(--text-secondary)] transition-all duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
             aria-label="Toggle sidebar"
           >
-            {!isDesktopSidebarCollapsed && (
-              <span className="text-[13px] font-semibold">Collapse</span>
-            )}
             <ChevronLeft className={`h-[18px] w-[18px] shrink-0 transition-transform duration-300 ${isDesktopSidebarCollapsed ? 'rotate-180' : ''}`} />
           </button>
         </div>
