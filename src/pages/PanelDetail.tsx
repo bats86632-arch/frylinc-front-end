@@ -911,7 +911,7 @@ export function PanelDetail() {
                               <span className="text-[var(--text-secondary)]">-</span>
                             )
                           ) : (
-                            {(() => {
+                            (() => {
                               const z = event.zone || event.zoneNumber;
                               let interpretation: string | null = null;
                               
@@ -959,7 +959,7 @@ export function PanelDetail() {
                                   )}
                                 </>
                               );
-                            })()}
+                            })()
                           )}
                         </td>
                       </tr>
