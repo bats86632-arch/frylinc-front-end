@@ -161,6 +161,27 @@ export function Reports() {
       if (log.action === 'ALARM') faultType = 'Fire';
       if (log.action === 'CLEAR') faultType = 'Normal';
 
+      // Update fault type based on zone and panel type
+      if (log.type === 'alarm' || log.action === 'ALARM') {
+        const p = panels.find(p => p.serial === log.panelSerial);
+        const pType = p?.panelType;
+        const z = Number(zoneNum);
+        
+        if (pType === 'Fire Alarm') {
+          if (z === 9) faultType = 'Earth Fault';
+          if (z === 10) faultType = 'Evacuate (EVA)';
+          if (z === 11) faultType = 'Low Battery';
+          if (z === 12) faultType = 'Ideal / Empty';
+          if (z === 13) faultType = 'Empty';
+        } else if (pType === 'Security') {
+          if (z === 9) faultType = 'Siren Cut';
+          if (z === 10) faultType = 'Evacuate (EVA)';
+          if (z === 11) faultType = 'Battery Low';
+          if (z === 12) faultType = 'Night zone arm / disarm (ARM)';
+          if (z === 13) faultType = 'Ideal';
+        }
+      }
+
       return {
         Timestamp: formatTimestamp(log.timestamp),
         Type: log.type,
@@ -418,11 +439,11 @@ export function Reports() {
                       {Array.from({ length: maxZones }).map((_, i) => (
                         <th key={i} className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Zone {i + 1}</th>
                       ))}
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Siren Cut</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Evacuate</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Bat. Low</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Earth Fault</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Night Zone</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Z9 (Earth / Siren)</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Z10 (Evacuate)</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Z11 (Bat. Low)</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Z12 (Night / Ideal)</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Z13 (Ideal / Empty)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)] bg-[var(--surface-base)]">
@@ -476,23 +497,19 @@ export function Reports() {
                             );
                           })}
                           
-                          {/* Special Events */}
+                          {/* Special Events (Z9 - Z13) */}
                           {(() => {
-                            const isFire = panel.panelType === 'Fire Alarm';
                             const isSecurity = panel.panelType === 'Security';
-                            const isDialer = panel.panelType === 'Dialer';
-                            const isHealth = panel.panelType === 'Health';
-                            const isUnknown = !isFire && !isSecurity && !isDialer && !isHealth;
                             
-                            const hasEarthFault = isFire && panel.zones?.[8] === 2;
-                            const isEvacuateActive = (isFire || isSecurity) && panel.zones?.[9] === 2;
-                            const isBatteryLow = (isFire || isSecurity) && panel.zones?.[10] === 2;
-                            const hasSirenCut = isSecurity && panel.zones?.[8] === 2;
-                            const isNightZone = isSecurity && panel.zones?.[11] === 2;
+                            const isZ9Active = panel.zones?.[8] === 2;
+                            const isZ10Active = panel.zones?.[9] === 2;
+                            const isZ11Active = panel.zones?.[10] === 2;
+                            const isZ12Active = panel.zones?.[11] === 2;
+                            const isZ13Active = panel.zones?.[12] === 2;
 
                             const renderBadge = (active: boolean, codeActive: string, codeInactive: string, activeClass: string, inactiveClass: string) => (
                               <td className="px-2 py-3.5 text-center">
-                                <span className={`inline-flex items-center justify-center w-8 h-6 rounded-md border font-bold text-[11px] transition-all ${active ? activeClass : inactiveClass}`}>
+                                <span className={`inline-flex items-center justify-center min-w-[32px] h-6 px-1 rounded-md border font-bold text-[11px] transition-all ${active ? activeClass : inactiveClass}`}>
                                   {active ? codeActive : codeInactive}
                                 </span>
                               </td>
@@ -505,11 +522,11 @@ export function Reports() {
 
                             return (
                               <>
-                                {renderBadge(hasSirenCut, 'F', 'N', activeDanger, inactiveBadge)}
-                                {renderBadge(isEvacuateActive, 'F', 'N', activeDanger, inactiveBadge)}
-                                {renderBadge(isBatteryLow, 'F', 'N', activeWarning, inactiveBadge)}
-                                {renderBadge(hasEarthFault, 'F', 'N', activeDanger, inactiveBadge)}
-                                {renderBadge(isNightZone, 'ON', 'OFF', activeInfo, inactiveBadge)}
+                                {renderBadge(isZ9Active, 'F', 'N', activeDanger, inactiveBadge)}
+                                {renderBadge(isZ10Active, 'F', 'N', activeDanger, inactiveBadge)}
+                                {renderBadge(isZ11Active, 'F', 'N', activeWarning, inactiveBadge)}
+                                {renderBadge(isZ12Active, isSecurity ? 'ON' : 'F', isSecurity ? 'OFF' : 'N', isSecurity ? activeInfo : activeDanger, inactiveBadge)}
+                                {renderBadge(isZ13Active, 'F', 'N', activeDanger, inactiveBadge)}
                               </>
                             );
                           })()}
@@ -550,8 +567,32 @@ export function Reports() {
                       <td className="px-5 py-3.5 whitespace-nowrap">
                         <span className="font-mono text-[11px] text-[var(--text-secondary)]">{formatTimestamp(log.timestamp)}</span>
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap">
-                        <span className="font-bold text-[13px] text-[var(--text-primary)]">{log.action}</span>
+                      <td className="px-5 py-3.5 max-w-[220px]">
+                        {(() => {
+                          let displayAction = log.action;
+                          if (log.action === 'ALARM' || log.action === 'CLEAR') {
+                            const p = panels.find(p => p.serial === log.panelSerial);
+                            const pType = p?.panelType;
+                            const z = log.zone;
+                            
+                            if (pType === 'Fire Alarm') {
+                              if (z === 9) displayAction = 'Earth Fault';
+                              if (z === 10) displayAction = 'Evacuate (EVA)';
+                              if (z === 11) displayAction = 'Low Battery';
+                              if (z === 12) displayAction = 'Ideal / Empty';
+                              if (z === 13) displayAction = 'Empty';
+                            } else if (pType === 'Security') {
+                              if (z === 9) displayAction = 'Siren Cut';
+                              if (z === 10) displayAction = 'Evacuate (EVA)';
+                              if (z === 11) displayAction = 'Battery Low';
+                              if (z === 12) displayAction = 'Night zone arm / disarm (ARM)';
+                              if (z === 13) displayAction = 'Ideal';
+                            }
+                          }
+                          return (
+                            <span className="font-bold text-[13px] text-[var(--text-primary)]">{displayAction}</span>
+                          );
+                        })()}
                       </td>
                       <td className="px-5 py-3.5 whitespace-nowrap">
                         {log.panelSerial ? (
@@ -597,7 +638,7 @@ export function Reports() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 max-w-[220px]">
+                      <td className="px-5 py-3.5 whitespace-nowrap">
                         {log.command ? (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[var(--surface-raised)] border border-[var(--border-subtle)] font-mono text-[11px] text-[var(--text-primary)] truncate max-w-full" title={log.command}>
                             {log.command}

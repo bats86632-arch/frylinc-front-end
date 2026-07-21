@@ -132,6 +132,17 @@ export function PanelDetail() {
   const [commandError, setCommandError] = useState<string | null>(null);
   const [editingZoneIdx, setEditingZoneIdx] = useState<number | null>(null);
   const [editedZoneName, setEditedZoneName] = useState<string>("");
+  const [showRawLogs, setShowRawLogs] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key.toLowerCase() === 'r') {
+        setShowRawLogs(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const commandSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const showCommandSuccess = useCallback((cmd: string) => {
@@ -856,7 +867,27 @@ export function PanelDetail() {
                                   : "border-[var(--border-subtle)] bg-[var(--surface-overlay)] text-[var(--text-secondary)]"
                             }`}
                           >
-                            {((event as any).faultType === "isolate" ? "isolate" : event.type)}
+                            {(() => {
+                              if (showRawLogs && event.raw) return event.type;
+                              let disp = ((event as any).faultType === "isolate" ? "isolate" : event.type);
+                              if (event.type === 'alarm' || (event as any).action === 'ALARM') {
+                                const z = event.zone || event.zoneNumber;
+                                if (normalizedPanel.panelType === 'Fire Alarm') {
+                                  if (z === 9) disp = 'Earth Fault';
+                                  if (z === 10) disp = 'Evacuate (EVA)';
+                                  if (z === 11) disp = 'Low Battery';
+                                  if (z === 12) disp = 'Ideal / Empty';
+                                  if (z === 13) disp = 'Empty';
+                                } else if (normalizedPanel.panelType === 'Security') {
+                                  if (z === 9) disp = 'Siren Cut';
+                                  if (z === 10) disp = 'Evacuate (EVA)';
+                                  if (z === 11) disp = 'Battery Low';
+                                  if (z === 12) disp = 'Night zone arm / disarm (ARM)';
+                                  if (z === 13) disp = 'Ideal';
+                                }
+                              }
+                              return disp;
+                            })()}
                           </span>
                         </td>
                         <td className="px-5 py-3.5">
@@ -871,26 +902,37 @@ export function PanelDetail() {
                           </span>
                         </td>
                         <td className="px-5 py-3.5 text-sm text-[var(--text-primary)]">
-                          {event.command && (
-                            <span>
-                              {event.command}
-                              {event.ackPayload && <span className="ml-2 text-[var(--text-secondary)]">(Ack: {event.ackPayload})</span>}
-                            </span>
-                          )}
-                          {event.raw && <span className="font-mono text-xs">{event.raw}</span>}
-                          
-                          {/* If it's a fault, display the faultType prominently */}
-                          {(event as any).faultType && (
-                            <span className="capitalize font-medium text-[var(--color-warning)] mr-2">{(event as any).faultType}</span>
-                          )}
-                          
-                          {event.details && <span>{event.details}</span>}
-                          {(!event.command && !event.raw && !(event as any).faultType && !event.details) && <span className="text-[var(--text-secondary)]">-</span>}
-                          
-                          {(event.zone || event.zoneNumber) && (
-                            <span className="ml-2 font-mono tabular-nums text-[var(--text-secondary)]">
-                              (Zone {event.zone || event.zoneNumber})
-                            </span>
+                          {showRawLogs ? (
+                            event.raw ? (
+                              <span className="font-mono text-xs">{event.raw}</span>
+                            ) : event.command ? (
+                              <span className="font-mono text-xs text-[var(--text-secondary)]">{event.command}</span>
+                            ) : (
+                              <span className="text-[var(--text-secondary)]">-</span>
+                            )
+                          ) : (
+                            <>
+                              {event.command && (
+                                <span>
+                                  {event.command}
+                                  {event.ackPayload && <span className="ml-2 text-[var(--text-secondary)]">(Ack: {event.ackPayload})</span>}
+                                </span>
+                              )}
+                              
+                              {/* If it's a fault, display the faultType prominently */}
+                              {(event as any).faultType && (
+                                <span className="capitalize font-medium text-[var(--color-warning)] mr-2">{(event as any).faultType}</span>
+                              )}
+                              
+                              {event.details && <span>{event.details}</span>}
+                              {(!event.command && !(event as any).faultType && !event.details) && <span className="text-[var(--text-secondary)]">-</span>}
+                              
+                              {(event.zone || event.zoneNumber) && (
+                                <span className="ml-2 font-mono tabular-nums text-[var(--text-secondary)]">
+                                  (Zone {event.zone || event.zoneNumber})
+                                </span>
+                              )}
+                            </>
                           )}
                         </td>
                       </tr>
