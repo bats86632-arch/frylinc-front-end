@@ -141,7 +141,10 @@ export function MainDashboardLayout() {
       const branchName = branches.find(b => b.id === panel.branchId)?.name || 'Unknown Branch';
       const panelName = formatPanelName(panel.name || "Unknown Panel", panel.panelType);
       const isFire = panel.panelType === "Fire Alarm";
-      
+      const isSecurity = panel.panelType === "Security";
+      const isDialer = panel.panelType === "Dialer";
+      const isHealth = panel.panelType === "Health";
+      const isUnknown = !isFire && !isSecurity && !isDialer && !isHealth;
       panel.zones?.forEach((z, i) => {
         const zoneNum = i + 1;
         let zoneDisplay = `Zone ${zoneNum}`;

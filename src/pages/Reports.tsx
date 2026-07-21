@@ -480,6 +480,9 @@ export function Reports() {
                           {(() => {
                             const isFire = panel.panelType === 'Fire Alarm';
                             const isSecurity = panel.panelType === 'Security';
+                            const isDialer = panel.panelType === 'Dialer';
+                            const isHealth = panel.panelType === 'Health';
+                            const isUnknown = !isFire && !isSecurity && !isDialer && !isHealth;
                             
                             const hasEarthFault = isFire && panel.zones?.[8] === 2;
                             const isEvacuateActive = (isFire || isSecurity) && panel.zones?.[9] === 2;

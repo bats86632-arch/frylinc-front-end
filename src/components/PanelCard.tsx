@@ -20,7 +20,9 @@ interface PanelCardProps {
 
   const isFire = panel.panelType === 'Fire Alarm';
   const isSecurity = panel.panelType === 'Security';
-  
+  const isDialer = panel.panelType === 'Dialer';
+  const isHealth = panel.panelType === 'Health';
+  const isUnknown = !isFire && !isSecurity && !isDialer && !isHealth;  
   const hasEarthFault = isFire && panel.zones?.[8] === 2;
   const isEvacuateActive = (isFire || isSecurity) && panel.zones?.[9] === 2;
   const isBatteryLow = (isFire || isSecurity) && panel.zones?.[10] === 2;
@@ -157,7 +159,7 @@ interface PanelCardProps {
               </span>
             </div>
             
-            {(isFire || (!isFire && !isSecurity)) && (
+            {(isFire || isUnknown) && (
             <div className={`flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
               {hasEarthFault ? (
                 <ZapOff className="h-3.5 w-3.5 text-[var(--color-error)] shrink-0" />

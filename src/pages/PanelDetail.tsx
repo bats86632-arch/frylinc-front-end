@@ -351,6 +351,9 @@ export function PanelDetail() {
 
   const isFire = normalizedPanel.panelType === 'Fire Alarm';
   const isSecurity = normalizedPanel.panelType === 'Security';
+  const isDialer = normalizedPanel.panelType === 'Dialer';
+  const isHealth = normalizedPanel.panelType === 'Health';
+  const isUnknown = !isFire && !isSecurity && !isDialer && !isHealth;
   
   const hasEarthFault = isFire && normalizedPanel.zones[8] === 2;
   const isEvacuateActive = (isFire || isSecurity) && normalizedPanel.zones[9] === 2;
@@ -455,8 +458,8 @@ export function PanelDetail() {
                 </span>
               </div>
               
-              {(isFire || (!isFire && !isSecurity)) && (
-              <div className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 overflow-hidden rounded-[8px] border px-1.5 py-2 transition-all duration-200 text-center ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+              {(isFire || isUnknown) && (
+                <div className={`flex flex-col xl:flex-row items-center justify-center gap-2 xl:gap-3 overflow-hidden rounded-[8px] border px-3 py-2.5 transition-all duration-200 text-center ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
                 {hasEarthFault ? (
                   <ZapOff className="h-4 w-4 text-[var(--color-error)] shrink-0" />
                 ) : (

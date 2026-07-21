@@ -48,7 +48,7 @@ export interface Panel {
   serial: string;
   name: string;
   enabled: boolean;
-  panelType?: "Fire Alarm" | "Security" | "GSM Module";
+  panelType?: "Fire Alarm" | "Security" | "GSM Module" | "Dialer" | "Health";
   zoneCount: number;
   zoneNames?: Record<string, string>;
   zones: (boolean | number | string)[];
