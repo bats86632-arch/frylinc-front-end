@@ -66,7 +66,7 @@ const navigation: Array<{
 export function MainDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(() => {
-    return localStorage.getItem("sidebarCollapsed") === "true";
+    return localStorage.getItem("sidebarCollapsed") !== "false";
   });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -235,15 +235,15 @@ export function MainDashboardLayout() {
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
       <aside
         className={`fixed left-0 top-0 z-50 flex h-full flex-col border-r border-[var(--border-subtle)] bg-[var(--surface-overlay)] transition-all duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0 w-[260px]" : "-translate-x-full w-[260px]"
-        } ${isDesktopSidebarCollapsed ? "lg:w-[80px]" : "lg:w-[260px]"}`}
+          sidebarOpen ? "translate-x-0 w-[290px]" : "-translate-x-full w-[290px]"
+        } ${isDesktopSidebarCollapsed ? "lg:w-[80px]" : "lg:w-[290px]"}`}
         style={{
           paddingTop: 'var(--safe-top)',
           paddingBottom: 'var(--safe-bottom)'
         }}
       >
         {/* Logo */}
-        <div className={`flex h-[72px] items-center border-b border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-5'}`}>
+        <div className={`flex flex-wrap items-center border-b border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ${isDesktopSidebarCollapsed ? 'py-4 gap-4 justify-center' : 'h-[72px] justify-between px-5'}`}>
           <Link
             to="/"
             className="flex items-center gap-3.5"
@@ -263,6 +263,13 @@ export function MainDashboardLayout() {
               </span>
             </div>
           </Link>
+          <button
+            onClick={toggleDesktopSidebar}
+            className="hidden lg:flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] border border-[var(--border-subtle)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
+            aria-label="Toggle sidebar"
+          >
+            <Menu className="h-4 w-4" />
+          </button>
           <button
             onClick={() => setSidebarOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-subtle)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-default)] hover:text-[var(--text-primary)] lg:hidden"
@@ -306,7 +313,7 @@ export function MainDashboardLayout() {
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
       <div 
-        className={`relative z-10 transition-all duration-300 ${isDesktopSidebarCollapsed ? 'lg:pl-[80px]' : 'lg:pl-[260px]'}`}
+        className={`relative z-10 transition-all duration-300 ${isDesktopSidebarCollapsed ? 'lg:pl-[80px]' : 'lg:pl-[290px]'}`}
         style={{ paddingBottom: 'var(--safe-bottom)' }}
       >
         {/* Header - Solid background with border */}
@@ -323,14 +330,6 @@ export function MainDashboardLayout() {
               onClick={() => setSidebarOpen(true)}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] lg:hidden"
               aria-label="Open sidebar"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-            {/* Desktop toggle */}
-            <button
-              onClick={toggleDesktopSidebar}
-              className="hidden lg:flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
-              aria-label="Toggle sidebar"
             >
               <Menu className="h-5 w-5" />
             </button>
