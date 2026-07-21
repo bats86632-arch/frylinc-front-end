@@ -911,28 +911,55 @@ export function PanelDetail() {
                               <span className="text-[var(--text-secondary)]">-</span>
                             )
                           ) : (
-                            <>
-                              {event.command && (
-                                <span>
-                                  {event.command}
-                                  {event.ackPayload && <span className="ml-2 text-[var(--text-secondary)]">(Ack: {event.ackPayload})</span>}
-                                </span>
-                              )}
+                            {(() => {
+                              const z = event.zone || event.zoneNumber;
+                              let interpretation: string | null = null;
                               
-                              {/* If it's a fault, display the faultType prominently */}
-                              {(event as any).faultType && (
-                                <span className="capitalize font-medium text-[var(--color-warning)] mr-2">{(event as any).faultType}</span>
-                              )}
-                              
-                              {event.details && <span>{event.details}</span>}
-                              {(!event.command && !(event as any).faultType && !event.details) && <span className="text-[var(--text-secondary)]">-</span>}
-                              
-                              {(event.zone || event.zoneNumber) && (
-                                <span className="ml-2 font-mono tabular-nums text-[var(--text-secondary)]">
-                                  (Zone {event.zone || event.zoneNumber})
-                                </span>
-                              )}
-                            </>
+                              if (z >= 9 && z <= 13 && (event.type === 'alarm' || (event as any).action === 'ALARM')) {
+                                if (normalizedPanel.panelType === 'Fire Alarm') {
+                                  if (z === 9) interpretation = 'Earth Fault';
+                                  if (z === 10) interpretation = 'Evacuate (EVA)';
+                                  if (z === 11) interpretation = 'Low Battery';
+                                  if (z === 12) interpretation = 'Ideal / Empty';
+                                  if (z === 13) interpretation = 'Empty';
+                                } else if (normalizedPanel.panelType === 'Security') {
+                                  if (z === 9) interpretation = 'Siren Cut';
+                                  if (z === 10) interpretation = 'Evacuate (EVA)';
+                                  if (z === 11) interpretation = 'Battery Low';
+                                  if (z === 12) interpretation = 'Night zone arm / disarm (ARM)';
+                                  if (z === 13) interpretation = 'Ideal';
+                                }
+                              }
+
+                              if (interpretation) {
+                                return <span className="font-medium text-[var(--text-primary)]">{interpretation}</span>;
+                              }
+
+                              return (
+                                <>
+                                  {event.command && (
+                                    <span>
+                                      {event.command}
+                                      {event.ackPayload && <span className="ml-2 text-[var(--text-secondary)]">(Ack: {event.ackPayload})</span>}
+                                    </span>
+                                  )}
+                                  
+                                  {/* If it's a fault, display the faultType prominently */}
+                                  {(event as any).faultType && (
+                                    <span className="capitalize font-medium text-[var(--color-warning)] mr-2">{(event as any).faultType}</span>
+                                  )}
+                                  
+                                  {event.details && <span>{event.details}</span>}
+                                  {(!event.command && !(event as any).faultType && !event.details) && <span className="text-[var(--text-secondary)]">-</span>}
+                                  
+                                  {z && (
+                                    <span className="ml-2 font-mono tabular-nums text-[var(--text-secondary)]">
+                                      (Zone {z})
+                                    </span>
+                                  )}
+                                </>
+                              );
+                            })()}
                           )}
                         </td>
                       </tr>
