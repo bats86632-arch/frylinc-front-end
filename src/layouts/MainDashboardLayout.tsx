@@ -236,8 +236,8 @@ export function MainDashboardLayout() {
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
       <aside
         className={`fixed left-0 top-0 z-50 flex h-full flex-col border-r border-[var(--border-subtle)] bg-[var(--surface-overlay)] transition-all duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0 w-[290px]" : "-translate-x-full w-[290px]"
-        } ${isDesktopSidebarCollapsed ? "lg:w-[80px]" : "lg:w-[290px]"}`}
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } ${isDesktopSidebarCollapsed ? "w-[240px] lg:w-[80px]" : "w-[240px] lg:w-[290px]"}`}
         style={{
           paddingTop: 'var(--safe-top)',
           paddingBottom: 'var(--safe-bottom)'
