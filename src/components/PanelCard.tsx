@@ -100,7 +100,7 @@ interface PanelCardProps {
 
           {/* Alarm Count Chip */}
           {activeAlarmCount > 0 && (
-            <span className="flex items-center gap-1.5 rounded-full bg-[var(--status-danger-bg)] px-2.5 py-1 text-[11px] font-bold text-[var(--color-error)] border border-[var(--status-danger-border)]">
+            <span className="flex shrink-0 whitespace-nowrap items-center justify-center rounded-[6px] bg-[var(--status-danger-bg)] px-3 py-1 text-[11px] font-bold text-[var(--color-error)] border border-[var(--status-danger-border)]">
               {activeAlarmCount} Active
             </span>
           )}
