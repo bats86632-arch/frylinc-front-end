@@ -134,7 +134,7 @@ export function MainDashboardLayout() {
 
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
   const notifications = useMemo(() => {
-    const notifs: Array<{ id: string; title: string; message: string; seen: boolean }> = [];
+    const notifs: Array<{ id: string; serial: string; title: string; message: string; seen: boolean }> = [];
     (panels || []).forEach(panel => {
       if (panel.clearedBy?.[userData?.uid || ""]) return;
 
@@ -167,6 +167,7 @@ export function MainDashboardLayout() {
           if (zoneNum >= 9) {
             notifs.push({
               id: `${panel.serial}-special-${zoneNum}`,
+              serial: panel.serial,
               title: `${zoneDisplay} Alert: ${baseTitle}`,
               message: `${zoneDisplay} condition detected.`,
               seen: !!panel.seenBy?.[userData?.uid || ""]
@@ -174,6 +175,7 @@ export function MainDashboardLayout() {
           } else {
             notifs.push({
               id: `${panel.serial}-fire-${zoneNum}`,
+              serial: panel.serial,
               title: `Fire Alert: ${baseTitle}`,
               message: `Fire detected in ${zoneDisplay}.`,
               seen: !!panel.seenBy?.[userData?.uid || ""]
@@ -182,6 +184,7 @@ export function MainDashboardLayout() {
         } else if (z === 5) {
           notifs.push({
             id: `${panel.serial}-isolate-${zoneNum}`,
+            serial: panel.serial,
             title: `Isolate Alert: ${baseTitle}`,
             message: `${zoneDisplay} has been isolated.`,
             seen: !!panel.seenBy?.[userData?.uid || ""]
@@ -196,8 +199,9 @@ export function MainDashboardLayout() {
   const toggleNotifications = () => {
     if (!notificationOpen) {
       const unseenPanels = notifications.filter(n => !n.seen);
-      unseenPanels.forEach(p => {
-        PanelService.markNotificationSeen(p.id).catch(console.error);
+      const unseenSerials = [...new Set(unseenPanels.map(p => p.serial))];
+      unseenSerials.forEach(serial => {
+        PanelService.markNotificationSeen(serial).catch(console.error);
       });
     }
     setNotificationOpen(!notificationOpen);
@@ -396,7 +400,7 @@ export function MainDashboardLayout() {
                                 </p>
                               </div>
                               <button
-                                onClick={() => PanelService.clearNotification(notification.id).catch(console.error)}
+                                onClick={() => PanelService.clearNotification(notification.serial).catch(console.error)}
                                 className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1"
                                 aria-label="Clear notification"
                               >
