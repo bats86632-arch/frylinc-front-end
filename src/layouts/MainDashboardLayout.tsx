@@ -167,8 +167,8 @@ export function MainDashboardLayout() {
           if (zoneNum >= 9) {
             notifs.push({
               id: `${panel.serial}-special-${zoneNum}`,
-              title: `Special Event Alert: ${baseTitle}`,
-              message: `Special Event in ${zoneDisplay}.`,
+              title: `${zoneDisplay} Alert: ${baseTitle}`,
+              message: `${zoneDisplay} condition detected.`,
               seen: !!panel.seenBy?.[userData?.uid || ""]
             });
           } else {
