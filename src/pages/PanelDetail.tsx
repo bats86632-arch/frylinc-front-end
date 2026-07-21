@@ -915,19 +915,21 @@ export function PanelDetail() {
                               const z = event.zone || event.zoneNumber;
                               let interpretation: string | null = null;
                               
-                              if (z >= 9 && z <= 13 && (event.type === 'alarm' || (event as any).action === 'ALARM')) {
+                              if (z >= 9 && z <= 16) {
                                 if (normalizedPanel.panelType === 'Fire Alarm') {
                                   if (z === 9) interpretation = 'Earth Fault';
-                                  if (z === 10) interpretation = 'Evacuate (EVA)';
-                                  if (z === 11) interpretation = 'Low Battery';
-                                  if (z === 12) interpretation = 'Ideal / Empty';
-                                  if (z === 13) interpretation = 'Empty';
+                                  else if (z === 10) interpretation = 'Evacuate (EVA)';
+                                  else if (z === 11) interpretation = 'Low Battery';
+                                  else if (z === 12) interpretation = 'Ideal / Empty';
+                                  else if (z === 13) interpretation = 'Empty';
+                                  else interpretation = `System Zone ${z}`;
                                 } else if (normalizedPanel.panelType === 'Security') {
                                   if (z === 9) interpretation = 'Siren Cut';
-                                  if (z === 10) interpretation = 'Evacuate (EVA)';
-                                  if (z === 11) interpretation = 'Battery Low';
-                                  if (z === 12) interpretation = 'Night zone arm / disarm (ARM)';
-                                  if (z === 13) interpretation = 'Ideal';
+                                  else if (z === 10) interpretation = 'Evacuate (EVA)';
+                                  else if (z === 11) interpretation = 'Battery Low';
+                                  else if (z === 12) interpretation = 'Night zone arm / disarm (ARM)';
+                                  else if (z === 13) interpretation = 'Ideal';
+                                  else interpretation = `System Zone ${z}`;
                                 }
                               }
 
@@ -952,7 +954,7 @@ export function PanelDetail() {
                                   {event.details && <span>{event.details}</span>}
                                   {(!event.command && !(event as any).faultType && !event.details) && <span className="text-[var(--text-secondary)]">-</span>}
                                   
-                                  {z && (
+                                  {z && (z < 9 || z > 16) && (
                                     <span className="ml-2 font-mono tabular-nums text-[var(--text-secondary)]">
                                       (Zone {z})
                                     </span>
