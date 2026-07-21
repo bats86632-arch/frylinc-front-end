@@ -146,7 +146,7 @@ interface PanelCardProps {
 
           {/* System Indicators */}
           <div className={`grid ${isSecurity ? 'grid-cols-3 gap-1.5' : 'grid-cols-2 gap-2'} mb-6`}>
-            <div className={`flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center xl:text-left ${isBatteryLow ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            <div className={`flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center ${isBatteryLow ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
               {isBatteryLow ? (
                 <BatteryWarning className="h-3.5 w-3.5 text-[var(--color-error)] shrink-0" />
               ) : (
@@ -158,7 +158,7 @@ interface PanelCardProps {
             </div>
             
             {(isFire || (!isFire && !isSecurity)) && (
-            <div className={`flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center xl:text-left ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            <div className={`flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center ${hasEarthFault ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
               {hasEarthFault ? (
                 <ZapOff className="h-3.5 w-3.5 text-[var(--color-error)] shrink-0" />
               ) : (
@@ -172,7 +172,7 @@ interface PanelCardProps {
             
             {isSecurity && (
             <>
-            <div className={`flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center xl:text-left ${hasSirenCut ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            <div className={`flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center ${hasSirenCut ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
               {hasSirenCut ? (
                 <AlertTriangle className="h-3.5 w-3.5 text-[var(--color-error)] shrink-0" />
               ) : (
@@ -182,7 +182,7 @@ interface PanelCardProps {
                 {hasSirenCut ? 'Siren Cut!' : 'Siren Normal'}
               </span>
             </div>
-            <div className={`flex flex-col xl:flex-row items-center justify-center xl:justify-start gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center xl:text-left ${isNightZone ? 'border-blue-500/20 bg-blue-500/10' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+            <div className={`flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 overflow-hidden rounded-[6px] border px-1.5 py-1.5 transition-all duration-200 text-center ${isNightZone ? 'border-blue-500/20 bg-blue-500/10' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
               <Activity className={`h-3.5 w-3.5 shrink-0 ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`} />
               <span className={`truncate text-[10px] font-semibold tracking-tight ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`}>
                 {isNightZone ? 'Night: ON' : 'Night: OFF'}

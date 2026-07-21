@@ -144,28 +144,35 @@ export function MainDashboardLayout() {
       
       panel.zones?.forEach((z, i) => {
         const zoneNum = i + 1;
-        let zoneName = panel.zoneNames?.[i.toString()] || `Zone ${zoneNum}`;
-        const baseTitle = `${panelName} (${panel.serial}) - ${branchName}`;
+        let zoneDisplay = `Zone ${zoneNum}`;
+        const customName = panel.zoneNames?.[i.toString()];
+        if (customName && customName.trim().toLowerCase() !== `zone ${zoneNum}`) {
+          zoneDisplay = `Zone ${zoneNum} (${customName.trim()})`;
+        }
 
-        if (i === 8) zoneName = isFire ? "Earth Fault" : "Siren Cut";
-        if (i === 9) zoneName = "Evacuate (EVA)";
-        if (i === 10) zoneName = isFire ? "Low Battery" : "Battery Low";
-        if (i === 11) zoneName = isFire ? "ideal / empty" : "Night zone arm / disarm (ARM)";
-        if (i === 12) zoneName = isFire ? "empty" : "Ideal";
+        const isSerialInName = panelName.includes(panel.serial);
+        const panelDisplayName = isSerialInName ? panelName : `${panelName} (${panel.serial})`;
+        const baseTitle = `${panelDisplayName} - ${branchName}`;
+
+        if (i === 8) zoneDisplay = isFire ? "Earth Fault" : "Siren Cut";
+        if (i === 9) zoneDisplay = "Evacuate (EVA)";
+        if (i === 10) zoneDisplay = isFire ? "Low Battery" : "Battery Low";
+        if (i === 11) zoneDisplay = isFire ? "ideal / empty" : "Night zone arm / disarm (ARM)";
+        if (i === 12) zoneDisplay = isFire ? "empty" : "Ideal";
 
         if (z === 2) {
           if (zoneNum >= 9) {
             notifs.push({
               id: `${panel.serial}-special-${zoneNum}`,
               title: `Special Event Alert: ${baseTitle}`,
-              message: `Special Event in Zone ${zoneNum}: ${zoneName}`,
+              message: `Special Event in ${zoneDisplay}.`,
               seen: !!panel.seenBy?.[userData?.uid || ""]
             });
           } else {
             notifs.push({
               id: `${panel.serial}-fire-${zoneNum}`,
               title: `Fire Alert: ${baseTitle}`,
-              message: `Fire detected in Zone ${zoneNum}: ${zoneName}`,
+              message: `Fire detected in ${zoneDisplay}.`,
               seen: !!panel.seenBy?.[userData?.uid || ""]
             });
           }
@@ -173,7 +180,7 @@ export function MainDashboardLayout() {
           notifs.push({
             id: `${panel.serial}-isolate-${zoneNum}`,
             title: `Isolate Alert: ${baseTitle}`,
-            message: `Zone ${zoneNum} is Isolated: ${zoneName}`,
+            message: `${zoneDisplay} has been isolated.`,
             seen: !!panel.seenBy?.[userData?.uid || ""]
           });
         }
