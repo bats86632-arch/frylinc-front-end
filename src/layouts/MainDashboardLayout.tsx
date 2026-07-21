@@ -1,9 +1,9 @@
 import { formatPanelName } from '../utils/formatters';
 import { useMemo, useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import {
   Bell,
   ChevronDown,
+  ChevronLeft,
   FileText,
   Flame,
   LayoutDashboard,
@@ -243,7 +243,7 @@ export function MainDashboardLayout() {
         }}
       >
         {/* Logo */}
-        <div className={`flex flex-wrap items-center border-b border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ${isDesktopSidebarCollapsed ? 'py-4 gap-4 justify-center' : 'h-[72px] justify-between px-5'}`}>
+        <div className={`flex h-[72px] items-center border-b border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-5'}`}>
           <Link
             to="/"
             className="flex items-center gap-3.5"
@@ -263,13 +263,6 @@ export function MainDashboardLayout() {
               </span>
             </div>
           </Link>
-          <button
-            onClick={toggleDesktopSidebar}
-            className="hidden lg:flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] border border-[var(--border-subtle)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-default)] hover:text-[var(--text-primary)]"
-            aria-label="Toggle sidebar"
-          >
-            <Menu className="h-4 w-4" />
-          </button>
           <button
             onClick={() => setSidebarOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-subtle)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-default)] hover:text-[var(--text-primary)] lg:hidden"
@@ -309,6 +302,20 @@ export function MainDashboardLayout() {
             );
           })}
         </nav>
+
+        {/* Toggle Footer */}
+        <div className="hidden lg:flex mt-auto border-t border-[var(--border-subtle)] p-3">
+          <button
+            onClick={toggleDesktopSidebar}
+            className={`flex w-full items-center rounded-[6px] p-2.5 text-[var(--text-secondary)] transition-all duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] ${isDesktopSidebarCollapsed ? 'justify-center' : 'justify-between'}`}
+            aria-label="Toggle sidebar"
+          >
+            {!isDesktopSidebarCollapsed && (
+              <span className="text-[13px] font-semibold">Collapse</span>
+            )}
+            <ChevronLeft className={`h-[18px] w-[18px] shrink-0 transition-transform duration-300 ${isDesktopSidebarCollapsed ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
       </aside>
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
