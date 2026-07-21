@@ -342,7 +342,7 @@ export function PanelDetail() {
       : [],
   };
 
-  const visibleZones = Math.min(normalizedPanel.zoneCount || 0, 8);
+  const visibleZones = normalizedPanel.zoneCount || 8;
   const panelCommands = ["ARM", "ZONE OFF"];
 
   const isOffline = normalizedPanel.manuallyMarkedOffline === true;
@@ -604,14 +604,16 @@ export function PanelDetail() {
                       {commandLoading === "EVA" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
                       Evacuate
                     </button>
-                    <button
-                      onClick={() => handleSendCommand("ARM")}
-                      disabled={commandLoading !== null}
-                      className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
-                    >
-                      {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
-                      Test ARM
-                    </button>
+                    {!isFire && (
+                      <button
+                        onClick={() => handleSendCommand("ARM")}
+                        disabled={commandLoading !== null}
+                        className="flex items-center justify-center gap-2 rounded-[8px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2 text-[13px] font-semibold text-[var(--color-error)] transition-all hover:shadow-lg disabled:opacity-50"
+                      >
+                        {commandLoading === "ARM" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldAlert className="h-4 w-4" />}
+                        Test ARM
+                      </button>
+                    )}
                   </>
                 )}
                 
@@ -653,9 +655,11 @@ export function PanelDetail() {
 
                 let additionalLabel = "";
                 if (zoneStatus === 2) {
-                  if (idx === 4) additionalLabel = " - Earth Fault";
-                  if (idx === 5) additionalLabel = " - Evacuate";
-                  if (idx === 6) additionalLabel = " - Low Battery";
+                  if (idx === 8) additionalLabel = isFire ? " - Earth Fault" : " - Siren Cut";
+                  if (idx === 9) additionalLabel = " - Evacuate (EVA)";
+                  if (idx === 10) additionalLabel = isFire ? " - Low Battery" : " - Battery Low";
+                  if (idx === 11) additionalLabel = isFire ? " - ideal / empty" : " - Night zone arm / disarm (ARM)";
+                  if (idx === 12) additionalLabel = isFire ? " - empty" : " - Ideal";
                 }
 
                 let containerClasses = `relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${statusStyles.bg} ${statusStyles.border} ${statusStyles.shadow}`;

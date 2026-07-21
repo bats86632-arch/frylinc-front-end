@@ -709,8 +709,8 @@ export function Reports() {
 
       {/* ── Pagination ────────────────────────────────────────────────────── */}
       {((!loading && logs.length > 0 && viewMode === 'list') || (viewMode === 'matrix' && activePanels.length > 0)) && (
-        <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] flex items-center justify-between sticky bottom-0 z-10">
-          <div className="flex items-center gap-6">
+        <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] grid grid-cols-2 gap-y-3 sm:flex sm:items-center sm:justify-between sticky bottom-0 z-10">
+          <div className="col-span-1 flex items-center sm:gap-6">
             <p className="text-[12px] text-[var(--text-secondary)] font-medium">
               Showing <span className="text-[var(--text-primary)] font-bold">
                 {viewMode === 'matrix' ? activePanels.length : filteredLogs.length}
@@ -738,22 +738,46 @@ export function Reports() {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrevPage}
-              disabled={pageHistory.length === 0}
-              className="flex h-[32px] px-3 items-center justify-center gap-1.5 rounded-[8px] bg-[var(--surface-base)] border border-[var(--border-subtle)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-            >
-              <ChevronLeft className="h-4 w-4" /> Previous
-            </button>
-            <button
-              onClick={handleNextPage}
-              disabled={!pageToken}
-              className="flex h-[32px] px-3 items-center justify-center gap-1.5 rounded-[8px] bg-[var(--accent)] text-[12px] font-semibold text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-            >
-              Next <ChevronRight className="h-4 w-4" />
-            </button>
+
+          <div className="col-span-1 flex items-center justify-end">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handlePrevPage}
+                disabled={pageHistory.length === 0}
+                className="flex h-[32px] px-3 items-center justify-center gap-1.5 rounded-[8px] bg-[var(--surface-base)] border border-[var(--border-subtle)] text-[12px] font-semibold text-[var(--text-primary)] hover:bg-[var(--surface-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+              >
+                <ChevronLeft className="h-4 w-4" /> <span className="hidden sm:inline">Previous</span>
+              </button>
+              <button
+                onClick={handleNextPage}
+                disabled={!pageToken}
+                className="flex h-[32px] px-3 items-center justify-center gap-1.5 rounded-[8px] bg-[var(--accent)] text-[12px] font-semibold text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+              >
+                <span className="hidden sm:inline">Next</span> <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
+
+          {viewMode === 'matrix' && (
+            <div className="col-span-2 flex sm:hidden items-center gap-3 pt-3 border-t border-[var(--border-subtle)] overflow-x-auto pb-1 hide-scrollbar">
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">N</span>
+                <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Normal</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-orange-500/10 text-orange-500 border-orange-500/20">F</span>
+                <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fire</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-indigo-500/10 text-indigo-400 border-indigo-500/20">Flt</span>
+                <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fault</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:text-yellow-400">I</span>
+                <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Isolate</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

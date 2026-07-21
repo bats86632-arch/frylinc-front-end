@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
+import { useBranches } from "../hooks/useBranches";
 import { PanelService } from "../api/PanelService";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { Role } from "../types";
@@ -68,6 +69,7 @@ export function MainDashboardLayout() {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const { userData, currentUser, logout, hasRole } = useAuth();
   const { panels } = usePanels();
+  const { branches } = useBranches();
   const location = useLocation();
   const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -131,18 +133,54 @@ export function MainDashboardLayout() {
       .join(" ") || "End User";
 
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
-  const notifications = useMemo(
-    () =>
-      (panels || [])
-        .filter((panel) => panel && panel.alarm && !panel.clearedBy?.[userData?.uid || ""])
-        .map((panel) => ({
-          id: panel.serial,
-          title: formatPanelName(panel.name || "Unknown Panel", panel.panelType),
-          message: `Alarm active on ${panel.serial || "unknown"}`,
-          seen: !!panel.seenBy?.[userData?.uid || ""]
-        })),
-    [panels, userData?.uid],
-  );
+  const notifications = useMemo(() => {
+    const notifs: Array<{ id: string; title: string; message: string; seen: boolean }> = [];
+    (panels || []).forEach(panel => {
+      if (panel.clearedBy?.[userData?.uid || ""]) return;
+
+      const branchName = branches.find(b => b.id === panel.branchId)?.name || 'Unknown Branch';
+      const panelName = formatPanelName(panel.name || "Unknown Panel", panel.panelType);
+      const isFire = panel.panelType === "Fire Alarm";
+      
+      panel.zones?.forEach((z, i) => {
+        const zoneNum = i + 1;
+        let zoneName = panel.zoneNames?.[i.toString()] || `Zone ${zoneNum}`;
+        const baseTitle = `${panelName} (${panel.serial}) - ${branchName}`;
+
+        if (i === 8) zoneName = isFire ? "Earth Fault" : "Siren Cut";
+        if (i === 9) zoneName = "Evacuate (EVA)";
+        if (i === 10) zoneName = isFire ? "Low Battery" : "Battery Low";
+        if (i === 11) zoneName = isFire ? "ideal / empty" : "Night zone arm / disarm (ARM)";
+        if (i === 12) zoneName = isFire ? "empty" : "Ideal";
+
+        if (z === 2) {
+          if (zoneNum >= 9) {
+            notifs.push({
+              id: `${panel.serial}-special-${zoneNum}`,
+              title: `Special Event Alert: ${baseTitle}`,
+              message: `Special Event in Zone ${zoneNum}: ${zoneName}`,
+              seen: !!panel.seenBy?.[userData?.uid || ""]
+            });
+          } else {
+            notifs.push({
+              id: `${panel.serial}-fire-${zoneNum}`,
+              title: `Fire Alert: ${baseTitle}`,
+              message: `Fire detected in Zone ${zoneNum}: ${zoneName}`,
+              seen: !!panel.seenBy?.[userData?.uid || ""]
+            });
+          }
+        } else if (z === 5) {
+          notifs.push({
+            id: `${panel.serial}-isolate-${zoneNum}`,
+            title: `Isolate Alert: ${baseTitle}`,
+            message: `Zone ${zoneNum} is Isolated: ${zoneName}`,
+            seen: !!panel.seenBy?.[userData?.uid || ""]
+          });
+        }
+      });
+    });
+    return notifs;
+  }, [panels, branches, userData?.uid]);
   const unseenCount = notifications.filter(n => !n.seen).length;
 
   const toggleNotifications = () => {

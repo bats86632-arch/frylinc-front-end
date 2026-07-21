@@ -51,7 +51,7 @@ export interface Panel {
   panelType?: "Fire Alarm" | "Security" | "GSM Module";
   zoneCount: number;
   zoneNames?: Record<string, string>;
-  zones: (boolean | number)[];
+  zones: (boolean | number | string)[];
   alarm: boolean;
   companyId: string;
   branchId: string;
