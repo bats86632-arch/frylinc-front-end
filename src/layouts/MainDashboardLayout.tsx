@@ -65,6 +65,9 @@ const navigation: Array<{
 
 export function MainDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(() => {
+    return localStorage.getItem("sidebarCollapsed") === "true";
+  });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const { userData, currentUser, logout, hasRole } = useAuth();
@@ -212,6 +215,14 @@ export function MainDashboardLayout() {
     navigate("/login");
   };
 
+  const toggleDesktopSidebar = () => {
+    setIsDesktopSidebarCollapsed(prev => {
+      const newVal = !prev;
+      localStorage.setItem("sidebarCollapsed", String(newVal));
+      return newVal;
+    });
+  };
+
   return (
     <div className="theme-scope min-h-screen bg-[var(--surface-base)] relative text-[var(--text-primary)]">
       {sidebarOpen && (
@@ -223,16 +234,16 @@ export function MainDashboardLayout() {
 
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-full w-[260px] flex-col border-r border-[var(--border-subtle)] bg-[var(--surface-overlay)] transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed left-0 top-0 z-50 flex h-full flex-col border-r border-[var(--border-subtle)] bg-[var(--surface-overlay)] transition-all duration-300 lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0 w-[260px]" : "-translate-x-full w-[260px]"
+        } ${isDesktopSidebarCollapsed ? "lg:w-[80px]" : "lg:w-[260px]"}`}
         style={{
           paddingTop: 'var(--safe-top)',
           paddingBottom: 'var(--safe-bottom)'
         }}
       >
         {/* Logo */}
-        <div className="flex h-[72px] items-center justify-between border-b border-[var(--border-subtle)] px-5">
+        <div className={`flex h-[72px] items-center border-b border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-5'}`}>
           <Link
             to="/"
             className="flex items-center gap-3.5"
@@ -241,9 +252,9 @@ export function MainDashboardLayout() {
             <img
               src="/fyrlinc-logo.png"
               alt="Fyrlinc"
-              className="h-10 w-10 rounded-[8px] object-cover border border-[var(--border-subtle)]"
+              className="h-10 w-10 shrink-0 rounded-[8px] object-cover border border-[var(--border-subtle)]"
             />
-            <div>
+            <div className={`whitespace-nowrap transition-opacity duration-200 ${isDesktopSidebarCollapsed ? 'lg:hidden' : 'block'}`}>
               <span className="block font-sans text-[1.05rem] font-semibold leading-none tracking-tight text-[var(--text-primary)]">
                 Fyrlinc
               </span>
@@ -270,25 +281,22 @@ export function MainDashboardLayout() {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`group flex items-center gap-3 px-5 py-2.5 transition-all duration-150 ${
+                title={isDesktopSidebarCollapsed ? item.name : undefined}
+                className={`group flex items-center py-2.5 transition-all duration-150 ${isDesktopSidebarCollapsed ? 'justify-center lg:px-0 gap-0' : 'px-5 gap-3'} ${
                   active
                     ? "border-l-2 border-[var(--accent)] bg-[var(--surface-raised)] text-[var(--text-primary)]"
                     : "border-l-2 border-transparent text-[var(--text-secondary)] opacity-80 hover:bg-[var(--surface-hover)] hover:opacity-100"
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
-                <item.icon className="h-[18px] w-[18px]" />
+                <item.icon className="h-[18px] w-[18px] shrink-0" />
                 <span
-                  className={
-                    active
-                      ? "text-[13px] font-semibold"
-                      : "text-[13px] font-medium"
-                  }
+                  className={`${active ? "text-[13px] font-semibold" : "text-[13px] font-medium"} ${isDesktopSidebarCollapsed ? 'lg:hidden' : ''}`}
                 >
                   <span className="lg:hidden">
                     {item.mobileName ?? item.name}
                   </span>
-                  <span className="hidden lg:inline">{item.name}</span>
+                  <span className="hidden lg:inline whitespace-nowrap">{item.name}</span>
                 </span>
               </Link>
             );
@@ -298,7 +306,7 @@ export function MainDashboardLayout() {
 
       {/* ── Main content ─────────────────────────────────────────────────────── */}
       <div 
-        className="lg:pl-[260px] relative z-10"
+        className={`relative z-10 transition-all duration-300 ${isDesktopSidebarCollapsed ? 'lg:pl-[80px]' : 'lg:pl-[260px]'}`}
         style={{ paddingBottom: 'var(--safe-bottom)' }}
       >
         {/* Header - Solid background with border */}
@@ -310,10 +318,19 @@ export function MainDashboardLayout() {
           }}
         >
           <div className="flex min-w-0 items-center gap-4 h-[72px]">
+            {/* Mobile toggle */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] lg:hidden"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] lg:hidden"
               aria-label="Open sidebar"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            {/* Desktop toggle */}
+            <button
+              onClick={toggleDesktopSidebar}
+              className="hidden lg:flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
+              aria-label="Toggle sidebar"
             >
               <Menu className="h-5 w-5" />
             </button>
