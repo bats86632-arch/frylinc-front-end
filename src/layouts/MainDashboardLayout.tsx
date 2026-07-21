@@ -244,7 +244,7 @@ export function MainDashboardLayout() {
         }}
       >
         {/* Logo */}
-        <div className={`flex h-[72px] items-center border-b border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ${isDesktopSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-5'}`}>
+        <div className={`flex h-[72px] items-center justify-between px-5 border-b border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ${isDesktopSidebarCollapsed ? 'lg:justify-center lg:px-0' : ''}`}>
           <Link
             to="/"
             className="flex items-center gap-3.5"
@@ -283,7 +283,7 @@ export function MainDashboardLayout() {
                 key={item.name}
                 to={item.href}
                 title={isDesktopSidebarCollapsed ? item.name : undefined}
-                className={`group flex items-center py-2.5 transition-all duration-150 ${isDesktopSidebarCollapsed ? 'justify-center lg:px-0 gap-0' : 'px-5 gap-3'} ${
+                className={`group flex items-center py-2.5 px-5 gap-3 transition-all duration-150 ${isDesktopSidebarCollapsed ? 'lg:justify-center lg:px-0 lg:gap-0' : ''} ${
                   active
                     ? "border-l-2 border-[var(--accent)] bg-[var(--surface-raised)] text-[var(--text-primary)]"
                     : "border-l-2 border-transparent text-[var(--text-secondary)] opacity-80 hover:bg-[var(--surface-hover)] hover:opacity-100"
