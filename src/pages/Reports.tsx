@@ -49,6 +49,7 @@ export function Reports() {
   const [dateRange, setDateRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
   const [viewMode, setViewMode] = useState<"list" | "matrix">("matrix");
   const [secretMode, setSecretMode] = useState<boolean>(false);
+  const [listClickCount, setListClickCount] = useState<number>(0);
   
   // Pagination
   const [pageToken, setPageToken] = useState<string | null>(null);
@@ -357,7 +358,17 @@ export function Reports() {
           <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
             <div className="flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)]">
               <button
-                onClick={() => setViewMode("list")}
+                onClick={() => {
+                  setViewMode("list");
+                  setListClickCount((prev) => {
+                    const newCount = prev + 1;
+                    if (newCount >= 7) {
+                      setSecretMode(true);
+                      return 0;
+                    }
+                    return newCount;
+                  });
+                }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${viewMode === 'list' ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
               >
                 <List className="h-3.5 w-3.5" /> List
