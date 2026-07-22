@@ -439,11 +439,11 @@ export function Reports() {
                       {Array.from({ length: maxZones }).map((_, i) => (
                         <th key={i} className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Zone {i + 1}</th>
                       ))}
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Earth / Siren</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Evacuate</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Bat. Low</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Night / Ideal</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Ideal / Empty</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Earth / Tamper</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">EVA / Siren</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Bat. / EVA</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Ideal / Bat.</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Empty / Night</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)] bg-[var(--surface-base)]">
@@ -524,9 +524,9 @@ export function Reports() {
                               <>
                                 {renderBadge(isZ9Active, 'F', 'N', activeDanger, inactiveBadge)}
                                 {renderBadge(isZ10Active, 'F', 'N', activeDanger, inactiveBadge)}
-                                {renderBadge(isZ11Active, 'F', 'N', activeWarning, inactiveBadge)}
-                                {renderBadge(isZ12Active, isSecurity ? 'ON' : 'F', isSecurity ? 'OFF' : 'N', isSecurity ? activeInfo : activeDanger, inactiveBadge)}
-                                {renderBadge(isZ13Active, 'F', 'N', activeDanger, inactiveBadge)}
+                                {renderBadge(isZ11Active, 'F', 'N', isSecurity ? activeDanger : activeWarning, inactiveBadge)}
+                                {renderBadge(isZ12Active, 'F', 'N', isSecurity ? activeWarning : activeDanger, inactiveBadge)}
+                                {renderBadge(isZ13Active, isSecurity ? 'ON' : 'F', isSecurity ? 'OFF' : 'N', isSecurity ? activeInfo : activeDanger, inactiveBadge)}
                               </>
                             );
                           })()}
