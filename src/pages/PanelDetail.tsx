@@ -367,10 +367,11 @@ export function PanelDetail() {
   const isUnknown = !isFire && !isSecurity && !isDialer && !isHealth;
   
   const hasEarthFault = isFire && normalizedPanel.zones[8] === 2;
-  const isEvacuateActive = (isFire || isSecurity) && normalizedPanel.zones[9] === 2;
-  const isBatteryLow = (isFire || isSecurity) && normalizedPanel.zones[10] === 2;
-  const hasSirenCut = isSecurity && normalizedPanel.zones[8] === 2;
-  const isNightZone = isSecurity && normalizedPanel.zones[11] === 2;
+  const hasTamper = isSecurity && normalizedPanel.zones[8] === 2;
+  const hasSirenCut = isSecurity && normalizedPanel.zones[9] === 2;
+  const isEvacuateActive = (isFire && normalizedPanel.zones[9] === 2) || (isSecurity && normalizedPanel.zones[10] === 2);
+  const isBatteryLow = (isFire && normalizedPanel.zones[10] === 2) || (isSecurity && normalizedPanel.zones[11] === 2);
+  const isNightZone = isSecurity && normalizedPanel.zones[12] === 2;
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">
@@ -457,7 +458,7 @@ export function PanelDetail() {
             </div>
 
             {/* System Indicators */}
-            <div className={`grid ${isSecurity ? 'grid-cols-3 gap-1.5' : 'grid-cols-2 gap-2'}`}>
+            <div className={`grid ${isSecurity ? 'grid-cols-2 gap-1.5' : 'grid-cols-2 gap-2'}`}>
               <div className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 overflow-hidden rounded-[8px] border px-1.5 py-2 transition-all duration-200 text-center ${isBatteryLow ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
                 {isBatteryLow ? (
                   <BatteryWarning className="h-4 w-4 text-[var(--color-error)] shrink-0" />
@@ -484,6 +485,16 @@ export function PanelDetail() {
               
               {isSecurity && (
               <>
+              <div className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 overflow-hidden rounded-[8px] border px-1.5 py-2 transition-all duration-200 text-center ${hasTamper ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
+                {hasTamper ? (
+                  <AlertTriangle className="h-4 w-4 text-[var(--color-error)] shrink-0" />
+                ) : (
+                  <Shield className="h-4 w-4 text-[var(--color-success)] shrink-0" />
+                )}
+                <span className={`truncate text-[11px] font-semibold tracking-tight ${hasTamper ? 'text-[var(--color-error)]' : 'text-[var(--text-secondary)]'}`}>
+                  {hasTamper ? 'Tamper!' : 'Tamper Normal'}
+                </span>
+              </div>
               <div className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 overflow-hidden rounded-[8px] border px-1.5 py-2 transition-all duration-200 text-center ${hasSirenCut ? 'border-[var(--status-danger-border)] bg-[var(--status-danger-bg)]' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
                 {hasSirenCut ? (
                   <AlertTriangle className="h-4 w-4 text-[var(--color-error)] shrink-0" />
@@ -497,7 +508,7 @@ export function PanelDetail() {
               <div className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 overflow-hidden rounded-[8px] border px-1.5 py-2 transition-all duration-200 text-center ${isNightZone ? 'border-blue-500/20 bg-blue-500/10' : 'border-[var(--border-subtle)] bg-[var(--surface-overlay)]'} cursor-default`}>
                 <Activity className={`h-4 w-4 shrink-0 ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`} />
                 <span className={`truncate text-[11px] font-semibold tracking-tight ${isNightZone ? 'text-blue-500' : 'text-[var(--text-secondary)]'}`}>
-                  {isNightZone ? 'Night: ON' : 'Night: OFF'}
+                  {isNightZone ? 'Night: ARM' : 'Night: DISARM'}
                 </span>
               </div>
               </>

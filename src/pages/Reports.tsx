@@ -174,11 +174,11 @@ export function Reports() {
           if (z === 12) faultType = 'Ideal / Empty';
           if (z === 13) faultType = 'Empty';
         } else if (pType === 'Security') {
-          if (z === 9) faultType = 'Siren Cut';
-          if (z === 10) faultType = 'Evacuate (EVA)';
-          if (z === 11) faultType = 'Battery Low';
-          if (z === 12) faultType = 'Night zone arm / disarm (ARM)';
-          if (z === 13) faultType = 'Ideal';
+          if (z === 9) faultType = 'Tamper';
+          if (z === 10) faultType = 'Siren Cut';
+          if (z === 11) faultType = 'Evacuate (EVA)';
+          if (z === 12) faultType = 'Battery Low';
+          if (z === 13) faultType = 'Night Zone';
         }
       }
 
@@ -582,11 +582,11 @@ export function Reports() {
                               if (z === 12) displayAction = 'Ideal / Empty';
                               if (z === 13) displayAction = 'Empty';
                             } else if (pType === 'Security') {
-                              if (z === 9) displayAction = 'Siren Cut';
-                              if (z === 10) displayAction = 'Evacuate (EVA)';
-                              if (z === 11) displayAction = 'Battery Low';
-                              if (z === 12) displayAction = 'Night zone arm / disarm (ARM)';
-                              if (z === 13) displayAction = 'Ideal';
+                              if (z === 9) displayAction = 'Tamper';
+                              if (z === 10) displayAction = 'Siren Cut';
+                              if (z === 11) displayAction = 'Evacuate (EVA)';
+                              if (z === 12) displayAction = 'Battery Low';
+                              if (z === 13) displayAction = 'Night Zone';
                             }
                           }
                           return (

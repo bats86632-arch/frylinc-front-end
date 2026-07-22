@@ -161,11 +161,11 @@ export function MainDashboardLayout() {
         const panelDisplayName = isSerialInName ? panelName : `${panelName} (${panel.serial})`;
         const baseTitle = `${panelDisplayName} - ${branchName}`;
 
-        if (i === 8) zoneDisplay = isFire ? "Earth Fault" : "Siren Cut";
-        if (i === 9) zoneDisplay = "Evacuate (EVA)";
-        if (i === 10) zoneDisplay = isFire ? "Low Battery" : "Battery Low";
-        if (i === 11) zoneDisplay = isFire ? "ideal / empty" : "Night zone arm / disarm (ARM)";
-        if (i === 12) zoneDisplay = isFire ? "empty" : "Ideal";
+        if (i === 8) zoneDisplay = isFire ? "Earth Fault" : "Tamper";
+        if (i === 9) zoneDisplay = isFire ? "Evacuate (EVA)" : "Siren Cut";
+        if (i === 10) zoneDisplay = isFire ? "Low Battery" : "Evacuate (EVA)";
+        if (i === 11) zoneDisplay = isFire ? "ideal / empty" : "Battery Low";
+        if (i === 12) zoneDisplay = isFire ? "empty" : "Night Zone";
 
         if (z === 2) {
           if (zoneNum >= 9) {
