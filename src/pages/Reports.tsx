@@ -121,7 +121,7 @@ export function Reports() {
     }
   };
 
-  const filteredLogs = logs.filter(log => {
+  const searchFilteredLogs = logs.filter(log => {
     if (!action) return true;
     const searchLower = action.toLowerCase();
     return (
@@ -131,6 +131,29 @@ export function Reports() {
       (log.actorEmail || "").toLowerCase().includes(searchLower) ||
       (log.panelSerial || "").toLowerCase().includes(searchLower)
     );
+  });
+
+  const filteredLogs = searchFilteredLogs.filter((log, index, self) => {
+    if (index === 0) return true;
+    const prevLog = self[index - 1];
+    
+    const isSameEvent = 
+      log.panelSerial === prevLog.panelSerial &&
+      log.action === prevLog.action &&
+      log.zone === prevLog.zone &&
+      log.details === prevLog.details &&
+      log.command === prevLog.command;
+      
+    let timeDiffMs = 0;
+    if (log.timestamp && prevLog.timestamp) {
+      timeDiffMs = Math.abs(new Date(prevLog.timestamp).getTime() - new Date(log.timestamp).getTime());
+    }
+    
+    // Deduplicate identical events that occur within a 2-minute window
+    if (isSameEvent && timeDiffMs < 120000) {
+      return false;
+    }
+    return true;
   });
 
   const handleExport = () => {
