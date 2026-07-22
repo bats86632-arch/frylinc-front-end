@@ -638,14 +638,22 @@ export function Reports() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap">
-                        {log.command ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[var(--surface-raised)] border border-[var(--border-subtle)] font-mono text-[11px] text-[var(--text-primary)] truncate max-w-full" title={log.command}>
-                            {log.command}
-                          </span>
-                        ) : (
-                          <span className="text-[var(--text-secondary)] italic opacity-40">—</span>
-                        )}
+                      <td className="px-5 py-3.5 max-w-[300px]">
+                        <div className="flex flex-col gap-1">
+                          {log.command ? (
+                            <span className="inline-block px-2 py-0.5 rounded-md bg-[var(--surface-raised)] border border-[var(--border-subtle)] font-mono text-[11px] text-[var(--text-primary)] break-all" title={log.command}>
+                              {log.command}
+                            </span>
+                          ) : null}
+                          {log.details ? (
+                            <span className="text-[10px] text-[var(--color-error)] opacity-90 break-words font-mono" title={log.details}>
+                              {log.details}
+                            </span>
+                          ) : null}
+                          {!log.command && !log.details && (
+                            <span className="text-[var(--text-secondary)] italic opacity-40">—</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-3.5 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border transition-all ${

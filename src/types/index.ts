@@ -182,6 +182,7 @@ export interface AuditLog {
   isApiKey?: boolean;
   apiKeyId?: string | null;
   timestamp: Timestamp | null;
+  details?: string | null;
   // Legacy
   user?: string;
   role?: string;
