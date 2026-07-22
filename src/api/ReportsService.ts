@@ -28,5 +28,14 @@ export const ReportsService = {
 
     const response = await apiClient.get('/audit-logs', { params });
     return response.data;
+  },
+
+  async getRawLogs(filters: { limit?: number; pageToken?: string } = {}): Promise<{ logs: any[]; nextPageToken: string | null }> {
+    const params: Record<string, string | number> = {};
+    if (filters.limit) params.limit = filters.limit;
+    if (filters.pageToken) params.pageToken = filters.pageToken;
+
+    const response = await apiClient.get('/raw-logs', { params });
+    return response.data;
   }
 };

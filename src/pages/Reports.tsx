@@ -48,14 +48,26 @@ export function Reports() {
   const [action, setAction] = useState<string>("");
   const [dateRange, setDateRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
   const [viewMode, setViewMode] = useState<"list" | "matrix">("matrix");
+  const [secretMode, setSecretMode] = useState<boolean>(false);
   
   // Pagination
   const [pageToken, setPageToken] = useState<string | null>(null);
   const [pageHistory, setPageHistory] = useState<string[]>([]);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        setSecretMode(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     fetchLogs(true);
-  }, [companyId, branchId, dateRange]);
+  }, [companyId, branchId, dateRange, secretMode]);
 
   const fetchLogs = async (resetPagination: boolean = false, token?: string) => {
     try {
@@ -87,20 +99,28 @@ export function Reports() {
 
       if (token) filters.pageToken = token;
 
-      const data = await ReportsService.getAuditLogs(filters);
-      
-      if (resetPagination) {
-        setPageHistory([]);
-      } else if (token && !pageHistory.includes(token)) {
-        setPageHistory(prev => [...prev, token]);
-      }
-      
-      const isUpdated = !cached || JSON.stringify(cached.logs) !== JSON.stringify(data.logs);
-      
-      if (isUpdated) {
-        reportsCache.set(cacheKey, { logs: data.logs, nextPageToken: data.nextPageToken });
-        setLogs(data.logs);
+      if (secretMode) {
+        const data = await ReportsService.getRawLogs({ limit: 50, pageToken: token || undefined });
+        if (resetPagination) setPageHistory([]);
+        else if (token && !pageHistory.includes(token)) setPageHistory(prev => [...prev, token]);
+        setLogs(data.logs as any);
         setPageToken(data.nextPageToken);
+      } else {
+        const data = await ReportsService.getAuditLogs(filters);
+        
+        if (resetPagination) {
+          setPageHistory([]);
+        } else if (token && !pageHistory.includes(token)) {
+          setPageHistory(prev => [...prev, token]);
+        }
+        
+        const isUpdated = !cached || JSON.stringify(cached.logs) !== JSON.stringify(data.logs);
+        
+        if (isUpdated) {
+          reportsCache.set(cacheKey, { logs: data.logs, nextPageToken: data.nextPageToken });
+          setLogs(data.logs);
+          setPageToken(data.nextPageToken);
+        }
       }
       
     } catch (err: any) {
@@ -122,6 +142,7 @@ export function Reports() {
   };
 
   const searchFilteredLogs = logs.filter(log => {
+    if (secretMode) return true; // Don't filter secret logs by search bar for now
     if (!action) return true;
     const searchLower = action.toLowerCase();
     return (
@@ -134,6 +155,7 @@ export function Reports() {
   });
 
   const filteredLogs = searchFilteredLogs.filter((log, index, self) => {
+    if (secretMode) return true; // Don't deduplicate in secret mode
     if (index === 0) return true;
     const prevLog = self[index - 1];
     
@@ -567,6 +589,66 @@ export function Reports() {
                 </table>
               );
             })()}
+          </div>
+        ) : secretMode ? (
+          <div className="w-full">
+            <div className="hidden md:block min-w-[1000px] w-full">
+              <table className="w-full text-left text-[12px]">
+                <thead className="bg-[var(--surface-overlay)] sticky top-0 border-b border-[var(--border-subtle)] z-10">
+                  <tr>
+                    <th className="px-5 py-3.5 font-bold text-emerald-500 uppercase tracking-widest text-[9px]">Raw Timestamp</th>
+                    <th className="px-5 py-3.5 font-bold text-emerald-500 uppercase tracking-widest text-[9px]">Topic</th>
+                    <th className="px-5 py-3.5 font-bold text-emerald-500 uppercase tracking-widest text-[9px]">Raw Payload (String)</th>
+                    <th className="px-5 py-3.5 font-bold text-emerald-500 uppercase tracking-widest text-[9px]">Raw Payload (Hex)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-subtle)]">
+                  {filteredLogs.map((log: any) => (
+                    <tr key={log.id} className="hover:bg-[var(--surface-hover)] transition-colors group">
+                      <td className="px-5 py-3.5 whitespace-nowrap">
+                        <span className="font-mono text-[11px] text-[var(--text-secondary)]">{formatTimestamp(log.timestamp)}</span>
+                      </td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-blue-400 font-mono text-[11px]">
+                        {log.topic}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="inline-block px-2 py-0.5 rounded-md bg-[var(--surface-raised)] border border-[var(--border-subtle)] font-mono text-[11px] text-[var(--text-primary)] break-all">
+                          {log.rawString}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="font-mono text-[10px] text-gray-500 break-all leading-tight">
+                          {log.rawHex}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredLogs.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-10 text-center text-[13px] text-[var(--text-secondary)]">
+                        No raw logs available.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Mobile View for Secret Mode */}
+            <div className="md:hidden space-y-3">
+              {filteredLogs.map((log: any) => (
+                <div key={log.id} className="bg-[var(--surface-card)] rounded-xl border border-[var(--border-subtle)] p-4 shadow-sm flex flex-col gap-3">
+                  <div className="flex justify-between items-start">
+                    <span className="font-mono text-[10px] text-[var(--text-secondary)]">{formatTimestamp(log.timestamp)}</span>
+                    <span className="text-[10px] font-mono text-blue-400 break-all ml-2 text-right">{log.topic}</span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="font-mono text-[11px] break-all bg-[var(--surface-raised)] p-2 rounded-md">{log.rawString}</span>
+                    <span className="font-mono text-[9px] text-gray-500 break-all">{log.rawHex}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="w-full">
