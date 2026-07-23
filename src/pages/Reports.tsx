@@ -510,11 +510,21 @@ export function Reports() {
                       {Array.from({ length: maxZones }).map((_, i) => (
                         <th key={i} className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center w-12">Zone {i + 1}</th>
                       ))}
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Earth / Tamper</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">EVA / Siren</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Bat. / EVA</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Ideal / Bat.</th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[70px]">Empty / Night</th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
+                        {matrixFilter === 'Fire Alarm' ? 'Earth Fault' : matrixFilter === 'Security' ? 'Tamper' : 'Earth Fault / Tamper'}
+                      </th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
+                        {matrixFilter === 'Fire Alarm' ? 'Evacuate' : matrixFilter === 'Security' ? 'Siren Cut' : 'Evacuate / Siren Cut'}
+                      </th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
+                        {matrixFilter === 'Fire Alarm' ? 'Low Battery' : matrixFilter === 'Security' ? 'Evacuate' : 'Low Battery / Evacuate'}
+                      </th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
+                        {matrixFilter === 'Fire Alarm' ? 'Ideal' : matrixFilter === 'Security' ? 'Battery Low' : 'Ideal / Battery Low'}
+                      </th>
+                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
+                        {matrixFilter === 'Fire Alarm' ? 'Empty' : matrixFilter === 'Security' ? 'Night Zone' : 'Empty / Night Zone'}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)] bg-[var(--surface-base)]">
@@ -545,23 +555,23 @@ export function Reports() {
                             }
 
                             const zoneStatus = panel.zones?.[i] || 1;
-                            let code = 'N';
+                            let code = 'Normal';
                             let badgeClass = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_6px_rgba(16,185,129,0.15)]'; 
 
                             if (zoneStatus === 2) {
-                              code = 'F';
+                              code = 'Fire';
                               badgeClass = 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-[0_0_6px_rgba(249,115,22,0.15)]';
                             } else if (zoneStatus === 3 || zoneStatus === 4) {
-                              code = 'Flt';
+                              code = 'Fault';
                               badgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-[0_0_6px_rgba(99,102,241,0.15)]';
                             } else if (zoneStatus === 5) {
-                              code = 'I';
+                              code = 'Isolated';
                               badgeClass = 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 shadow-[0_0_6px_rgba(234,179,8,0.15)] dark:text-yellow-400';
                             }
 
                             return (
                               <td key={i} className="px-2 py-3.5 text-center">
-                                <span className={`inline-flex items-center justify-center w-8 h-6 rounded-md border font-bold text-[11px] transition-all ${badgeClass}`}>
+                                <span className={`inline-flex items-center justify-center min-w-[40px] px-2 h-6 rounded-md border font-bold text-[10px] transition-all ${badgeClass}`}>
                                   {code}
                                 </span>
                               </td>
@@ -580,7 +590,7 @@ export function Reports() {
 
                             const renderBadge = (active: boolean, codeActive: string, codeInactive: string, activeClass: string, inactiveClass: string) => (
                               <td className="px-2 py-3.5 text-center">
-                                <span className={`inline-flex items-center justify-center min-w-[32px] h-6 px-1 rounded-md border font-bold text-[11px] transition-all ${active ? activeClass : inactiveClass}`}>
+                                <span className={`inline-flex items-center justify-center min-w-[50px] h-6 px-1.5 rounded-md border font-bold text-[10px] transition-all ${active ? activeClass : inactiveClass}`}>
                                   {active ? codeActive : codeInactive}
                                 </span>
                               </td>
@@ -591,13 +601,20 @@ export function Reports() {
                             const activeInfo = 'bg-blue-500/10 text-blue-500 border-blue-500/20 shadow-[0_0_6px_rgba(59,130,246,0.15)]';
                             const inactiveBadge = 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border-[var(--border-subtle)]';
 
+                            const z9ActiveName = isSecurity ? 'Tamper' : 'Earth Fault';
+                            const z10ActiveName = isSecurity ? 'Siren Cut' : 'Evacuate';
+                            const z11ActiveName = isSecurity ? 'Evacuate' : 'Low Battery';
+                            const z12ActiveName = isSecurity ? 'Battery Low' : 'Ideal';
+                            const z13ActiveName = isSecurity ? 'Night Zone ON' : 'Empty';
+                            const z13InactiveName = isSecurity ? 'Night Zone OFF' : 'Normal';
+
                             return (
                               <>
-                                {renderBadge(isZ9Active, 'F', 'N', activeDanger, inactiveBadge)}
-                                {renderBadge(isZ10Active, 'F', 'N', activeDanger, inactiveBadge)}
-                                {renderBadge(isZ11Active, 'F', 'N', isSecurity ? activeDanger : activeWarning, inactiveBadge)}
-                                {renderBadge(isZ12Active, 'F', 'N', isSecurity ? activeWarning : activeDanger, inactiveBadge)}
-                                {renderBadge(isZ13Active, isSecurity ? 'ON' : 'F', isSecurity ? 'OFF' : 'N', isSecurity ? activeInfo : activeDanger, inactiveBadge)}
+                                {renderBadge(isZ9Active, z9ActiveName, 'Normal', activeDanger, inactiveBadge)}
+                                {renderBadge(isZ10Active, z10ActiveName, 'Normal', activeDanger, inactiveBadge)}
+                                {renderBadge(isZ11Active, z11ActiveName, 'Normal', isSecurity ? activeDanger : activeWarning, inactiveBadge)}
+                                {renderBadge(isZ12Active, z12ActiveName, 'Normal', isSecurity ? activeWarning : activeDanger, inactiveBadge)}
+                                {renderBadge(isZ13Active, z13ActiveName, z13InactiveName, isSecurity ? activeInfo : activeDanger, inactiveBadge)}
                               </>
                             );
                           })()}
