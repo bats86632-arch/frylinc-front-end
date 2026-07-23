@@ -358,20 +358,13 @@ export function Reports() {
             <h2 className="text-[13px] font-bold text-[var(--text-primary)]">Advanced Filtering</h2>
           </div>
           <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
-            {viewMode === 'matrix' && (
-              <div className="hidden lg:flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)] overflow-x-auto">
-                {(["All", "Fire Alarm", "Security", "Dialer", "Health"] as const).map(type => (
-                  <button
-                    key={type}
-                    onClick={() => setMatrixFilter(type)}
-                    className={`whitespace-nowrap px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${matrixFilter === type ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
-                  >
-                    {type === "Fire Alarm" ? "Fire" : type}
-                  </button>
-                ))}
-              </div>
-            )}
             <div className="flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)] shrink-0">
+              <button
+                onClick={() => setViewMode("matrix")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${viewMode === 'matrix' ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" /> Matrix
+              </button>
               <button
                 onClick={() => {
                   setViewMode("list");
@@ -388,13 +381,20 @@ export function Reports() {
               >
                 <List className="h-3.5 w-3.5" /> List
               </button>
-              <button
-                onClick={() => setViewMode("matrix")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${viewMode === 'matrix' ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
-              >
-                <LayoutGrid className="h-3.5 w-3.5" /> Matrix
-              </button>
             </div>
+            {viewMode === 'matrix' && (
+              <div className="hidden lg:flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)] overflow-x-auto">
+                {(["All", "Fire Alarm", "Security", "Dialer", "Health"] as const).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => setMatrixFilter(type)}
+                    className={`whitespace-nowrap px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${matrixFilter === type ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
+                  >
+                    {type === "Fire Alarm" ? "Fire" : type}
+                  </button>
+                ))}
+              </div>
+            )}
             <button
               onClick={handleExport}
               disabled={filteredLogs.length === 0}
