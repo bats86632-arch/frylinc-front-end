@@ -2,6 +2,8 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Panel } from "../types";
 import { formatPanelName } from "../utils/formatters";
+import { useCompanies } from "../hooks/useCompanies";
+import { useBranches } from "../hooks/useBranches";
 import { Activity, AlertTriangle, Hash, MapPin, RadioTower, Clock, CheckCircle, BatteryMedium, BatteryWarning, Zap, ZapOff, Shield } from "lucide-react";
 import { PanelService } from "../api/PanelService";
 import { getZoneStatusColors } from "../utils/zoneUtils";
@@ -14,6 +16,8 @@ interface PanelCardProps {
   export function PanelCard({ panel }: PanelCardProps) {
   const [resolvingZone, setResolvingZone] = useState<number | null>(null);
   const [isResolving, setIsResolving] = useState(false);
+  const { companies } = useCompanies();
+  const { branches } = useBranches();
 
   // Ensure we always have exactly 8 zones (or zoneCount) to render, capped at 8
   const targetCount = Math.min(panel.zoneCount || 8, 8);
@@ -80,7 +84,15 @@ interface PanelCardProps {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-sans text-[1.1rem] font-semibold leading-tight tracking-tight text-[var(--text-primary)]">
-                  {formatPanelName(panel.name, panel.panelType)}
+                  {(() => {
+                    const company = companies.find(c => c.id === panel.companyId);
+                    const branch = branches.find(b => b.id === panel.branchId);
+                    const bsrCode = (branch as any)?.bsrCode ? ` (BSR No. ${(branch as any).bsrCode})` : "";
+                    if (company && branch) {
+                      return `${company.name} - ${branch.name}${bsrCode}`;
+                    }
+                    return formatPanelName(panel.name, panel.panelType);
+                  })()}
                 </h3>
                 {/* status dot */}
                 {!panel.alarm && (

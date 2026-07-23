@@ -222,16 +222,16 @@ export function Login() {
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="absolute right-0 text-[13px] font-medium text-white hover:opacity-80 transition-opacity duration-200 lg:hidden"
+                className="absolute right-12 text-[13px] font-medium text-white hover:opacity-80 transition-opacity duration-200 lg:hidden"
               >
                 Forgot?
               </button>
 
-              {/* Desktop Show/Hide Password */}
+              {/* Desktop and Mobile Show/Hide Password */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="hidden lg:flex absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[4px] text-white/40 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 transition-colors"
+                className="flex absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[4px] text-white/60 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 transition-colors"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (

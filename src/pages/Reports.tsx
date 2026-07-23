@@ -48,6 +48,7 @@ export function Reports() {
   const [action, setAction] = useState<string>("");
   const [dateRange, setDateRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
   const [viewMode, setViewMode] = useState<"list" | "matrix">("matrix");
+  const [matrixFilter, setMatrixFilter] = useState<"All" | "Fire Alarm" | "Security" | "Dialer" | "Health">("All");
   const [secretMode, setSecretMode] = useState<boolean>(false);
   const [listClickCount, setListClickCount] = useState<number>(0);
   
@@ -273,9 +274,10 @@ export function Reports() {
   const activePanels = panels.filter(p => {
     if (companyId && p.companyId !== companyId) return false;
     if (branchId && p.branchId !== branchId) return false;
+    if (viewMode === 'matrix' && matrixFilter !== 'All' && p.panelType !== matrixFilter) return false;
     if (action) {
       const searchLower = action.toLowerCase();
-      return p.serial.toLowerCase().includes(searchLower) || p.name.toLowerCase().includes(searchLower);
+      return p.serial.toLowerCase().includes(searchLower) || (p.name || '').toLowerCase().includes(searchLower);
     }
     return true;
   });
@@ -356,7 +358,20 @@ export function Reports() {
             <h2 className="text-[13px] font-bold text-[var(--text-primary)]">Advanced Filtering</h2>
           </div>
           <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
-            <div className="flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)]">
+            {viewMode === 'matrix' && (
+              <div className="hidden lg:flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)] overflow-x-auto">
+                {(["All", "Fire Alarm", "Security", "Dialer", "Health"] as const).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => setMatrixFilter(type)}
+                    className={`whitespace-nowrap px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${matrixFilter === type ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
+                  >
+                    {type === "Fire Alarm" ? "Fire" : type}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)] shrink-0">
               <button
                 onClick={() => {
                   setViewMode("list");

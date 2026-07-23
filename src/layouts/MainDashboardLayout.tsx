@@ -37,12 +37,6 @@ const navigation: Array<{
     roles: ["super_admin", "head_office", "system_integrator", "end_user"],
   },
   {
-    name: "Settings",
-    href: "/admin",
-    icon: Settings,
-    roles: ["super_admin", "head_office", "system_integrator"],
-  },
-  {
     name: "Graphical Monitoring System (GMS)",
     mobileName: "GMS",
     href: "/map-zones",
@@ -61,6 +55,12 @@ const navigation: Array<{
     href: "/health",
     icon: Activity,
     roles: ["super_admin", "head_office", "system_integrator", "end_user"],
+  },
+  {
+    name: "Settings",
+    href: "/admin",
+    icon: Settings,
+    roles: ["super_admin", "head_office", "system_integrator"],
   },
 ];
 
@@ -245,10 +245,12 @@ export function MainDashboardLayout() {
       >
         {/* Logo */}
         <div className={`flex h-[72px] items-center justify-between px-5 border-b border-[var(--border-subtle)] overflow-hidden transition-all duration-300 ${isDesktopSidebarCollapsed ? 'lg:justify-center lg:px-0' : ''}`}>
-          <Link
-            to="/"
-            className="flex items-center gap-3.5"
-            onClick={() => setSidebarOpen(false)}
+          <button
+            onClick={() => {
+              setSidebarOpen(false);
+              window.location.reload();
+            }}
+            className="flex items-center gap-3.5 text-left"
           >
             <img
               src="/fyrlinc-logo.png"
@@ -263,7 +265,7 @@ export function MainDashboardLayout() {
                 by AGNi
               </span>
             </div>
-          </Link>
+          </button>
           <button
             onClick={() => setSidebarOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-subtle)] text-[var(--text-tertiary)] transition-all duration-150 hover:border-[var(--border-default)] hover:text-[var(--text-primary)] lg:hidden"

@@ -773,8 +773,11 @@ export function MapZones() {
   const renderAlarmBanner = () => {
     if (!anyAlarm || !selectedPanel) return null;
     const alarmZones = selectedPanel.zones
-      ?.map((on, i) => (on ? i + 1 : null))
+      ?.map((state, i) => (state === 2 && i <= 7 ? i + 1 : null))
       .filter(Boolean) as number[];
+      
+    if (alarmZones.length === 0) return null;
+
     return (
       <div className="flex items-center gap-3 rounded-[6px] border border-[var(--status-danger-border)] bg-[var(--status-danger-bg)] px-4 py-2.5 mx-4 mt-3">
         <AlertTriangle className="h-4 w-4 text-[var(--color-error)] flex-shrink-0 animate-pulse" />
