@@ -858,7 +858,19 @@ export function PanelDetail() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)]">
-                    {events.map((event) => (
+                    {events.filter((event, index, array) => {
+                      if (index === 0) return true;
+                      const prevEvent = array[index - 1];
+                      if (event.type === "command" && prevEvent.type === "command" && event.command === prevEvent.command) {
+                        const t1 = event.timestamp || (event as any).createdAt;
+                        const t2 = prevEvent.timestamp || (prevEvent as any).createdAt;
+                        if (t1 && t2) {
+                          const timeDiff = Math.abs(new Date(t1).getTime() - new Date(t2).getTime());
+                          if (timeDiff < 15000) return false;
+                        }
+                      }
+                      return true;
+                    }).map((event) => (
                       <tr
                         key={event.id}
                         className="transition-colors hover:bg-[var(--surface-hover)]"

@@ -22,7 +22,7 @@ export function AuthLayout() {
     <div className="auth-screen relative min-h-screen overflow-hidden text-white">
       {/* Background Image — desktop: cmp.png centered; mobile: cmp-phone.png object-[center_30%] to show AGNi sign */}
       <picture className="absolute inset-0 z-0 h-full w-full">
-        <source media="(max-width: 1023px)" srcSet="/cmp-phone.png" />
+        <source media="(max-width: 1023px)" srcSet="/cmp-phone.png?v=2" />
         <source media="(min-width: 1024px)" srcSet="/cmp.png" />
         <img
           ref={bgRef}

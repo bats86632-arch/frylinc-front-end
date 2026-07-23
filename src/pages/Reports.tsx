@@ -165,7 +165,6 @@ export function Reports() {
       log.panelSerial === prevLog.panelSerial &&
       log.action === prevLog.action &&
       log.zone === prevLog.zone &&
-      log.details === prevLog.details &&
       log.command === prevLog.command;
       
     let timeDiffMs = 0;
