@@ -63,6 +63,7 @@ export interface Panel {
   manuallyMarkedOffline?: boolean;
   seenBy?: Record<string, boolean>;
   clearedBy?: Record<string, boolean>;
+  nightZoneOn?: boolean;
 }
 
 export interface CommandLog {

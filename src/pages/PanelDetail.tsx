@@ -371,7 +371,7 @@ export function PanelDetail() {
   const hasSirenCut = isSecurity && normalizedPanel.zones[9] === 2;
   const isEvacuateActive = (isFire && normalizedPanel.zones[9] === 2) || (isSecurity && normalizedPanel.zones[10] === 2);
   const isBatteryLow = (isFire && normalizedPanel.zones[10] === 2) || (isSecurity && normalizedPanel.zones[11] === 2);
-  const isNightZone = isSecurity && normalizedPanel.zones[12] === 2;
+  const isNightZone = isSecurity && normalizedPanel.nightZoneOn === true;
 
   return (
     <div className="animate-fade-in p-[32px] space-y-8">

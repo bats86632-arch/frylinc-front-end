@@ -28,7 +28,7 @@ interface PanelCardProps {
   const hasSirenCut = isSecurity && panel.zones?.[9] === 2;
   const isEvacuateActive = (isFire && panel.zones?.[9] === 2) || (isSecurity && panel.zones?.[10] === 2);
   const isBatteryLow = (isFire && panel.zones?.[10] === 2) || (isSecurity && panel.zones?.[11] === 2);
-  const isNightZone = isSecurity && panel.zones?.[12] === 2;  
+  const isNightZone = isSecurity && panel.nightZoneOn === true;  
   const getZoneState = (isAlarm: boolean) => {
     if (isAlarm) return "alarm";
     return "clear";
