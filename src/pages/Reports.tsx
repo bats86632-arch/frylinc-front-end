@@ -163,13 +163,19 @@ export function Reports() {
     
     const isSameEvent = 
       log.panelSerial === prevLog.panelSerial &&
-      log.action === prevLog.action &&
+      (log.action || '') === (prevLog.action || '') &&
       log.zone === prevLog.zone &&
-      log.command === prevLog.command;
+      (log.command || '') === (prevLog.command || '');
       
     let timeDiffMs = 0;
     if (log.timestamp && prevLog.timestamp) {
-      timeDiffMs = Math.abs(new Date(prevLog.timestamp).getTime() - new Date(log.timestamp).getTime());
+      const getMs = (ts: any) => {
+        if (typeof ts === 'string') return new Date(ts).getTime();
+        const secs = ts._seconds || ts.seconds;
+        if (secs) return secs * 1000;
+        return 0;
+      };
+      timeDiffMs = Math.abs(getMs(prevLog.timestamp) - getMs(log.timestamp));
     }
     
     // Deduplicate identical events that occur within a 2-minute window
