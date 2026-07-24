@@ -928,38 +928,7 @@ export function Reports() {
               </span> {viewMode === 'matrix' ? 'panels' : 'results'}
             </p>
 
-            {viewMode === 'matrix' && (
-              <div className="hidden sm:flex items-center gap-4 border-l border-[var(--border-subtle)] pl-6 overflow-x-auto whitespace-nowrap">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">N</span>
-                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Normal</span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-orange-500/10 text-orange-500 border-orange-500/20">F</span>
-                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fire</span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-indigo-500/10 text-indigo-400 border-indigo-500/20">Flt</span>
-                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fault</span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:text-yellow-400">I</span>
-                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Isolate</span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">E</span>
-                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Earth Fault</span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">T</span>
-                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Tamper</span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">S</span>
-                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Siren Cut</span>
-                </div>
-              </div>
-            )}
+
           </div>
 
           <div className="col-span-1 flex items-center justify-end">
