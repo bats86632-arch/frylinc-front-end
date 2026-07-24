@@ -555,23 +555,28 @@ export function Reports() {
 
                             const zoneStatus = panel.zones?.[i] || 1;
                             let code = 'Normal';
+                            let shortCode = 'N';
                             let badgeClass = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_6px_rgba(16,185,129,0.15)]'; 
 
                             if (zoneStatus === 2) {
                               code = 'Fire';
+                              shortCode = 'F';
                               badgeClass = 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-[0_0_6px_rgba(249,115,22,0.15)]';
                             } else if (zoneStatus === 3 || zoneStatus === 4) {
                               code = 'Fault';
+                              shortCode = 'Flt';
                               badgeClass = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20 shadow-[0_0_6px_rgba(99,102,241,0.15)]';
                             } else if (zoneStatus === 5) {
                               code = 'Isolated';
+                              shortCode = 'I';
                               badgeClass = 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20 shadow-[0_0_6px_rgba(234,179,8,0.15)] dark:text-yellow-400';
                             }
 
                             return (
                               <td key={i} className="px-2 py-3.5 text-center">
-                                <span className={`inline-flex items-center justify-center min-w-[40px] px-2 h-6 rounded-md border font-bold text-[10px] transition-all ${badgeClass}`}>
-                                  {code}
+                                <span className={`inline-flex items-center justify-center min-w-[32px] sm:min-w-[40px] px-1 sm:px-2 h-6 rounded-md border font-bold text-[10px] transition-all whitespace-nowrap ${badgeClass}`}>
+                                  <span className="hidden sm:inline">{code}</span>
+                                  <span className="sm:hidden">{shortCode}</span>
                                 </span>
                               </td>
                             );
@@ -587,10 +592,11 @@ export function Reports() {
                             const isZ12Active = panel.zones?.[11] === 2;
                             const isZ13Active = panel.zones?.[12] === 2;
 
-                            const renderBadge = (active: boolean, codeActive: string, codeInactive: string, activeClass: string, inactiveClass: string) => (
+                            const renderBadge = (active: boolean, codeActive: string, shortActive: string, codeInactive: string, shortInactive: string, activeClass: string, inactiveClass: string) => (
                               <td className="px-2 py-3.5 text-center">
-                                <span className={`inline-flex items-center justify-center min-w-[50px] h-6 px-1.5 rounded-md border font-bold text-[10px] transition-all ${active ? activeClass : inactiveClass}`}>
-                                  {active ? codeActive : codeInactive}
+                                <span className={`inline-flex items-center justify-center min-w-[32px] sm:min-w-[50px] h-6 px-1.5 rounded-md border font-bold text-[10px] transition-all whitespace-nowrap ${active ? activeClass : inactiveClass}`}>
+                                  <span className="hidden sm:inline">{active ? codeActive : codeInactive}</span>
+                                  <span className="sm:hidden">{active ? shortActive : shortInactive}</span>
                                 </span>
                               </td>
                             );
@@ -601,19 +607,25 @@ export function Reports() {
                             const inactiveBadge = 'bg-[var(--surface-overlay)] text-[var(--text-secondary)] border-[var(--border-subtle)]';
 
                             const z9ActiveName = isSecurity ? 'Tamper' : 'Earth Fault';
+                            const z9ShortActive = isSecurity ? 'T' : 'E';
                             const z10ActiveName = isSecurity ? 'Siren Cut' : 'Evacuate';
+                            const z10ShortActive = isSecurity ? 'S' : 'EVA';
                             const z11ActiveName = isSecurity ? 'Evacuate' : 'Low Battery';
+                            const z11ShortActive = isSecurity ? 'EVA' : 'BAT';
                             const z12ActiveName = isSecurity ? 'Battery Low' : 'Ideal';
+                            const z12ShortActive = isSecurity ? 'BAT' : 'Idl';
                             const z13ActiveName = isSecurity ? 'Night Zone ON' : 'Empty';
+                            const z13ShortActive = isSecurity ? 'Nz' : 'Emp';
                             const z13InactiveName = isSecurity ? 'Night Zone OFF' : 'Normal';
+                            const z13ShortInactive = isSecurity ? 'N' : 'N';
 
                             return (
                               <>
-                                {renderBadge(isZ9Active, z9ActiveName, 'Normal', activeDanger, inactiveBadge)}
-                                {renderBadge(isZ10Active, z10ActiveName, 'Normal', activeDanger, inactiveBadge)}
-                                {renderBadge(isZ11Active, z11ActiveName, 'Normal', isSecurity ? activeDanger : activeWarning, inactiveBadge)}
-                                {renderBadge(isZ12Active, z12ActiveName, 'Normal', isSecurity ? activeWarning : activeDanger, inactiveBadge)}
-                                {renderBadge(isZ13Active, z13ActiveName, z13InactiveName, isSecurity ? activeInfo : activeDanger, inactiveBadge)}
+                                {renderBadge(isZ9Active, z9ActiveName, z9ShortActive, 'Normal', 'N', activeDanger, inactiveBadge)}
+                                {renderBadge(isZ10Active, z10ActiveName, z10ShortActive, 'Normal', 'N', activeDanger, inactiveBadge)}
+                                {renderBadge(isZ11Active, z11ActiveName, z11ShortActive, 'Normal', 'N', isSecurity ? activeDanger : activeWarning, inactiveBadge)}
+                                {renderBadge(isZ12Active, z12ActiveName, z12ShortActive, 'Normal', 'N', isSecurity ? activeWarning : activeDanger, inactiveBadge)}
+                                {renderBadge(isZ13Active, z13ActiveName, z13ShortActive, z13InactiveName, z13ShortInactive, isSecurity ? activeInfo : activeDanger, inactiveBadge)}
                               </>
                             );
                           })()}
@@ -917,22 +929,34 @@ export function Reports() {
             </p>
 
             {viewMode === 'matrix' && (
-              <div className="hidden sm:flex items-center gap-4 border-l border-[var(--border-subtle)] pl-6">
-                <div className="flex items-center gap-1.5">
+              <div className="hidden sm:flex items-center gap-4 border-l border-[var(--border-subtle)] pl-6 overflow-x-auto whitespace-nowrap">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">N</span>
                   <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Normal</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-orange-500/10 text-orange-500 border-orange-500/20">F</span>
                   <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fire</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-indigo-500/10 text-indigo-400 border-indigo-500/20">Flt</span>
                   <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fault</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:text-yellow-400">I</span>
                   <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Isolate</span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">E</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Earth Fault</span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">T</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Tamper</span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">S</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Siren Cut</span>
                 </div>
               </div>
             )}
@@ -959,21 +983,33 @@ export function Reports() {
 
           {viewMode === 'matrix' && (
             <div className="col-span-2 flex sm:hidden items-center gap-3 pt-3 border-t border-[var(--border-subtle)] overflow-x-auto pb-1 hide-scrollbar">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">N</span>
                 <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Normal</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-orange-500/10 text-orange-500 border-orange-500/20">F</span>
                 <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fire</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-indigo-500/10 text-indigo-400 border-indigo-500/20">Flt</span>
                 <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fault</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:text-yellow-400">I</span>
                 <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Isolate</span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">E</span>
+                <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Earth Fault</span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">T</span>
+                <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Tamper</span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">S</span>
+                <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Siren Cut</span>
               </div>
             </div>
           )}

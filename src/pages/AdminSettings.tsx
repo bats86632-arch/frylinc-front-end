@@ -3595,7 +3595,7 @@ export function AdminSettings() {
       {/* ðŸ›‘ Delete Company Modal ðŸ›‘ */}
       {deleteCompanyModalState.isOpen && deleteCompanyModalState.company && createPortal(
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[#1a1917] shadow-2xl">
+          <div className="w-full max-w-md rounded-[12px] border border-[var(--border-subtle)] bg-[var(--surface-base)] shadow-2xl">
             <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-4">
               <h3 className="text-[15px] font-medium text-[var(--text-primary)]">
                 Delete Company
