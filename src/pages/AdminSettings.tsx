@@ -486,7 +486,7 @@ export function AdminSettings() {
       const rows = XLSX.utils.sheet_to_json(ws) as any[];
 
       for (const row of rows) {
-        const serial = row["Panel ID"]?.toString().trim();
+        const serial = row["Panel ID"]?.toString().trim().replace(/^['"]|['"]$/g, '');
         const name = row["Panel Name"]?.toString().trim();
         
         const panelTypeRaw = row["Panel Type"]?.toString().trim().toLowerCase();

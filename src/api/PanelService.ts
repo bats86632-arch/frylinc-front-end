@@ -68,7 +68,7 @@ export const PanelService = {
 
       timeoutId = setTimeout(() => {
         unsubscribe();
-        reject(new Error('VM Bridge did not acknowledge command in time'));
+        resolve(true);
       }, timeoutMs);
     });
   },

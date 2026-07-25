@@ -292,7 +292,7 @@ export function Reports() {
 
       {/* ── Stats Row ──────────────────────────────────────────────────── */}
       <div className="px-4 pt-4 pb-3 sm:px-6 sm:pt-6 sm:pb-5 border-b border-[var(--border-subtle)]">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className={`grid grid-cols-2 ${hasRole(['super_admin']) ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-3 sm:gap-4`}>
 
           {/* Total Events */}
           <div className="relative overflow-hidden p-3 sm:p-5 rounded-[12px] sm:rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-raised)] shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
@@ -324,6 +324,7 @@ export function Reports() {
           </div>
 
           {/* Failed */}
+          {hasRole(['super_admin']) && (
           <div className="relative overflow-hidden p-3 sm:p-5 rounded-[12px] sm:rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-500/8 to-transparent shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <div className="flex items-start justify-between">
               <div>
@@ -336,6 +337,7 @@ export function Reports() {
               </div>
             </div>
           </div>
+          )}
 
           {/* Active Branches */}
           <div className="relative overflow-hidden p-3 sm:p-5 rounded-[12px] sm:rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-500/8 to-transparent shadow-sm group hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
@@ -389,15 +391,21 @@ export function Reports() {
             </div>
             {viewMode === 'matrix' && (
               <div className="hidden lg:flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)] overflow-x-auto">
-                {(["All", "Fire Alarm", "Security", "Dialer", "Health"] as const).map(type => (
+                {(["Fire Alarm", "Security", "Dialer", "Health", "All"] as const).map(type => {
+                  let displayName = type as string;
+                  if (type === "Fire Alarm") displayName = "Fire Alarm Panel";
+                  if (type === "Security") displayName = "Security Alarm Panel";
+                  if (type === "Health") displayName = "Health Monitoring System";
+                  
+                  return (
                   <button
                     key={type}
                     onClick={() => setMatrixFilter(type)}
                     className={`whitespace-nowrap px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${matrixFilter === type ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
                   >
-                    {type === "Fire Alarm" ? "Fire" : type}
+                    {displayName}
                   </button>
-                ))}
+                )})}
               </div>
             )}
             <button
