@@ -447,8 +447,8 @@ export function AdminSettings() {
         "MOB Numbers": "1234567890, 0987654321",
       },
       {
-        "Panel ID": "123457",
-        "Panel Name": "Warehouse Panel",
+        "Panel ID": "'000400'",
+        "Panel Name": "Warehouse Panel (With Quotes for Leading Zeros)",
         "Panel Type": "security",
         "Zone Count": 4,
         "Organization Name": "TechNova",
@@ -456,7 +456,7 @@ export function AdminSettings() {
         "MOB Numbers": "",
       },
       {
-        "Panel ID": "123458",
+        "Panel ID": "000500",
         "Panel Name": "Gate Controller",
         "Panel Type": "gsm_module",
         "Zone Count": 0,
