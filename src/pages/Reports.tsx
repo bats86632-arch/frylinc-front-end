@@ -158,31 +158,32 @@ export function Reports() {
 
   const filteredLogs = searchFilteredLogs.filter((log, index, self) => {
     if (secretMode) return true; // Don't deduplicate in secret mode
-    if (index === 0) return true;
-    const prevLog = self[index - 1];
     
-    const isSameEvent = 
-      log.panelSerial === prevLog.panelSerial &&
-      (log.action || '') === (prevLog.action || '') &&
-      log.zone === prevLog.zone &&
-      (log.command || '') === (prevLog.command || '');
+    const isDuplicate = self.slice(0, index).some(newerLog => {
+      const isSameEvent = 
+        log.panelSerial === newerLog.panelSerial &&
+        (log.action || '') === (newerLog.action || '') &&
+        log.zone === newerLog.zone &&
+        (log.command || '') === (newerLog.command || '');
+        
+      if (!isSameEvent) return false;
       
-    let timeDiffMs = 0;
-    if (log.timestamp && prevLog.timestamp) {
-      const getMs = (ts: any) => {
-        if (typeof ts === 'string') return new Date(ts).getTime();
-        const secs = ts._seconds || ts.seconds;
-        if (secs) return secs * 1000;
-        return 0;
-      };
-      timeDiffMs = Math.abs(getMs(prevLog.timestamp) - getMs(log.timestamp));
-    }
+      let timeDiffMs = 0;
+      if (log.timestamp && newerLog.timestamp) {
+        const getMs = (ts: any) => {
+          if (typeof ts === 'string') return new Date(ts).getTime();
+          const secs = ts._seconds || ts.seconds;
+          if (secs) return secs * 1000;
+          return 0;
+        };
+        timeDiffMs = Math.abs(getMs(newerLog.timestamp) - getMs(log.timestamp));
+      }
+      
+      // Deduplicate identical events that occur within a 15-second window
+      return timeDiffMs < 15000;
+    });
     
-    // Deduplicate identical events that occur within a 2-minute window
-    if (isSameEvent && timeDiffMs < 120000) {
-      return false;
-    }
-    return true;
+    return !isDuplicate;
   });
 
   const handleExport = () => {

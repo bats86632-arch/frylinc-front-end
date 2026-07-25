@@ -859,17 +859,24 @@ export function PanelDetail() {
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)]">
                     {events.filter((event, index, array) => {
-                      if (index === 0) return true;
-                      const prevEvent = array[index - 1];
-                      if (event.type === "command" && prevEvent.type === "command" && event.command === prevEvent.command) {
-                        const t1 = event.timestamp || (event as any).createdAt;
-                        const t2 = prevEvent.timestamp || (prevEvent as any).createdAt;
-                        if (t1 && t2) {
-                          const timeDiff = Math.abs(new Date(t1).getTime() - new Date(t2).getTime());
-                          if (timeDiff < 15000) return false;
+                      const isDuplicate = array.slice(0, index).some(newerEvent => {
+                        if (event.type === "command" && newerEvent.type === "command" && event.command === newerEvent.command) {
+                          const t1 = event.timestamp || (event as any).createdAt;
+                          const t2 = newerEvent.timestamp || (newerEvent as any).createdAt;
+                          if (t1 && t2) {
+                            const getMs = (ts: any) => {
+                              if (typeof ts === 'string') return new Date(ts).getTime();
+                              const secs = ts._seconds || ts.seconds;
+                              if (secs) return secs * 1000;
+                              return 0;
+                            };
+                            const timeDiff = Math.abs(getMs(t1) - getMs(t2));
+                            if (timeDiff < 15000) return true;
+                          }
                         }
-                      }
-                      return true;
+                        return false;
+                      });
+                      return !isDuplicate;
                     }).map((event) => (
                       <tr
                         key={event.id}
