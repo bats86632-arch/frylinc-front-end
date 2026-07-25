@@ -860,7 +860,23 @@ export function PanelDetail() {
                   <tbody className="divide-y divide-[var(--border-subtle)]">
                     {events.filter((event, index, array) => {
                       const isDuplicate = array.slice(0, index).some(newerEvent => {
-                        if (event.type === "command" && newerEvent.type === "command" && event.command === newerEvent.command) {
+                        let cmd1 = (event.command || '').trim();
+                        if (!cmd1 && typeof event.details === 'string' && event.details.includes('{')) {
+                          try {
+                            const parsed = JSON.parse(event.details);
+                            if (parsed.command) cmd1 = parsed.command.trim();
+                          } catch (e) {}
+                        }
+                        
+                        let cmd2 = (newerEvent.command || '').trim();
+                        if (!cmd2 && typeof newerEvent.details === 'string' && newerEvent.details.includes('{')) {
+                          try {
+                            const parsed = JSON.parse(newerEvent.details);
+                            if (parsed.command) cmd2 = parsed.command.trim();
+                          } catch (e) {}
+                        }
+
+                        if (event.type === "command" && newerEvent.type === "command" && cmd1 === cmd2 && cmd1 !== "") {
                           const t1 = event.timestamp || (event as any).createdAt;
                           const t2 = newerEvent.timestamp || (newerEvent as any).createdAt;
                           if (t1 && t2) {
@@ -871,7 +887,7 @@ export function PanelDetail() {
                               return 0;
                             };
                             const timeDiff = Math.abs(getMs(t1) - getMs(t2));
-                            if (timeDiff < 15000) return true;
+                            if (timeDiff < 30000) return true;
                           }
                         }
                         return false;

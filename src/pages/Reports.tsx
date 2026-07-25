@@ -160,11 +160,27 @@ export function Reports() {
     if (secretMode) return true; // Don't deduplicate in secret mode
     
     const isDuplicate = self.slice(0, index).some(newerLog => {
+      let cmd1 = log.command || '';
+      if (!cmd1 && typeof log.details === 'string' && log.details.includes('{')) {
+        try {
+          const parsed = JSON.parse(log.details);
+          if (parsed.command) cmd1 = parsed.command;
+        } catch (e) {}
+      }
+      
+      let cmd2 = newerLog.command || '';
+      if (!cmd2 && typeof newerLog.details === 'string' && newerLog.details.includes('{')) {
+        try {
+          const parsed = JSON.parse(newerLog.details);
+          if (parsed.command) cmd2 = parsed.command;
+        } catch (e) {}
+      }
+
       const isSameEvent = 
         log.panelSerial === newerLog.panelSerial &&
-        (log.action || '') === (newerLog.action || '') &&
+        (log.action || '').trim() === (newerLog.action || '').trim() &&
         log.zone === newerLog.zone &&
-        (log.command || '') === (newerLog.command || '');
+        cmd1.trim() === cmd2.trim();
         
       if (!isSameEvent) return false;
       
@@ -179,8 +195,8 @@ export function Reports() {
         timeDiffMs = Math.abs(getMs(newerLog.timestamp) - getMs(log.timestamp));
       }
       
-      // Deduplicate identical events that occur within a 15-second window
-      return timeDiffMs < 15000;
+      // Deduplicate identical events that occur within a 30-second window
+      return timeDiffMs < 30000;
     });
     
     return !isDuplicate;
