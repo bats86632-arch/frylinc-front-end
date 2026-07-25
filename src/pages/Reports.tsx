@@ -524,12 +524,16 @@ export function Reports() {
                       <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
                         {matrixFilter === 'Fire Alarm' ? 'Low Battery' : matrixFilter === 'Security' ? 'Evacuate' : 'Low Battery / Evacuate'}
                       </th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
-                        {matrixFilter === 'Fire Alarm' ? 'Ideal' : matrixFilter === 'Security' ? 'Battery Low' : 'Ideal / Battery Low'}
-                      </th>
-                      <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
-                        {matrixFilter === 'Fire Alarm' ? 'Empty' : matrixFilter === 'Security' ? 'Night Zone' : 'Empty / Night Zone'}
-                      </th>
+                      {matrixFilter !== 'Fire Alarm' && (
+                        <>
+                          <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
+                            {matrixFilter === 'Security' ? 'Battery Low' : 'Battery Low'}
+                          </th>
+                          <th className="px-2 py-3.5 font-bold text-[var(--text-secondary)] uppercase tracking-widest text-[9px] text-center min-w-[80px]">
+                            {matrixFilter === 'Security' ? 'Night Zone' : 'Night Zone'}
+                          </th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--border-subtle)] bg-[var(--surface-base)]">
@@ -630,8 +634,19 @@ export function Reports() {
                                 {renderBadge(isZ9Active, z9ActiveName, z9ShortActive, 'Normal', 'N', activeDanger, inactiveBadge)}
                                 {renderBadge(isZ10Active, z10ActiveName, z10ShortActive, 'Normal', 'N', activeDanger, inactiveBadge)}
                                 {renderBadge(isZ11Active, z11ActiveName, z11ShortActive, 'Normal', 'N', isSecurity ? activeDanger : activeWarning, inactiveBadge)}
-                                {renderBadge(isZ12Active, z12ActiveName, z12ShortActive, 'Normal', 'N', isSecurity ? activeWarning : activeDanger, inactiveBadge)}
-                                {renderBadge(isZ13Active, z13ActiveName, z13ShortActive, z13InactiveName, z13ShortInactive, isSecurity ? activeInfo : activeDanger, inactiveBadge)}
+                                {matrixFilter !== 'Fire Alarm' && (
+                                  isSecurity ? (
+                                    <>
+                                      {renderBadge(isZ12Active, z12ActiveName, z12ShortActive, 'Normal', 'N', activeWarning, inactiveBadge)}
+                                      {renderBadge(isZ13Active, z13ActiveName, z13ShortActive, z13InactiveName, z13ShortInactive, activeInfo, inactiveBadge)}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <td className="px-2 py-3.5 text-center"><span className="text-[var(--text-secondary)] opacity-30 text-[10px]">—</span></td>
+                                      <td className="px-2 py-3.5 text-center"><span className="text-[var(--text-secondary)] opacity-30 text-[10px]">—</span></td>
+                                    </>
+                                  )
+                                )}
                               </>
                             );
                           })()}
