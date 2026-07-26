@@ -683,11 +683,12 @@ export function PanelDetail() {
 
                 let additionalLabel = "";
                 if (zoneStatus === 2) {
-                  if (idx === 8) additionalLabel = isFire ? " - Earth Fault" : " - Siren Cut";
-                  if (idx === 9) additionalLabel = " - Evacuate (EVA)";
-                  if (idx === 10) additionalLabel = isFire ? " - Low Battery" : " - Battery Low";
-                  if (idx === 11) additionalLabel = isFire ? " - ideal / empty" : " - Night zone armed (ARM)";
-                  if (idx === 12) additionalLabel = isFire ? " - empty" : " - Ideal";
+                  if (idx === 8) additionalLabel = isFire ? " - Earth Fault" : " - Tamper";
+                  if (idx === 9) additionalLabel = isFire ? " - Evacuate (EVA)" : " - Siren Cut";
+                  if (idx === 10) additionalLabel = isFire ? " - Low Battery" : " - Evacuate (EVA)";
+                  if (idx === 11) additionalLabel = isFire ? " - ideal / empty" : " - Battery Low";
+                  if (idx === 12) additionalLabel = isFire ? " - empty" : " - Night zone armed (ARM)";
+                  if (idx === 13) additionalLabel = isFire ? "" : " - Ideal";
                 }
 
                 let containerClasses = `relative overflow-hidden rounded-2xl border p-5 flex flex-col gap-5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${statusStyles.bg} ${statusStyles.border} ${statusStyles.shadow}`;
@@ -925,11 +926,12 @@ export function PanelDetail() {
                                   if (z === 12) disp = 'Ideal / Empty';
                                   if (z === 13) disp = 'Empty';
                                 } else if (normalizedPanel.panelType === 'Security') {
-                                  if (z === 9) disp = 'Siren Cut';
-                                  if (z === 10) disp = 'Evacuate (EVA)';
-                                  if (z === 11) disp = 'Battery Low';
-                                  if (z === 12) disp = 'Night zone armed (ARM)';
-                                  if (z === 13) disp = 'Ideal';
+                                  if (z === 9) disp = 'Tamper';
+                                  if (z === 10) disp = 'Siren Cut';
+                                  if (z === 11) disp = 'Evacuate (EVA)';
+                                  if (z === 12) disp = 'Battery Low';
+                                  if (z === 13) disp = 'Night zone armed (ARM)';
+                                  if (z === 14) disp = 'Ideal';
                                 }
                               }
                               return disp;
@@ -970,10 +972,11 @@ export function PanelDetail() {
                                   else if (z === 13) interpretation = 'Empty';
                                   else interpretation = `System Zone ${z}`;
                                 } else if (normalizedPanel.panelType === 'Security') {
-                                  if (z === 9) interpretation = 'Siren Cut';
-                                  else if (z === 10) interpretation = 'Evacuate (EVA)';
-                                  else if (z === 11) interpretation = 'Battery Low';
-                                  else if (z === 12) {
+                                  if (z === 9) interpretation = 'Tamper';
+                                  else if (z === 10) interpretation = 'Siren Cut';
+                                  else if (z === 11) interpretation = 'Evacuate (EVA)';
+                                  else if (z === 12) interpretation = 'Battery Low';
+                                  else if (z === 13) {
                                     if (event.type === 'alarm' || (event as any).action === 'ALARM') {
                                       interpretation = 'Night zone armed (ARM)';
                                     } else if (event.type === 'clear' || (event as any).action === 'CLEAR') {
@@ -982,7 +985,7 @@ export function PanelDetail() {
                                       interpretation = 'Night zone arm / disarm (ARM)';
                                     }
                                   }
-                                  else if (z === 13) interpretation = 'Ideal';
+                                  else if (z === 14) interpretation = 'Ideal';
                                   else interpretation = `System Zone ${z}`;
                                 }
                               }
