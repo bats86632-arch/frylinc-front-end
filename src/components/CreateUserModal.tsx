@@ -348,7 +348,8 @@ export function CreateUserModal({
   // ── SI: Add company to assignments ──
   const handleAddSiCompany = (companyId: string) => {
     if (!companyId || siAssignments[companyId]) return;
-    setSiAssignments((prev) => ({ ...prev, [companyId]: [] }));
+    const compBranches = getAvailableBranches(actorRole!, actorData, branches, companyId);
+    setSiAssignments((prev) => ({ ...prev, [companyId]: compBranches.map(b => b.id) }));
   };
 
   const handleRemoveSiCompany = (companyId: string) => {
