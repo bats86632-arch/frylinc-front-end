@@ -101,6 +101,10 @@ export const PanelService = {
     await apiClient.post(`/panels/${serial}/notifications/clear`);
   },
 
+  async clearAllNotifications(serials: string[]): Promise<void> {
+    await apiClient.post(`/notifications/clear-all`, { serials });
+  },
+
   async deletePanel(serial: string): Promise<void> {
     await apiClient.delete(`/panels/${serial}`);
   },

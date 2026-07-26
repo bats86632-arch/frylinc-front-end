@@ -211,6 +211,17 @@ export function MainDashboardLayout() {
     setNotificationOpen(!notificationOpen);
   };
 
+  const clearAllNotifications = async () => {
+    try {
+      const serialsToClear = [...new Set(notifications.map(n => n.serial))];
+      if (serialsToClear.length > 0) {
+        await PanelService.clearAllNotifications(serialsToClear);
+      }
+    } catch (error) {
+      console.error("Failed to clear notifications:", error);
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate("/login");
@@ -276,7 +287,14 @@ export function MainDashboardLayout() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 space-y-1.5 py-5">
+        <nav 
+          className="flex-1 space-y-1.5 py-5 lg:cursor-pointer"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && window.innerWidth >= 1024) {
+              toggleDesktopSidebar();
+            }
+          }}
+        >
           {filteredNav.map((item) => {
             const active = isActive(item.href);
 
@@ -391,9 +409,19 @@ export function MainDashboardLayout() {
                           Live panel alerts
                         </p>
                       </div>
-                      <span className="rounded-full border border-[var(--border-default)] bg-[var(--surface-overlay)] px-2.5 py-1 text-[11px] font-bold tabular-nums text-[var(--text-secondary)]">
-                        {notifications.length}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {notifications.length > 0 && (
+                          <button
+                            onClick={clearAllNotifications}
+                            className="text-[12px] font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                        <span className="rounded-full border border-[var(--border-default)] bg-[var(--surface-overlay)] px-2.5 py-1 text-[11px] font-bold tabular-nums text-[var(--text-secondary)]">
+                          {notifications.length}
+                        </span>
+                      </div>
                     </div>
 
                     {notifications.length === 0 ? (

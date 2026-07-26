@@ -48,7 +48,7 @@ export function Reports() {
   const [action, setAction] = useState<string>("");
   const [dateRange, setDateRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
   const [viewMode, setViewMode] = useState<"list" | "matrix">("matrix");
-  const [matrixFilter, setMatrixFilter] = useState<"All" | "Fire Alarm" | "Security" | "Dialer" | "Health">("All");
+  const [matrixFilter, setMatrixFilter] = useState<"All" | "Fire Alarm" | "Security" | "Dialer" | "Health">("Fire Alarm");
   const [secretMode, setSecretMode] = useState<boolean>(false);
   const [listClickCount, setListClickCount] = useState<number>(0);
   
@@ -435,7 +435,7 @@ export function Reports() {
           </div>
         </div>
         <div className="flex flex-col md:flex-row flex-wrap gap-4">
-          {(hasRole(["super_admin"]) || (hasRole(["system_integrator"]) && companies.length > 1)) && (
+          {(hasRole(["super_admin", "system_integrator"])) && (
             <div className="flex-1 min-w-[200px]">
               <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
                 <Building2 className="h-3 w-3" /> Organization

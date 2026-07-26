@@ -35,10 +35,24 @@ export function Dashboard() {
 
   const [filter, setFilter] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
-    null,
+  const [selectedCompanyId, setSelectedCompanyIdState] = useState<string | null>(
+    () => sessionStorage.getItem("dashboard_company_id")
   );
-  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+  const [selectedBranchId, setSelectedBranchIdState] = useState<string | null>(
+    () => sessionStorage.getItem("dashboard_branch_id")
+  );
+
+  const setSelectedCompanyId = (id: string | null) => {
+    setSelectedCompanyIdState(id);
+    if (id) sessionStorage.setItem("dashboard_company_id", id);
+    else sessionStorage.removeItem("dashboard_company_id");
+  };
+
+  const setSelectedBranchId = (id: string | null) => {
+    setSelectedBranchIdState(id);
+    if (id) sessionStorage.setItem("dashboard_branch_id", id);
+    else sessionStorage.removeItem("dashboard_branch_id");
+  };
 
   const { reloadBranches } = useBranches();
 
@@ -49,7 +63,7 @@ export function Dashboard() {
   const isHoOrSi = role === "head_office" || isSystemIntegrator;
   const isEndUser = role === "end_user";
 
-  const canViewCompanies = isSuperAdmin || (isSystemIntegrator && (companies || []).length > 1);
+  const canViewCompanies = isSuperAdmin || isSystemIntegrator;
 
   // ── View calculation ────────────────────────────────────────────────────
   const viewBranches = canViewCompanies

@@ -85,6 +85,7 @@ function App() {
                         allowedRoles={[
                           "super_admin",
                           "head_office",
+                          "system_integrator",
                         ]}
                       >
                         <Reports />

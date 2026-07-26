@@ -872,6 +872,8 @@ export function AdminSettings() {
     setEditingCompanyData(company);
     setEditCompanyValue("name", company.name);
     setEditCompanyValue("description", company.description || "");
+    setEditCompanyValue("logoUrl", company.logoUrl || "");
+    setLogoFile(null);
   };
 
   const startDeleteCompany = (company: Company) => {
@@ -1304,7 +1306,10 @@ export function AdminSettings() {
                     Use Excel
                   </button>
                   <button
-                    onClick={() => setCompanyFormOpen(true)}
+                    onClick={() => {
+                      setLogoFile(null);
+                      setCompanyFormOpen(true);
+                    }}
                     className="flex h-[32px] shrink-0 items-center gap-1.5 rounded-[6px] border border-[var(--border-subtle)] bg-transparent px-[12px] text-[12px] text-[var(--text-primary)] transition-all hover:bg-[var(--surface-raised)]"
                   >
                     <Plus className="h-[14px] w-[14px]" />
