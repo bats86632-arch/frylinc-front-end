@@ -176,7 +176,7 @@ export function Login() {
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`w-full bg-transparent px-8 py-2.5 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-transparent lg:border-none lg:px-1 lg:py-2 lg:text-[13px] lg:font-light lg:h-auto lg:rounded-none lg:placeholder:text-transparent lg:focus:border-transparent lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_transparent_inset] ${
+                className={`w-full bg-transparent px-8 py-2.5 text-[14px] text-white placeholder:text-white/80 lg:bg-transparent lg:border-none lg:px-1 lg:py-2 lg:text-[13px] lg:font-light lg:h-auto lg:rounded-none lg:placeholder:text-transparent lg:focus:border-transparent ${
                   errors.email
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)] pr-10"
                     : ""
@@ -209,7 +209,7 @@ export function Login() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 {...register("password")}
-                className={`w-full bg-transparent px-8 py-2.5 pr-20 text-[14px] text-white placeholder:text-white/80 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:delay-[5000s] lg:bg-transparent lg:border-none lg:px-1 lg:py-2 lg:pr-10 lg:text-[13px] lg:font-light lg:h-auto lg:rounded-none lg:placeholder:text-transparent lg:focus:border-transparent lg:[&:-webkit-autofill]:shadow-[0_0_0_1000px_transparent_inset] ${
+                className={`w-full bg-transparent px-8 py-2.5 pr-20 text-[14px] text-white placeholder:text-white/80 lg:bg-transparent lg:border-none lg:px-1 lg:py-2 lg:pr-10 lg:text-[13px] lg:font-light lg:h-auto lg:rounded-none lg:placeholder:text-transparent lg:focus:border-transparent ${
                   errors.password
                     ? "border-[var(--status-danger-border)] lg:bg-[var(--status-danger-bg)]"
                     : ""
