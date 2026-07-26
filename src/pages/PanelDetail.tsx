@@ -686,7 +686,7 @@ export function PanelDetail() {
                   if (idx === 8) additionalLabel = isFire ? " - Earth Fault" : " - Siren Cut";
                   if (idx === 9) additionalLabel = " - Evacuate (EVA)";
                   if (idx === 10) additionalLabel = isFire ? " - Low Battery" : " - Battery Low";
-                  if (idx === 11) additionalLabel = isFire ? " - ideal / empty" : " - Night zone arm / disarm (ARM)";
+                  if (idx === 11) additionalLabel = isFire ? " - ideal / empty" : " - Night zone armed (ARM)";
                   if (idx === 12) additionalLabel = isFire ? " - empty" : " - Ideal";
                 }
 
@@ -928,7 +928,7 @@ export function PanelDetail() {
                                   if (z === 9) disp = 'Siren Cut';
                                   if (z === 10) disp = 'Evacuate (EVA)';
                                   if (z === 11) disp = 'Battery Low';
-                                  if (z === 12) disp = 'Night zone arm / disarm (ARM)';
+                                  if (z === 12) disp = 'Night zone armed (ARM)';
                                   if (z === 13) disp = 'Ideal';
                                 }
                               }
@@ -973,7 +973,15 @@ export function PanelDetail() {
                                   if (z === 9) interpretation = 'Siren Cut';
                                   else if (z === 10) interpretation = 'Evacuate (EVA)';
                                   else if (z === 11) interpretation = 'Battery Low';
-                                  else if (z === 12) interpretation = 'Night zone arm / disarm (ARM)';
+                                  else if (z === 12) {
+                                    if (event.type === 'alarm' || (event as any).action === 'ALARM') {
+                                      interpretation = 'Night zone armed (ARM)';
+                                    } else if (event.type === 'clear' || (event as any).action === 'CLEAR') {
+                                      interpretation = 'Night zone disarmed (DISARM)';
+                                    } else {
+                                      interpretation = 'Night zone arm / disarm (ARM)';
+                                    }
+                                  }
                                   else if (z === 13) interpretation = 'Ideal';
                                   else interpretation = `System Zone ${z}`;
                                 }
