@@ -625,3 +625,9 @@ select option {
     background: var(--surface-elevated);
     color: var(--text-primary);
 }
+
+/* Hide Microsoft Edge native password reveal icon */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
