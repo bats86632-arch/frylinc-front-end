@@ -32,7 +32,7 @@ import { PanelService } from "../api/PanelService";
 import { rectToPoints } from "../utils/polygonGeom";
 
 // Roles that can edit (upload, drag, resize, save)
-const EDIT_ROLES = ["super_admin", "secret_super_admin", "head_office", "system_integrator"] as const;
+const EDIT_ROLES = ["super_admin", "system_service_account", "head_office", "system_integrator"] as const;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/svg+xml", "image/webp"];
 const MAX_FILE_MB = 20;
 
@@ -980,6 +980,28 @@ export function MapZones() {
         <div className="flex flex-col flex-1 min-h-0 overflow-auto">
           {renderCanvas()}
         </div>
+
+        {/* Legend */}
+        {selectedPanel && (
+          <div className="px-4 py-2 sm:px-6 border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)] flex items-center gap-4 overflow-x-auto shrink-0 hide-scrollbar flex-wrap">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">N</span>
+              <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Normal</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-red-500/10 text-red-500 border-red-500/20">F</span>
+              <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fire</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-indigo-500/10 text-indigo-400 border-indigo-500/20">Flt</span>
+              <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Fault</span>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="inline-flex items-center justify-center w-5 h-4 rounded-[4px] border font-bold text-[9px] bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:text-yellow-400">I</span>
+              <span className="text-[10px] text-[var(--text-secondary)] uppercase font-bold tracking-wider">Isolate</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
