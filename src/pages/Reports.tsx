@@ -59,12 +59,15 @@ export function Reports() {
   const [rawVmLogs, setRawVmLogs] = useState<any[]>([]);
   const [rawVmLoading, setRawVmLoading] = useState<boolean>(false);
   const [rawVmFilter, setRawVmFilter] = useState<string>("");
+  const [rawVmLimit, setRawVmLimit] = useState<number>(100);
+  const [rawVmCategory, setRawVmCategory] = useState<"ALL" | "PING" | "PANEL" | "RAW">("ALL");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const fetchRawVmLogs = async () => {
+  const fetchRawVmLogs = async (overrideLimit?: number) => {
     try {
       setRawVmLoading(true);
-      const res = await ReportsService.getRawLogs({ limit: 150 });
+      const queryLimit = overrideLimit || rawVmLimit;
+      const res = await ReportsService.getRawLogs({ limit: queryLimit });
       setRawVmLogs(res.logs || []);
     } catch (err) {
       console.error("Failed to load raw VM logs:", err);
@@ -1100,9 +1103,9 @@ export function Reports() {
             </div>
 
             {/* CLI Filter & Action Bar */}
-            <div className="px-4 py-2 bg-[#0e1012] border-b border-gray-800 flex items-center justify-between gap-4 text-gray-300">
-              <div className="flex items-center gap-2 flex-1 max-w-xl">
-                <span className="text-emerald-500 font-bold select-none">root@fire-panel-bridge-vm:~# grep -i</span>
+            <div className="px-4 py-2 bg-[#0e1012] border-b border-gray-800 flex flex-wrap items-center justify-between gap-3 text-gray-300">
+              <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+                <span className="text-emerald-500 font-bold select-none whitespace-nowrap">root@fire-panel-bridge-vm:~# grep -i</span>
                 <input
                   type="text"
                   placeholder="filter pattern..."
@@ -1111,14 +1114,48 @@ export function Reports() {
                   className="bg-black border border-gray-800 rounded px-2.5 py-1 text-xs text-gray-100 placeholder-gray-600 font-mono w-full focus:outline-none focus:border-gray-600"
                 />
               </div>
-              <div className="flex items-center gap-3 shrink-0 text-xs">
-                <span className="text-gray-400">[{rawVmLogs.length} Raw Inbound Records]</span>
-                <button
-                  onClick={fetchRawVmLogs}
-                  disabled={rawVmLoading}
-                  className="px-3 py-1 border border-gray-700 bg-gray-900 hover:bg-gray-800 text-gray-200 text-xs font-mono rounded transition-all disabled:opacity-50"
+
+              {/* Custom Query Controls (Top Right) */}
+              <div className="flex items-center gap-2.5 shrink-0 text-xs">
+                {/* Category Filter */}
+                <select
+                  value={rawVmCategory}
+                  onChange={(e) => setRawVmCategory(e.target.value as any)}
+                  className="bg-black border border-gray-700 text-gray-200 rounded px-2 py-1 font-mono text-xs focus:outline-none focus:border-emerald-500"
                 >
-                  {rawVmLoading ? "Syncing..." : "Refresh Socket Stream"}
+                  <option value="ALL">All Traffic</option>
+                  <option value="PING">ICMP Pings Only</option>
+                  <option value="PANEL">Panel Commands Only</option>
+                  <option value="RAW">Non-Panel / Raw Only</option>
+                </select>
+
+                {/* Limit Selector */}
+                <div className="flex items-center gap-1 bg-black border border-gray-700 rounded px-2 py-1">
+                  <span className="text-gray-400 font-mono text-[11px]">Limit:</span>
+                  <select
+                    value={rawVmLimit}
+                    onChange={(e) => {
+                      const newLimit = Number(e.target.value);
+                      setRawVmLimit(newLimit);
+                      fetchRawVmLogs(newLimit);
+                    }}
+                    className="bg-transparent text-gray-100 font-mono text-xs focus:outline-none font-bold"
+                  >
+                    <option value={50}>50</option>
+                    <option value={100}>100 (Default)</option>
+                    <option value={250}>250</option>
+                    <option value={500}>500</option>
+                    <option value={1000}>1000 (Max)</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={() => fetchRawVmLogs()}
+                  disabled={rawVmLoading}
+                  className="px-3 py-1 border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-mono rounded transition-all disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <RefreshCw className={`h-3 w-3 ${rawVmLoading ? "animate-spin" : ""}`} />
+                  Execute Query
                 </button>
               </div>
             </div>
@@ -1128,13 +1165,13 @@ export function Reports() {
               <div className="text-gray-500 pb-2 border-b border-gray-800 mb-3 space-y-0.5">
                 <div>Linux fire-panel-bridge-vm 6.1.0-21-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1</div>
                 <div>VM Public IP: <span className="text-gray-300 font-bold">136.66.72.191</span> | Private IP: <span className="text-gray-300">10.138.0.5</span> | Region: <span className="text-gray-300">us-west1-a</span></div>
-                <div>Socket Listener: <span className="text-gray-300">0.0.0.0:1883 (MQTT Inbound Stream)</span></div>
+                <div>Socket Listener: <span className="text-gray-300">0.0.0.0:1883 (MQTT & ICMP Stream)</span> | Active Query Limit: <span className="text-emerald-400 font-bold">{rawVmLimit} Records</span></div>
                 <div className="text-gray-600">--------------------------------------------------------------------------------------------------</div>
               </div>
 
               {rawVmLoading ? (
                 <div className="py-12 text-center text-gray-400">
-                  <span>Connecting to raw inbound byte stream...</span>
+                  <span>Executing custom raw query...</span>
                 </div>
               ) : rawVmLogs.length === 0 ? (
                 <div className="py-12 text-center text-gray-600">
@@ -1143,6 +1180,17 @@ export function Reports() {
               ) : (
                 rawVmLogs
                   .filter((item) => {
+                    // Category Filter
+                    if (rawVmCategory === "PING") {
+                      if (!item.topic?.startsWith("icmp/ping/") && !item.rawString?.includes("ICMP PING")) return false;
+                    }
+                    if (rawVmCategory === "PANEL") {
+                      if (!item.topic?.startsWith("device/")) return false;
+                    }
+                    if (rawVmCategory === "RAW") {
+                      if (item.topic?.startsWith("device/") || item.topic?.startsWith("icmp/ping/")) return false;
+                    }
+
                     if (!rawVmFilter) return true;
                     const q = rawVmFilter.toLowerCase();
                     return (
