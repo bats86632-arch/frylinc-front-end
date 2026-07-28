@@ -1073,64 +1073,66 @@ export function Reports() {
         </div>
       )}
 
-      {/* ── Raw VM Inbound Hits Command Prompt Modal (Shift+R+L - Super Admin Only) ── */}
+      {/* ── Raw VM Inbound Hits Real VM Stream Modal (Shift+R+L - Super Admin Only) ── */}
       {showRawVmModal && (hasRole(['super_admin']) || userData?.role === 'super_admin' || role === 'super_admin') && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="bg-black border border-gray-700 rounded-lg max-w-5xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden font-mono text-xs">
-            {/* Classic CMD Title Bar */}
-            <div className="px-3 py-1.5 bg-[#1f1f1f] border-b border-gray-700 flex items-center justify-between select-none text-gray-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="bg-[#0c0d0e] border border-gray-800 rounded-lg max-w-5xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden font-mono text-xs">
+            {/* Real VM Title Bar */}
+            <div className="px-4 py-2 bg-[#16181a] border-b border-gray-800 flex items-center justify-between select-none text-gray-200">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold tracking-wide text-gray-300">
-                  Administrator: Command Prompt - C:\Windows\System32\cmd.exe
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-[12px] font-mono text-gray-200">
+                  fire-panel-bridge-vm (136.66.72.191 / 10.138.0.5) — us-west1-a
                 </span>
               </div>
               <button
                 onClick={() => setShowRawVmModal(false)}
-                className="px-2.5 py-0.5 hover:bg-red-600 text-gray-300 hover:text-white transition-colors text-xs font-bold"
+                className="px-2 py-0.5 hover:bg-gray-800 text-gray-400 hover:text-white rounded transition-colors text-xs font-bold"
               >
-                ✕
+                ✕ Close
               </button>
             </div>
 
-            {/* CMD Filter & Status Bar */}
-            <div className="px-4 py-2 bg-[#0c0c0c] border-b border-gray-800 flex items-center justify-between gap-4 text-gray-300">
+            {/* CLI Filter & Action Bar */}
+            <div className="px-4 py-2 bg-[#0e1012] border-b border-gray-800 flex items-center justify-between gap-4 text-gray-300">
               <div className="flex items-center gap-2 flex-1 max-w-xl">
-                <span className="text-gray-400 select-none">C:\Users\Administrator&gt; findstr /i</span>
+                <span className="text-emerald-500 font-bold select-none">root@fire-panel-bridge-vm:~# grep -i</span>
                 <input
                   type="text"
-                  placeholder='"search pattern..."'
+                  placeholder="filter pattern..."
                   value={rawVmFilter}
                   onChange={(e) => setRawVmFilter(e.target.value)}
-                  className="bg-black border border-gray-700 rounded px-2.5 py-0.5 text-xs text-gray-100 placeholder-gray-600 font-mono w-full focus:outline-none focus:border-gray-400"
+                  className="bg-black border border-gray-800 rounded px-2.5 py-1 text-xs text-gray-100 placeholder-gray-600 font-mono w-full focus:outline-none focus:border-gray-600"
                 />
               </div>
               <div className="flex items-center gap-3 shrink-0 text-xs">
-                <span className="text-gray-400">[{rawVmLogs.length} Raw Records]</span>
+                <span className="text-gray-400">[{rawVmLogs.length} Raw Inbound Records]</span>
                 <button
                   onClick={fetchRawVmLogs}
                   disabled={rawVmLoading}
-                  className="px-2.5 py-0.5 border border-gray-600 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-mono transition-all disabled:opacity-50"
+                  className="px-3 py-1 border border-gray-700 bg-gray-900 hover:bg-gray-800 text-gray-200 text-xs font-mono rounded transition-all disabled:opacity-50"
                 >
-                  {rawVmLoading ? "Loading..." : "Refresh Feed"}
+                  {rawVmLoading ? "Syncing..." : "Refresh Socket Stream"}
                 </button>
               </div>
             </div>
 
-            {/* Raw Command Prompt Console Output */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-1 bg-black text-gray-200 select-text font-mono text-xs leading-normal scrollbar-thin scrollbar-thumb-gray-800">
-              <div className="text-gray-400 pb-2 border-b border-gray-900 mb-2">
-                Microsoft Windows [Version 10.0.19045.3803]<br />
-                (c) Microsoft Corporation. All rights reserved.<br /><br />
-                C:\Users\Administrator&gt; netstat -raw -listen -port 1883
+            {/* Raw Socket Output Console */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-1 bg-[#050607] text-gray-200 select-text font-mono text-xs leading-relaxed scrollbar-thin scrollbar-thumb-gray-800">
+              <div className="text-gray-500 pb-2 border-b border-gray-800 mb-3 space-y-0.5">
+                <div>Linux fire-panel-bridge-vm 6.1.0-21-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1</div>
+                <div>VM Public IP: <span className="text-gray-300 font-bold">136.66.72.191</span> | Private IP: <span className="text-gray-300">10.138.0.5</span> | Region: <span className="text-gray-300">us-west1-a</span></div>
+                <div>Socket Listener: <span className="text-gray-300">0.0.0.0:1883 (MQTT Inbound Stream)</span></div>
+                <div className="text-gray-600">--------------------------------------------------------------------------------------------------</div>
               </div>
 
               {rawVmLoading ? (
                 <div className="py-12 text-center text-gray-400">
-                  <span>Listening for raw incoming bytes...</span>
+                  <span>Connecting to raw inbound byte stream...</span>
                 </div>
               ) : rawVmLogs.length === 0 ? (
-                <div className="py-12 text-center text-gray-500">
-                  <span>No raw network traffic logged.</span>
+                <div className="py-12 text-center text-gray-600">
+                  <span>No raw network traffic captured in current buffer.</span>
                 </div>
               ) : (
                 rawVmLogs
@@ -1144,24 +1146,26 @@ export function Reports() {
                     );
                   })
                   .map((log, idx) => {
-                    const rawContent = log.rawString || log.rawHex || (typeof log === 'string' ? log : JSON.stringify(log));
-                    const topicStr = log.topic ? `[${log.topic}] ` : '';
                     const timeStr = formatTimestamp(log.timestamp);
+                    const topicStr = log.topic ? `[${log.topic}] ` : '';
+                    const rawStr = log.rawString || '';
+                    const hexStr = log.rawHex ? ` (HEX: ${log.rawHex})` : '';
 
                     return (
-                      <div key={log.id || idx} className="hover:bg-gray-900/50 py-0.5 px-1 font-mono text-gray-200 break-all flex items-start justify-between group">
+                      <div key={log.id || idx} className="hover:bg-gray-900/60 py-1 px-1.5 font-mono break-all flex items-start justify-between group border-b border-gray-900/40">
                         <span>
-                          <span className="text-gray-500">{timeStr} </span>
-                          <span className="text-gray-400">{topicStr}</span>
-                          <span>{rawContent}</span>
+                          <span className="text-gray-500">[{timeStr}] </span>
+                          <span className="text-emerald-500">{topicStr}</span>
+                          <span className="text-gray-200">{rawStr}</span>
+                          <span className="text-gray-500 text-[11px]">{hexStr}</span>
                         </span>
                         <button
                           onClick={() => {
-                            navigator.clipboard.writeText(rawContent);
+                            navigator.clipboard.writeText(rawStr || log.rawHex || "");
                             setCopiedId(log.id);
                             setTimeout(() => setCopiedId(null), 2000);
                           }}
-                          className="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-white ml-2 shrink-0 select-none"
+                          className="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-white ml-2 shrink-0 select-none px-1.5 py-0.5 rounded border border-gray-800 bg-gray-900"
                         >
                           {copiedId === log.id ? "[Copied]" : "[Copy]"}
                         </button>
@@ -1169,8 +1173,8 @@ export function Reports() {
                     );
                   })
               )}
-              <div className="pt-3 text-gray-300 flex items-center gap-1">
-                <span>C:\Users\Administrator&gt;</span>
+              <div className="pt-3 text-emerald-500 flex items-center gap-1">
+                <span>root@fire-panel-bridge-vm:~#</span>
                 <span className="animate-pulse">_</span>
               </div>
             </div>
