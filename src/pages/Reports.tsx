@@ -1073,68 +1073,64 @@ export function Reports() {
         </div>
       )}
 
-      {/* ── Raw VM Inbound Hits Terminal Modal (Shift+R+L - Super Admin Only) ── */}
+      {/* ── Raw VM Inbound Hits Command Prompt Modal (Shift+R+L - Super Admin Only) ── */}
       {showRawVmModal && (hasRole(['super_admin']) || userData?.role === 'super_admin' || role === 'super_admin') && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
-          <div className="bg-[#080a0f] border border-emerald-500/40 rounded-xl max-w-5xl w-full max-h-[88vh] flex flex-col shadow-[0_0_50px_rgba(16,185,129,0.2)] overflow-hidden font-mono">
-            {/* Terminal Window Top Bar */}
-            <div className="px-4 py-3 border-b border-emerald-500/30 flex items-center justify-between bg-[#040508] select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="bg-black border border-gray-700 rounded-lg max-w-5xl w-full max-h-[88vh] flex flex-col shadow-2xl overflow-hidden font-mono text-xs">
+            {/* Classic CMD Title Bar */}
+            <div className="px-3 py-1.5 bg-[#1f1f1f] border-b border-gray-700 flex items-center justify-between select-none text-gray-200">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500/80 border border-red-400/40"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80 border border-yellow-400/40"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500/80 border border-green-400/40"></div>
-                <span className="ml-2 text-xs text-emerald-400/90 font-bold tracking-wider">
-                  root@fyrlinc-vm-uswest1:~# tail -n 200 -f /var/log/mqtt_raw_traffic.log
+                <span className="text-[11px] font-semibold tracking-wide text-gray-300">
+                  Administrator: Command Prompt - C:\Windows\System32\cmd.exe
                 </span>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] text-emerald-500/70 border border-emerald-500/30 px-2 py-0.5 rounded bg-emerald-500/10">
-                  SUPER_ADMIN_MODE
-                </span>
-                <button
-                  onClick={() => setShowRawVmModal(false)}
-                  className="text-emerald-500/60 hover:text-emerald-400 p-1 hover:bg-emerald-500/10 rounded transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
+              <button
+                onClick={() => setShowRawVmModal(false)}
+                className="px-2.5 py-0.5 hover:bg-red-600 text-gray-300 hover:text-white transition-colors text-xs font-bold"
+              >
+                ✕
+              </button>
             </div>
 
-            {/* CLI Command Line Filter Bar */}
-            <div className="px-5 py-2.5 border-b border-emerald-500/20 bg-[#06080d] flex items-center justify-between gap-4 text-xs">
-              <div className="flex items-center gap-2 flex-1 max-w-xl text-emerald-400">
-                <span className="text-emerald-500 font-bold select-none">$ grep -i</span>
+            {/* CMD Filter & Status Bar */}
+            <div className="px-4 py-2 bg-[#0c0c0c] border-b border-gray-800 flex items-center justify-between gap-4 text-gray-300">
+              <div className="flex items-center gap-2 flex-1 max-w-xl">
+                <span className="text-gray-400 select-none">C:\Users\Administrator&gt; findstr /i</span>
                 <input
                   type="text"
-                  placeholder="filter pattern (topic, payload, hex)..."
+                  placeholder='"search pattern..."'
                   value={rawVmFilter}
                   onChange={(e) => setRawVmFilter(e.target.value)}
-                  className="bg-[#030406] border border-emerald-500/30 rounded px-3 py-1 text-xs text-emerald-300 placeholder-emerald-700 font-mono w-full focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+                  className="bg-black border border-gray-700 rounded px-2.5 py-0.5 text-xs text-gray-100 placeholder-gray-600 font-mono w-full focus:outline-none focus:border-gray-400"
                 />
               </div>
-              <div className="flex items-center gap-3 shrink-0 text-xs text-emerald-400/80">
-                <span>{rawVmLogs.length} LINES CAPTURED</span>
+              <div className="flex items-center gap-3 shrink-0 text-xs">
+                <span className="text-gray-400">[{rawVmLogs.length} Raw Records]</span>
                 <button
                   onClick={fetchRawVmLogs}
                   disabled={rawVmLoading}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-mono transition-all disabled:opacity-50"
+                  className="px-2.5 py-0.5 border border-gray-600 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-mono transition-all disabled:opacity-50"
                 >
-                  <RefreshCw className={`h-3 w-3 ${rawVmLoading ? "animate-spin" : ""}`} />
-                  REFRESH_FEED
+                  {rawVmLoading ? "Loading..." : "Refresh Feed"}
                 </button>
               </div>
             </div>
 
-            {/* Raw Terminal Stream Output */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-2 bg-[#040508] text-xs leading-relaxed text-emerald-400 select-text font-mono scrollbar-thin scrollbar-thumb-emerald-800">
+            {/* Raw Command Prompt Console Output */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-1 bg-black text-gray-200 select-text font-mono text-xs leading-normal scrollbar-thin scrollbar-thumb-gray-800">
+              <div className="text-gray-400 pb-2 border-b border-gray-900 mb-2">
+                Microsoft Windows [Version 10.0.19045.3803]<br />
+                (c) Microsoft Corporation. All rights reserved.<br /><br />
+                C:\Users\Administrator&gt; netstat -raw -listen -port 1883
+              </div>
+
               {rawVmLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-3 text-emerald-500">
-                  <Loader2 className="h-7 w-7 animate-spin text-emerald-400" />
-                  <span className="text-xs tracking-widest uppercase">Connecting to raw socket stream...</span>
+                <div className="py-12 text-center text-gray-400">
+                  <span>Listening for raw incoming bytes...</span>
                 </div>
               ) : rawVmLogs.length === 0 ? (
-                <div className="text-center py-20 text-emerald-600">
-                  <p>&gt; NO RAW INBOUND TRAFFIC LOGGED IN CURRENT BUFFER &lt;</p>
+                <div className="py-12 text-center text-gray-500">
+                  <span>No raw network traffic logged.</span>
                 </div>
               ) : (
                 rawVmLogs
@@ -1147,45 +1143,35 @@ export function Reports() {
                       (item.rawHex || "").toLowerCase().includes(q)
                     );
                   })
-                  .map((log, idx) => (
-                    <div
-                      key={log.id || idx}
-                      className="group border-b border-emerald-900/40 pb-2 mb-2 hover:bg-emerald-950/20 p-2 rounded transition-colors"
-                    >
-                      <div className="flex items-center justify-between text-[11px] text-emerald-500/80 mb-1">
-                        <span className="font-bold text-emerald-400">
-                          [{formatTimestamp(log.timestamp)}] [INBOUND_HIT] TOPIC: <span className="text-emerald-200">{log.topic || "RAW_BYTE_STREAM"}</span>
+                  .map((log, idx) => {
+                    const rawContent = log.rawString || log.rawHex || (typeof log === 'string' ? log : JSON.stringify(log));
+                    const topicStr = log.topic ? `[${log.topic}] ` : '';
+                    const timeStr = formatTimestamp(log.timestamp);
+
+                    return (
+                      <div key={log.id || idx} className="hover:bg-gray-900/50 py-0.5 px-1 font-mono text-gray-200 break-all flex items-start justify-between group">
+                        <span>
+                          <span className="text-gray-500">{timeStr} </span>
+                          <span className="text-gray-400">{topicStr}</span>
+                          <span>{rawContent}</span>
                         </span>
                         <button
                           onClick={() => {
-                            navigator.clipboard.writeText(log.rawString || log.rawHex || "");
+                            navigator.clipboard.writeText(rawContent);
                             setCopiedId(log.id);
                             setTimeout(() => setCopiedId(null), 2000);
                           }}
-                          className="opacity-60 group-hover:opacity-100 text-[10px] px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-all"
+                          className="opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 hover:text-white ml-2 shrink-0 select-none"
                         >
-                          {copiedId === log.id ? "[COPIED]" : "[COPY_RAW]"}
+                          {copiedId === log.id ? "[Copied]" : "[Copy]"}
                         </button>
                       </div>
-
-                      {log.rawString && (
-                        <div className="text-emerald-300 font-mono break-all whitespace-pre-wrap pl-3 border-l-2 border-emerald-600/40 my-1">
-                          <span className="text-emerald-500 select-none">&gt; PAYLOAD: </span>
-                          {log.rawString}
-                        </div>
-                      )}
-
-                      {log.rawHex && (
-                        <div className="text-emerald-600/90 font-mono text-[10px] break-all pl-3">
-                          <span className="text-emerald-700 select-none">&gt; HEX_DUMP: </span>
-                          {log.rawHex}
-                        </div>
-                      )}
-                    </div>
-                  ))
+                    );
+                  })
               )}
-              <div className="pt-2 text-emerald-500 animate-pulse">
-                <span>root@fyrlinc-vm:~# █</span>
+              <div className="pt-3 text-gray-300 flex items-center gap-1">
+                <span>C:\Users\Administrator&gt;</span>
+                <span className="animate-pulse">_</span>
               </div>
             </div>
           </div>
