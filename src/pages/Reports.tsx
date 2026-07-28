@@ -33,7 +33,7 @@ const getPanelTypeBadge = (type?: string) => {
 };
 
 export function Reports() {
-  const { hasRole, userData } = useAuth();
+  const { hasRole, userData, role } = useAuth();
   const { companies } = useCompanies();
   const { branches } = useBranches();
   const { panels, loading: panelsLoading } = usePanels();
@@ -81,7 +81,8 @@ export function Reports() {
       keysPressed.add(e.key.toLowerCase());
 
       if (e.shiftKey && keysPressed.has('r') && keysPressed.has('l')) {
-        if (!hasRole('super_admin') && userData?.role !== 'super_admin') {
+        const isSuperAdmin = hasRole(['super_admin']) || userData?.role === 'super_admin' || role === 'super_admin';
+        if (!isSuperAdmin) {
           return;
         }
         e.preventDefault();
@@ -1073,7 +1074,7 @@ export function Reports() {
       )}
 
       {/* ── Raw VM Inbound Hits Terminal Modal (Shift+R+L - Super Admin Only) ── */}
-      {showRawVmModal && (hasRole('super_admin') || userData?.role === 'super_admin') && (
+      {showRawVmModal && (hasRole(['super_admin']) || userData?.role === 'super_admin' || role === 'super_admin') && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
           <div className="bg-[#080a0f] border border-emerald-500/40 rounded-xl max-w-5xl w-full max-h-[88vh] flex flex-col shadow-[0_0_50px_rgba(16,185,129,0.2)] overflow-hidden font-mono">
             {/* Terminal Window Top Bar */}
