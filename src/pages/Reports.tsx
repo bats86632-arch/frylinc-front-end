@@ -81,6 +81,9 @@ export function Reports() {
       keysPressed.add(e.key.toLowerCase());
 
       if (e.shiftKey && keysPressed.has('r') && keysPressed.has('l')) {
+        if (!hasRole('super_admin') && userData?.role !== 'super_admin') {
+          return;
+        }
         e.preventDefault();
         setShowRawVmModal(true);
         fetchRawVmLogs();
@@ -1069,74 +1072,68 @@ export function Reports() {
         </div>
       )}
 
-      {/* ── Raw VM Inbound Hits Modal (Shift+R+L) ───────────────────────── */}
-      {showRawVmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-[var(--surface-overlay)] border border-[var(--border-subtle)] rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-raised)]">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-                  <Terminal className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    Raw VM Hits & Inbound Logs
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                      Shift+R+L
-                    </span>
-                  </h3>
-                  <p className="text-xs text-[var(--text-secondary)]">
-                    All unstructured network hits, MQTT payloads & non-panel traffic received by the VM
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowRawVmModal(false)}
-                className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Filter & Action Bar */}
-            <div className="px-6 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-base)] flex items-center justify-between gap-4">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--text-tertiary)]" />
-                <input
-                  type="text"
-                  placeholder="Filter by topic, raw payload or hex..."
-                  value={rawVmFilter}
-                  onChange={(e) => setRawVmFilter(e.target.value)}
-                  className="control-field w-full pl-9 pr-4 py-1.5 text-xs rounded-lg bg-[var(--surface-overlay)] border border-[var(--border-subtle)] text-[var(--text-primary)]"
-                />
-              </div>
+      {/* ── Raw VM Inbound Hits Terminal Modal (Shift+R+L - Super Admin Only) ── */}
+      {showRawVmModal && (hasRole('super_admin') || userData?.role === 'super_admin') && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
+          <div className="bg-[#080a0f] border border-emerald-500/40 rounded-xl max-w-5xl w-full max-h-[88vh] flex flex-col shadow-[0_0_50px_rgba(16,185,129,0.2)] overflow-hidden font-mono">
+            {/* Terminal Window Top Bar */}
+            <div className="px-4 py-3 border-b border-emerald-500/30 flex items-center justify-between bg-[#040508] select-none">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[var(--text-tertiary)] font-mono">
-                  {rawVmLogs.length} total entries
+                <div className="w-3 h-3 rounded-full bg-red-500/80 border border-red-400/40"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80 border border-yellow-400/40"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500/80 border border-green-400/40"></div>
+                <span className="ml-2 text-xs text-emerald-400/90 font-bold tracking-wider">
+                  root@fyrlinc-vm-uswest1:~# tail -n 200 -f /var/log/mqtt_raw_traffic.log
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] text-emerald-500/70 border border-emerald-500/30 px-2 py-0.5 rounded bg-emerald-500/10">
+                  SUPER_ADMIN_MODE
                 </span>
                 <button
-                  onClick={fetchRawVmLogs}
-                  disabled={rawVmLoading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-all"
+                  onClick={() => setShowRawVmModal(false)}
+                  className="text-emerald-500/60 hover:text-emerald-400 p-1 hover:bg-emerald-500/10 rounded transition-colors"
                 >
-                  <RefreshCw className={`h-3.5 w-3.5 ${rawVmLoading ? "animate-spin" : ""}`} />
-                  Refresh
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
 
-            {/* Content List */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-3 font-mono text-xs">
+            {/* CLI Command Line Filter Bar */}
+            <div className="px-5 py-2.5 border-b border-emerald-500/20 bg-[#06080d] flex items-center justify-between gap-4 text-xs">
+              <div className="flex items-center gap-2 flex-1 max-w-xl text-emerald-400">
+                <span className="text-emerald-500 font-bold select-none">$ grep -i</span>
+                <input
+                  type="text"
+                  placeholder="filter pattern (topic, payload, hex)..."
+                  value={rawVmFilter}
+                  onChange={(e) => setRawVmFilter(e.target.value)}
+                  className="bg-[#030406] border border-emerald-500/30 rounded px-3 py-1 text-xs text-emerald-300 placeholder-emerald-700 font-mono w-full focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/40"
+                />
+              </div>
+              <div className="flex items-center gap-3 shrink-0 text-xs text-emerald-400/80">
+                <span>{rawVmLogs.length} LINES CAPTURED</span>
+                <button
+                  onClick={fetchRawVmLogs}
+                  disabled={rawVmLoading}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-mono transition-all disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-3 w-3 ${rawVmLoading ? "animate-spin" : ""}`} />
+                  REFRESH_FEED
+                </button>
+              </div>
+            </div>
+
+            {/* Raw Terminal Stream Output */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-2 bg-[#040508] text-xs leading-relaxed text-emerald-400 select-text font-mono scrollbar-thin scrollbar-thumb-emerald-800">
               {rawVmLoading ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
-                  <span className="text-xs text-[var(--text-secondary)]">Fetching all raw VM traffic logs...</span>
+                <div className="flex flex-col items-center justify-center py-20 gap-3 text-emerald-500">
+                  <Loader2 className="h-7 w-7 animate-spin text-emerald-400" />
+                  <span className="text-xs tracking-widest uppercase">Connecting to raw socket stream...</span>
                 </div>
               ) : rawVmLogs.length === 0 ? (
-                <div className="text-center py-16 text-[var(--text-tertiary)]">
-                  <Server className="h-10 w-10 mx-auto mb-2 opacity-40" />
-                  <p>No raw VM incoming logs recorded yet.</p>
+                <div className="text-center py-20 text-emerald-600">
+                  <p>&gt; NO RAW INBOUND TRAFFIC LOGGED IN CURRENT BUFFER &lt;</p>
                 </div>
               ) : (
                 rawVmLogs
@@ -1149,55 +1146,46 @@ export function Reports() {
                       (item.rawHex || "").toLowerCase().includes(q)
                     );
                   })
-                  .map((log) => (
+                  .map((log, idx) => (
                     <div
-                      key={log.id}
-                      className="p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-base)] space-y-2 hover:border-purple-500/30 transition-all"
+                      key={log.id || idx}
+                      className="group border-b border-emerald-900/40 pb-2 mb-2 hover:bg-emerald-950/20 p-2 rounded transition-colors"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-wider">
-                            {log.topic || "RAW INBOUND"}
-                          </span>
-                          <span className="text-[11px] text-[var(--text-tertiary)]">
-                            {formatTimestamp(log.timestamp)}
-                          </span>
-                        </div>
+                      <div className="flex items-center justify-between text-[11px] text-emerald-500/80 mb-1">
+                        <span className="font-bold text-emerald-400">
+                          [{formatTimestamp(log.timestamp)}] [INBOUND_HIT] TOPIC: <span className="text-emerald-200">{log.topic || "RAW_BYTE_STREAM"}</span>
+                        </span>
                         <button
                           onClick={() => {
                             navigator.clipboard.writeText(log.rawString || log.rawHex || "");
                             setCopiedId(log.id);
                             setTimeout(() => setCopiedId(null), 2000);
                           }}
-                          className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                          className="opacity-60 group-hover:opacity-100 text-[10px] px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-all"
                         >
-                          {copiedId === log.id ? (
-                            <>
-                              <Check className="h-3 w-3 text-emerald-400" /> Copied
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="h-3 w-3" /> Copy Raw
-                            </>
-                          )}
+                          {copiedId === log.id ? "[COPIED]" : "[COPY_RAW]"}
                         </button>
                       </div>
 
                       {log.rawString && (
-                        <div className="p-2.5 rounded-lg bg-[var(--surface-overlay)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-[11px] break-all leading-relaxed whitespace-pre-wrap">
+                        <div className="text-emerald-300 font-mono break-all whitespace-pre-wrap pl-3 border-l-2 border-emerald-600/40 my-1">
+                          <span className="text-emerald-500 select-none">&gt; PAYLOAD: </span>
                           {log.rawString}
                         </div>
                       )}
 
                       {log.rawHex && (
-                        <div className="text-[10px] text-[var(--text-tertiary)] font-mono break-all opacity-80">
-                          <span className="font-bold text-purple-400/80">HEX: </span>
+                        <div className="text-emerald-600/90 font-mono text-[10px] break-all pl-3">
+                          <span className="text-emerald-700 select-none">&gt; HEX_DUMP: </span>
                           {log.rawHex}
                         </div>
                       )}
                     </div>
                   ))
               )}
+              <div className="pt-2 text-emerald-500 animate-pulse">
+                <span>root@fyrlinc-vm:~# █</span>
+              </div>
             </div>
           </div>
         </div>
