@@ -187,6 +187,14 @@ export function Reports() {
 
   const searchFilteredLogs = logs.filter(log => {
     if (secretMode) return true; // Don't filter secret logs by search bar for now
+
+    if (matrixFilter !== "All") {
+      const panel = panels.find(p => p.serial === log.panelSerial);
+      if (panel && panel.panelType !== matrixFilter) {
+        return false;
+      }
+    }
+
     if (!action) return true;
     const searchLower = action.toLowerCase();
     return (
@@ -448,25 +456,23 @@ export function Reports() {
                 <List className="h-3.5 w-3.5" /> List
               </button>
             </div>
-            {viewMode === 'matrix' && (
-              <div className="hidden lg:flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)] overflow-x-auto">
-                {(["Fire Alarm", "Security", "Dialer", "Health", "All"] as const).map(type => {
-                  let displayName = type as string;
-                  if (type === "Fire Alarm") displayName = "Fire Alarm Panel";
-                  if (type === "Security") displayName = "Security Alarm Panel";
-                  if (type === "Health") displayName = "Health Monitoring System";
-                  
-                  return (
-                  <button
-                    key={type}
-                    onClick={() => setMatrixFilter(type)}
-                    className={`whitespace-nowrap px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${matrixFilter === type ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
-                  >
-                    {displayName}
-                  </button>
-                )})}
-              </div>
-            )}
+            <div className="hidden lg:flex items-center bg-[var(--surface-raised)] rounded-[8px] p-1 border border-[var(--border-subtle)] overflow-x-auto">
+              {(["Fire Alarm", "Security", "Dialer", "Health", "All"] as const).map(type => {
+                let displayName = type as string;
+                if (type === "Fire Alarm") displayName = "Fire Alarm Panel";
+                if (type === "Security") displayName = "Security Alarm Panel";
+                if (type === "Health") displayName = "Health Monitoring System";
+                
+                return (
+                <button
+                  key={type}
+                  onClick={() => setMatrixFilter(type)}
+                  className={`whitespace-nowrap px-3 py-1.5 rounded-[6px] text-[11px] font-bold transition-all ${matrixFilter === type ? 'bg-[var(--surface-overlay)] text-[var(--text-primary)] shadow-sm border border-[var(--border-subtle)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'}`}
+                >
+                  {displayName}
+                </button>
+              )})}
+            </div>
             <button
               onClick={handleExport}
               disabled={filteredLogs.length === 0}
