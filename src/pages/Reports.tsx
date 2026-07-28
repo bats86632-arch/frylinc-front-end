@@ -87,7 +87,7 @@ export function Reports() {
         return;
       }
 
-      if (e.shiftKey && e.key.toLowerCase() === 'r') {
+      if (e.shiftKey && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setSecretMode(prev => !prev);
       }
