@@ -36,8 +36,8 @@ const ROLE_META: Record<
   Role,
   { label: string; description: string; icon: React.ReactNode; color: string }
 > = {
-  secret_super_admin: {
-    label: "Secret Super Admin",
+  system_service_account: {
+    label: "System Service Account",
     description: "Invisible super admin with global access",
     icon: <ShieldAlert className="h-4 w-4" />,
     color: "#6b7280", // gray
@@ -90,9 +90,9 @@ type EditFormData = z.infer<typeof editSchema>;
 function getCreatableRoles(actorRole: Role, isSecret: boolean): Role[] {
   switch (actorRole) {
     case "super_admin":
-    case "secret_super_admin":
+    case "system_service_account":
       return isSecret 
-        ? ["secret_super_admin", "super_admin", "head_office", "system_integrator", "end_user"]
+        ? ["system_service_account", "super_admin", "head_office", "system_integrator", "end_user"]
         : ["super_admin", "head_office", "system_integrator", "end_user"];
     case "head_office":
       return ["system_integrator", "end_user"];
@@ -200,7 +200,7 @@ export function CreateUserModal({
 
   // ── Derived data ──
   const creatableRoles = useMemo(
-    () => (actorRole ? getCreatableRoles(actorRole, !!actorData?.secret_super_admin) : []),
+    () => (actorRole ? getCreatableRoles(actorRole, !!actorData?.system_service_account) : []),
     [actorRole, actorData],
   );
 

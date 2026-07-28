@@ -106,7 +106,7 @@ const companySchema = z.object({
 type CompanyFormData = z.infer<typeof companySchema>;
 
 const roleLabels: Record<Role, string> = {
-  secret_super_admin: "Secret Super Admin",
+  system_service_account: "System Service Account",
   super_admin: "Super Admin",
   head_office: "Head Office",
   system_integrator: "System Integrator",

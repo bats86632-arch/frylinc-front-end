@@ -9,7 +9,7 @@ import { AuditLog } from "../types";
 import {
   Loader2, Search, FileText, AlertCircle, Building2, MapPin,
   ChevronLeft, ChevronRight, Download, CheckCircle, Clock,
-  LayoutGrid, List
+  LayoutGrid, List, Terminal, X, RefreshCw, Copy, Check, Server
 } from "lucide-react";
 import * as xlsx from "xlsx";
 
@@ -51,20 +51,56 @@ export function Reports() {
   const [matrixFilter, setMatrixFilter] = useState<"All" | "Fire Alarm" | "Security" | "Dialer" | "Health">("Fire Alarm");
   const [secretMode, setSecretMode] = useState<boolean>(false);
   const [listClickCount, setListClickCount] = useState<number>(0);
-  
-  // Pagination
-  const [pageToken, setPageToken] = useState<string | null>(null);
-  const [pageHistory, setPageHistory] = useState<string[]>([]);
 
+  // Raw VM Hits Modal State (Shift + R + L)
+  const [showRawVmModal, setShowRawVmModal] = useState<boolean>(false);
+  const [rawVmLogs, setRawVmLogs] = useState<any[]>([]);
+  const [rawVmLoading, setRawVmLoading] = useState<boolean>(false);
+  const [rawVmFilter, setRawVmFilter] = useState<string>("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const fetchRawVmLogs = async () => {
+    try {
+      setRawVmLoading(true);
+      const res = await ReportsService.getRawLogs({ limit: 150 });
+      setRawVmLogs(res.logs || []);
+    } catch (err) {
+      console.error("Failed to load raw VM logs:", err);
+    } finally {
+      setRawVmLoading(false);
+    }
+  };
+
+  // Keyboard shortcut listener for Shift+R and Shift+R+L
   useEffect(() => {
+    const keysPressed = new Set<string>();
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      keysPressed.add(e.key.toLowerCase());
+
+      if (e.shiftKey && keysPressed.has('r') && keysPressed.has('l')) {
+        e.preventDefault();
+        setShowRawVmModal(true);
+        fetchRawVmLogs();
+        return;
+      }
+
       if (e.shiftKey && e.key.toLowerCase() === 'r') {
         e.preventDefault();
         setSecretMode(prev => !prev);
       }
     };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysPressed.delete(e.key.toLowerCase());
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, []);
 
   useEffect(() => {
@@ -1028,6 +1064,140 @@ export function Reports() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Raw VM Inbound Hits Modal (Shift+R+L) ───────────────────────── */}
+      {showRawVmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-[var(--surface-overlay)] border border-[var(--border-subtle)] rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-[var(--border-subtle)] flex items-center justify-between bg-[var(--surface-raised)]">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                  <Terminal className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    Raw VM Hits & Inbound Logs
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                      Shift+R+L
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    All unstructured network hits, MQTT payloads & non-panel traffic received by the VM
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRawVmModal(false)}
+                className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Filter & Action Bar */}
+            <div className="px-6 py-3 border-b border-[var(--border-subtle)] bg-[var(--surface-base)] flex items-center justify-between gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--text-tertiary)]" />
+                <input
+                  type="text"
+                  placeholder="Filter by topic, raw payload or hex..."
+                  value={rawVmFilter}
+                  onChange={(e) => setRawVmFilter(e.target.value)}
+                  className="control-field w-full pl-9 pr-4 py-1.5 text-xs rounded-lg bg-[var(--surface-overlay)] border border-[var(--border-subtle)] text-[var(--text-primary)]"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[var(--text-tertiary)] font-mono">
+                  {rawVmLogs.length} total entries
+                </span>
+                <button
+                  onClick={fetchRawVmLogs}
+                  disabled={rawVmLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] disabled:opacity-50 transition-all"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${rawVmLoading ? "animate-spin" : ""}`} />
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            {/* Content List */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-3 font-mono text-xs">
+              {rawVmLoading ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+                  <span className="text-xs text-[var(--text-secondary)]">Fetching all raw VM traffic logs...</span>
+                </div>
+              ) : rawVmLogs.length === 0 ? (
+                <div className="text-center py-16 text-[var(--text-tertiary)]">
+                  <Server className="h-10 w-10 mx-auto mb-2 opacity-40" />
+                  <p>No raw VM incoming logs recorded yet.</p>
+                </div>
+              ) : (
+                rawVmLogs
+                  .filter((item) => {
+                    if (!rawVmFilter) return true;
+                    const q = rawVmFilter.toLowerCase();
+                    return (
+                      (item.topic || "").toLowerCase().includes(q) ||
+                      (item.rawString || "").toLowerCase().includes(q) ||
+                      (item.rawHex || "").toLowerCase().includes(q)
+                    );
+                  })
+                  .map((log) => (
+                    <div
+                      key={log.id}
+                      className="p-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-base)] space-y-2 hover:border-purple-500/30 transition-all"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-wider">
+                            {log.topic || "RAW INBOUND"}
+                          </span>
+                          <span className="text-[11px] text-[var(--text-tertiary)]">
+                            {formatTimestamp(log.timestamp)}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(log.rawString || log.rawHex || "");
+                            setCopiedId(log.id);
+                            setTimeout(() => setCopiedId(null), 2000);
+                          }}
+                          className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                        >
+                          {copiedId === log.id ? (
+                            <>
+                              <Check className="h-3 w-3 text-emerald-400" /> Copied
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3 w-3" /> Copy Raw
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {log.rawString && (
+                        <div className="p-2.5 rounded-lg bg-[var(--surface-overlay)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-mono text-[11px] break-all leading-relaxed whitespace-pre-wrap">
+                          {log.rawString}
+                        </div>
+                      )}
+
+                      {log.rawHex && (
+                        <div className="text-[10px] text-[var(--text-tertiary)] font-mono break-all opacity-80">
+                          <span className="font-bold text-purple-400/80">HEX: </span>
+                          {log.rawHex}
+                        </div>
+                      )}
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

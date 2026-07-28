@@ -2,7 +2,7 @@ import type { Timestamp } from "firebase/firestore";
 
 export type Role =
   | "super_admin"
-  | "secret_super_admin"
+  | "system_service_account"
   | "head_office"
   | "system_integrator"
   | "end_user";
@@ -15,7 +15,7 @@ export interface User {
   companyId?: string;
   branchIds?: string[];
   assignments?: Record<string, string[]>;
-  secret_super_admin?: boolean;
+  system_service_account?: boolean;
   // Extended profile fields
   firstName?: string;
   lastName?: string;

@@ -42,7 +42,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const roleHierarchy: Record<Role, number> = {
-  secret_super_admin: 5,
+  system_service_account: 5,
   super_admin: 4,
   head_office: 3,
   system_integrator: 2,
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       companyId: customClaims.companyId as string | undefined,
       branchIds: (customClaims.branchIds as string[]) || [],
       assignments,
-      secret_super_admin: customClaims.secret_super_admin === true,
+      system_service_account: customClaims.system_service_account === true,
       photoURL: user.photoURL || undefined,
     };
 
@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             companyId: profile.companyId || prev.companyId,
             branchIds: profile.branchIds || prev.branchIds,
             assignments: profile.assignments || prev.assignments,
-            secret_super_admin: profile.secret_super_admin ?? prev.secret_super_admin,
+            system_service_account: profile.system_service_account ?? prev.system_service_account,
             firstName: profile.firstName ?? prev.firstName,
             lastName: profile.lastName ?? prev.lastName,
             phoneNumber: profile.phoneNumber ?? prev.phoneNumber,

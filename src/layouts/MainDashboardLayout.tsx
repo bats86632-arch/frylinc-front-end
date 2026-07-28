@@ -41,7 +41,7 @@ const navigation: Array<{
     mobileName: "GMS",
     href: "/map-zones",
     icon: Map,
-    roles: ["super_admin", "secret_super_admin", "head_office", "system_integrator", "end_user"],
+    roles: ["super_admin", "system_service_account", "head_office", "system_integrator", "end_user"],
   },
   {
     name: "Reports",
