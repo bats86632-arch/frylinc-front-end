@@ -46,6 +46,7 @@ import {
   Upload,
   Radio,
   Zap,
+  Key,
 } from "lucide-react";
 import apiClient from "../api/axios";
 import { CopyButton } from "../components/CopyButton";
@@ -53,7 +54,6 @@ import { CreateUserModal } from "../components/CreateUserModal";
 import { ApiKeysSection } from "../components/ApiKeysSection";
 import { ApiKeyService } from "../api/ApiKeyService";
 import { WebhookService } from "../api/WebhookService";
-import { Key } from "lucide-react";
 
 
 const panelSchema = z.object({
@@ -145,6 +145,7 @@ export function AdminSettings() {
   const [apiKeysCount, setApiKeysCount] = useState(0);
   const [apiKeysLoading, setApiKeysLoading] = useState(true);
   const [webhooksCount, setWebhooksCount] = useState(0);
+  const [apiOverlayTab, setApiOverlayTab] = useState<"api_keys" | "webhooks">("api_keys");
   const [editingUserData, setEditingUserData] = useState<User | null>(null);
   const [companySearchQuery, setCompanySearchQuery] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
@@ -155,7 +156,7 @@ export function AdminSettings() {
   // using bsrCode, addressLine1, addressLine2, city, state, zipCode
   
 
-  const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | "api_keys" | null>(null);
+  const [activeSection, setActiveSection] = useState<"companies" | "users" | "panels" | "api_keys" | "webhooks" | null>(null);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [selectedUserCompanyId, setSelectedUserCompanyId] = useState<string | null>(null);
   const [selectedPanelCompanyId, setSelectedPanelCompanyId] = useState<string | null>(null);
@@ -917,9 +918,10 @@ export function AdminSettings() {
     setUsersLoading(true);
     try {
       const data = await UserService.getUsers();
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Failed to load users:", err);
+      console.warn("Failed to load users:", err);
+      setUsers([]);
     } finally {
       setUsersLoading(false);
     }
@@ -928,14 +930,18 @@ export function AdminSettings() {
   const loadApiKeys = async () => {
     setApiKeysLoading(true);
     try {
-      const [keys, webhooks] = await Promise.all([
+      const [keysRes, webhooksRes] = await Promise.allSettled([
         ApiKeyService.getApiKeys(),
         WebhookService.getWebhooks(),
       ]);
-      setApiKeysCount(keys.length);
-      setWebhooksCount(webhooks.length);
+      if (keysRes.status === "fulfilled" && Array.isArray(keysRes.value)) {
+        setApiKeysCount(keysRes.value.length);
+      }
+      if (webhooksRes.status === "fulfilled" && Array.isArray(webhooksRes.value)) {
+        setWebhooksCount(webhooksRes.value.length);
+      }
     } catch (err) {
-      console.error("Failed to load api keys:", err);
+      console.warn("Failed to load api keys/webhooks count:", err);
     } finally {
       setApiKeysLoading(false);
     }
@@ -1224,52 +1230,72 @@ export function AdminSettings() {
           </div>
         </button>
 
-        {/* API & Webhooks Card */}
+        {/* REST API Keys Card */}
         {hasRole(["super_admin", "head_office"]) && (
           <button
-            onClick={() => setActiveSection("api_keys")}
+            onClick={() => { setApiOverlayTab("api_keys"); setActiveSection("api_keys"); }}
             className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
           >
             <div className="relative z-10">
               <div className="mb-5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
-                    <Key className="h-6 w-6 text-[var(--accent)]" />
-                  </div>
-                  <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-emerald-500/10 border border-emerald-500/20">
-                    <Radio className="h-3.5 w-3.5 text-emerald-500" />
-                  </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                  <Key className="h-6 w-6 text-[var(--accent)]" />
                 </div>
                 <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
               </div>
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
-                API &amp; Webhooks
+                REST API Keys
               </h3>
               <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
-                Provision REST API keys and real-time webhook endpoints. APIs require polling � webhooks auto-push events instantly.
+                Provision API credentials for programmatic access. Third-party systems must call and poll endpoints to retrieve data.
               </p>
-              <div className="pt-4 mt-auto border-t border-[var(--border-subtle)] flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
-                  </span>
-                  <span className="text-[12px] font-semibold text-[var(--text-primary)] tabular-nums">
-                    {apiKeysLoading ? "�" : apiKeysCount}
-                  </span>
-                  <span className="text-[11px] text-[var(--text-secondary)]">keys</span>
+              <div className="pt-4 mt-auto border-t border-[var(--border-subtle)] flex items-center gap-3">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
+                </span>
+                <span className="text-[12px] font-semibold text-[var(--text-primary)] tabular-nums">
+                  {apiKeysLoading ? "?" : apiKeysCount}
+                </span>
+                <span className="text-[11px] text-[var(--text-secondary)]">{apiKeysLoading ? "Loading..." : "keys provisioned"}</span>
+              </div>
+            </div>
+          </button>
+        )}
+
+        {/* Webhooks (Real-Time) Card */}
+        {hasRole(["super_admin", "head_office"]) && (
+          <button
+            onClick={() => { setApiOverlayTab("webhooks"); setActiveSection("webhooks"); }}
+            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
+          >
+            <div className="relative z-10">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-emerald-500/10 border border-emerald-500/20">
+                  <Radio className="h-6 w-6 text-emerald-500" />
                 </div>
-                <span className="text-[var(--border-default)]">�</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40 animate-ping" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                  </span>
-                  <span className="text-[12px] font-semibold text-[var(--text-primary)] tabular-nums">
-                    {apiKeysLoading ? "�" : webhooksCount}
-                  </span>
-                  <span className="text-[11px] text-[var(--text-secondary)]">webhooks</span>
-                </div>
+                <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
+              </div>
+              <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
+                Webhooks
+              </h3>
+              <div className="mb-3">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[10px] font-bold uppercase tracking-wider">
+                  <Zap className="h-3 w-3" /> Real-Time Push
+                </span>
+              </div>
+              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
+                Auto-forward fire alarms, faults, status changes, and telemetry to your endpoint the instant they happen ? no polling needed.
+              </p>
+              <div className="pt-4 mt-auto border-t border-[var(--border-subtle)] flex items-center gap-3">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                <span className="text-[12px] font-semibold text-[var(--text-primary)] tabular-nums">
+                  {apiKeysLoading ? "?" : webhooksCount}
+                </span>
+                <span className="text-[11px] text-[var(--text-secondary)]">{apiKeysLoading ? "Loading..." : "webhooks active"}</span>
               </div>
             </div>
           </button>
@@ -2321,27 +2347,35 @@ export function AdminSettings() {
                                   })}
                                 </div>
                               )}
-
+                              
                               <div className="mt-8 border-t border-[var(--border-subtle)] pt-6">
                                 <div className="flex items-center justify-between mb-4">
                                   <div className="flex items-center gap-2">
                                     <div className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm">
                                       <Key className="h-3 w-3 text-[var(--text-secondary)]" />
                                     </div>
-                                    <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">API &amp; Webhooks</h4>
+                                    <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">API & Webhooks</h4>
                                   </div>
-                                  <button
-                                    onClick={() => { setActiveSection(null); setTimeout(() => setActiveSection("api_keys"), 80); }}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-all"
-                                  >
-                                    <Radio className="h-3.5 w-3.5 text-emerald-500" />
-                                    Manage API &amp; Webhooks
-                                    <ArrowRight className="h-3.5 w-3.5" />
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => { setApiOverlayTab("api_keys"); setActiveSection("api_keys"); }}
+                                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-all"
+                                    >
+                                      <Key className="h-3.5 w-3.5 text-[var(--accent)]" />
+                                      API Keys
+                                    </button>
+                                    <button
+                                      onClick={() => { setApiOverlayTab("webhooks"); setActiveSection("api_keys"); }}
+                                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-emerald-500/10 border border-emerald-500/20 shadow-sm text-[12px] font-medium text-emerald-600 hover:bg-emerald-500/20 transition-all"
+                                    >
+                                      <Radio className="h-3.5 w-3.5" />
+                                      Webhooks
+                                    </button>
+                                  </div>
                                 </div>
                                 <div className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-hover)] p-4 text-[12px] text-[var(--text-secondary)]">
-                                  <p>Click <strong className="text-[var(--text-primary)]">Manage API &amp; Webhooks</strong> to provision REST API keys and real-time webhook endpoints for <strong className="text-[var(--text-primary)]">{selectedCompany?.name}</strong>.</p>
-                                  <p className="mt-1.5 flex items-start gap-1.5"><Zap className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span><strong>Webhooks</strong> auto-forward events in real-time. <strong>APIs</strong> require your system to poll for updates.</span></p>
+                                  <p>Click <strong className="text-[var(--text-primary)]">API Keys</strong> or <strong className="text-[var(--text-primary)]">Webhooks</strong> to manage integrations for <strong className="text-[var(--text-primary)]">{selectedCompany?.name}</strong>.</p>
+                                  <p className="mt-1.5 flex items-start gap-1.5"><Zap className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span>Webhooks auto-forward events in real-time. API keys require your system to poll for updates.</span></p>
                                 </div>
                               </div>
 
@@ -2776,7 +2810,7 @@ export function AdminSettings() {
 
 
       {/* API & Webhooks Overlay */}
-      {activeSection === "api_keys" && createPortal(
+      {(activeSection === "api_keys" || activeSection === "webhooks") && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
             className="absolute inset-0 bg-[var(--surface-base)]/80 backdrop-blur-md admin-overlay-backdrop"
@@ -2793,18 +2827,17 @@ export function AdminSettings() {
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
-                      <Key className="h-4 w-4 text-[var(--accent)]" />
-                    </div>
-                    <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-emerald-500/10 border border-emerald-500/20">
-                      <Radio className="h-4 w-4 text-emerald-500" />
-                    </div>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                    {apiOverlayTab === "api_keys" ? <Key className="h-4 w-4 text-[var(--accent)]" /> : <Radio className="h-4 w-4 text-emerald-500" />}
                   </div>
                   <div>
-                    <h2 className="text-[15px] font-bold text-[var(--text-primary)]">API &amp; Webhooks</h2>
+                    <h2 className="text-[15px] font-bold text-[var(--text-primary)]">
+                      {activeSection === "webhooks" || apiOverlayTab === "webhooks" ? "Real-Time Webhooks" : "REST API Keys"}
+                    </h2>
                     <p className="text-[11px] text-[var(--text-secondary)]">
-                      {hasRole(["super_admin"]) ? "Global provisioning across all organizations" : "Scoped to your organization"}
+                      {activeSection === "webhooks" || apiOverlayTab === "webhooks"
+                        ? "Push streaming endpoints — events auto-forward in real time"
+                        : "Programmatic REST credentials — requires client polling"}
                     </p>
                   </div>
                 </div>
@@ -2820,13 +2853,15 @@ export function AdminSettings() {
                 <ApiKeysSection
                   companies={companies}
                   branches={branches}
-                  companyId={hasRole(["super_admin"]) ? undefined : userData?.companyId}
+                  companyId={hasRole(["super_admin"]) ? undefined : (userData?.companyId ?? undefined)}
+                  initialTab={activeSection === "webhooks" || apiOverlayTab === "webhooks" ? "webhooks" : "api_keys"}
                 />
               </div>
             </div>
           </div>
         </div>, document.body
       )}
+
       {/* â”€â”€ Panel Provisioning Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeSection === "panels" && createPortal(
         <div className="fixed inset-0 z-[200]">

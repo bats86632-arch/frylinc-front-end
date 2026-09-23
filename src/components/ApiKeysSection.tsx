@@ -59,6 +59,12 @@ export function ApiKeysSection({
 }: ApiKeysSectionProps) {
   const [activeTab, setActiveTab] = useState<"api_keys" | "webhooks">(initialTab);
 
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
   // ── API Keys State ──────────────────────────────────────────────────────────
   const [keys, setKeys] = useState<ApiKeyRecord[]>([]);
   const [keysLoading, setKeysLoading] = useState(true);
@@ -111,9 +117,9 @@ export function ApiKeysSection({
       setKeysLoading(true);
       setKeyError(null);
       const data = await ApiKeyService.getApiKeys(companyId);
-      setKeys(data || []);
+      setKeys(Array.isArray(data) ? data : []);
     } catch (err: any) {
-      setKeyError(err.message || "Failed to load API keys");
+      setKeyError(err.response?.data?.error || err.message || "Failed to load API keys");
     } finally {
       setKeysLoading(false);
     }
@@ -124,9 +130,9 @@ export function ApiKeysSection({
       setWebhooksLoading(true);
       setWebhookError(null);
       const data = await WebhookService.getWebhooks(companyId);
-      setWebhooks(data || []);
+      setWebhooks(Array.isArray(data) ? data : []);
     } catch (err: any) {
-      setWebhookError(err.message || "Failed to load Webhooks");
+      setWebhookError(err.response?.data?.error || err.message || "Failed to load Webhooks");
     } finally {
       setWebhooksLoading(false);
     }

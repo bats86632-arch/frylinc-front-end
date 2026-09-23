@@ -7,6 +7,7 @@ import { AuthLayout } from "./layouts/AuthLayout";
 import { MainDashboardLayout } from "./layouts/MainDashboardLayout";
 import { PageLoader } from "./components/PageLoader";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const Login = lazy(() =>
   import("./pages/Login").then((m) => ({ default: m.Login })),
@@ -102,7 +103,9 @@ function App() {
                           "system_integrator",
                         ]}
                       >
-                        <AdminSettings />
+                        <ErrorBoundary fallbackTitle="Settings unavailable">
+                          <AdminSettings />
+                        </ErrorBoundary>
                       </ProtectedRoute>
                     }
                   />
