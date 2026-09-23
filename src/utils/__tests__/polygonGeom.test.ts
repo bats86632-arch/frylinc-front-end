@@ -5,6 +5,8 @@ import {
   rectToPoints,
   translatePolygon,
   clampPoint,
+  distToPolygonBoundary,
+  pointInPolygon,
 } from '../polygonGeom';
 
 describe('polygonGeom - translateEdge', () => {
@@ -39,5 +41,21 @@ describe('polygonGeom - translateEdge', () => {
 
     expect(updated[0].y).toBe(0);
     expect(updated[1].y).toBe(0);
+  });
+});
+
+describe('polygonGeom - distToPolygonBoundary & pointInPolygon', () => {
+  it('correctly calculates distance to boundary for interior and boundary points', () => {
+    // 20x20 square from (10, 10) to (30, 30)
+    const square = rectToPoints(10, 10, 20, 20);
+
+    // Center is (20, 20) -> distance to all 4 walls is 10
+    expect(distToPolygonBoundary({ x: 20, y: 20 }, square)).toBe(10);
+
+    // Point near top wall at (20, 11) -> distance to top wall is 1
+    expect(distToPolygonBoundary({ x: 20, y: 11 }, square)).toBeCloseTo(1, 4);
+
+    // Point right on the right wall at (30, 20) -> distance is 0
+    expect(distToPolygonBoundary({ x: 30, y: 20 }, square)).toBe(0);
   });
 });

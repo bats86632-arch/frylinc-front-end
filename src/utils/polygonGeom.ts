@@ -266,3 +266,19 @@ export function translateEdge(pts: PolyPoint[], edgeIdx: number, dx: number, dy:
   });
 }
 
+/**
+ * Minimum distance from point P to any boundary edge segment of the polygon.
+ */
+export function distToPolygonBoundary(p: PolyPoint, pts: PolyPoint[]): number {
+  if (pts.length < 2) return Infinity;
+  let minDist = Infinity;
+  const n = pts.length;
+  for (let i = 0; i < n; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % n];
+    const d = distToSegment(p, a, b);
+    if (d < minDist) minDist = d;
+  }
+  return minDist;
+}
+
