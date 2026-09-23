@@ -44,12 +44,15 @@ import {
   Smartphone,
   Download,
   Upload,
+  Radio,
+  Zap,
 } from "lucide-react";
 import apiClient from "../api/axios";
 import { CopyButton } from "../components/CopyButton";
 import { CreateUserModal } from "../components/CreateUserModal";
 import { ApiKeysSection } from "../components/ApiKeysSection";
 import { ApiKeyService } from "../api/ApiKeyService";
+import { WebhookService } from "../api/WebhookService";
 import { Key } from "lucide-react";
 
 
@@ -141,6 +144,7 @@ export function AdminSettings() {
   const [usersLoading, setUsersLoading] = useState(true);
   const [apiKeysCount, setApiKeysCount] = useState(0);
   const [apiKeysLoading, setApiKeysLoading] = useState(true);
+  const [webhooksCount, setWebhooksCount] = useState(0);
   const [editingUserData, setEditingUserData] = useState<User | null>(null);
   const [companySearchQuery, setCompanySearchQuery] = useState("");
   const [userSearchQuery, setUserSearchQuery] = useState("");
@@ -233,7 +237,7 @@ export function AdminSettings() {
     },
   });
 
-  const { hasRole } = useAuth();
+  const { hasRole, userData } = useAuth();
   const { panels, loading: panelsLoading } = usePanels();
   const [editingPanelData, setEditingPanelData] = useState<Panel | null>(null);
   const [editPanelFormLoading, setEditPanelFormLoading] = useState(false);
@@ -924,8 +928,12 @@ export function AdminSettings() {
   const loadApiKeys = async () => {
     setApiKeysLoading(true);
     try {
-      const data = await ApiKeyService.getApiKeys();
-      setApiKeysCount(data.length);
+      const [keys, webhooks] = await Promise.all([
+        ApiKeyService.getApiKeys(),
+        WebhookService.getWebhooks(),
+      ]);
+      setApiKeysCount(keys.length);
+      setWebhooksCount(webhooks.length);
     } catch (err) {
       console.error("Failed to load api keys:", err);
     } finally {
@@ -1216,39 +1224,52 @@ export function AdminSettings() {
           </div>
         </button>
 
-                {/* API Provisioning Card */}
-        {hasRole(["super_admin"]) && (
+        {/* API & Webhooks Card */}
+        {hasRole(["super_admin", "head_office"]) && (
           <button
             onClick={() => setActiveSection("api_keys")}
             className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
           >
             <div className="relative z-10">
               <div className="mb-5 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
-                  <Key className="h-6 w-6 text-[var(--accent)]" />
+                <div className="flex items-center gap-2">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                    <Key className="h-6 w-6 text-[var(--accent)]" />
+                  </div>
+                  <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-emerald-500/10 border border-emerald-500/20">
+                    <Radio className="h-3.5 w-3.5 text-emerald-500" />
+                  </div>
                 </div>
                 <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
               </div>
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
-                API Provisioning
+                API &amp; Webhooks
               </h3>
               <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
-                Manage global and organization-specific API keys and webhooks.
+                Provision REST API keys and real-time webhook endpoints. APIs require polling � webhooks auto-push events instantly.
               </p>
-              
-              <div className="pt-5 mt-auto border-t border-[var(--border-subtle)] flex items-center gap-3">
+              <div className="pt-4 mt-auto border-t border-[var(--border-subtle)] flex items-center gap-4">
                 <div className="flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
                   </span>
-                  <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
-                    {apiKeysLoading ? "-" : apiKeysCount}
+                  <span className="text-[12px] font-semibold text-[var(--text-primary)] tabular-nums">
+                    {apiKeysLoading ? "�" : apiKeysCount}
                   </span>
+                  <span className="text-[11px] text-[var(--text-secondary)]">keys</span>
                 </div>
-                <span className="text-[12px] text-[var(--text-secondary)]">
-                  {apiKeysLoading ? "? Loading..." : `keys active`}
-                </span>
+                <span className="text-[var(--border-default)]">�</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40 animate-ping" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  </span>
+                  <span className="text-[12px] font-semibold text-[var(--text-primary)] tabular-nums">
+                    {apiKeysLoading ? "�" : webhooksCount}
+                  </span>
+                  <span className="text-[11px] text-[var(--text-secondary)]">webhooks</span>
+                </div>
               </div>
             </div>
           </button>
@@ -2300,18 +2321,27 @@ export function AdminSettings() {
                                   })}
                                 </div>
                               )}
-                              
+
                               <div className="mt-8 border-t border-[var(--border-subtle)] pt-6">
                                 <div className="flex items-center justify-between mb-4">
                                   <div className="flex items-center gap-2">
                                     <div className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm">
                                       <Key className="h-3 w-3 text-[var(--text-secondary)]" />
                                     </div>
-                                    <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">API Keys & Real-Time Webhooks</h4>
+                                    <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">API &amp; Webhooks</h4>
                                   </div>
+                                  <button
+                                    onClick={() => { setActiveSection(null); setTimeout(() => setActiveSection("api_keys"), 80); }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-all"
+                                  >
+                                    <Radio className="h-3.5 w-3.5 text-emerald-500" />
+                                    Manage API &amp; Webhooks
+                                    <ArrowRight className="h-3.5 w-3.5" />
+                                  </button>
                                 </div>
-                                <div className="h-[400px] border border-[var(--border-subtle)] rounded-[8px] overflow-hidden relative">
-                                  <ApiKeysSection companyId={selectedCompany.id} companies={companies} branches={branches} />
+                                <div className="rounded-[8px] border border-[var(--border-subtle)] bg-[var(--surface-hover)] p-4 text-[12px] text-[var(--text-secondary)]">
+                                  <p>Click <strong className="text-[var(--text-primary)]">Manage API &amp; Webhooks</strong> to provision REST API keys and real-time webhook endpoints for <strong className="text-[var(--text-primary)]">{selectedCompany?.name}</strong>.</p>
+                                  <p className="mt-1.5 flex items-start gap-1.5"><Zap className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span><strong>Webhooks</strong> auto-forward events in real-time. <strong>APIs</strong> require your system to poll for updates.</span></p>
                                 </div>
                               </div>
 
@@ -2745,7 +2775,7 @@ export function AdminSettings() {
       )}
 
 
-      {/* API Keys Overlay */}
+      {/* API & Webhooks Overlay */}
       {activeSection === "api_keys" && createPortal(
         <div className="fixed inset-0 z-[200]">
           <div
@@ -2753,21 +2783,50 @@ export function AdminSettings() {
             onClick={() => setActiveSection(null)}
           />
           <div className="fixed inset-x-0 bottom-0 top-[6vh] sm:inset-x-[2.5vw] sm:top-[4vh] sm:bottom-[2vh] z-[201] flex flex-col admin-overlay-drawer">
-            <div className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden relative">
-              <button
-                onClick={() => setActiveSection(null)}
-                className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-              <div className="h-full overflow-y-auto">
-                <ApiKeysSection companies={companies} branches={branches} />
+            <div className="flex flex-col flex-1 min-h-0 bg-[var(--surface-overlay)] rounded-t-[20px] sm:rounded-[20px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden">
+              {/* Sticky header */}
+              <div className="shrink-0 flex items-center justify-between border-b border-[var(--border-subtle)] px-5 sm:px-7 py-4 bg-[var(--surface-overlay)]">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setActiveSection(null)}
+                    className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                      <Key className="h-4 w-4 text-[var(--accent)]" />
+                    </div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-emerald-500/10 border border-emerald-500/20">
+                      <Radio className="h-4 w-4 text-emerald-500" />
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-[15px] font-bold text-[var(--text-primary)]">API &amp; Webhooks</h2>
+                    <p className="text-[11px] text-[var(--text-secondary)]">
+                      {hasRole(["super_admin"]) ? "Global provisioning across all organizations" : "Scoped to your organization"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setActiveSection(null)}
+                  className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-default)] transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto">
+                <ApiKeysSection
+                  companies={companies}
+                  branches={branches}
+                  companyId={hasRole(["super_admin"]) ? undefined : userData?.companyId}
+                />
               </div>
             </div>
           </div>
         </div>, document.body
       )}
-
       {/* â”€â”€ Panel Provisioning Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeSection === "panels" && createPortal(
         <div className="fixed inset-0 z-[200]">
