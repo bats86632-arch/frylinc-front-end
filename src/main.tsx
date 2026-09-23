@@ -7,6 +7,7 @@ import { isNative, isAndroid } from './platform/runtime';
 import { configureKeyboard } from './platform/keyboard';
 import { configureStatusBar } from './platform/status-bar';
 import { initLiveUpdates } from './platform/updater';
+import { getInitialTheme } from './contexts/themeCore';
 
 // ── Service Worker ───────────────────────────────────────────────────────────
 // Only register the PWA service worker on web. Inside a Capacitor native
@@ -51,8 +52,8 @@ if (isAndroid) {
 if (isNative) {
   // Configure keyboard resize behaviour
   configureKeyboard();
-  // Set status bar style to match the dark theme (will update on theme toggle)
-  configureStatusBar('dark');
+  // Set status bar style to match current initial theme (will update on theme toggle)
+  configureStatusBar(getInitialTheme());
   // Initialize Over-The-Air Live Updates (signals successful startup)
   initLiveUpdates();
 }
