@@ -663,11 +663,10 @@ nav a {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ANDROID NATIVE ERGONOMIC & TOUCH ENHANCEMENTS
+   ANDROID NATIVE DESIGN ENHANCEMENTS & ELEVATION
    Activates inside the Android APK via root .platform-android class.
-   All theme colors, backgrounds, borders, and surfaces strictly inherit
-   from :root (dark) and :root[data-theme="light"] (light) for 100% visual
-   consistency between the web app and mobile APK.
+   Gives the mobile app stylish elevation, modern rounded cards, sleek shadows,
+   and responsive tactile feedback while strictly respecting both Dark and Light themes.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .platform-android {
@@ -675,6 +674,11 @@ nav a {
   -webkit-touch-callout: none;
   user-select: none;
   -webkit-user-select: none;
+
+  /* Modern mobile geometric tokens */
+  --radius-card: 14px;
+  --radius-element: 10px;
+  --radius-small: 6px;
 }
 
 /* Allow text selection inside form inputs and readouts */
@@ -690,7 +694,7 @@ nav a {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Native micro-touch responsiveness */
+/* Native micro-touch tactile feedback */
 .platform-android button:active,
 .platform-android a:active,
 .platform-android [role="button"]:active {
@@ -708,11 +712,160 @@ nav a {
   transform: scale(0.97);
 }
 
-/* GMS / MapZones toolbar micro-blur on native */
+/* ── 1. Stylish Cards & Surfaces (Dark Theme - Default) ──────────────────── */
+
+.platform-android .surface-panel {
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.platform-android .surface-muted {
+  border-radius: var(--radius-card);
+}
+
+.platform-android .surface-alarm {
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 20px -2px rgba(209, 52, 56, 0.28);
+}
+
+.platform-android .surface-panel.border-t-2 {
+  border-radius: var(--radius-card);
+  box-shadow: 0 6px 22px -3px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ── 2. Stylish Cards & Surfaces (Light Theme) ───────────────────────────── */
+
+.platform-android[data-theme="light"] .surface-panel {
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 16px -2px rgba(0, 20, 40, 0.08), 0 1px 3px rgba(0, 20, 40, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.platform-android[data-theme="light"] .surface-alarm {
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 20px -2px rgba(196, 43, 47, 0.16);
+}
+
+.platform-android[data-theme="light"] .surface-panel.border-t-2 {
+  border-radius: var(--radius-card);
+  box-shadow: 0 6px 20px -3px rgba(0, 20, 40, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* ── 3. Translucent Frosted Glass Header ─────────────────────────────────── */
+
+.platform-android header {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Dark mode header: semi-translucent dark slate with subtle border */
+.platform-android:not([data-theme="light"]) header {
+  background: rgba(17, 18, 20, 0.85) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Light mode header: semi-translucent crisp light surface */
+.platform-android[data-theme="light"] header {
+  background: rgba(244, 245, 247, 0.88) !important;
+  border-bottom: 1px solid rgba(0, 20, 40, 0.08) !important;
+}
+
+.platform-android header button {
+  border-radius: 8px;
+  transition: all 120ms ease;
+}
+
+/* ── 4. Mobile Sidebar Drawer ────────────────────────────────────────────── */
+
+.platform-android aside {
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms ease;
+}
+
+/* Dark mode drawer: deep slate gradient with depth shadow */
+.platform-android:not([data-theme="light"]) aside {
+  background: linear-gradient(180deg, #17191d 0%, #111215 100%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 12px 0 36px rgba(0, 0, 0, 0.55);
+}
+
+.platform-android:not([data-theme="light"]) aside nav a {
+  margin: 3px 12px;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.platform-android:not([data-theme="light"]) aside nav a.border-\[var\(--accent\)\] {
+  background: linear-gradient(90deg, rgba(30, 107, 138, 0.22) 0%, rgba(30, 107, 138, 0.05) 100%) !important;
+  border-left: 3px solid var(--accent) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(30, 107, 138, 0.20);
+}
+
+/* Light mode drawer: clean white-to-light gradient with subtle soft shadow */
+.platform-android[data-theme="light"] aside {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f6fa 100%) !important;
+  border-right: 1px solid rgba(0, 20, 40, 0.08) !important;
+  box-shadow: 12px 0 36px rgba(0, 20, 40, 0.12);
+}
+
+.platform-android[data-theme="light"] aside nav a {
+  margin: 3px 12px;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.platform-android[data-theme="light"] aside nav a.border-\[var\(--accent\)\] {
+  background: linear-gradient(90deg, rgba(26, 96, 120, 0.12) 0%, rgba(26, 96, 120, 0.03) 100%) !important;
+  border-left: 3px solid var(--accent) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 2px 8px rgba(26, 96, 120, 0.10);
+  font-weight: 600;
+}
+
+/* ── 5. Form Controls & Floating Toolbars ─────────────────────────────────── */
+
+.platform-android .control-field {
+  border-radius: var(--radius-element);
+}
+
+.platform-android .control-field:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--border-focus) 25%, transparent);
+}
+
+.platform-android .btn-primary {
+  border-radius: var(--radius-element);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.platform-android:not([data-theme="light"]) .btn-primary {
+  box-shadow: 0 3px 12px rgba(30, 107, 138, 0.35);
+}
+
+.platform-android[data-theme="light"] .btn-primary {
+  box-shadow: 0 2px 10px rgba(26, 96, 120, 0.25);
+}
+
+/* Floating GMS / MapZones toolbars */
 .platform-android .map-zone-toolbar,
 .platform-android .zone-controls {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 12px;
+  box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.28);
+}
+
+/* Health status dot ambient glow */
+.platform-android .health-meter-dot {
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.45);
+}
+
+/* Cards on admin/settings */
+.platform-android .settings-card,
+.platform-android .admin-user-card {
+  border-radius: var(--radius-card);
 }
 
 /* Clean table borders on mobile */
