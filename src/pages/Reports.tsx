@@ -12,6 +12,7 @@ import {
   LayoutGrid, List, Terminal, X, RefreshCw, Copy, Check, Server
 } from "lucide-react";
 import * as xlsx from "xlsx";
+import { saveFile } from "../platform/filesystem";
 
 
 const formatTimestamp = (ts: any) => {
@@ -255,7 +256,7 @@ export function Reports() {
     return !isDuplicate;
   });
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (filteredLogs.length === 0) return;
     const exportData = filteredLogs.map(log => {
       let zoneNum = log.zone !== undefined && log.zone !== null ? String(log.zone) : 'N/A';
@@ -323,7 +324,16 @@ export function Reports() {
     const ws = xlsx.utils.json_to_sheet(exportData);
     const wb = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(wb, ws, "Audit Logs");
-    xlsx.writeFile(wb, `Audit_Logs_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const wbout = xlsx.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([wbout], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const filename = `Audit_Logs_${new Date().toISOString().split('T')[0]}.xlsx`;
+    await saveFile({
+      blob,
+      filename,
+      mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
   };
 
   if (!hasRole(["super_admin", "head_office", "system_integrator"])) {

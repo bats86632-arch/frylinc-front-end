@@ -6,9 +6,11 @@ import {
   ReactNode,
 } from "react";
 import { onSnapshot, collection, query, where } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { db, reconnectFirestore } from "../config/firebase";
 import { Panel } from "../types";
 import { useAuth } from "./AuthContext";
+import { useAppLifecycle } from "../platform/lifecycle";
+import { useNetworkStatus } from "../platform/network";
 
 interface PanelsContextType {
   panels: Panel[];
@@ -24,6 +26,23 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { userData } = useAuth();
+  const { connected } = useNetworkStatus();
+
+  // Reconnect Firestore when app transitions back to active/foreground
+  useAppLifecycle({
+    onStateChange: (state) => {
+      if (state === "active") {
+        reconnectFirestore();
+      }
+    },
+  });
+
+  // Reconnect Firestore when network connectivity is restored
+  useEffect(() => {
+    if (connected) {
+      reconnectFirestore();
+    }
+  }, [connected]);
 
   useEffect(() => {
     if (!userData) {
@@ -142,9 +161,11 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
   }, [userData]);
 
   const refreshPanels = async () => {
-    // refreshPanels is no longer strictly necessary because we are using onSnapshot,
-    // which automatically maintains real-time sync with the server.
-    console.log("Panels are in active state (real-time). Refresh not required.");
+    try {
+      await reconnectFirestore();
+    } catch (e) {
+      console.warn("Error refreshing Firestore network:", e);
+    }
   };
 
   const value = { panels, loading, error, refreshPanels };

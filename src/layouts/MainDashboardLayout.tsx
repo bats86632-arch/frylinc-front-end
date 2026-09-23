@@ -1,4 +1,6 @@
 import { formatPanelName } from '../utils/formatters';
+import { useNetworkStatus } from '../platform/network';
+import { useAppLifecycle } from '../platform/lifecycle';
 import { useMemo, useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -76,20 +78,21 @@ export function MainDashboardLayout() {
   const { branches } = useBranches();
   const location = useLocation();
   const navigate = useNavigate();
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const { connected: isOnline } = useNetworkStatus();
 
   const displayPhotoURL = userData?.photoURL || currentUser?.photoURL;
 
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
+  // ── Android hardware back button ─────────────────────────────────────────
+  // Priority: close topmost overlay → navigate back → minimize app
+  useAppLifecycle({
+    onBackButton: () => {
+      if (notificationOpen) { setNotificationOpen(false); return true; }
+      if (userMenuOpen) { setUserMenuOpen(false); return true; }
+      if (sidebarOpen) { setSidebarOpen(false); return true; }
+      // Let the default handler (window.history.back / minimize) take over
+      return false;
+    },
+  });
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -137,10 +140,128 @@ export function MainDashboardLayout() {
       .join(" ") || "End User";
 
   const filteredNav = navigation.filter((item) => hasRole(item.roles));
+
+  // ── Optimistic notification state (seen & cleared serials) ───────────────
+  const [optimisticallySeenSerials, setOptimisticallySeenSerials] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(`notifications_seen_${userData?.uid}`);
+      return saved ? new Set(JSON.parse(saved)) : new Set<string>();
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  const [optimisticallyClearedSerials, setOptimisticallyClearedSerials] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(`notifications_cleared_${userData?.uid}`);
+      return saved ? new Set(JSON.parse(saved)) : new Set<string>();
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  // Re-sync optimistic state when user changes
+  useEffect(() => {
+    const uid = userData?.uid;
+    if (!uid) {
+      setOptimisticallySeenSerials(new Set());
+      setOptimisticallyClearedSerials(new Set());
+      return;
+    }
+    try {
+      const savedSeen = localStorage.getItem(`notifications_seen_${uid}`);
+      const savedCleared = localStorage.getItem(`notifications_cleared_${uid}`);
+      setOptimisticallySeenSerials(savedSeen ? new Set(JSON.parse(savedSeen)) : new Set());
+      setOptimisticallyClearedSerials(savedCleared ? new Set(JSON.parse(savedCleared)) : new Set());
+    } catch {
+      setOptimisticallySeenSerials(new Set());
+      setOptimisticallyClearedSerials(new Set());
+    }
+  }, [userData?.uid]);
+
+  // Synchronize optimistic state with incoming Firestore panels:
+  // - If a panel has returned to normal (no alarm zones), prune it from optimistic sets so future alarms can show.
+  // - If Firestore confirmed seenBy or clearedBy, prune from local optimistic sets to keep memory clean.
+  useEffect(() => {
+    if (!userData?.uid || !panels || panels.length === 0) return;
+    const uid = userData.uid;
+
+    setOptimisticallyClearedSerials(prev => {
+      let changed = false;
+      const next = new Set(prev);
+
+      for (const serial of next) {
+        const panel = panels.find(p => p.serial === serial);
+        if (!panel) {
+          next.delete(serial);
+          changed = true;
+          continue;
+        }
+
+        const hasAlarm = panel.zones?.some(z => z === 2 || z === 5);
+        if (!hasAlarm) {
+          // Alarm condition resolved on the panel
+          next.delete(serial);
+          changed = true;
+        } else if (panel.clearedBy?.[uid]) {
+          // Persisted in Firestore, can safely prune local entry
+          next.delete(serial);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        try {
+          localStorage.setItem(`notifications_cleared_${uid}`, JSON.stringify([...next]));
+        } catch {
+          // ignore storage errors
+        }
+        return next;
+      }
+      return prev;
+    });
+
+    setOptimisticallySeenSerials(prev => {
+      let changed = false;
+      const next = new Set(prev);
+
+      for (const serial of next) {
+        const panel = panels.find(p => p.serial === serial);
+        if (!panel) {
+          next.delete(serial);
+          changed = true;
+          continue;
+        }
+
+        const hasAlarm = panel.zones?.some(z => z === 2 || z === 5);
+        if (!hasAlarm) {
+          next.delete(serial);
+          changed = true;
+        } else if (panel.seenBy?.[uid]) {
+          next.delete(serial);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        try {
+          localStorage.setItem(`notifications_seen_${uid}`, JSON.stringify([...next]));
+        } catch {
+          // ignore storage errors
+        }
+        return next;
+      }
+      return prev;
+    });
+  }, [panels, userData?.uid]);
+
   const notifications = useMemo(() => {
     const notifs: Array<{ id: string; serial: string; title: string; message: string; seen: boolean }> = [];
+    const uid = userData?.uid || "";
+
     (panels || []).forEach(panel => {
-      if (panel.clearedBy?.[userData?.uid || ""]) return;
+      const isCleared = (uid && !!panel.clearedBy?.[uid]) || optimisticallyClearedSerials.has(panel.serial);
+      if (isCleared) return;
 
       const branchName = branches.find(b => b.id === panel.branchId)?.name || 'Unknown Branch';
       const panelName = formatPanelName(panel.name || "Unknown Panel", panel.panelType);
@@ -149,6 +270,9 @@ export function MainDashboardLayout() {
       const isDialer = panel.panelType === "Dialer";
       const isHealth = panel.panelType === "Health";
       const isUnknown = !isFire && !isSecurity && !isDialer && !isHealth;
+
+      const isSeen = (uid && !!panel.seenBy?.[uid]) || optimisticallySeenSerials.has(panel.serial);
+
       panel.zones?.forEach((z, i) => {
         const zoneNum = i + 1;
         let zoneDisplay = `Zone ${zoneNum}`;
@@ -174,7 +298,7 @@ export function MainDashboardLayout() {
               serial: panel.serial,
               title: `${zoneDisplay} Alert: ${baseTitle}`,
               message: `${zoneDisplay} condition detected.`,
-              seen: !!panel.seenBy?.[userData?.uid || ""]
+              seen: isSeen
             });
           } else {
             notifs.push({
@@ -182,7 +306,7 @@ export function MainDashboardLayout() {
               serial: panel.serial,
               title: `Fire Alert: ${baseTitle}`,
               message: `Fire detected in ${zoneDisplay}.`,
-              seen: !!panel.seenBy?.[userData?.uid || ""]
+              seen: isSeen
             });
           }
         } else if (z === 5) {
@@ -191,32 +315,113 @@ export function MainDashboardLayout() {
             serial: panel.serial,
             title: `Isolate Alert: ${baseTitle}`,
             message: `${zoneDisplay} has been isolated.`,
-            seen: !!panel.seenBy?.[userData?.uid || ""]
+            seen: isSeen
           });
         }
       });
     });
     return notifs;
-  }, [panels, branches, userData?.uid]);
+  }, [panels, branches, userData?.uid, optimisticallySeenSerials, optimisticallyClearedSerials]);
+
   const unseenCount = notifications.filter(n => !n.seen).length;
 
   const toggleNotifications = () => {
     if (!notificationOpen) {
       const unseenPanels = notifications.filter(n => !n.seen);
       const unseenSerials = [...new Set(unseenPanels.map(p => p.serial))];
-      unseenSerials.forEach(serial => {
-        PanelService.markNotificationSeen(serial).catch(console.error);
-      });
+      
+      if (unseenSerials.length > 0) {
+        // Optimistically mark all current unseen serials as seen immediately (0ms badge clear)
+        setOptimisticallySeenSerials(prev => {
+          const next = new Set(prev);
+          unseenSerials.forEach(s => next.add(s));
+          try {
+            if (userData?.uid) {
+              localStorage.setItem(`notifications_seen_${userData.uid}`, JSON.stringify([...next]));
+            }
+          } catch {
+            // ignore
+          }
+          return next;
+        });
+
+        // Fire-and-forget backend sync with automatic retry
+        unseenSerials.forEach(serial => {
+          PanelService.markNotificationSeen(serial).catch(err => {
+            console.error(`Failed to mark notification seen for ${serial}:`, err);
+          });
+        });
+      }
     }
     setNotificationOpen(!notificationOpen);
   };
 
-  const clearAllNotifications = async () => {
-    try {
-      const serialsToClear = [...new Set(notifications.map(n => n.serial))];
-      if (serialsToClear.length > 0) {
-        await PanelService.clearAllNotifications(serialsToClear);
+  const clearNotification = (serial: string) => {
+    // Optimistically remove this notification from the UI immediately (0ms)
+    setOptimisticallyClearedSerials(prev => {
+      const next = new Set(prev);
+      next.add(serial);
+      try {
+        if (userData?.uid) {
+          localStorage.setItem(`notifications_cleared_${userData.uid}`, JSON.stringify([...next]));
+        }
+      } catch {
+        // ignore
       }
+      return next;
+    });
+
+    setOptimisticallySeenSerials(prev => {
+      const next = new Set(prev);
+      next.add(serial);
+      try {
+        if (userData?.uid) {
+          localStorage.setItem(`notifications_seen_${userData.uid}`, JSON.stringify([...next]));
+        }
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+
+    PanelService.clearNotification(serial).catch(err => {
+      console.error(`Failed to clear notification for ${serial}:`, err);
+    });
+  };
+
+  const clearAllNotifications = async () => {
+    const serialsToClear = [...new Set(notifications.map(n => n.serial))];
+    if (serialsToClear.length === 0) return;
+
+    // Optimistically clear all notifications from the UI immediately (0ms)
+    setOptimisticallyClearedSerials(prev => {
+      const next = new Set(prev);
+      serialsToClear.forEach(s => next.add(s));
+      try {
+        if (userData?.uid) {
+          localStorage.setItem(`notifications_cleared_${userData.uid}`, JSON.stringify([...next]));
+        }
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+
+    setOptimisticallySeenSerials(prev => {
+      const next = new Set(prev);
+      serialsToClear.forEach(s => next.add(s));
+      try {
+        if (userData?.uid) {
+          localStorage.setItem(`notifications_seen_${userData.uid}`, JSON.stringify([...next]));
+        }
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+
+    try {
+      await PanelService.clearAllNotifications(serialsToClear);
     } catch (error) {
       console.error("Failed to clear notifications:", error);
     }
@@ -259,7 +464,7 @@ export function MainDashboardLayout() {
           <button
             onClick={() => {
               setSidebarOpen(false);
-              window.location.reload();
+              navigate('/');
             }}
             className="flex items-center gap-3.5 text-left"
           >
@@ -451,7 +656,7 @@ export function MainDashboardLayout() {
                                 </p>
                               </div>
                               <button
-                                onClick={() => PanelService.clearNotification(notification.serial).catch(console.error)}
+                                onClick={() => clearNotification(notification.serial)}
                                 className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1"
                                 aria-label="Clear notification"
                               >

@@ -108,7 +108,7 @@ function getAvailableCompanies(
   actorData: User | null,
   allCompanies: Company[],
 ): Company[] {
-  if (actorRole === "super_admin") return allCompanies;
+  if (actorRole === "super_admin" || actorRole === "system_service_account") return allCompanies;
 
   if (actorRole === "head_office" && actorData?.companyId) {
     return allCompanies.filter((c) => c.id === actorData.companyId);
@@ -119,7 +119,7 @@ function getAvailableCompanies(
     return allCompanies.filter((c) => assignedCompanyIds.includes(c.id));
   }
 
-  return [];
+  return allCompanies;
 }
 
 function getAvailableBranches(
@@ -130,9 +130,15 @@ function getAvailableBranches(
 ): Branch[] {
   if (!companyId) return [];
 
-  const companyBranches = allBranches.filter((b) => b.companyId === companyId);
+  const companyBranches = allBranches.filter(
+    (b) => b.companyId === companyId || (b as any).company_id === companyId,
+  );
 
-  if (actorRole === "super_admin" || actorRole === "head_office") {
+  if (
+    actorRole === "super_admin" ||
+    actorRole === "system_service_account" ||
+    actorRole === "head_office"
+  ) {
     return companyBranches;
   }
 
@@ -142,7 +148,7 @@ function getAvailableBranches(
     return companyBranches.filter((b) => allowed.includes(b.id));
   }
 
-  return [];
+  return companyBranches;
 }
 
 function isCompanyAutoSet(actorRole: Role, actorData: any): boolean {
@@ -176,7 +182,8 @@ export function CreateUserModal({
 }: CreateUserModalProps) {
   const { role: actorRole, userData: actorData } = useAuth();
   const { companies, loading: companiesLoading } = useCompanies();
-  const { branches, loading: branchesLoading } = useBranches();
+  const { branches, loading: branchesLoading, reloadBranches } = useBranches();
+  const [extraBranches, setExtraBranches] = useState<Branch[]>([]);
 
   // ── Local state ──
   const [selectedRole, setSelectedRole] = useState<Role | "">("");
@@ -198,6 +205,35 @@ export function CreateUserModal({
     resolver: zodResolver(schema),
   });
 
+  const allModalBranches = useMemo(() => {
+    const map = new Map<string, Branch>();
+    for (const b of branches) {
+      if (b.id) map.set(b.id, b);
+    }
+    for (const b of extraBranches) {
+      if (b.id) map.set(b.id, b);
+    }
+    return Array.from(map.values());
+  }, [branches, extraBranches]);
+
+  const fetchBranchesForCompany = useCallback(async (compId: string): Promise<Branch[]> => {
+    if (!compId) return [];
+    try {
+      const fetched = await BranchService.getBranches(compId, true);
+      if (fetched && fetched.length > 0) {
+        setExtraBranches((prev) => {
+          const existingIds = new Set(prev.map((b) => b.id));
+          const newBranches = fetched.filter((b) => !existingIds.has(b.id));
+          return [...prev, ...newBranches];
+        });
+        return fetched;
+      }
+    } catch (err) {
+      console.warn("Failed to fetch branches for company:", compId, err);
+    }
+    return [];
+  }, []);
+
   // ── Derived data ──
   const creatableRoles = useMemo(
     () => (actorRole ? getCreatableRoles(actorRole, !!actorData?.system_service_account) : []),
@@ -213,9 +249,9 @@ export function CreateUserModal({
   const availableBranches = useMemo(
     () =>
       actorRole
-        ? getAvailableBranches(actorRole, actorData, branches, selectedCompanyId)
+        ? getAvailableBranches(actorRole, actorData, allModalBranches, selectedCompanyId)
         : [],
-    [actorRole, actorData, branches, selectedCompanyId],
+    [actorRole, actorData, allModalBranches, selectedCompanyId],
   );
 
   const actorCompanyAutoSet = useMemo(
@@ -226,6 +262,7 @@ export function CreateUserModal({
   // ── Reset/populate on open or user change ──
   useEffect(() => {
     if (!isOpen) return;
+    reloadBranches();
 
     if (isEditMode && editingUser) {
       // Edit mode: pre-populate
@@ -237,14 +274,24 @@ export function CreateUserModal({
       setSelectedRole(editingUser.role);
 
       if (editingUser.role === "system_integrator") {
-        setSiAssignments(editingUser.assignments || {});
-        const firstComp = Object.keys(editingUser.assignments || {})[0] || "";
+        const assignments = editingUser.assignments || {};
+        setSiAssignments(assignments);
+        const compIds = Object.keys(assignments);
+        const firstComp = compIds[0] || editingUser.companyId || "";
         setSelectedCompanyId(firstComp);
         setSelectedBranchIds([]);
+
+        // Preload branches for all assigned companies
+        compIds.forEach((compId) => {
+          fetchBranchesForCompany(compId);
+        });
       } else {
         setSelectedCompanyId(editingUser.companyId || "");
         setSelectedBranchIds(editingUser.branchIds || []);
         setSiAssignments({});
+        if (editingUser.companyId) {
+          fetchBranchesForCompany(editingUser.companyId);
+        }
       }
     } else {
       // Create mode: reset everything
@@ -253,9 +300,10 @@ export function CreateUserModal({
       setSelectedCompanyId("");
       setSelectedBranchIds([]);
       setSiAssignments({});
+      setExtraBranches([]);
       setShowPassword(false);
     }
-  }, [isOpen, editingUser, isEditMode, reset]);
+  }, [isOpen, editingUser, isEditMode, reset, reloadBranches, fetchBranchesForCompany]);
 
   // ── Auto-set company for HO/SI actors ──
   useEffect(() => {
@@ -278,7 +326,10 @@ export function CreateUserModal({
     if (selectedRole !== "system_integrator") {
       setSelectedBranchIds([]);
     }
-  }, [selectedCompanyId, selectedRole]);
+    if (selectedCompanyId && selectedRole === "end_user") {
+      fetchBranchesForCompany(selectedCompanyId);
+    }
+  }, [selectedCompanyId, selectedRole, fetchBranchesForCompany]);
 
   // ── Submission ──
   const onSubmit = async (formData: CreateFormData | EditFormData) => {
@@ -298,9 +349,14 @@ export function CreateUserModal({
         finalBranchIds = [];
       } else if (selectedRole === "system_integrator") {
         finalAssignments = siAssignments;
-        const firstComp = Object.keys(siAssignments)[0];
-        finalCompanyId = firstComp || undefined;
-        finalBranchIds = firstComp ? siAssignments[firstComp] : [];
+        const compKeys = Object.keys(siAssignments);
+        const primaryComp =
+          (selectedCompanyId && siAssignments[selectedCompanyId] ? selectedCompanyId : null) ||
+          (editingUser?.companyId && siAssignments[editingUser.companyId] ? editingUser.companyId : null) ||
+          compKeys[0] ||
+          undefined;
+        finalCompanyId = primaryComp;
+        finalBranchIds = primaryComp ? (siAssignments[primaryComp] || []) : [];
       } else {
         // end_user
         finalCompanyId = selectedCompanyId || undefined;
@@ -346,10 +402,26 @@ export function CreateUserModal({
   };
 
   // ── SI: Add company to assignments ──
-  const handleAddSiCompany = (companyId: string) => {
+  const handleAddSiCompany = async (companyId: string) => {
     if (!companyId || siAssignments[companyId]) return;
-    const compBranches = getAvailableBranches(actorRole!, actorData, branches, companyId);
-    setSiAssignments((prev) => ({ ...prev, [companyId]: compBranches.map(b => b.id) }));
+    let compBranches = getAvailableBranches(
+      actorRole || "super_admin",
+      actorData,
+      allModalBranches,
+      companyId,
+    );
+
+    if (compBranches.length === 0) {
+      const fetched = await fetchBranchesForCompany(companyId);
+      if (fetched.length > 0) {
+        compBranches = fetched;
+      }
+    }
+
+    setSiAssignments((prev) => ({
+      ...prev,
+      [companyId]: compBranches.map((b) => b.id),
+    }));
   };
 
   const handleRemoveSiCompany = (companyId: string) => {
@@ -784,9 +856,9 @@ export function CreateUserModal({
                                         );
                                         const compBranches =
                                           getAvailableBranches(
-                                            actorRole!,
+                                            actorRole || "super_admin",
                                             actorData,
-                                            branches,
+                                            allModalBranches,
                                             compId,
                                           );
 

@@ -74,15 +74,11 @@ export function Login() {
           const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/system/health/verify`, {
             method: "POST",
             headers: { 
-              "Content-Type": "application/json",
-              "x-system-maintenance-account": import.meta.env.VITE_SYSTEM_MAINTENANCE_ACCOUNT || "",
-              "x-system-maintenance-key": import.meta.env.VITE_SYSTEM_MAINTENANCE_KEY || ""
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({ 
               email: data.email, 
-              password: data.password,
-              account: import.meta.env.VITE_SYSTEM_MAINTENANCE_ACCOUNT,
-              key: import.meta.env.VITE_SYSTEM_MAINTENANCE_KEY
+              password: data.password
             })
           });
           if (res.ok) {

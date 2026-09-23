@@ -3,13 +3,13 @@ import { BranchService } from '../api/BranchService';
 import { Branch } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
-export function useBranches() {
+export function useBranches(companyId?: string) {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { userData } = useAuth();
 
-  const fetchBranches = useCallback(async () => {
+  const fetchBranches = useCallback(async (forceRefresh = false) => {
     if (!userData) {
       setBranches([]);
       setLoading(false);
@@ -17,7 +17,10 @@ export function useBranches() {
     }
     try {
       setLoading(true);
-      const data = await BranchService.getBranches();
+      if (forceRefresh) {
+        BranchService.invalidateCache();
+      }
+      const data = await BranchService.getBranches(companyId, forceRefresh);
       setBranches(data);
       setError(null);
     } catch (err: unknown) {
@@ -26,11 +29,11 @@ export function useBranches() {
     } finally {
       setLoading(false);
     }
-  }, [userData]);
+  }, [userData, companyId]);
 
   useEffect(() => {
     fetchBranches();
   }, [fetchBranches]);
 
-  return { branches, loading, error, reloadBranches: fetchBranches };
+  return { branches, loading, error, reloadBranches: () => fetchBranches(true) };
 }

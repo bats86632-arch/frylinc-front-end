@@ -2307,7 +2307,7 @@ export function AdminSettings() {
                                     <div className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] shadow-sm">
                                       <Key className="h-3 w-3 text-[var(--text-secondary)]" />
                                     </div>
-                                    <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">Organization API Keys</h4>
+                                    <h4 className="text-[13px] font-semibold text-[var(--text-primary)]">API Keys & Real-Time Webhooks</h4>
                                   </div>
                                 </div>
                                 <div className="h-[400px] border border-[var(--border-subtle)] rounded-[8px] overflow-hidden relative">
@@ -2487,7 +2487,7 @@ export function AdminSettings() {
           const isSelected = selectedUserCompanyId === company.id;
           const userCount = isUnassigned 
             ? filteredUsers.filter(u => !u.companyId).length 
-            : filteredUsers.filter(u => u.companyId === company.id).length;
+            : filteredUsers.filter(u => u.companyId === company.id || (u.assignments && Object.prototype.hasOwnProperty.call(u.assignments, company.id))).length;
           
           return (
             <button
@@ -2553,7 +2553,7 @@ export function AdminSettings() {
 
       const companyUsers = isUnassigned 
         ? filteredUsers.filter(u => !u.companyId)
-        : filteredUsers.filter(u => u.companyId === selectedCompany.id);
+        : filteredUsers.filter(u => u.companyId === selectedCompany.id || (u.assignments && Object.prototype.hasOwnProperty.call(u.assignments, selectedCompany.id)));
 
       const companyBranches = isUnassigned ? [] : branches.filter(b => b.companyId === selectedCompany.id);
       
@@ -2618,7 +2618,13 @@ export function AdminSettings() {
             ) : (
               <div className="space-y-4">
                 {companyBranches.map(branch => {
-                  const assignedUsers = companyUsers.filter(u => u.branchIds?.includes(branch.id));
+                  const assignedUsers = companyUsers.filter((u) => {
+                    if (u.role === "system_integrator" && u.assignments) {
+                      const compBranches = u.assignments[selectedCompany.id] || [];
+                      return compBranches.includes(branch.id) || compBranches.includes("*");
+                    }
+                    return u.branchIds?.includes(branch.id);
+                  });
                   const isExpanded = expandedUserBranches[`${selectedCompany.id}-${branch.id}`];
                   const displayedUsers = isExpanded ? assignedUsers : assignedUsers.slice(0, 5);
 

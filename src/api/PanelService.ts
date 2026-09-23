@@ -3,6 +3,20 @@ import { Panel, Event, CommandResponse } from '../types';
 import { db } from '../config/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
+async function retryOperation<T>(
+  operation: () => Promise<T>,
+  retries: number = 2,
+  delayMs: number = 500
+): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (retries <= 0) throw error;
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return retryOperation(operation, retries - 1, delayMs * 2);
+  }
+}
+
 export const PanelService = {
   async getPanels(): Promise<Panel[]> {
     const response = await apiClient.get('/panels');
@@ -94,15 +108,15 @@ export const PanelService = {
   },
 
   async markNotificationSeen(serial: string): Promise<void> {
-    await apiClient.post(`/panels/${serial}/notifications/seen`);
+    await retryOperation(() => apiClient.post(`/panels/${serial}/notifications/seen`));
   },
 
   async clearNotification(serial: string): Promise<void> {
-    await apiClient.post(`/panels/${serial}/notifications/clear`);
+    await retryOperation(() => apiClient.post(`/panels/${serial}/notifications/clear`));
   },
 
   async clearAllNotifications(serials: string[]): Promise<void> {
-    await apiClient.post(`/notifications/clear-all`, { serials });
+    await retryOperation(() => apiClient.post(`/notifications/clear-all`, { serials }));
   },
 
   async deletePanel(serial: string): Promise<void> {

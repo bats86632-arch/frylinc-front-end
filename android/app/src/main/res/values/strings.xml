@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Fyrlinc</string>
+    <string name="title_activity_main">Fyrlinc</string>
+    <string name="package_name">com.fyrlinc.app</string>
+    <string name="custom_url_scheme">com.fyrlinc.app</string>
+</resources>

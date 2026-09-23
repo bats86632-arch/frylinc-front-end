@@ -73,7 +73,12 @@
 
     /* ── Safe Areas ── */
     --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+
+    /* ── Keyboard (set dynamically by platform/keyboard.ts on native) ── */
+    --keyboard-height: 0px;
 
     /* ── Typography ── */
     font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -636,3 +641,208 @@ input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
 }
+
+/* ── Native / Capacitor tweaks ─────────────────────────────────────────────── */
+
+/* Eliminate 300ms tap delay on mobile — safe on modern browsers */
+html {
+  touch-action: manipulation;
+}
+
+/* Prevent rubber-band overscroll in Capacitor WebView (feels more app-like) */
+body {
+  overscroll-behavior: none;
+}
+
+/* Prevent text selection on interactive elements (app-like feel on native) */
+button,
+[role="button"],
+nav a {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANDROID-EXCLUSIVE DESIGN ENHANCEMENTS
+   Only activates inside the Android APK via root .platform-android class.
+   The web app and desktop experience remain 100% identical and unaffected.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.platform-android {
+  /* ── Deep OLED mobile contrast palette ── */
+  --surface-base: #0b0c0e;
+  --surface-raised: #131519;
+  --surface-elevated: #1a1d23;
+  --surface-overlay: #15181d;
+  --surface-hover: #1e2229;
+
+  /* ── Vibrant mobile accent with subtle cyan glow ── */
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --accent-muted: rgba(2, 132, 199, 0.12);
+  --accent-border: rgba(2, 132, 199, 0.28);
+  --accent-soft: rgba(2, 132, 199, 0.08);
+
+  /* ── High-DPI mobile border highlights ── */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-default: rgba(255, 255, 255, 0.11);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --border-focus: rgba(2, 132, 199, 0.55);
+
+  /* ── Softer, modern touch radiuses ── */
+  --radius-card: 14px;
+  --radius-element: 10px;
+  --radius-small: 6px;
+
+  /* ── Ambient mobile elevation & micro-highlights ── */
+  --shadow-low: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-mid: 0 6px 18px rgba(0, 0, 0, 0.48);
+  --shadow-high: 0 12px 36px rgba(0, 0, 0, 0.6);
+  --shadow-panel: 0 3px 14px -2px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Light theme support on Android */
+.platform-android[data-theme="light"] {
+  --surface-base: #f1f3f7;
+  --surface-raised: #ffffff;
+  --surface-elevated: #f8fafc;
+  --surface-overlay: #f4f6fa;
+  --surface-hover: #eaeef5;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.10);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --shadow-panel: 0 2px 10px -2px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+/* ── 1. Boxes, Cards & Surfaces (All 5 Tabs) ────────────────────────────── */
+
+.platform-android .surface-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0) 100%), var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: 0 3px 14px -2px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.platform-android button.surface-panel:active {
+  transform: scale(0.99);
+}
+
+.platform-android .surface-muted {
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+}
+
+.platform-android .surface-alarm {
+  background: linear-gradient(180deg, rgba(209, 52, 56, 0.16) 0%, rgba(209, 52, 56, 0.06) 100%);
+  border: 1px solid rgba(209, 52, 56, 0.35);
+  border-left: 3px solid var(--color-error);
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 20px -2px rgba(209, 52, 56, 0.22);
+}
+
+/* ── 2. Header & Navigation Polish ───────────────────────────────────────── */
+
+.platform-android header {
+  background: rgba(11, 12, 14, 0.88) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.platform-android header button {
+  border-radius: 8px;
+  transition: all 120ms ease;
+}
+
+.platform-android header button:active {
+  transform: scale(0.95);
+}
+
+/* ── 3. Sidebar (Mobile Drawer) ─────────────────────────────────────────── */
+
+.platform-android aside {
+  background: linear-gradient(180deg, #15171d 0%, #101216 100%) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+  box-shadow: 10px 0 32px rgba(0, 0, 0, 0.55);
+}
+
+.platform-android aside nav a {
+  margin: 3px 12px;
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: all 150ms ease;
+}
+
+.platform-android aside nav a.border-\[var\(--accent\)\] {
+  background: linear-gradient(90deg, rgba(2, 132, 199, 0.16) 0%, rgba(2, 132, 199, 0.04) 100%) !important;
+  border-left: 3px solid var(--accent) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(2, 132, 199, 0.15);
+}
+
+.platform-android aside nav a:active {
+  transform: scale(0.98);
+}
+
+/* ── 4. Form Controls & Buttons ──────────────────────────────────────────── */
+
+.platform-android .control-field {
+  border-radius: var(--radius-element);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-default);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.platform-android .control-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.platform-android .btn-primary {
+  border-radius: var(--radius-element);
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
+  letter-spacing: 0.01em;
+}
+
+.platform-android .btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* ── 5. Tab-Specific Micro Polish ────────────────────────────────────────── */
+
+/* Tab 1: Dashboard */
+.platform-android .surface-panel.border-t-2 {
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Tab 2: GMS / MapZones */
+.platform-android .map-zone-toolbar,
+.platform-android .zone-controls {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px;
+}
+
+/* Tab 3: Reports */
+.platform-android table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Tab 4: Health Monitor */
+.platform-android .health-meter-dot {
+  border-radius: 3px;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.4);
+}
+
+/* Tab 5: Settings / Admin */
+.platform-android .settings-card,
+.platform-android .admin-user-card {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-subtle);
+}
+

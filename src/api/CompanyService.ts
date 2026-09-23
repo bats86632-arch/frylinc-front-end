@@ -1,4 +1,6 @@
 import apiClient from './axios';
+import { db } from '../config/firebase';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 
 export interface Company {
   id: string;
@@ -27,10 +29,28 @@ export const CompanyService = {
     if (cachedCompanies && Date.now() - lastFetchTime < 60000) {
       return cachedCompanies;
     }
-    const response = await apiClient.get('/companies');
-    cachedCompanies = response.data.companies || [];
-    lastFetchTime = Date.now();
-    return cachedCompanies as Company[];
+    try {
+      const response = await apiClient.get('/companies');
+      cachedCompanies = response.data.companies || [];
+      lastFetchTime = Date.now();
+      return cachedCompanies as Company[];
+    } catch (apiErr) {
+      console.warn('REST API /companies failed, falling back to direct Firestore fetch:', apiErr);
+      try {
+        const q = query(collection(db, 'companies'), orderBy('name'));
+        const snap = await getDocs(q);
+        const companies = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        })) as Company[];
+        cachedCompanies = companies;
+        lastFetchTime = Date.now();
+        return companies;
+      } catch (fsErr) {
+        console.error('Direct Firestore fetch for companies also failed:', fsErr);
+        throw apiErr;
+      }
+    }
   },
   
   async updateCompany(id: string, data: Partial<Company>): Promise<void> {

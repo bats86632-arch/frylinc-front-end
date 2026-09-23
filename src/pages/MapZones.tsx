@@ -397,6 +397,74 @@ export function MapZones() {
   // Deselect zone when clicking the canvas background
   const handleCanvasClick = () => setSelectedZoneIdx(null);
 
+  // Canvas background drag / pan state
+  const panState = useRef<{ isPanning: boolean; startX: number; startY: number; scrollLeft: number; scrollTop: number } | null>(null);
+  const touchDistRef = useRef<number | null>(null);
+
+  const handleCanvasPointerDown = useCallback((e: React.PointerEvent) => {
+    // Only pan if clicking on empty background, not on a zone polygon or handle
+    if (e.target !== svgRef.current && e.target !== canvasScrollRef.current) return;
+    setSelectedZoneIdx(null);
+    const canvas = canvasScrollRef.current;
+    if (!canvas) return;
+
+    panState.current = {
+      isPanning: true,
+      startX: e.clientX,
+      startY: e.clientY,
+      scrollLeft: canvas.scrollLeft,
+      scrollTop: canvas.scrollTop,
+    };
+    (e.target as Element).setPointerCapture(e.pointerId);
+  }, []);
+
+  const handleCanvasPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!panState.current?.isPanning) return;
+    const canvas = canvasScrollRef.current;
+    if (!canvas) return;
+    const dx = e.clientX - panState.current.startX;
+    const dy = e.clientY - panState.current.startY;
+    canvas.scrollLeft = panState.current.scrollLeft - dx;
+    canvas.scrollTop = panState.current.scrollTop - dy;
+  }, []);
+
+  const handleCanvasPointerUp = useCallback((e: React.PointerEvent) => {
+    if (panState.current) {
+      panState.current = null;
+      (e.target as Element)?.releasePointerCapture?.(e.pointerId);
+    }
+  }, []);
+
+  // Multi-touch pinch-to-zoom for mobile
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      touchDistRef.current = Math.hypot(dx, dy);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && touchDistRef.current !== null) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const diff = dist - touchDistRef.current;
+      if (Math.abs(diff) > 6) {
+        setZoom((z) => {
+          if (z === null) return z;
+          const delta = diff > 0 ? 0.05 : -0.05;
+          return Math.min(3, Math.max(0.2, +(z + delta).toFixed(2)));
+        });
+        touchDistRef.current = dist;
+      }
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    touchDistRef.current = null;
+  }, []);
+
   // ── Render: No panel selected ────────────────────────────────────────────
   const renderEmptyCanvas = () => (
     <div className="flex flex-1 items-center justify-center h-full min-h-[400px]">
@@ -640,8 +708,8 @@ export function MapZones() {
 
           {/* Info tip */}
           <div className="flex items-center gap-1 text-[10px] text-[var(--text-quaternary)]">
-            <Info className="h-3 w-3" />
-            <span>Drag to move &middot; Drag vertices to reshape &middot; Hover edge + drag to add a bend &middot; Double-click vertex to remove it &middot; Select a zone and press Delete to remove</span>
+            <Info className="h-3 w-3 shrink-0" />
+            <span>Drag zone to move &middot; Drag edge to shift wall &middot; Tap (+) on edge to add bend &middot; Double-tap/click vertex to remove &middot; Drag empty map to pan</span>
           </div>
         </div>
       )}
@@ -657,14 +725,20 @@ export function MapZones() {
       {/* Map image + zone overlay */}
       <div
         ref={canvasScrollRef}
-        className={`relative flex-1 min-h-[300px] rounded-[8px] border-2 overflow-auto ${
+        className={`relative flex-1 min-h-[300px] rounded-[8px] border-2 overflow-auto select-none ${
           anyAlarm
             ? "map-border-alarm"
             : "border-[var(--border-default)]"
         }`}
-        style={{ background: "var(--surface-overlay)" }}
+        style={{ background: "var(--surface-overlay)", touchAction: "none" }}
         onClick={handleCanvasClick}
         onWheel={handleCanvasWheel}
+        onPointerDown={handleCanvasPointerDown}
+        onPointerMove={handleCanvasPointerMove}
+        onPointerUp={handleCanvasPointerUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {zoom === null && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] rounded-[8px]">
@@ -703,8 +777,14 @@ export function MapZones() {
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full"
-            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible", touchAction: canEdit ? "none" : "auto" }}
+            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible", touchAction: "none" }}
             onClick={handleCanvasClick}
+            onPointerDown={handleCanvasPointerDown}
+            onPointerMove={handleCanvasPointerMove}
+            onPointerUp={handleCanvasPointerUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             {localZones.map((zone, idx) => {
               const isOrphan =

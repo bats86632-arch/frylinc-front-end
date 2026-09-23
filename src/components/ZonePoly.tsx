@@ -1,28 +1,29 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback } from "react";
 import { ZoneLayout, PolyPoint } from "../types";
 import {
   toSvgPoints,
   polygonIsSelfIntersecting,
   polygonIsDegenerate,
   translatePolygon,
+  translateEdge,
   splitEdge,
   clampPoint,
-  distToSegment,
-  projectPointOnSegment,
 } from "../utils/polygonGeom";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const IS_TOUCH = typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0);
 
-/** Radius of vertex handles in SVG units (= % of container). */
-const VERTEX_R = IS_TOUCH ? 2.4 : 1.2;
-/** Edge ghost-handle radius — slightly smaller. */
-const EDGE_R = IS_TOUCH ? 1.6 : 0.85;
-/** Max distance (in % units) to the edge midpoint to show the ghost handle. */
-const EDGE_HOVER_THRESHOLD = IS_TOUCH ? 8 : 3.5;
-/** Max distance (in % units) to a vertex to prefer vertex dragging over edge dragging on touch. */
-const VERTEX_TOUCH_THRESHOLD = IS_TOUCH ? 4.5 : 2.0;
+/** Visible radius of vertex handles in SVG units (= % of container). */
+const VERTEX_R = IS_TOUCH ? 2.2 : 1.2;
+/** Touch hit radius of vertex handles (generous touch padding). */
+const VERTEX_HIT_R = IS_TOUCH ? 5.5 : 3.0;
+
+/** Midpoint (+) handle radius. */
+const EDGE_MID_R = IS_TOUCH ? 1.8 : 1.0;
+/** Touch hit radius of midpoint handle. */
+const EDGE_MID_HIT_R = IS_TOUCH ? 5.0 : 2.5;
+
 /** Minimum vertices before a vertex can be deleted. */
 const MIN_VERTICES = 3;
 
@@ -60,7 +61,8 @@ interface ZonePolyProps {
 type DragMode =
   | { type: "move"; startPts: PolyPoint[]; startX: number; startY: number }
   | { type: "vertex"; vertexIdx: number; startPts: PolyPoint[]; startX: number; startY: number }
-  | { type: "edge"; edgeIdx: number; vertexInserted: boolean; startX: number; startY: number; startPts: PolyPoint[] };
+  | { type: "edge"; edgeIdx: number; startPts: PolyPoint[]; startX: number; startY: number }
+  | { type: "insert_vertex"; newVertexIdx: number; startPts: PolyPoint[]; startX: number; startY: number };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -105,9 +107,9 @@ function getAnimClass(isAlarm: boolean, isEvacuatePulse: boolean, isIsolated: bo
  * Interactions (edit mode only):
  *  - Drag body → move whole zone
  *  - Drag vertex handle → move that vertex
- *  - Hover edge → ghost handle appears; drag it → inserts vertex and moves it
- *  - Double-click vertex → delete vertex (min 3)
- *  - Trash button (selected) → remove zone
+ *  - Drag edge line → translate the entire edge (moves both endpoints, shifts the wall)
+ *  - Tap / drag midpoint (+) handle → inserts a new vertex and moves it
+ *  - Double-click or double-tap vertex → delete vertex (min 3)
  */
 export function ZonePoly({
   zone,
@@ -122,7 +124,6 @@ export function ZonePoly({
   svgRef,
   onSelect,
   onChange,
-  onRemove,
 }: ZonePolyProps) {
   const pts = zone.points ?? [];
 
@@ -130,10 +131,8 @@ export function ZonePoly({
   const dragRef = useRef<DragMode | null>(null);
   /** Snapshot of points at drag start — used for revert on invalid shape. */
   const dragStartPts = useRef<PolyPoint[]>([]);
-
-  // ── Edge hover ─────────────────────────────────────────────────────────────
-  /** Index of the edge whose ghost handle is shown, or null. */
-  const [hoverEdge, setHoverEdge] = useState<{ edgeIdx: number; pt: PolyPoint } | null>(null);
+  /** Track last tap on a vertex for mobile double-tap deletion. */
+  const lastVertexTapRef = useRef<{ index: number; time: number } | null>(null);
 
   // ── Coordinate conversion ─────────────────────────────────────────────────
   const toSvgPct = useCallback((e: React.PointerEvent | PointerEvent): PolyPoint => {
@@ -160,11 +159,10 @@ export function ZonePoly({
       const dx = cur.x - ds.startX;
       const dy = cur.y - ds.startY;
       const candidate = translatePolygon(ds.startPts, dx, dy);
-      // Move always stays valid (translatePolygon clamps to bounds)
       onChange({ points: candidate });
     } else if (ds.type === "vertex") {
       let clamped = clampPoint(cur);
-      
+
       // Dynamic snapping for straight lines
       const SNAP_T = 1.5;
       const prev = ds.startPts[(ds.vertexIdx - 1 + ds.startPts.length) % ds.startPts.length];
@@ -179,41 +177,18 @@ export function ZonePoly({
       );
       tryCommit(candidate);
     } else if (ds.type === "edge") {
-      // After vertex insertion, treat this like a vertex drag
-      if (!ds.vertexInserted) {
-        // Insert vertex on first move
-        const t = projectPointOnSegment(cur, ds.startPts[ds.edgeIdx], ds.startPts[(ds.edgeIdx + 1) % ds.startPts.length]);
-        const withNew = splitEdge(ds.startPts, ds.edgeIdx, t);
-        // The new vertex is at edgeIdx+1
-        const newVertexIdx = ds.edgeIdx + 1;
-        dragRef.current = {
-          type: "edge",
-          edgeIdx: newVertexIdx,
-          vertexInserted: true,
-          startX: ds.startX,
-          startY: ds.startY,
-          startPts: withNew,
-        };
-        onChange({ points: withNew });
-      } else {
-        // Drag the inserted vertex
-        const vertexIdx = ds.edgeIdx;
-        let clamped = clampPoint(cur);
-        
-        // Dynamic snapping for straight lines
-        const SNAP_T = 1.5;
-        const prev = ds.startPts[(vertexIdx - 1 + ds.startPts.length) % ds.startPts.length];
-        const next = ds.startPts[(vertexIdx + 1) % ds.startPts.length];
-        if (Math.abs(clamped.x - prev.x) < SNAP_T) clamped.x = prev.x;
-        if (Math.abs(clamped.y - prev.y) < SNAP_T) clamped.y = prev.y;
-        if (Math.abs(clamped.x - next.x) < SNAP_T) clamped.x = next.x;
-        if (Math.abs(clamped.y - next.y) < SNAP_T) clamped.y = next.y;
-
-        const candidate = ds.startPts.map((p, i) =>
-          i === vertexIdx ? clamped : p
-        );
-        tryCommit(candidate);
-      }
+      // Translate the entire edge line (moves both endpoints by dx, dy)
+      const dx = cur.x - ds.startX;
+      const dy = cur.y - ds.startY;
+      const candidate = translateEdge(ds.startPts, ds.edgeIdx, dx, dy);
+      tryCommit(candidate);
+    } else if (ds.type === "insert_vertex") {
+      // Drag the newly inserted vertex
+      let clamped = clampPoint(cur);
+      const candidate = ds.startPts.map((p, i) =>
+        i === ds.newVertexIdx ? clamped : p
+      );
+      tryCommit(candidate);
     }
   }, [toSvgPct, tryCommit, onChange, svgRef]);
 
@@ -221,11 +196,10 @@ export function ZonePoly({
     if (!dragRef.current) return;
     dragRef.current = null;
     dragStartPts.current = [];
-    // Release capture
     (e.target as Element)?.releasePointerCapture?.(e.pointerId);
   }, []);
 
-  // ── Polygon body pointer handlers ─────────────────────────────────────────
+  // ── Polygon body pointer handler ──────────────────────────────────────────
   const handleBodyPointerDown = useCallback((e: React.PointerEvent) => {
     if (isReadOnly) return;
     e.stopPropagation();
@@ -233,55 +207,7 @@ export function ZonePoly({
     onSelect();
     const cur = toSvgPct(e);
 
-    // On touch devices: detect if the pointer landed near an edge
-    // (but not on an existing vertex). If so, start an edge drag instead
-    // of a body move — this gives mobile users the same flexibility as desktop hover+drag.
-    if (IS_TOUCH && pts.length >= 3) {
-      const n = pts.length;
-
-      // First check: is the pointer close to an existing vertex?
-      let nearVertex = false;
-      for (let i = 0; i < n; i++) {
-        const dx = cur.x - pts[i].x;
-        const dy = cur.y - pts[i].y;
-        if (Math.sqrt(dx * dx + dy * dy) < VERTEX_TOUCH_THRESHOLD) {
-          nearVertex = true;
-          break;
-        }
-      }
-
-      // Second check: is the pointer close to an edge?
-      if (!nearVertex) {
-        let closestEdge: number | null = null;
-        let closestDist = EDGE_HOVER_THRESHOLD;
-        for (let i = 0; i < n; i++) {
-          const d = distToSegment(cur, pts[i], pts[(i + 1) % n]);
-          if (d < closestDist) {
-            closestDist = d;
-            closestEdge = i;
-          }
-        }
-
-        if (closestEdge !== null) {
-          // Start an edge drag
-          dragRef.current = {
-            type: "edge",
-            edgeIdx: closestEdge,
-            vertexInserted: false,
-            startPts: [...pts],
-            startX: cur.x,
-            startY: cur.y,
-          };
-          dragStartPts.current = [...pts];
-          (e.target as Element).setPointerCapture(e.pointerId);
-          svgRef.current?.addEventListener("pointermove", handleGlobalPointerMove);
-          svgRef.current?.addEventListener("pointerup", handleGlobalPointerUp, { once: true });
-          return;
-        }
-      }
-    }
-
-    // Default: body move drag
+    // Reliable whole-body move drag (no accidental vertex splits)
     dragStartPts.current = [...pts];
     dragRef.current = {
       type: "move",
@@ -294,11 +220,77 @@ export function ZonePoly({
     svgRef.current?.addEventListener("pointerup", handleGlobalPointerUp, { once: true });
   }, [isReadOnly, pts, toSvgPct, onSelect, svgRef, handleGlobalPointerMove, handleGlobalPointerUp]);
 
+  // ── Edge translation pointer handler ──────────────────────────────────────
+  const handleEdgePointerDown = useCallback((e: React.PointerEvent, edgeIdx: number) => {
+    if (isReadOnly) return;
+    e.stopPropagation();
+    e.preventDefault();
+    onSelect();
+    const cur = toSvgPct(e);
+
+    // Translate the edge (shifts wall without adding vertices)
+    dragStartPts.current = [...pts];
+    dragRef.current = {
+      type: "edge",
+      edgeIdx,
+      startPts: [...pts],
+      startX: cur.x,
+      startY: cur.y,
+    };
+    (e.target as Element).setPointerCapture(e.pointerId);
+    svgRef.current?.addEventListener("pointermove", handleGlobalPointerMove);
+    svgRef.current?.addEventListener("pointerup", handleGlobalPointerUp, { once: true });
+  }, [isReadOnly, pts, toSvgPct, onSelect, svgRef, handleGlobalPointerMove, handleGlobalPointerUp]);
+
+  // ── Edge midpoint (+) handle pointer handler ──────────────────────────────
+  const handleInsertVertexPointerDown = useCallback((e: React.PointerEvent, edgeIdx: number) => {
+    if (isReadOnly) return;
+    e.stopPropagation();
+    e.preventDefault();
+    onSelect();
+    const cur = toSvgPct(e);
+
+    // Explicitly split edge at midpoint and drag the new vertex
+    const withNew = splitEdge(pts, edgeIdx, 0.5);
+    const newVertexIdx = edgeIdx + 1;
+    onChange({ points: withNew });
+
+    dragStartPts.current = withNew;
+    dragRef.current = {
+      type: "insert_vertex",
+      newVertexIdx,
+      startPts: withNew,
+      startX: cur.x,
+      startY: cur.y,
+    };
+    (e.target as Element).setPointerCapture(e.pointerId);
+    svgRef.current?.addEventListener("pointermove", handleGlobalPointerMove);
+    svgRef.current?.addEventListener("pointerup", handleGlobalPointerUp, { once: true });
+  }, [isReadOnly, pts, toSvgPct, onSelect, onChange, svgRef, handleGlobalPointerMove, handleGlobalPointerUp]);
+
   // ── Vertex handle pointer handlers ────────────────────────────────────────
   const handleVertexPointerDown = useCallback((e: React.PointerEvent, vertexIdx: number) => {
     if (isReadOnly) return;
     e.stopPropagation();
     e.preventDefault();
+    onSelect();
+
+    // Mobile double-tap detection for deleting vertex
+    const now = Date.now();
+    if (
+      lastVertexTapRef.current &&
+      lastVertexTapRef.current.index === vertexIdx &&
+      now - lastVertexTapRef.current.time < 350
+    ) {
+      lastVertexTapRef.current = null;
+      if (pts.length > MIN_VERTICES) {
+        const next = pts.filter((_, idx) => idx !== vertexIdx);
+        onChange({ points: next });
+        return;
+      }
+    }
+    lastVertexTapRef.current = { index: vertexIdx, time: now };
+
     const cur = toSvgPct(e);
     dragStartPts.current = [...pts];
     dragRef.current = {
@@ -311,7 +303,7 @@ export function ZonePoly({
     (e.target as Element).setPointerCapture(e.pointerId);
     svgRef.current?.addEventListener("pointermove", handleGlobalPointerMove);
     svgRef.current?.addEventListener("pointerup", handleGlobalPointerUp, { once: true });
-  }, [isReadOnly, pts, toSvgPct, svgRef, handleGlobalPointerMove, handleGlobalPointerUp]);
+  }, [isReadOnly, pts, toSvgPct, onSelect, onChange, svgRef, handleGlobalPointerMove, handleGlobalPointerUp]);
 
   const handleVertexDblClick = useCallback((e: React.MouseEvent, vertexIdx: number) => {
     if (isReadOnly) return;
@@ -321,73 +313,20 @@ export function ZonePoly({
     onChange({ points: next });
   }, [isReadOnly, pts, onChange]);
 
-  // ── Edge ghost handle pointer handlers ────────────────────────────────────
-  const handleEdgePointerDown = useCallback((e: React.PointerEvent, edgeIdx: number) => {
-    if (isReadOnly) return;
-    e.stopPropagation();
-    e.preventDefault();
-    const cur = toSvgPct(e);
-    dragRef.current = {
-      type: "edge",
-      edgeIdx,
-      vertexInserted: false,
-      startPts: [...pts],
-      startX: cur.x,
-      startY: cur.y,
-    };
-    (e.target as Element).setPointerCapture(e.pointerId);
-    svgRef.current?.addEventListener("pointermove", handleGlobalPointerMove);
-    svgRef.current?.addEventListener("pointerup", handleGlobalPointerUp, { once: true });
-    setHoverEdge(null);
-  }, [isReadOnly, pts, toSvgPct, svgRef, handleGlobalPointerMove, handleGlobalPointerUp]);
-
-  // ── SVG mouse move for edge hover detection ───────────────────────────────
-  const handleSvgMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-    if (isReadOnly || !isSelected || dragRef.current) {
-      setHoverEdge(null);
-      return;
-    }
-    if (!svgRef.current) return;
-    const cur = clientToSvgPct(svgRef.current, e.clientX, e.clientY);
-    const n = pts.length;
-    let closestEdge: number | null = null;
-    let closestDist = EDGE_HOVER_THRESHOLD;
-    let closestPt: PolyPoint = cur;
-
-    for (let i = 0; i < n; i++) {
-      const a = pts[i];
-      const b = pts[(i + 1) % n];
-      const d = distToSegment(cur, a, b);
-      if (d < closestDist) {
-        closestDist = d;
-        closestEdge = i;
-        // Projection point on the edge
-        const t = projectPointOnSegment(cur, a, b);
-        closestPt = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
-      }
-    }
-
-    if (closestEdge !== null) {
-      setHoverEdge({ edgeIdx: closestEdge, pt: closestPt });
-    } else {
-      setHoverEdge(null);
-    }
-  }, [isReadOnly, isSelected, pts, svgRef]);
-
   // ── Visual state ──────────────────────────────────────────────────────────
   const fill = getFill(isAlarm, isEvacuatePulse, isIsolated, isOrphan, isSelected);
   const stroke = getStroke(isAlarm, isEvacuatePulse, isIsolated, isOrphan, isSelected);
   const animClass = getAnimClass(isAlarm, isEvacuatePulse, isIsolated);
-  const strokeWidth = isSelected ? 0.5 : 0.35;
+  const strokeWidth = isSelected ? 0.6 : 0.4;
   const strokeDasharray = isOrphan ? "1.2,0.8" : undefined;
 
   // Bounding box for label positioning
   const minX = pts.length > 0 ? Math.min(...pts.map(p => p.x)) : 50;
   const minY = pts.length > 0 ? Math.min(...pts.map(p => p.y)) : 50;
-  const centroid = pts.length > 0 
-    ? { 
-        x: pts.reduce((sum, p) => sum + p.x, 0) / pts.length, 
-        y: pts.reduce((sum, p) => sum + p.y, 0) / pts.length 
+  const centroid = pts.length > 0
+    ? {
+        x: pts.reduce((sum, p) => sum + p.x, 0) / pts.length,
+        y: pts.reduce((sum, p) => sum + p.y, 0) / pts.length
       }
     : { x: 50, y: 50 };
   const zoneNumber = zone.zoneId.split("-Z")[1] || zone.label;
@@ -399,9 +338,8 @@ export function ZonePoly({
     <g
       className={animClass}
       style={{ cursor: isReadOnly ? "default" : "move" }}
-      onMouseMove={handleSvgMouseMove as unknown as React.MouseEventHandler<SVGGElement>}
     >
-      {/* ── Polygon fill ── */}
+      {/* ── Polygon fill & body ── */}
       <polygon
         points={toSvgPoints(pts)}
         fill={fill}
@@ -420,12 +358,12 @@ export function ZonePoly({
       {/* ── Zone label ── */}
       <text
         x={minX + 1.5}
-        y={minY + 2}
+        y={minY + 2.5}
         textAnchor="start"
         dominantBaseline="central"
         fill="white"
         style={{
-          fontSize: "2.5",
+          fontSize: "2.4",
           fontWeight: 700,
           fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
           pointerEvents: "none",
@@ -440,42 +378,92 @@ export function ZonePoly({
       {/* ── Editing handles (only when selected) ── */}
       {isSelected && !isReadOnly && (
         <>
-          {/* Edge ghost handles */}
-          {hoverEdge && (
-            <circle
-              key={`edge-ghost-${hoverEdge.edgeIdx}`}
-              cx={hoverEdge.pt.x}
-              cy={hoverEdge.pt.y}
-              r={EDGE_R}
-              fill="white"
-              stroke="var(--accent, #1e6b8a)"
-              strokeWidth={0.4}
-              style={{ cursor: "crosshair", pointerEvents: "all", touchAction: "none" }}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                handleEdgePointerDown(e, hoverEdge.edgeIdx);
-              }}
-            />
-          )}
+          {/* 1. Interactive Edge Hit-lines (Drag to translate edge) */}
+          {pts.map((pt, i) => {
+            const nextPt = pts[(i + 1) % pts.length];
+            return (
+              <line
+                key={`edge-hit-${i}`}
+                x1={pt.x}
+                y1={pt.y}
+                x2={nextPt.x}
+                y2={nextPt.y}
+                stroke="transparent"
+                strokeWidth={IS_TOUCH ? 4.5 : 2.6}
+                strokeLinecap="round"
+                style={{ cursor: "move", pointerEvents: "all", touchAction: "none" }}
+                onPointerDown={(e) => handleEdgePointerDown(e, i)}
+              />
+            );
+          })}
 
-          {/* Vertex handles */}
+          {/* 2. Edge Midpoint (+) Handles (Tap/drag to add a bend/vertex) */}
+          {pts.map((pt, i) => {
+            const nextPt = pts[(i + 1) % pts.length];
+            const midX = (pt.x + nextPt.x) / 2;
+            const midY = (pt.y + nextPt.y) / 2;
+            const plusSize = EDGE_MID_R * 0.45;
+
+            return (
+              <g
+                key={`edge-midpoint-${i}`}
+                style={{ cursor: "crosshair", pointerEvents: "all", touchAction: "none" }}
+                onPointerDown={(e) => handleInsertVertexPointerDown(e, i)}
+              >
+                {/* Generous touch target */}
+                <circle cx={midX} cy={midY} r={EDGE_MID_HIT_R} fill="transparent" />
+                {/* Midpoint circle indicator */}
+                <circle
+                  cx={midX}
+                  cy={midY}
+                  r={EDGE_MID_R}
+                  fill="white"
+                  stroke="var(--accent, #0284c7)"
+                  strokeWidth={0.35}
+                />
+                {/* Plus (+) icon */}
+                <line
+                  x1={midX - plusSize}
+                  y1={midY}
+                  x2={midX + plusSize}
+                  y2={midY}
+                  stroke="var(--accent, #0284c7)"
+                  strokeWidth={0.32}
+                  strokeLinecap="round"
+                />
+                <line
+                  x1={midX}
+                  y1={midY - plusSize}
+                  x2={midX}
+                  y2={midY + plusSize}
+                  stroke="var(--accent, #0284c7)"
+                  strokeWidth={0.32}
+                  strokeLinecap="round"
+                />
+              </g>
+            );
+          })}
+
+          {/* 3. Vertex Handles (Drag to reshape, double-tap/click to delete) */}
           {pts.map((pt, i) => (
-            <circle
+            <g
               key={`vertex-${i}`}
-              cx={pt.x}
-              cy={pt.y}
-              r={VERTEX_R}
-              fill="white"
-              stroke="var(--accent, #1e6b8a)"
-              strokeWidth={0.45}
               style={{ cursor: "grab", pointerEvents: "all", touchAction: "none" }}
-              onPointerDown={(e) => {
-                e.stopPropagation();
-                handleVertexPointerDown(e, i);
-              }}
+              onPointerDown={(e) => handleVertexPointerDown(e, i)}
               onDoubleClick={(e) => handleVertexDblClick(e, i)}
-              title={pts.length > MIN_VERTICES ? "Double-click to remove point" : "Minimum 3 points"}
-            />
+            >
+              {/* Invisible large touch hit area */}
+              <circle cx={pt.x} cy={pt.y} r={VERTEX_HIT_R} fill="transparent" />
+              {/* Visible vertex handle */}
+              <circle
+                cx={pt.x}
+                cy={pt.y}
+                r={VERTEX_R}
+                fill="white"
+                stroke="var(--accent, #0284c7)"
+                strokeWidth={0.45}
+              />
+            </g>
           ))}
         </>
       )}

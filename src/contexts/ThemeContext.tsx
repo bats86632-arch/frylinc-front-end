@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { getInitialTheme, ThemeContext, THEME_STORAGE_KEY } from "./themeCore";
+import { configureStatusBar } from "../platform/status-bar";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState(getInitialTheme);
@@ -14,6 +15,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    // Sync native status bar colour with the current theme
+    configureStatusBar(theme);
   }, [theme]);
 
   const toggleTheme = useCallback(() => {

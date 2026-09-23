@@ -248,3 +248,21 @@ export function projectPointOnSegment(p: PolyPoint, a: PolyPoint, b: PolyPoint):
   if (lenSq === 0) return 0;
   return Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq));
 }
+
+/**
+ * Translate an edge (both vertex edgeIdx and (edgeIdx+1)%n) by (dx, dy),
+ * clamping both moved vertices within [0, 100].
+ */
+export function translateEdge(pts: PolyPoint[], edgeIdx: number, dx: number, dy: number): PolyPoint[] {
+  const n = pts.length;
+  if (edgeIdx < 0 || edgeIdx >= n || n < 3) return pts;
+  const nextIdx = (edgeIdx + 1) % n;
+
+  return pts.map((p, idx) => {
+    if (idx === edgeIdx || idx === nextIdx) {
+      return clampPoint({ x: p.x + dx, y: p.y + dy });
+    }
+    return p;
+  });
+}
+

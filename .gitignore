@@ -21,3 +21,26 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Capacitor — keep android/ and ios/ committed as source artifacts.
+# Only ignore generated build outputs, pods, and sensitive files.
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+ios/App/build/
+ios/App/Pods/
+ios/DerivedData/
+
+# Firebase native config files (contain project-specific data — add manually)
+google-services.json
+GoogleService-Info.plist
+
+# Signing (never commit)
+*.keystore
+*.jks
+*.p12
+
+# Local build artifacts
+bundle.zip
+release-builds/

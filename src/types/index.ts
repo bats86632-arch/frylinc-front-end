@@ -44,6 +44,14 @@ export interface Branch {
   enabled?: boolean;
 }
 
+export interface Company {
+  id: string;
+  name: string;
+  description?: string;
+  logoUrl?: string;
+  enabled?: boolean;
+}
+
 export interface Panel {
   serial: string;
   name: string;
@@ -162,6 +170,52 @@ export interface CreateApiKeyPayload {
   branchIds?: string[];
   webhookUrl?: string;
   expiresAt?: string | null;
+}
+
+// ── Webhooks (Real-Time Stream) ─────────────────────────────────────────────
+
+export type WebhookEventType =
+  | 'ALL'
+  | 'ALARM_TRIGGERED'
+  | 'ALARM_RESOLVED'
+  | 'PANEL_STATUS_CHANGED'
+  | 'TELEMETRY_UPDATE'
+  | 'ZONE_UPDATE'
+  | 'FAULT_REPORTED';
+
+export interface WebhookRecord {
+  id: string;
+  url: string;
+  secret: string; // HMAC signing secret, e.g. "whsec_..."
+  companyId: string | null;
+  branchIds: string[];
+  events: string[];
+  enabled: boolean;
+  description?: string | null;
+  createdAt: Timestamp | null;
+  updatedAt?: Timestamp | null;
+  lastTriggeredAt?: Timestamp | null;
+  lastStatus?: 'success' | 'failed' | 'pending' | null;
+  lastStatusCode?: number | null;
+  failureCount?: number;
+}
+
+export interface CreateWebhookPayload {
+  url: string;
+  companyId?: string | null;
+  branchIds?: string[];
+  events: string[];
+  description?: string;
+  enabled?: boolean;
+}
+
+export interface WebhookTestResult {
+  ok: boolean;
+  success: boolean;
+  statusCode?: number;
+  durationMs?: number;
+  responseBody?: string;
+  error?: string;
 }
 
 // ── Audit Logs ──────────────────────────────────────────────────────────────
