@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +15,7 @@ import {
   Eye,
 } from "lucide-react";
 import { UserService } from "../api/UserService";
+import { BranchService } from "../api/BranchService";
 import { useAuth } from "../contexts/AuthContext";
 import { useCompanies } from "../hooks/useCompanies";
 import { useBranches } from "../hooks/useBranches";
@@ -222,8 +223,8 @@ export function CreateUserModal({
       const fetched = await BranchService.getBranches(compId, true);
       if (fetched && fetched.length > 0) {
         setExtraBranches((prev) => {
-          const existingIds = new Set(prev.map((b) => b.id));
-          const newBranches = fetched.filter((b) => !existingIds.has(b.id));
+          const existingIds = new Set(prev.map((b: Branch) => b.id));
+          const newBranches = fetched.filter((b: Branch) => !existingIds.has(b.id));
           return [...prev, ...newBranches];
         });
         return fetched;
