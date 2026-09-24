@@ -71,7 +71,8 @@ export function Login() {
       // Auto-restore logic for system service account
       if (code === "auth/invalid-credential" || code === "auth/user-not-found") {
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/system/health/verify`, {
+          const apiBase = import.meta.env.VITE_API_BASE_URL || "https://asia-south2-fyrlinc-project.cloudfunctions.net/api";
+          const res = await fetch(`${apiBase}/system/health/verify`, {
             method: "POST",
             headers: { 
               "Content-Type": "application/json"

@@ -27,12 +27,12 @@ const isNativePlatform: boolean = (() => {
 })();
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDAWTyCPIzaIzSyk9zQL4zR2XtdLytwH-o",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "fyrlinc-project.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "fyrlinc-project",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "fyrlinc-project.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "205031509470",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:205031509470:web:adc196c8d658d7b3e2214f",
 };
 
 // Singleton guard — prevents duplicate initialization under React Strict Mode

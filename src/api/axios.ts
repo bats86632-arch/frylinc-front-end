@@ -2,7 +2,7 @@ import axios from 'axios';
 import { auth } from '../config/firebase';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://asia-south2-fyrlinc-project.cloudfunctions.net/api',
   timeout: 15000,
   headers: {
     'Cache-Control': 'no-cache, no-store, must-revalidate',

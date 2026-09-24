@@ -12,6 +12,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - '.npmrc'
+      - 'netlify.toml'
       - 'vite.config.ts'
 
 jobs:
