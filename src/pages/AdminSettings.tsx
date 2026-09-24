@@ -1124,10 +1124,9 @@ export function AdminSettings() {
         {hasRole(["super_admin"]) && (
           <button
             onClick={() => setActiveSection("companies")}
-            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
+            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group flex flex-col justify-between h-full"
           >
-            
-            <div className="relative z-10">
+            <div className="relative z-10 flex flex-col flex-1 h-full">
               <div className="mb-5 flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
                   <Building2 className="h-6 w-6 text-[var(--accent)]" />
@@ -1137,10 +1136,10 @@ export function AdminSettings() {
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
                 Organization Management
               </h3>
-              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
+              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5 flex-1 min-h-[38px]">
                 Create, edit, and manage companies and their branch structures.
               </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
+              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)] mt-auto">
                 <div className="flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
@@ -1158,14 +1157,12 @@ export function AdminSettings() {
           </button>
         )}
 
-
         {/* User Management Card */}
         <button
           onClick={() => setActiveSection("users")}
-          className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
+          className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group flex flex-col justify-between h-full"
         >
-          
-          <div className="relative z-10">
+          <div className="relative z-10 flex flex-col flex-1 h-full">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
                 <Users className="h-6 w-6 text-[var(--accent)]" />
@@ -1175,10 +1172,10 @@ export function AdminSettings() {
             <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
               User Management
             </h3>
-            <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
+            <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5 flex-1 min-h-[38px]">
               Manage user accounts, assign roles, and configure branch access.
             </p>
-            <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)] mt-auto">
               <div className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
@@ -1198,10 +1195,9 @@ export function AdminSettings() {
         {/* Panel Provisioning Card */}
         <button
           onClick={() => setActiveSection("panels")}
-          className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
+          className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group flex flex-col justify-between h-full"
         >
-          
-          <div className="relative z-10">
+          <div className="relative z-10 flex flex-col flex-1 h-full">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
                 <Cpu className="h-6 w-6 text-[var(--accent)]" />
@@ -1211,10 +1207,10 @@ export function AdminSettings() {
             <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
               Panel Provisioning
             </h3>
-            <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
+            <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5 flex-1 min-h-[38px]">
               Register new panels, assign them to branches, and track status.
             </p>
-            <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)] mt-auto">
               <div className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
@@ -1225,7 +1221,7 @@ export function AdminSettings() {
                 </span>
               </div>
               <span className="text-[12px] text-[var(--text-secondary)]">
-                {panelsLoading ? "● Loading…" : `panels provisioned`}
+                {panelsLoading ? "● Loading…" : "panels provisioned"}
               </span>
             </div>
           </div>
@@ -1235,9 +1231,9 @@ export function AdminSettings() {
         {hasRole(["super_admin"]) && (
           <button
             onClick={() => { setScopedCompanyForApi(null); setApiOverlayTab("api_keys"); setActiveSection("api_keys"); }}
-            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
+            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group flex flex-col justify-between h-full"
           >
-            <div className="relative z-10">
+            <div className="relative z-10 flex flex-col flex-1 h-full">
               <div className="mb-5 flex items-center justify-between">
                 <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
                   <Key className="h-6 w-6 text-[var(--accent)]" />
@@ -1247,18 +1243,22 @@ export function AdminSettings() {
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
                 API Provisioning
               </h3>
-              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
-                Provision programmatic API credentials for polling and query calls. Third-party systems must make active HTTP requests to retrieve data.
+              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5 flex-1 min-h-[38px]">
+                Provision programmatic API credentials for polling and query calls.
               </p>
-              <div className="pt-4 mt-auto border-t border-[var(--border-subtle)] flex items-center gap-3">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
+              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)] mt-auto">
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
+                  </span>
+                  <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
+                    {apiKeysLoading ? "—" : apiKeysCount}
+                  </span>
+                </div>
+                <span className="text-[12px] text-[var(--text-secondary)]">
+                  {apiKeysLoading ? "● Loading…" : "keys provisioned"}
                 </span>
-                <span className="text-[12px] font-semibold text-[var(--text-primary)] tabular-nums">
-                  {apiKeysLoading ? "—" : apiKeysCount}
-                </span>
-                <span className="text-[11px] text-[var(--text-secondary)]">{apiKeysLoading ? "Loading..." : "keys provisioned"}</span>
               </div>
             </div>
           </button>
@@ -1268,35 +1268,34 @@ export function AdminSettings() {
         {hasRole(["super_admin"]) && (
           <button
             onClick={() => { setScopedCompanyForApi(null); setApiOverlayTab("webhooks"); setActiveSection("webhooks"); }}
-            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group"
+            className="admin-hero-card surface-panel rounded-[16px] p-6 text-left group flex flex-col justify-between h-full"
           >
-            <div className="relative z-10">
+            <div className="relative z-10 flex flex-col flex-1 h-full">
               <div className="mb-5 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-emerald-500/10 border border-emerald-500/20">
-                  <Radio className="h-6 w-6 text-emerald-500" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                  <Radio className="h-6 w-6 text-[var(--accent)]" />
                 </div>
                 <ArrowRight className="h-5 w-5 text-[var(--text-secondary)] transition-all duration-200 group-hover:text-[var(--text-primary)] group-hover:translate-x-1" />
               </div>
               <h3 className="text-[17px] font-bold text-[var(--text-primary)] mb-1.5">
                 Webhooks Provisioning
               </h3>
-              <div className="mb-3">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[10px] font-bold uppercase tracking-wider">
-                  <Zap className="h-3 w-3" /> Real-Time Push
-                </span>
-              </div>
-              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5">
-                Auto-forward fire alarms, faults, status changes, and telemetry to your endpoint the instant they happen — no polling needed.
+              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed mb-5 flex-1 min-h-[38px]">
+                Configure real-time event streaming endpoints with auto-forwarding.
               </p>
-              <div className="pt-4 mt-auto border-t border-[var(--border-subtle)] flex items-center gap-3">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              <div className="flex items-center gap-3 pt-4 border-t border-[var(--border-subtle)] mt-auto">
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-40 animate-ping" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
+                  </span>
+                  <span className="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">
+                    {apiKeysLoading ? "—" : webhooksCount}
+                  </span>
+                </div>
+                <span className="text-[12px] text-[var(--text-secondary)]">
+                  {apiKeysLoading ? "● Loading…" : "webhooks active"}
                 </span>
-                <span className="text-[12px] font-semibold text-[var(--text-primary)] tabular-nums">
-                  {apiKeysLoading ? "—" : webhooksCount}
-                </span>
-                <span className="text-[11px] text-[var(--text-secondary)]">{apiKeysLoading ? "Loading..." : "webhooks active"}</span>
               </div>
             </div>
           </button>
