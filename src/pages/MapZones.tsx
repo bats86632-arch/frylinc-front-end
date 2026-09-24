@@ -19,6 +19,8 @@ import {
   Minus,
   Plus,
   Maximize2,
+  PenTool,
+  Undo2,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
@@ -27,7 +29,7 @@ import { ZonePoly } from "../components/ZonePoly";
 import { CopyButton } from "../components/CopyButton";
 
 
-import { Panel, ZoneLayout } from "../types";
+import { Panel, ZoneLayout, PolyPoint } from "../types";
 import { PanelService } from "../api/PanelService";
 import { rectToPoints } from "../utils/polygonGeom";
 
@@ -61,6 +63,15 @@ function newZonePos(existingCount: number): Pick<ZoneLayout, "points"> {
   const offset = (existingCount % 8) * 5;
   const x = 5 + offset, y = 5 + offset, w = 20, h = 15;
   return { points: rectToPoints(x, y, w, h) };
+}
+
+/** Convert a DOM event position to SVG % coords (0–100). */
+function clientToSvgPct(svg: SVGSVGElement, clientX: number, clientY: number): PolyPoint {
+  const rect = svg.getBoundingClientRect();
+  return {
+    x: ((clientX - rect.left) / rect.width) * 100,
+    y: ((clientY - rect.top) / rect.height) * 100,
+  };
 }
 
 // ── Panel Selector item ───────────────────────────────────────────────────────
@@ -151,6 +162,16 @@ export function MapZones() {
   const [deletePanelConfirm, setDeletePanelConfirm] = useState(false);
   const [isDeletingPanel, setIsDeletingPanel] = useState(false);
 
+  // Draw polygon mode
+  const [drawMode, setDrawMode] = useState(false);
+  const [drawPoints, setDrawPoints] = useState<PolyPoint[]>([]);
+  const [drawCursor, setDrawCursor] = useState<PolyPoint | null>(null);
+  const drawCursorRaf = useRef<number | null>(null);
+
+  // Unsaved changes guard
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingPanelSwitch, setPendingPanelSwitch] = useState<string | null>(null);
+
   // Container ref for coordinate system
   const containerRef = useRef<HTMLDivElement>(null);
   // SVG overlay ref — shared by all ZonePoly instances
@@ -240,12 +261,14 @@ export function MapZones() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedZoneIdx, canEdit]);
 
-  // Scroll-wheel zoom on the canvas
+  // Scroll-wheel zoom — smooth proportional delta
   const handleCanvasWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
-    if (!e.ctrlKey && !e.metaKey) return; // only zoom on Ctrl+scroll
+    if (!e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setZoom((prev) => prev === null ? null : Math.min(3, Math.max(0.2, +(prev + delta).toFixed(2))));
+    // Scale proportionally to wheel magnitude for analog feel
+    const rawDelta = -e.deltaY * 0.002;
+    const step = Math.max(-0.15, Math.min(0.15, rawDelta));
+    setZoom((prev) => prev === null ? null : Math.min(3, Math.max(0.2, +(prev + step).toFixed(3))));
   }, []);
 
   // File input ref
@@ -394,8 +417,24 @@ export function MapZones() {
     e.target.value = "";
   };
 
-  // Deselect zone when clicking the canvas background
-  const handleCanvasClick = () => setSelectedZoneIdx(null);
+  // Canvas click: in draw mode places a vertex, otherwise deselects zone
+  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
+    if (drawMode && svgRef.current) {
+      e.stopPropagation();
+      const pt = clientToSvgPct(svgRef.current, e.clientX, e.clientY);
+      // Check if clicking near first point to close the polygon
+      if (drawPoints.length >= 3) {
+        const first = drawPoints[0];
+        if (Math.hypot(pt.x - first.x, pt.y - first.y) < 2.5) {
+          finishDrawing();
+          return;
+        }
+      }
+      setDrawPoints((prev) => [...prev, pt]);
+      return;
+    }
+    setSelectedZoneIdx(null);
+  }, [drawMode, drawPoints, finishDrawing]);
 
   // Canvas background drag / pan state
   const panState = useRef<{ isPanning: boolean; startX: number; startY: number; scrollLeft: number; scrollTop: number } | null>(null);
@@ -419,6 +458,17 @@ export function MapZones() {
   }, []);
 
   const handleCanvasPointerMove = useCallback((e: React.PointerEvent) => {
+    // Track cursor position in draw mode for preview line
+    if (drawMode && svgRef.current && drawPoints.length > 0) {
+      if (drawCursorRaf.current !== null) return;
+      const svg = svgRef.current;
+      const cx = e.clientX, cy = e.clientY;
+      drawCursorRaf.current = requestAnimationFrame(() => {
+        drawCursorRaf.current = null;
+        setDrawCursor(clientToSvgPct(svg, cx, cy));
+      });
+    }
+    // Pan handling
     if (!panState.current?.isPanning) return;
     const canvas = canvasScrollRef.current;
     if (!canvas) return;
@@ -426,7 +476,7 @@ export function MapZones() {
     const dy = e.clientY - panState.current.startY;
     canvas.scrollLeft = panState.current.scrollLeft - dx;
     canvas.scrollTop = panState.current.scrollTop - dy;
-  }, []);
+  }, [drawMode, drawPoints.length]);
 
   const handleCanvasPointerUp = useCallback((e: React.PointerEvent) => {
     if (panState.current) {
@@ -444,17 +494,17 @@ export function MapZones() {
     }
   }, []);
 
+  // Continuous ratio-based pinch-to-zoom — feels 1:1 with finger spread
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2 && touchDistRef.current !== null) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.hypot(dx, dy);
-      const diff = dist - touchDistRef.current;
-      if (Math.abs(diff) > 6) {
+      if (dist > 0 && touchDistRef.current > 0) {
+        const ratio = dist / touchDistRef.current;
         setZoom((z) => {
           if (z === null) return z;
-          const delta = diff > 0 ? 0.05 : -0.05;
-          return Math.min(3, Math.max(0.2, +(z + delta).toFixed(2)));
+          return Math.min(3, Math.max(0.2, +(z * ratio).toFixed(3)));
         });
         touchDistRef.current = dist;
       }
@@ -463,6 +513,80 @@ export function MapZones() {
 
   const handleTouchEnd = useCallback(() => {
     touchDistRef.current = null;
+  }, []);
+
+  // ── Draw polygon mode handlers ────────────────────────────────────────────
+
+  const finishDrawing = useCallback(() => {
+    if (drawPoints.length < 3 || !selectedPanel) return;
+    const maxZones = selectedPanel.zoneCount ?? 8;
+    if (localZones.length >= maxZones) {
+      setDrawMode(false);
+      setDrawPoints([]);
+      setDrawCursor(null);
+      return;
+    }
+    const nextNum = localZones.length + 1;
+    const zoneId = `${selectedPanel.serial}-Z${nextNum}`;
+    const customName = selectedPanel.zoneNames?.[(nextNum - 1).toString()];
+    const label = `${selectedPanel.serial} \u2014 ${formatZoneLabel(nextNum - 1, customName)}`;
+    const newZone: ZoneLayout = { zoneId, label, points: drawPoints };
+    setLocalZones((prev) => [...prev, newZone]);
+    setIsDirty(true);
+    setSelectedZoneIdx(localZones.length);
+    setDrawMode(false);
+    setDrawPoints([]);
+    setDrawCursor(null);
+  }, [drawPoints, selectedPanel, localZones, setLocalZones, setIsDirty, setSelectedZoneIdx]);
+
+  const cancelDrawing = useCallback(() => {
+    setDrawMode(false);
+    setDrawPoints([]);
+    setDrawCursor(null);
+  }, []);
+
+  const undoLastDrawPoint = useCallback(() => {
+    setDrawPoints((prev) => prev.slice(0, -1));
+  }, []);
+
+  // Keyboard shortcuts for draw mode
+  useEffect(() => {
+    if (!drawMode) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        cancelDrawing();
+      } else if (e.key === "Enter" && drawPoints.length >= 3) {
+        finishDrawing();
+      } else if ((e.key === "z" && (e.ctrlKey || e.metaKey)) || e.key === "Backspace") {
+        e.preventDefault();
+        undoLastDrawPoint();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [drawMode, drawPoints, finishDrawing, cancelDrawing, undoLastDrawPoint]);
+
+  // ── Unsaved changes panel switch guard ─────────────────────────────────────
+  const handlePanelSelect = useCallback((panelId: string) => {
+    if (isDirty) {
+      setPendingPanelSwitch(panelId);
+      setShowUnsavedModal(true);
+      return;
+    }
+    setSelectedPanelId(panelId);
+  }, [isDirty]);
+
+  const confirmPanelSwitch = useCallback(() => {
+    if (pendingPanelSwitch) {
+      setSelectedPanelId(pendingPanelSwitch);
+    }
+    setShowUnsavedModal(false);
+    setPendingPanelSwitch(null);
+  }, [pendingPanelSwitch]);
+
+  const cancelPanelSwitch = useCallback(() => {
+    setShowUnsavedModal(false);
+    setPendingPanelSwitch(null);
   }, []);
 
   // ── Render: No panel selected ────────────────────────────────────────────
@@ -619,16 +743,74 @@ export function MapZones() {
               </div>
             )}
 
-            {/* Add Zone button */}
-            {localZones.length < (selectedPanel?.zoneCount ?? 0) && (
+            {/* Add Zone button — always visible, disabled at quota */}
+            {(() => {
+              const maxZones = selectedPanel?.zoneCount ?? 0;
+              const atLimit = localZones.length >= maxZones;
+              return (
+                <button
+                  onClick={handleAddZone}
+                  disabled={saving || atLimit}
+                  className={`btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] rounded-[6px] ${
+                    atLimit
+                      ? "opacity-50 cursor-not-allowed border-[var(--border-default)] text-[var(--text-quaternary)]"
+                      : "border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-muted)]"
+                  }`}
+                  title={atLimit ? `All ${maxZones} zones placed` : "Add a rectangle zone"}
+                >
+                  <PlusSquare className="h-3.5 w-3.5" />
+                  {atLimit ? `All ${maxZones} Zones Placed` : `Add Zone (${localZones.length}/${maxZones})`}
+                </button>
+              );
+            })()}
+
+            {/* Draw Custom Shape button */}
+            {localZones.length < (selectedPanel?.zoneCount ?? 0) && !drawMode && (
               <button
-                onClick={handleAddZone}
+                onClick={() => { setDrawMode(true); setSelectedZoneIdx(null); }}
                 disabled={saving}
                 className="btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] rounded-[6px] border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-muted)]"
+                title="Draw a custom polygon shape by clicking to place vertices"
               >
-                <PlusSquare className="h-3.5 w-3.5" />
-                Add Zone ({localZones.length}/{selectedPanel?.zoneCount ?? 0})
+                <PenTool className="h-3.5 w-3.5" />
+                Draw Shape
               </button>
+            )}
+
+            {/* Draw mode controls */}
+            {drawMode && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold text-[var(--accent)] bg-[var(--accent-muted)] px-2 py-1 rounded-[4px]">
+                  Drawing: {drawPoints.length} point{drawPoints.length !== 1 ? "s" : ""} placed
+                </span>
+                {drawPoints.length > 0 && (
+                  <button
+                    onClick={undoLastDrawPoint}
+                    className="btn-secondary inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-[5px]"
+                    title="Undo last point (Ctrl+Z)"
+                  >
+                    <Undo2 className="h-3 w-3" />
+                    Undo
+                  </button>
+                )}
+                {drawPoints.length >= 3 && (
+                  <button
+                    onClick={finishDrawing}
+                    className="btn-primary inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-[5px]"
+                    title="Finish polygon (Enter)"
+                  >
+                    Finish
+                  </button>
+                )}
+                <button
+                  onClick={cancelDrawing}
+                  className="btn-secondary inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-[5px] text-[var(--color-error)]"
+                  title="Cancel drawing (Esc)"
+                >
+                  <X className="h-3 w-3" />
+                  Cancel
+                </button>
+              </div>
             )}
 
             {/* Delete Selected Zone button */}
@@ -709,7 +891,7 @@ export function MapZones() {
           {/* Info tip */}
           <div className="flex items-center gap-1 text-[10px] text-[var(--text-quaternary)]">
             <Info className="h-3 w-3 shrink-0" />
-            <span>Drag zone to move &middot; Drag edge to shift wall &middot; Tap (+) on edge to add bend &middot; Double-tap/click vertex to remove &middot; Drag empty map to pan</span>
+            <span>{drawMode ? "Click to place vertices · Click first point or press Enter to close · Esc to cancel · Ctrl+Z to undo" : "Drag zone to move · Drag edge to shift wall · Tap (+) on edge to add bend · Double-tap/click vertex to remove · Drag empty map to pan"}</span>
           </div>
         </div>
       )}
@@ -753,6 +935,7 @@ export function MapZones() {
             height: mapImageRef.current?.naturalHeight && zoom !== null ? mapImageRef.current.naturalHeight * zoom : 0,
             opacity: zoom === null ? 0 : 1,
             overflow: zoom === null ? "hidden" : "visible",
+            willChange: "transform",
           }}
         >
           {/* Floor plan image */}
@@ -777,7 +960,7 @@ export function MapZones() {
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full"
-            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible", touchAction: "none" }}
+            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible", touchAction: "none", cursor: drawMode ? "crosshair" : undefined }}
             onClick={handleCanvasClick}
             onPointerDown={handleCanvasPointerDown}
             onPointerMove={handleCanvasPointerMove}
@@ -810,6 +993,89 @@ export function MapZones() {
                 />
               );
             })}
+
+            {/* ── Draw mode preview ── */}
+            {drawMode && drawPoints.length > 0 && (
+              <g>
+                {/* Lines between placed points */}
+                {drawPoints.map((pt, i) => {
+                  if (i === 0) return null;
+                  const prev = drawPoints[i - 1];
+                  return (
+                    <line
+                      key={`draw-line-${i}`}
+                      x1={prev.x} y1={prev.y}
+                      x2={pt.x} y2={pt.y}
+                      stroke="var(--accent, #0284c7)"
+                      strokeWidth={0.5}
+                      strokeDasharray="1.5,0.8"
+                      style={{ pointerEvents: "none" }}
+                    />
+                  );
+                })}
+                {/* Preview line from last point to cursor */}
+                {drawCursor && (
+                  <>
+                    <line
+                      x1={drawPoints[drawPoints.length - 1].x}
+                      y1={drawPoints[drawPoints.length - 1].y}
+                      x2={drawCursor.x}
+                      y2={drawCursor.y}
+                      stroke="var(--accent, #0284c7)"
+                      strokeWidth={0.35}
+                      strokeDasharray="1,0.6"
+                      opacity={0.6}
+                      style={{ pointerEvents: "none" }}
+                    />
+                    {/* Closing preview line (cursor back to first point) */}
+                    {drawPoints.length >= 2 && (
+                      <line
+                        x1={drawCursor.x}
+                        y1={drawCursor.y}
+                        x2={drawPoints[0].x}
+                        y2={drawPoints[0].y}
+                        stroke="var(--accent, #0284c7)"
+                        strokeWidth={0.25}
+                        strokeDasharray="0.8,0.5"
+                        opacity={0.3}
+                        style={{ pointerEvents: "none" }}
+                      />
+                    )}
+                  </>
+                )}
+                {/* Vertex dots */}
+                {drawPoints.map((pt, i) => {
+                  const isFirst = i === 0 && drawPoints.length >= 3;
+                  const isSnap = isFirst && drawCursor && Math.hypot(pt.x - drawCursor.x, pt.y - drawCursor.y) < 2.5;
+                  return (
+                    <circle
+                      key={`draw-v-${i}`}
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={isFirst ? 1.6 : 1.1}
+                      fill={isSnap ? "var(--accent, #0284c7)" : "white"}
+                      stroke={isSnap ? "white" : "var(--accent, #0284c7)"}
+                      strokeWidth={isSnap ? 0.5 : 0.35}
+                      style={{ pointerEvents: "none", transition: "r 150ms ease, fill 150ms ease" }}
+                    />
+                  );
+                })}
+                {/* Snap indicator ring on first vertex */}
+                {drawPoints.length >= 3 && drawCursor && Math.hypot(drawPoints[0].x - drawCursor.x, drawPoints[0].y - drawCursor.y) < 2.5 && (
+                  <circle
+                    cx={drawPoints[0].x}
+                    cy={drawPoints[0].y}
+                    r={2.5}
+                    fill="none"
+                    stroke="var(--accent, #0284c7)"
+                    strokeWidth={0.3}
+                    strokeDasharray="0.8,0.4"
+                    opacity={0.7}
+                    style={{ pointerEvents: "none" }}
+                  />
+                )}
+              </g>
+            )}
           </svg>
           </div>
       </div>
@@ -878,6 +1144,7 @@ export function MapZones() {
 
   // ── Main render ───────────────────────────────────────────────────────────
   return (
+    <>
     <div className="flex relative h-[calc(100vh-72px)] overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-8">
       {/* Mobile Backdrop Overlay */}
       {sidebarOpen && (
@@ -937,7 +1204,7 @@ export function MapZones() {
                 panel={panel}
                 isSelected={selectedPanelId === panel.serial}
                 onClick={() => {
-                  setSelectedPanelId(panel.serial);
+                  handlePanelSelect(panel.serial);
                   setSidebarOpen(false); // auto-collapse on mobile
                 }}
               />
@@ -1084,5 +1351,32 @@ export function MapZones() {
         )}
       </div>
     </div>
+
+      {/* Unsaved changes modal */}
+      {showUnsavedModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="surface-panel rounded-[12px] p-6 shadow-xl max-w-sm mx-4 border border-[var(--border-default)]">
+            <h3 className="text-[15px] font-bold text-[var(--text-primary)] mb-2">Unsaved Changes</h3>
+            <p className="text-[13px] text-[var(--text-secondary)] mb-5">
+              You have unsaved zone layout changes. Switching panels will discard them.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={cancelPanelSwitch}
+                className="btn-secondary px-3 py-1.5 text-[12px] rounded-[6px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmPanelSwitch}
+                className="btn-secondary px-3 py-1.5 text-[12px] rounded-[6px] text-[var(--color-error)] border-[var(--status-danger-border)] hover:bg-[var(--status-danger-bg)]"
+              >
+                Discard & Switch
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

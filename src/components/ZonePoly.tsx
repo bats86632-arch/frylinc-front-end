@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useState, useMemo, memo } from "react";
 import { ZoneLayout, PolyPoint } from "../types";
 import {
   toSvgPoints,
@@ -10,6 +10,7 @@ import {
   clampPoint,
   pointInPolygon,
   distToPolygonBoundary,
+  polygonCentroid,
 } from "../utils/polygonGeom";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -31,6 +32,9 @@ const EDGE_HIT_STROKE = IS_TOUCH ? 1.6 : 1.2;
 
 /** Minimum vertices before a vertex can be deleted. */
 const MIN_VERTICES = 3;
+
+/** Orthogonal vertex snap threshold in SVG units. */
+const SNAP_T = 1.5;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -124,7 +128,7 @@ function getAnimClass(isAlarm: boolean, isEvacuatePulse: boolean, isIsolated: bo
  *  - Tap / drag midpoint (+) handle → inserts a new vertex and moves it
  *  - Double-click or double-tap vertex → delete vertex (min 3)
  */
-export function ZonePoly({
+function ZonePolyInner({
   zone,
   isAlarm,
   isIsolated,
@@ -146,6 +150,14 @@ export function ZonePoly({
   const dragStartPts = useRef<PolyPoint[]>([]);
   /** Track last tap on a vertex for mobile double-tap deletion. */
   const lastVertexTapRef = useRef<{ index: number; time: number } | null>(null);
+  /** Red flash feedback when drag produces an invalid shape. */
+  const [invalidFlash, setInvalidFlash] = useState(false);
+  const invalidTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** rAF guard for throttled pointer move processing. */
+  const rafRef = useRef<number | null>(null);
+  const pendingMoveRef = useRef<PointerEvent | null>(null);
+  /** Track the last pointer type for hybrid device handling. */
+  const lastPointerTypeRef = useRef<string>("mouse");
 
   // ── Coordinate conversion ─────────────────────────────────────────────────
   const toSvgPct = useCallback((e: React.PointerEvent | PointerEvent): PolyPoint => {
@@ -153,20 +165,28 @@ export function ZonePoly({
     return clientToSvgPct(svgRef.current, e.clientX, e.clientY);
   }, [svgRef]);
 
+  /** Flash red border briefly on invalid polygon state. */
+  const flashInvalid = useCallback(() => {
+    setInvalidFlash(true);
+    if (invalidTimerRef.current) clearTimeout(invalidTimerRef.current);
+    invalidTimerRef.current = setTimeout(() => setInvalidFlash(false), 300);
+  }, []);
+
   // ── Validate and commit a candidate set of points ─────────────────────────
   const tryCommit = useCallback((candidate: PolyPoint[]) => {
-    if (candidate.length < MIN_VERTICES) return false;
-    if (polygonIsSelfIntersecting(candidate)) return false;
-    if (polygonIsDegenerate(candidate)) return false;
+    if (candidate.length < MIN_VERTICES) { flashInvalid(); return false; }
+    if (polygonIsSelfIntersecting(candidate)) { flashInvalid(); return false; }
+    if (polygonIsDegenerate(candidate)) { flashInvalid(); return false; }
     onChange({ points: candidate });
     return true;
-  }, [onChange]);
+  }, [onChange, flashInvalid]);
 
   // ── Global pointer events ─────────────────────────────────────────────────
-  const handleGlobalPointerMove = useCallback((e: PointerEvent) => {
+  /** Process the actual pointer move logic (called inside rAF). */
+  const processPointerMove = useCallback((e: PointerEvent) => {
     const ds = dragRef.current;
     if (!ds || !svgRef.current) return;
-    const cur = toSvgPct(e);
+    const cur = clientToSvgPct(svgRef.current, e.clientX, e.clientY);
 
     if (ds.type === "move") {
       const dx = cur.x - ds.startX;
@@ -177,7 +197,6 @@ export function ZonePoly({
       let clamped = clampPoint(cur);
 
       // Dynamic snapping for straight lines
-      const SNAP_T = 1.5;
       const prev = ds.startPts[(ds.vertexIdx - 1 + ds.startPts.length) % ds.startPts.length];
       const next = ds.startPts[(ds.vertexIdx + 1) % ds.startPts.length];
       if (Math.abs(clamped.x - prev.x) < SNAP_T) clamped.x = prev.x;
@@ -190,14 +209,12 @@ export function ZonePoly({
       );
       tryCommit(candidate);
     } else if (ds.type === "edge") {
-      // Translate the entire edge line (moves both endpoints by dx, dy)
       const dx = cur.x - ds.startX;
       const dy = cur.y - ds.startY;
       const candidate = translateEdge(ds.startPts, ds.edgeIdx, dx, dy);
       tryCommit(candidate);
     } else if (ds.type === "midpoint_press") {
       const dist = Math.hypot(cur.x - ds.startX, cur.y - ds.startY);
-      // Only split the edge if dragged outward deliberately (> 1.2 SVG units)
       if (!ds.hasSplit && dist > 1.2) {
         const withNew = splitEdge(ds.startPts, ds.edgeIdx, 0.5);
         const newIdx = ds.edgeIdx + 1;
@@ -215,7 +232,20 @@ export function ZonePoly({
         tryCommit(candidate);
       }
     }
-  }, [toSvgPct, tryCommit, onChange, svgRef]);
+  }, [svgRef, tryCommit, onChange]);
+
+  /** rAF-throttled pointer move — processes only the latest event per frame. */
+  const handleGlobalPointerMove = useCallback((e: PointerEvent) => {
+    pendingMoveRef.current = e;
+    if (rafRef.current !== null) return; // already scheduled
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const pending = pendingMoveRef.current;
+      if (!pending) return;
+      pendingMoveRef.current = null;
+      processPointerMove(pending);
+    });
+  }, [processPointerMove]);
 
   const handleGlobalPointerUp = useCallback((e: PointerEvent) => {
     window.removeEventListener("pointermove", handleGlobalPointerMove);
@@ -238,12 +268,14 @@ export function ZonePoly({
     }
   }, [handleGlobalPointerMove, tryCommit]);
 
-  // Clean up global listeners on unmount
+  // Clean up global listeners and animation frames on unmount
   useEffect(() => {
     return () => {
       window.removeEventListener("pointermove", handleGlobalPointerMove);
       window.removeEventListener("pointerup", handleGlobalPointerUp);
       window.removeEventListener("pointercancel", handleGlobalPointerUp);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (invalidTimerRef.current) clearTimeout(invalidTimerRef.current);
     };
   }, [handleGlobalPointerMove, handleGlobalPointerUp]);
 
@@ -252,6 +284,7 @@ export function ZonePoly({
     if (isReadOnly) return;
     e.stopPropagation();
     e.preventDefault();
+    lastPointerTypeRef.current = e.pointerType;
     onSelect();
     const cur = toSvgPct(e);
 
@@ -278,6 +311,7 @@ export function ZonePoly({
     if (isReadOnly) return;
     e.stopPropagation();
     e.preventDefault();
+    lastPointerTypeRef.current = e.pointerType;
     onSelect();
     const cur = toSvgPct(e);
 
@@ -311,6 +345,7 @@ export function ZonePoly({
     if (isReadOnly) return;
     e.stopPropagation();
     e.preventDefault();
+    lastPointerTypeRef.current = e.pointerType;
     onSelect();
     const cur = toSvgPct(e);
 
@@ -349,22 +384,25 @@ export function ZonePoly({
     e.stopPropagation();
     e.preventDefault();
     onSelect();
+    lastPointerTypeRef.current = e.pointerType;
 
-    // Mobile double-tap detection for deleting vertex
-    const now = Date.now();
-    if (
-      lastVertexTapRef.current &&
-      lastVertexTapRef.current.index === vertexIdx &&
-      now - lastVertexTapRef.current.time < 350
-    ) {
-      lastVertexTapRef.current = null;
-      if (pts.length > MIN_VERTICES) {
-        const next = pts.filter((_, idx) => idx !== vertexIdx);
-        onChange({ points: next });
-        return;
+    // Software double-tap detection ONLY for touch (prevents double-delete on hybrid devices)
+    if (e.pointerType === "touch") {
+      const now = Date.now();
+      if (
+        lastVertexTapRef.current &&
+        lastVertexTapRef.current.index === vertexIdx &&
+        now - lastVertexTapRef.current.time < 350
+      ) {
+        lastVertexTapRef.current = null;
+        if (pts.length > MIN_VERTICES) {
+          const next = pts.filter((_, idx) => idx !== vertexIdx);
+          onChange({ points: next });
+          return;
+        }
       }
+      lastVertexTapRef.current = { index: vertexIdx, time: now };
     }
-    lastVertexTapRef.current = { index: vertexIdx, time: now };
 
     const cur = toSvgPct(e);
     dragStartPts.current = [...pts];
@@ -388,27 +426,27 @@ export function ZonePoly({
   const handleVertexDblClick = useCallback((e: React.MouseEvent, vertexIdx: number) => {
     if (isReadOnly) return;
     e.stopPropagation();
+    // Only handle double-click for mouse/pen — touch uses software double-tap above
+    if (lastPointerTypeRef.current === "touch") return;
     if (pts.length <= MIN_VERTICES) return;
     const next = pts.filter((_, i) => i !== vertexIdx);
     onChange({ points: next });
   }, [isReadOnly, pts, onChange]);
 
   // ── Visual state ──────────────────────────────────────────────────────────
-  const fill = getFill(isAlarm, isEvacuatePulse, isIsolated, isOrphan, isSelected);
-  const stroke = getStroke(isAlarm, isEvacuatePulse, isIsolated, isOrphan, isSelected);
+  const baseFill = getFill(isAlarm, isEvacuatePulse, isIsolated, isOrphan, isSelected);
+  const baseStroke = getStroke(isAlarm, isEvacuatePulse, isIsolated, isOrphan, isSelected);
+  const fill = invalidFlash ? "rgba(239, 68, 68, 0.25)" : baseFill;
+  const stroke = invalidFlash ? "rgba(239, 68, 68, 0.9)" : baseStroke;
   const animClass = getAnimClass(isAlarm, isEvacuatePulse, isIsolated);
-  const strokeWidth = isSelected ? 0.6 : 0.4;
+  const strokeWidth = invalidFlash ? 0.8 : isSelected ? 0.6 : 0.4;
   const strokeDasharray = isOrphan ? "1.2,0.8" : undefined;
 
-  // Bounding box for label positioning
-  const minX = pts.length > 0 ? Math.min(...pts.map(p => p.x)) : 50;
-  const minY = pts.length > 0 ? Math.min(...pts.map(p => p.y)) : 50;
-  const centroid = pts.length > 0
-    ? {
-        x: pts.reduce((sum, p) => sum + p.x, 0) / pts.length,
-        y: pts.reduce((sum, p) => sum + p.y, 0) / pts.length
-      }
-    : { x: 50, y: 50 };
+  // Memoized geometry: centroid for label positioning, bbox for orphan badge
+  const centroid = useMemo(() =>
+    pts.length > 0 ? polygonCentroid(pts) : { x: 50, y: 50 },
+    [pts]
+  );
   const zoneNumber = zone.zoneId.split("-Z")[1] || zone.label;
   const labelText = customName ? `${customName} (Z${zoneNumber})${additionalLabel ?? ""}` : `Zone ${zoneNumber}${additionalLabel ?? ""}`;
 
@@ -437,9 +475,9 @@ export function ZonePoly({
 
       {/* ── Zone label ── */}
       <text
-        x={minX + 1.5}
-        y={minY + 2.5}
-        textAnchor="start"
+        x={centroid.x}
+        y={centroid.y}
+        textAnchor="middle"
         dominantBaseline="central"
         fill="white"
         style={{
@@ -572,3 +610,18 @@ export function ZonePoly({
     </g>
   );
 }
+
+/** Memoized ZonePoly — skips re-render unless visual props change. */
+export const ZonePoly = memo(ZonePolyInner, (prev, next) => {
+  // Return true if equal (should NOT re-render)
+  if (prev.zone !== next.zone) return false;
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.isAlarm !== next.isAlarm) return false;
+  if (prev.isIsolated !== next.isIsolated) return false;
+  if (prev.isEvacuatePulse !== next.isEvacuatePulse) return false;
+  if (prev.isOrphan !== next.isOrphan) return false;
+  if (prev.isReadOnly !== next.isReadOnly) return false;
+  if (prev.additionalLabel !== next.additionalLabel) return false;
+  if (prev.customName !== next.customName) return false;
+  return true; // All visual props unchanged — skip re-render
+});

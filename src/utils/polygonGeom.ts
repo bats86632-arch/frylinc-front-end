@@ -62,7 +62,7 @@ export function polygonCentroid(pts: PolyPoint[]): PolyPoint {
   if (n === 0) return { x: 0, y: 0 };
   let cx = 0, cy = 0;
   const signed = polygonSignedArea(pts);
-  if (signed === 0) {
+  if (Math.abs(signed) < 1e-8) {
     // Degenerate — return average
     return {
       x: pts.reduce((s, p) => s + p.x, 0) / n,
@@ -258,9 +258,20 @@ export function translateEdge(pts: PolyPoint[], edgeIdx: number, dx: number, dy:
   if (edgeIdx < 0 || edgeIdx >= n || n < 3) return pts;
   const nextIdx = (edgeIdx + 1) % n;
 
+  // Compute uniform clamped delta from both edge endpoints so the
+  // edge translates rigidly without skewing near canvas boundaries.
+  const a = pts[edgeIdx];
+  const b = pts[nextIdx];
+  const clampedDx = dx < 0
+    ? Math.max(dx, -Math.min(a.x, b.x))
+    : Math.min(dx, 100 - Math.max(a.x, b.x));
+  const clampedDy = dy < 0
+    ? Math.max(dy, -Math.min(a.y, b.y))
+    : Math.min(dy, 100 - Math.max(a.y, b.y));
+
   return pts.map((p, idx) => {
     if (idx === edgeIdx || idx === nextIdx) {
-      return clampPoint({ x: p.x + dx, y: p.y + dy });
+      return { x: p.x + clampedDx, y: p.y + clampedDy };
     }
     return p;
   });
