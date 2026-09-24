@@ -107,6 +107,13 @@ export function ApiKeysSection({
   } | null>(null);
 
   useEffect(() => {
+    if (companyId) {
+      setKeyCompanyId(companyId);
+      setWebhookCompanyId(companyId);
+    } else {
+      setKeyCompanyId("");
+      setWebhookCompanyId("");
+    }
     fetchKeys();
     fetchWebhooks();
   }, [companyId]);
@@ -444,7 +451,7 @@ export function ApiKeysSection({
                     />
                   </div>
 
-                  {!companyId && (
+                  {!companyId ? (
                     <div>
                       <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                         <Building2 className="h-3 w-3" /> Organization Scope
@@ -462,6 +469,14 @@ export function ApiKeysSection({
                           </option>
                         ))}
                       </select>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 p-2.5 rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] text-[12px]">
+                      <Building2 className="h-4 w-4 text-[var(--accent)] shrink-0" />
+                      <span className="text-[var(--text-secondary)]">Scoped to Organization:</span>
+                      <strong className="text-[var(--text-primary)]">
+                        {companies.find((c) => c.id === companyId)?.name || companyId}
+                      </strong>
                     </div>
                   )}
 
@@ -784,7 +799,7 @@ export function ApiKeysSection({
                     </div>
                   </div>
 
-                  {!companyId && (
+                  {!companyId ? (
                     <div>
                       <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                         <Building2 className="h-3 w-3" /> Organization Scope
@@ -802,6 +817,14 @@ export function ApiKeysSection({
                           </option>
                         ))}
                       </select>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 p-2.5 rounded-[6px] bg-[var(--surface-base)] border border-[var(--border-subtle)] text-[12px]">
+                      <Building2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span className="text-[var(--text-secondary)]">Scoped to Organization:</span>
+                      <strong className="text-[var(--text-primary)]">
+                        {companies.find((c) => c.id === companyId)?.name || companyId}
+                      </strong>
                     </div>
                   )}
 
