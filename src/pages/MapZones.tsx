@@ -261,6 +261,15 @@ export function MapZones() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedZoneIdx, canEdit]);
 
+  // Clean up draw cursor rAF on unmount
+  useEffect(() => {
+    return () => {
+      if (drawCursorRaf.current !== null) {
+        cancelAnimationFrame(drawCursorRaf.current);
+      }
+    };
+  }, []);
+
   // Scroll-wheel zoom — smooth proportional delta
   const handleCanvasWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
     if (!e.ctrlKey && !e.metaKey) return;
@@ -417,6 +426,57 @@ export function MapZones() {
     e.target.value = "";
   };
 
+  // ── Draw polygon mode handlers ────────────────────────────────────────────
+
+  const finishDrawing = useCallback(() => {
+    if (drawPoints.length < 3 || !selectedPanel) return;
+    const maxZones = selectedPanel.zoneCount ?? 8;
+    if (localZones.length >= maxZones) {
+      setDrawMode(false);
+      setDrawPoints([]);
+      setDrawCursor(null);
+      return;
+    }
+    const nextNum = localZones.length + 1;
+    const zoneId = `${selectedPanel.serial}-Z${nextNum}`;
+    const customName = selectedPanel.zoneNames?.[(nextNum - 1).toString()];
+    const label = `${selectedPanel.serial} \u2014 ${formatZoneLabel(nextNum - 1, customName)}`;
+    const newZone: ZoneLayout = { zoneId, label, points: drawPoints };
+    setLocalZones((prev) => [...prev, newZone]);
+    setIsDirty(true);
+    setSelectedZoneIdx(localZones.length);
+    setDrawMode(false);
+    setDrawPoints([]);
+    setDrawCursor(null);
+  }, [drawPoints, selectedPanel, localZones, setLocalZones, setIsDirty, setSelectedZoneIdx]);
+
+  const cancelDrawing = useCallback(() => {
+    setDrawMode(false);
+    setDrawPoints([]);
+    setDrawCursor(null);
+  }, []);
+
+  const undoLastDrawPoint = useCallback(() => {
+    setDrawPoints((prev) => prev.slice(0, -1));
+  }, []);
+
+  // Keyboard shortcuts for draw mode
+  useEffect(() => {
+    if (!drawMode) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        cancelDrawing();
+      } else if (e.key === "Enter" && drawPoints.length >= 3) {
+        finishDrawing();
+      } else if ((e.key === "z" && (e.ctrlKey || e.metaKey)) || e.key === "Backspace") {
+        e.preventDefault();
+        undoLastDrawPoint();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [drawMode, drawPoints, finishDrawing, cancelDrawing, undoLastDrawPoint]);
+
   // Canvas click: in draw mode places a vertex, otherwise deselects zone
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     if (drawMode && svgRef.current) {
@@ -514,57 +574,6 @@ export function MapZones() {
   const handleTouchEnd = useCallback(() => {
     touchDistRef.current = null;
   }, []);
-
-  // ── Draw polygon mode handlers ────────────────────────────────────────────
-
-  const finishDrawing = useCallback(() => {
-    if (drawPoints.length < 3 || !selectedPanel) return;
-    const maxZones = selectedPanel.zoneCount ?? 8;
-    if (localZones.length >= maxZones) {
-      setDrawMode(false);
-      setDrawPoints([]);
-      setDrawCursor(null);
-      return;
-    }
-    const nextNum = localZones.length + 1;
-    const zoneId = `${selectedPanel.serial}-Z${nextNum}`;
-    const customName = selectedPanel.zoneNames?.[(nextNum - 1).toString()];
-    const label = `${selectedPanel.serial} \u2014 ${formatZoneLabel(nextNum - 1, customName)}`;
-    const newZone: ZoneLayout = { zoneId, label, points: drawPoints };
-    setLocalZones((prev) => [...prev, newZone]);
-    setIsDirty(true);
-    setSelectedZoneIdx(localZones.length);
-    setDrawMode(false);
-    setDrawPoints([]);
-    setDrawCursor(null);
-  }, [drawPoints, selectedPanel, localZones, setLocalZones, setIsDirty, setSelectedZoneIdx]);
-
-  const cancelDrawing = useCallback(() => {
-    setDrawMode(false);
-    setDrawPoints([]);
-    setDrawCursor(null);
-  }, []);
-
-  const undoLastDrawPoint = useCallback(() => {
-    setDrawPoints((prev) => prev.slice(0, -1));
-  }, []);
-
-  // Keyboard shortcuts for draw mode
-  useEffect(() => {
-    if (!drawMode) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        cancelDrawing();
-      } else if (e.key === "Enter" && drawPoints.length >= 3) {
-        finishDrawing();
-      } else if ((e.key === "z" && (e.ctrlKey || e.metaKey)) || e.key === "Backspace") {
-        e.preventDefault();
-        undoLastDrawPoint();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [drawMode, drawPoints, finishDrawing, cancelDrawing, undoLastDrawPoint]);
 
   // ── Unsaved changes panel switch guard ─────────────────────────────────────
   const handlePanelSelect = useCallback((panelId: string) => {
