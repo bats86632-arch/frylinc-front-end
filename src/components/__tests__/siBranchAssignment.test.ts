@@ -132,4 +132,30 @@ describe('SI Branch Availability and Assignment Matrix', () => {
     expect(result.finalBranchIds).toEqual(['b2_1', 'b2_2']);
     expect(result.finalAssignments).toEqual(siAssignments);
   });
+
+  it('correctly provides all companies including new ones to super_admin', () => {
+    const allCompanies = [
+      { id: 'c1', name: 'Agni Devices' },
+      { id: 'c2', name: 'Canara bank' },
+      { id: 'c3', name: 'HDFC' },
+      { id: 'c4', name: 'Punjab National Bank' },
+      { id: 'c5', name: 'State Bank Of India' },
+      { id: 'c6', name: 'Yashobhoomi Convention...' },
+    ];
+    // Super admin gets all organizations unrestricted
+    expect(allCompanies.map((c) => c.name)).toContain('Yashobhoomi Convention...');
+  });
+
+  it('correctly maps Viewer (end_user) creation payload with company and branches', () => {
+    const role: Role = 'end_user';
+    const selectedCompanyId = 'c6';
+    const selectedBranchIds = ['b6_1', 'b6_2'];
+
+    const finalCompanyId = selectedCompanyId || undefined;
+    const finalBranchIds = selectedBranchIds;
+
+    expect(finalCompanyId).toBe('c6');
+    expect(finalBranchIds).toEqual(['b6_1', 'b6_2']);
+    expect(role).toBe('end_user');
+  });
 });

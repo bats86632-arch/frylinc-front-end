@@ -35,5 +35,7 @@ export function useBranches(companyId?: string) {
     fetchBranches();
   }, [fetchBranches]);
 
-  return { branches, loading, error, reloadBranches: () => fetchBranches(true) };
+  const reloadBranches = useCallback(() => fetchBranches(true), [fetchBranches]);
+
+  return { branches, loading, error, reloadBranches };
 }

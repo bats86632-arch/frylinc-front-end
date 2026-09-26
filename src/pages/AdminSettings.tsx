@@ -3879,6 +3879,8 @@ export function AdminSettings() {
         onSuccess={(msg) => { showSuccess(msg); loadUsers(); }}
         onError={(msg) => { setError(msg); }}
         editingUser={editingUserData}
+        companies={companies}
+        defaultCompanyId={selectedUserCompanyId && selectedUserCompanyId !== 'unassigned' ? selectedUserCompanyId : undefined}
       />
 
       {/* 🛑 Delete Branch Modal 🛑 */}

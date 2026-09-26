@@ -31,6 +31,8 @@ interface CreateUserModalProps {
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
   editingUser?: User | null;
+  companies?: Company[];
+  defaultCompanyId?: string;
 }
 
 const ROLE_META: Record<
@@ -180,11 +182,19 @@ export function CreateUserModal({
   onSuccess,
   onError,
   editingUser,
+  companies: externalCompanies,
+  defaultCompanyId,
 }: CreateUserModalProps) {
   const { role: actorRole, userData: actorData } = useAuth();
-  const { companies, loading: companiesLoading } = useCompanies();
+  const { companies: hookCompanies, loading: hookCompaniesLoading, reloadCompanies } = useCompanies();
+  const companies = externalCompanies && externalCompanies.length > 0 ? externalCompanies : hookCompanies;
+  const companiesLoading = externalCompanies && externalCompanies.length > 0 ? false : hookCompaniesLoading;
   const { branches, loading: branchesLoading, reloadBranches } = useBranches();
   const [extraBranches, setExtraBranches] = useState<Branch[]>([]);
+
+  // Track initialization so form resets ONLY when modal transitions from closed to open
+  const prevIsOpenRef = useRef(false);
+  const prevEditingUserRef = useRef<string | null>(null);
 
   // ── Local state ──
   const [selectedRole, setSelectedRole] = useState<Role | "">("");
@@ -260,10 +270,27 @@ export function CreateUserModal({
     [actorRole, actorData],
   );
 
-  // ── Reset/populate on open or user change ──
+  // ── Reset/populate ONLY on modal open transition or editing user change ──
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      prevIsOpenRef.current = false;
+      return;
+    }
+
+    const currentUserId = editingUser?.uid || null;
+    const isNewlyOpened = !prevIsOpenRef.current;
+    const isUserChanged = isEditMode && currentUserId !== prevEditingUserRef.current;
+
+    if (!isNewlyOpened && !isUserChanged) {
+      return;
+    }
+
+    prevIsOpenRef.current = true;
+    prevEditingUserRef.current = currentUserId;
+
+    // Refresh branches and companies in background on open
     reloadBranches();
+    reloadCompanies();
 
     if (isEditMode && editingUser) {
       // Edit mode: pre-populate
@@ -278,7 +305,7 @@ export function CreateUserModal({
         const assignments = editingUser.assignments || {};
         setSiAssignments(assignments);
         const compIds = Object.keys(assignments);
-        const firstComp = compIds[0] || editingUser.companyId || "";
+        const firstComp = compIds[0] || editingUser.companyId || defaultCompanyId || "";
         setSelectedCompanyId(firstComp);
         setSelectedBranchIds([]);
 
@@ -287,24 +314,27 @@ export function CreateUserModal({
           fetchBranchesForCompany(compId);
         });
       } else {
-        setSelectedCompanyId(editingUser.companyId || "");
+        setSelectedCompanyId(editingUser.companyId || defaultCompanyId || "");
         setSelectedBranchIds(editingUser.branchIds || []);
         setSiAssignments({});
-        if (editingUser.companyId) {
-          fetchBranchesForCompany(editingUser.companyId);
+        if (editingUser.companyId || defaultCompanyId) {
+          fetchBranchesForCompany(editingUser.companyId || defaultCompanyId || "");
         }
       }
     } else {
       // Create mode: reset everything
       reset({ displayName: "", email: "", password: "" });
       setSelectedRole("");
-      setSelectedCompanyId("");
+      setSelectedCompanyId(defaultCompanyId || "");
       setSelectedBranchIds([]);
       setSiAssignments({});
       setExtraBranches([]);
       setShowPassword(false);
+      if (defaultCompanyId) {
+        fetchBranchesForCompany(defaultCompanyId);
+      }
     }
-  }, [isOpen, editingUser, isEditMode, reset, reloadBranches, fetchBranchesForCompany]);
+  }, [isOpen, editingUser, isEditMode, reset, reloadBranches, reloadCompanies, fetchBranchesForCompany, defaultCompanyId]);
 
   // ── Auto-set company for HO/SI actors ──
   useEffect(() => {
@@ -470,17 +500,20 @@ export function CreateUserModal({
   const showCompanyReadonly = needsCompany && actorCompanyAutoSet;
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !submitting) onClose();
-      }}
-    >
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        onClick={() => {
+          if (!submitting) onClose();
+        }}
+      />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-[540px] mx-4 max-h-[90vh] flex flex-col animate-fade-in-up">
+      <div
+        className="relative z-10 w-full max-w-[540px] max-h-[90vh] flex flex-col animate-fade-in-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="surface-panel rounded-[16px] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
           {/* ── Header ── */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)] shrink-0">
@@ -996,7 +1029,8 @@ export function CreateUserModal({
             <button
               type="submit"
               form="user-modal-form"
-              disabled={submitting || !selectedRole}
+              disabled={submitting || !selectedRole || (needsCompany && !selectedCompanyId)}
+              title={needsCompany && !selectedCompanyId ? "Please select an organization" : undefined}
               className="flex h-[36px] items-center justify-center rounded-[8px] bg-[var(--text-primary)] px-5 text-[13px] font-medium text-[var(--surface-base)] transition-all hover:opacity-90 disabled:opacity-40"
             >
               {submitting ? (

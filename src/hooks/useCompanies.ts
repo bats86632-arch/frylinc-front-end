@@ -8,7 +8,7 @@ export function useCompanies() {
   const [error, setError] = useState<string | null>(null);
   const { userData } = useAuth();
 
-  const fetchCompanies = useCallback(async () => {
+  const fetchCompanies = useCallback(async (forceRefresh = false) => {
     if (!userData) {
       setCompanies([]);
       setLoading(false);
@@ -16,6 +16,9 @@ export function useCompanies() {
     }
     try {
       setLoading(true);
+      if (forceRefresh) {
+        CompanyService.invalidateCache();
+      }
       let data = await CompanyService.getCompanies();
       
       if (userData.role === 'system_integrator' || userData.role === 'end_user') {
@@ -40,6 +43,8 @@ export function useCompanies() {
     fetchCompanies();
   }, [fetchCompanies]);
 
-  return { companies, loading, error, reloadCompanies: fetchCompanies };
+  const reloadCompanies = useCallback(() => fetchCompanies(true), [fetchCompanies]);
+
+  return { companies, loading, error, reloadCompanies };
 }
 
