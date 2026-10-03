@@ -838,7 +838,7 @@ export function MapZones() {
             {/* Zoom Controls */}
             <div className="flex items-center gap-1 bg-[var(--surface-overlay)] border border-[var(--border-default)] rounded-[6px] p-0.5 ml-2">
               <button
-                onClick={() => setZoom((z) => Math.max(0.2, +(z - 0.1).toFixed(2)))}
+                onClick={() => setZoom((z) => (z === null ? null : Math.max(0.2, +(z - 0.1).toFixed(2))))}
                 className="p-1 hover:bg-[var(--surface-hover)] rounded-[4px] text-[var(--text-secondary)]"
                 title="Zoom Out"
               >
@@ -852,14 +852,14 @@ export function MapZones() {
                 <Maximize2 className="h-3.5 w-3.5" />
               </button>
               <button
-                onClick={() => setZoom((z) => Math.min(3, +(z + 0.1).toFixed(2)))}
+                onClick={() => setZoom((z) => (z === null ? null : Math.min(3, +(z + 0.1).toFixed(2))))}
                 className="p-1 hover:bg-[var(--surface-hover)] rounded-[4px] text-[var(--text-secondary)]"
                 title="Zoom In"
               >
                 <Plus className="h-3.5 w-3.5" />
               </button>
               <span className="text-[10px] text-[var(--text-quaternary)] px-1 font-medium w-8 text-center">
-                {Math.round(zoom * 100)}%
+                {zoom !== null ? Math.round(zoom * 100) : 100}%
               </span>
             </div>
 

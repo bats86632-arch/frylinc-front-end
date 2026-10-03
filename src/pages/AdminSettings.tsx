@@ -240,7 +240,7 @@ export function AdminSettings() {
   });
 
   const { hasRole, userData } = useAuth();
-  const { panels, loading: panelsLoading } = usePanels();
+  const { panels, loading: panelsLoading, refreshPanels } = usePanels();
   const [editingPanelData, setEditingPanelData] = useState<Panel | null>(null);
   const [editPanelFormLoading, setEditPanelFormLoading] = useState(false);
 
@@ -1038,7 +1038,7 @@ export function AdminSettings() {
       setSuccess("Branch deleted successfully");
       await reloadBranches();
       if (deletePanelsAlso) {
-        await reloadPanels();
+        await refreshPanels();
       }
       setDeleteBranchModalState((prev) => ({ ...prev, isOpen: false }));
     } catch (err: unknown) {
@@ -1560,7 +1560,7 @@ export function AdminSettings() {
                           </h4>
                           <button
                             type="button"
-                            onClick={() => appendCreateCompanyBranch({ name: "", address: "", supervisorName: "", contactNumber: "", emailAddress: "" })}
+                            onClick={() => appendCreateCompanyBranch({ name: "", addressLine1: "", supervisorName: "", contactNumber: "", emailAddress: "" })}
                             className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--text-primary)] hover:opacity-80 transition-opacity"
                           >
                             <Plus className="h-3.5 w-3.5" />
@@ -1924,7 +1924,7 @@ export function AdminSettings() {
                         const companyBranches = branches.filter(b => 
                           b.companyId === selectedCompany.id &&
                           (b.name.toLowerCase().includes(branchSearchQuery.toLowerCase()) ||
-                           (b.address && b.address.toLowerCase().includes(branchSearchQuery.toLowerCase())) ||
+                           (b.addressLine1 && b.addressLine1.toLowerCase().includes(branchSearchQuery.toLowerCase())) ||
                            (b.supervisorName && b.supervisorName.toLowerCase().includes(branchSearchQuery.toLowerCase())) ||
                            (b.contactNumber && b.contactNumber.toLowerCase().includes(branchSearchQuery.toLowerCase())) ||
                            (b.emailAddress && b.emailAddress.toLowerCase().includes(branchSearchQuery.toLowerCase())))
@@ -3900,7 +3900,7 @@ export function AdminSettings() {
 
             <div className="p-6">
               <p className="text-[14px] text-[var(--text-primary)] mb-6">
-                Are you sure you want to delete <span className="font-bold">{deleteBranchModalState.branchName}</span>?
+                Are you sure you want to delete <span className="font-bold">{deleteBranchModalState.branch?.name}</span>?
               </p>
 
               {deleteBranchModalState.associatedPanels.length > 0 && (

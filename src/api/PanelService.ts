@@ -82,7 +82,7 @@ export const PanelService = {
 
       timeoutId = setTimeout(() => {
         unsubscribe();
-        resolve(true);
+        resolve();
       }, timeoutMs);
     });
   },

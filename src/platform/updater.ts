@@ -25,7 +25,7 @@ export interface LiveUpdateManifest {
 }
 
 const FIREBASE_STORAGE_MANIFEST_URL =
-  'https://firebasestorage.googleapis.com/v0/b/fyrlinc-project.appspot.com/o/app-updates%2Fversion.json?alt=media';
+  'https://firebasestorage.googleapis.com/v0/b/fyrlinc-project.firebasestorage.app/o/app-updates%2Fversion.json?alt=media';
 
 /**
  * Notify the native updater that the current bundle booted successfully,

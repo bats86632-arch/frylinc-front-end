@@ -6,7 +6,6 @@ import { useCompanies } from "../hooks/useCompanies";
 import { useBranches } from "../hooks/useBranches";
 import { Activity, AlertTriangle, Hash, MapPin, RadioTower, Clock, CheckCircle, BatteryMedium, BatteryWarning, Zap, ZapOff, Shield } from "lucide-react";
 import { PanelService } from "../api/PanelService";
-import { getZoneStatusColors } from "../utils/zoneUtils";
 import { formatZoneLabel } from "../utils/formatters";
 
 interface PanelCardProps {

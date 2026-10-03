@@ -84,10 +84,10 @@ export function ZoneRect({
       dragState.current = {
         startPx: e.clientX,
         startPy: e.clientY,
-        startX: zone.x,
-        startY: zone.y,
-        startW: zone.width,
-        startH: zone.height,
+        startX: zone.x ?? 0,
+        startY: zone.y ?? 0,
+        startW: zone.width ?? 10,
+        startH: zone.height ?? 10,
         handle,
       };
     },
@@ -257,7 +257,7 @@ export function ZoneRect({
               : "text-white"
           }`}
           style={{
-            fontSize: `clamp(9px, ${Math.min(zone.width, zone.height) * 0.15}vw, 12px)`,
+            fontSize: `clamp(9px, ${Math.min(zone.width ?? 10, zone.height ?? 10) * 0.15}vw, 12px)`,
           }}
         >
           {isOrphan ? (

@@ -34,7 +34,6 @@ import {
   ZapOff
 } from "lucide-react";
 import { formatDateTime, formatZoneLabel } from "../utils/formatters";
-import { getZoneStatusColors } from "../utils/zoneUtils";
 import { Event } from "../types";
 
 
@@ -963,7 +962,7 @@ export function PanelDetail() {
                               const z = event.zone || event.zoneNumber;
                               let interpretation: string | null = null;
                               
-                              if (z >= 9 && z <= 16) {
+                              if (z !== undefined && z >= 9 && z <= 16) {
                                 if (normalizedPanel.panelType === 'Fire Alarm') {
                                   if (z === 9) interpretation = 'Earth Fault';
                                   else if (z === 10) interpretation = 'Evacuate (EVA)';

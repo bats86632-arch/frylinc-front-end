@@ -51,6 +51,7 @@ export function Reports() {
   const [viewMode, setViewMode] = useState<"list" | "matrix">("matrix");
   const [matrixFilter, setMatrixFilter] = useState<"All" | "Fire Alarm" | "Security" | "Dialer" | "Health">("Fire Alarm");
   const [secretMode, setSecretMode] = useState<boolean>(false);
+  const [listClickCount, setListClickCount] = useState<number>(0);
   // Pagination
   const [pageToken, setPageToken] = useState<string | null>(null);
   const [pageHistory, setPageHistory] = useState<string[]>([]);
