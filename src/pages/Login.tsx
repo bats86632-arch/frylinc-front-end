@@ -61,7 +61,6 @@ export function Login() {
     register,
     handleSubmit,
     getValues,
-    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -71,7 +70,7 @@ export function Login() {
     setError(null);
     setIsLoading(true);
 
-    // If demo credentials entered by app store reviewer or guest, activate demo mode immediately
+    // If demo credentials entered by app reviewer or guest, activate demo mode
     const normalizedEmail = data.email.trim().toLowerCase();
     if (
       normalizedEmail === "demo@fyrlinc.com" ||
@@ -175,25 +174,11 @@ export function Login() {
 
   return (
     <div className="w-full animate-fade-in rounded-[24px] border border-white/10 bg-black/40 p-6 backdrop-blur-xl shadow-2xl lg:rounded-[20px] lg:p-12">
-      {/* Top Header with title and top-right Demo User option */}
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-        <div>
-          <h2 className="font-sans text-[1.5rem] lg:text-[1.75rem] font-normal leading-tight tracking-[-0.01em] text-white drop-shadow-sm">
-            Welcome back
-          </h2>
-          <p className="mt-1 text-[12px] text-white/60 font-light hidden sm:block">
-            Sign in or explore reviewer sandbox
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleEnterDemo}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-[12px] font-semibold text-amber-300 transition-all shadow-sm hover:scale-105 active:scale-95"
-          title="Explore Demo Mode with sample fire panels"
-        >
-          <Sparkles className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-          <span>Demo User</span>
-        </button>
+      {/* Header (Desktop Only) */}
+      <div className="hidden lg:block mb-10">
+        <h2 className="font-sans text-[1.75rem] font-normal leading-tight tracking-[-0.01em] text-white drop-shadow-sm">
+          Welcome back
+        </h2>
       </div>
 
       {/* Error banner */}
@@ -336,33 +321,16 @@ export function Login() {
           )}
         </button>
 
-        {/* Demo Mode for App Reviewers & Guests */}
-        <div className="mt-8 pt-6 border-t border-white/10 text-center">
+        {/* Demo Account - Thin & subtle below login button */}
+        <div className="mt-4 flex items-center justify-center">
           <button
             type="button"
             onClick={handleEnterDemo}
-            className="flex w-full items-center justify-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-white rounded-[8px] lg:rounded-full bg-gradient-to-r from-amber-500/20 via-amber-400/20 to-amber-500/20 hover:from-amber-500/30 hover:to-amber-500/30 border border-amber-400/40 transition-all shadow-sm"
+            className="group inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[12px] font-normal text-white/70 hover:bg-white/10 hover:text-white hover:border-white/30 transition-all"
           >
-            <Sparkles className="h-4 w-4 text-amber-400 shrink-0" />
-            <span>Explore Demo Mode (Reviewer Sandbox)</span>
+            <Sparkles className="h-3 w-3 text-amber-400/90 group-hover:scale-110 transition-transform" />
+            <span>Demo Account (Sample Data)</span>
           </button>
-          <div className="mt-2.5 flex items-center justify-center gap-2 text-[11px] text-white/60">
-            <span>Reviewer Login:</span>
-            <button
-              type="button"
-              onClick={() => {
-                setValue("email", "demo@fyrlinc.com");
-                setValue("password", "Demo@1234");
-              }}
-              className="text-amber-300 underline font-mono hover:text-amber-200"
-              title="Click to auto-fill demo credentials"
-            >
-              demo@fyrlinc.com / Demo@1234
-            </button>
-          </div>
-          <p className="mt-1 text-[10px] text-white/40 leading-relaxed">
-            Instant sample sandbox with 2 mock companies, branches, and simulated live fire panels.
-          </p>
         </div>
       </form>
     </div>
