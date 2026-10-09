@@ -75,27 +75,8 @@ export function ZoneRect({
 
   // ── Pointer handlers ─────────────────────────────────────────────────────
 
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent, handle: ResizeHandle | "move") => {
-      if (isReadOnly) return;
-      e.stopPropagation();
-      e.currentTarget.setPointerCapture(e.pointerId);
-      onSelect();
-      dragState.current = {
-        startPx: e.clientX,
-        startPy: e.clientY,
-        startX: zone.x ?? 0,
-        startY: zone.y ?? 0,
-        startW: zone.width ?? 10,
-        startH: zone.height ?? 10,
-        handle,
-      };
-    },
-    [isReadOnly, zone, onSelect]
-  );
-
   const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
+    (e: PointerEvent) => {
       const ds = dragState.current;
       if (!ds) return;
 
@@ -138,7 +119,41 @@ export function ZoneRect({
 
   const handlePointerUp = useCallback(() => {
     dragState.current = null;
-  }, []);
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", handlePointerUp);
+    window.removeEventListener("pointercancel", handlePointerUp);
+  }, [handlePointerMove]);
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent, handle: ResizeHandle | "move") => {
+      if (isReadOnly) return;
+      e.stopPropagation();
+      e.preventDefault();
+      onSelect();
+      dragState.current = {
+        startPx: e.clientX,
+        startPy: e.clientY,
+        startX: zone.x ?? 0,
+        startY: zone.y ?? 0,
+        startW: zone.width ?? 10,
+        startH: zone.height ?? 10,
+        handle,
+      };
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
+    },
+    [isReadOnly, zone, onSelect, handlePointerMove, handlePointerUp]
+  );
+
+  // Clean up window listeners on unmount
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+    };
+  }, [handlePointerMove, handlePointerUp]);
 
   // ── Appearance ────────────────────────────────────────────────────────────
 
@@ -200,8 +215,6 @@ export function ZoneRect({
         style={rectStyle}
         className={rectClass}
         onPointerDown={(e) => handlePointerDown(e, "move")}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
         onClick={(e) => { e.stopPropagation(); if (!isReadOnly) onSelect(); }}
       >
         {/* ── Resize Handles (only when selected and not read-only) ─────── */}
@@ -216,8 +229,6 @@ export function ZoneRect({
                   e.stopPropagation();
                   handlePointerDown(e, handle);
                 }}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
               />
             ))}
             {/* Remove button — hovering above the top-center of the zone */}

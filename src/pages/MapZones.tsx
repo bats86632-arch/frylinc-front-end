@@ -21,6 +21,7 @@ import {
   Maximize2,
   PenTool,
   Undo2,
+  PlusCircle,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { usePanels } from "../hooks/usePanels";
@@ -167,6 +168,16 @@ export function MapZones() {
   const [drawPoints, setDrawPoints] = useState<PolyPoint[]>([]);
   const [drawCursor, setDrawCursor] = useState<PolyPoint | null>(null);
   const drawCursorRaf = useRef<number | null>(null);
+
+  // Add vertex mode for selected polygon zone
+  const [addVertexMode, setAddVertexMode] = useState(false);
+
+  // Automatically exit add-vertex mode if no zone is selected
+  useEffect(() => {
+    if (selectedZoneIdx === null) {
+      setAddVertexMode(false);
+    }
+  }, [selectedZoneIdx]);
 
   // Unsaved changes guard
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
@@ -476,6 +487,18 @@ export function MapZones() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [drawMode, drawPoints, finishDrawing, cancelDrawing, undoLastDrawPoint]);
+
+  // Keyboard shortcut to exit Add Vertex mode on Escape
+  useEffect(() => {
+    if (!addVertexMode) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setAddVertexMode(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [addVertexMode]);
 
   // Canvas click: in draw mode places a vertex, otherwise deselects zone
   const handleCanvasClick = useCallback((e: React.MouseEvent) => {
@@ -822,6 +845,23 @@ export function MapZones() {
               </div>
             )}
 
+            {/* Add Vertex to Selected Zone button */}
+            {selectedZoneIdx !== null && !drawMode && (
+              <button
+                onClick={() => setAddVertexMode((prev) => !prev)}
+                disabled={saving}
+                className={`btn-secondary inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] rounded-[6px] transition-all ${
+                  addVertexMode
+                    ? "bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm font-semibold"
+                    : "border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-muted)]"
+                }`}
+                title={addVertexMode ? "Exit Add Vertex mode (Esc)" : "Add a vertex/corner to the selected zone"}
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                {addVertexMode ? "Adding Vertex (Click Edge)..." : "Add Vertex"}
+              </button>
+            )}
+
             {/* Delete Selected Zone button */}
             {selectedZoneIdx !== null && (
               <button
@@ -900,7 +940,13 @@ export function MapZones() {
           {/* Info tip */}
           <div className="flex items-center gap-1 text-[10px] text-[var(--text-quaternary)]">
             <Info className="h-3 w-3 shrink-0" />
-            <span>{drawMode ? "Click to place vertices · Click first point or press Enter to close · Esc to cancel · Ctrl+Z to undo" : "Drag zone to move · Drag edge to shift wall · Tap (+) on edge to add bend · Double-tap/click vertex to remove · Drag empty map to pan"}</span>
+            <span>
+              {addVertexMode
+                ? "Add Vertex Mode: Tap any edge of the selected zone to add a vertex there · Esc to cancel"
+                : drawMode
+                ? "Click to place vertices · Click first point or press Enter to close · Esc to cancel · Ctrl+Z to undo"
+                : "Drag zone to move · Drag corners to reshape · Click 'Add Vertex' to add a bend · Double-tap/click vertex to remove · Drag empty map to pan"}
+            </span>
           </div>
         </div>
       )}
@@ -945,6 +991,7 @@ export function MapZones() {
             opacity: zoom === null ? 0 : 1,
             overflow: zoom === null ? "hidden" : "visible",
             willChange: "transform",
+            touchAction: "none",
           }}
         >
           {/* Floor plan image */}
@@ -962,14 +1009,14 @@ export function MapZones() {
           <div
             ref={containerRef}
             className="absolute inset-0"
-            style={{ pointerEvents: "none" }}
+            style={{ pointerEvents: "none", touchAction: "none" }}
           >
           <svg
             ref={svgRef}
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full"
-            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible", touchAction: "none", cursor: drawMode ? "crosshair" : undefined }}
+            style={{ pointerEvents: canEdit ? "all" : "none", overflow: "visible", touchAction: "none", cursor: drawMode || addVertexMode ? "crosshair" : undefined }}
             onClick={handleCanvasClick}
             onPointerDown={handleCanvasPointerDown}
             onPointerMove={handleCanvasPointerMove}
@@ -999,6 +1046,8 @@ export function MapZones() {
                   onSelect={() => setSelectedZoneIdx(idx)}
                   onChange={(updated) => handleZoneChange(idx, updated)}
                   onRemove={canEdit ? () => handleRemoveZone(idx) : undefined}
+                  addVertexMode={selectedZoneIdx === idx && addVertexMode}
+                  onVertexInserted={() => setAddVertexMode(false)}
                 />
               );
             })}
