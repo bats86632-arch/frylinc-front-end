@@ -13,7 +13,6 @@ import {
   CheckCircle,
   Mail,
   Lock,
-  Sparkles,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -321,15 +320,14 @@ export function Login() {
           )}
         </button>
 
-        {/* Demo Account - Thin & subtle below login button */}
+        {/* Demo Account - Subtle pill below login button */}
         <div className="mt-4 flex items-center justify-center">
           <button
             type="button"
             onClick={handleEnterDemo}
-            className="group inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[12px] font-normal text-white/70 hover:bg-white/10 hover:text-white hover:border-white/30 transition-all"
+            className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-normal text-white/50 hover:bg-white/10 hover:text-white/80 hover:border-white/20 transition-all duration-200"
           >
-            <Sparkles className="h-3 w-3 text-amber-400/90 group-hover:scale-110 transition-transform" />
-            <span>Demo Account (Sample Data)</span>
+            Demo Account
           </button>
         </div>
       </form>
