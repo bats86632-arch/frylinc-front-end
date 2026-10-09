@@ -1,14 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CompanyService, Company } from '../api/CompanyService';
 import { useAuth } from '../contexts/AuthContext';
+import { DEMO_COMPANIES } from '../mock/demoData';
 
 export function useCompanies() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { userData } = useAuth();
+  const { userData, isDemoMode } = useAuth();
 
   const fetchCompanies = useCallback(async (forceRefresh = false) => {
+    if (isDemoMode) {
+      setCompanies(DEMO_COMPANIES);
+      setLoading(false);
+      setError(null);
+      return;
+    }
     if (!userData) {
       setCompanies([]);
       setLoading(false);
@@ -37,7 +44,7 @@ export function useCompanies() {
     } finally {
       setLoading(false);
     }
-  }, [userData]);
+  }, [userData, isDemoMode]);
 
   useEffect(() => {
     fetchCompanies();

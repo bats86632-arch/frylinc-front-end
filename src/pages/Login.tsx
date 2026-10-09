@@ -12,8 +12,10 @@ import {
   Loader2,
   CheckCircle,
   Mail,
-  Lock
+  Lock,
+  Sparkles,
 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -43,6 +45,12 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { enterDemoMode } = useAuth();
+
+  const handleEnterDemo = () => {
+    enterDemoMode();
+    navigate("/", { replace: true });
+  };
 
   const from =
     (location.state as LoginLocationState | null)?.from?.pathname || "/";
@@ -299,6 +307,21 @@ export function Login() {
             </>
           )}
         </button>
+
+        {/* Demo Mode for App Reviewers & Guests */}
+        <div className="mt-8 pt-6 border-t border-white/10 text-center">
+          <button
+            type="button"
+            onClick={handleEnterDemo}
+            className="flex w-full items-center justify-center gap-2 px-4 py-2.5 text-[13px] font-medium text-white/90 rounded-[8px] lg:rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all shadow-sm"
+          >
+            <Sparkles className="h-4 w-4 text-amber-400 shrink-0" />
+            <span>Explore Demo Mode (Reviewer Sandbox)</span>
+          </button>
+          <p className="mt-2 text-[11px] text-white/50 leading-relaxed">
+            Instant sandbox with simulated fire panels, zones & telemetry for app store reviewers and unauthorized guests.
+          </p>
+        </div>
       </form>
     </div>
   );

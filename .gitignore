@@ -40,6 +40,7 @@ GoogleService-Info.plist
 *.keystore
 *.jks
 *.p12
+keystore.properties
 
 # Local build artifacts
 bundle.zip

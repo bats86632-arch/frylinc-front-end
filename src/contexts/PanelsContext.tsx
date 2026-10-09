@@ -11,6 +11,7 @@ import { Panel } from "../types";
 import { useAuth } from "./AuthContext";
 import { useAppLifecycle } from "../platform/lifecycle";
 import { useNetworkStatus } from "../platform/network";
+import { DEMO_PANELS } from "../mock/demoData";
 
 interface PanelsContextType {
   panels: Panel[];
@@ -25,13 +26,13 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
   const [panels, setPanels] = useState<Panel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { userData } = useAuth();
+  const { userData, isDemoMode } = useAuth();
   const { connected } = useNetworkStatus();
 
   // Reconnect Firestore when app transitions back to active/foreground
   useAppLifecycle({
     onStateChange: (state) => {
-      if (state === "active") {
+      if (state === "active" && !isDemoMode) {
         reconnectFirestore();
       }
     },
@@ -39,12 +40,19 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
 
   // Reconnect Firestore when network connectivity is restored
   useEffect(() => {
-    if (connected) {
+    if (connected && !isDemoMode) {
       reconnectFirestore();
     }
-  }, [connected]);
+  }, [connected, isDemoMode]);
 
   useEffect(() => {
+    if (isDemoMode) {
+      setPanels(DEMO_PANELS);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     if (!userData) {
       // No authenticated user - clear panels and mark as done loading
       setPanels([]);
@@ -158,9 +166,13 @@ export function PanelsProvider({ children }: { children: ReactNode }) {
     return () => {
       unsubscribes.forEach((unsub) => unsub());
     };
-  }, [userData]);
+  }, [userData, isDemoMode]);
 
   const refreshPanels = async () => {
+    if (isDemoMode) {
+      setPanels(DEMO_PANELS);
+      return;
+    }
     try {
       await reconnectFirestore();
     } catch (e) {

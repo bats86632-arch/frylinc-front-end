@@ -73,7 +73,7 @@ export function MainDashboardLayout() {
   });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const { userData, currentUser, logout, hasRole } = useAuth();
+  const { userData, currentUser, logout, hasRole, isDemoMode, exitDemoMode } = useAuth();
   const { panels } = usePanels();
   const { branches } = useBranches();
   const location = useLocation();
@@ -578,6 +578,27 @@ export function MainDashboardLayout() {
           </div>
 
           <div className="flex items-center gap-3">
+            {isDemoMode && (
+              <div className="flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold text-amber-500 shadow-sm animate-fade-in">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
+                </span>
+                <span className="hidden sm:inline">DEMO MODE · Sample Data</span>
+                <span className="sm:hidden">DEMO</span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await exitDemoMode();
+                    navigate("/login", { replace: true });
+                  }}
+                  className="ml-1 rounded px-1.5 py-0.5 text-[10px] uppercase font-bold text-amber-500 hover:bg-amber-500/20 transition-colors"
+                  title="Exit demo sandbox and return to login"
+                >
+                  Exit
+                </button>
+              </div>
+            )}
             <ThemeToggle />
             {/* Notification bell */}
             <div className="relative">

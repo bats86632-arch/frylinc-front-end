@@ -2,14 +2,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { BranchService } from '../api/BranchService';
 import { Branch } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { DEMO_BRANCHES } from '../mock/demoData';
 
 export function useBranches(companyId?: string) {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { userData } = useAuth();
+  const { userData, isDemoMode } = useAuth();
 
   const fetchBranches = useCallback(async (forceRefresh = false) => {
+    if (isDemoMode) {
+      const filtered = companyId
+        ? DEMO_BRANCHES.filter((b) => b.companyId === companyId)
+        : DEMO_BRANCHES;
+      setBranches(filtered);
+      setLoading(false);
+      setError(null);
+      return;
+    }
     if (!userData) {
       setBranches([]);
       setLoading(false);
@@ -29,7 +39,7 @@ export function useBranches(companyId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [userData, companyId]);
+  }, [userData, companyId, isDemoMode]);
 
   useEffect(() => {
     fetchBranches();

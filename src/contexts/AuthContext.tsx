@@ -14,6 +14,11 @@ import { auth } from "../config/firebase";
 import { User, Role } from "../types";
 import apiClient from "../api/axios";
 import { CompanyService } from "../api/CompanyService";
+import {
+  DEMO_USER,
+  isDemoModeActive,
+  setDemoModeActive,
+} from "../mock/demoData";
 
 interface ProfileUpdateData {
   displayName?: string;
@@ -37,6 +42,9 @@ interface AuthContextType {
   saveDisplayName: (displayName: string) => Promise<void>;
   updateProfile: (data: ProfileUpdateData) => Promise<void>;
   hasRole: (allowedRoles: Role[]) => boolean;
+  isDemoMode: boolean;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,12 +90,29 @@ function clearCachedUser(): void {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<User | null>(readCachedUser);
-  const [role, setRole] = useState<Role | null>(
-    () => readCachedUser()?.role ?? null,
-  );
-  const [loading, setLoading] = useState(() => readCachedUser() === null);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => isDemoModeActive());
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(() => {
+    if (isDemoModeActive()) {
+      return {
+        uid: DEMO_USER.uid,
+        email: DEMO_USER.email,
+        displayName: DEMO_USER.displayName,
+      } as unknown as FirebaseUser;
+    }
+    return null;
+  });
+  const [userData, setUserData] = useState<User | null>(() => {
+    if (isDemoModeActive()) return DEMO_USER;
+    return readCachedUser();
+  });
+  const [role, setRole] = useState<Role | null>(() => {
+    if (isDemoModeActive()) return DEMO_USER.role;
+    return readCachedUser()?.role ?? null;
+  });
+  const [loading, setLoading] = useState(() => {
+    if (isDemoModeActive()) return false;
+    return readCachedUser() === null;
+  });
 
   const loadUserProfile = async (user: FirebaseUser, forceRefresh = false) => {
     const tokenResult = await user.getIdTokenResult(forceRefresh);
@@ -161,8 +186,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
   };
 
+  const enterDemoMode = () => {
+    setDemoModeActive(true);
+    setIsDemoMode(true);
+    const mockUser = {
+      uid: DEMO_USER.uid,
+      email: DEMO_USER.email,
+      displayName: DEMO_USER.displayName,
+    } as unknown as FirebaseUser;
+    setCurrentUser(mockUser);
+    setUserData(DEMO_USER);
+    setRole(DEMO_USER.role);
+    setLoading(false);
+  };
+
+  const exitDemoMode = () => {
+    setDemoModeActive(false);
+    setIsDemoMode(false);
+    clearCachedUser();
+    setCurrentUser(null);
+    setUserData(null);
+    setRole(null);
+    setLoading(false);
+  };
+
   useEffect(() => {
+    if (isDemoModeActive()) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (isDemoModeActive()) return;
       setCurrentUser(user);
 
       if (user) {
@@ -184,14 +239,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isDemoMode]);
 
   const refreshUserData = async () => {
+    if (isDemoMode) return;
     if (!auth.currentUser) return;
     await loadUserProfile(auth.currentUser, true);
   };
 
   const updateProfile = async (data: ProfileUpdateData) => {
+    if (isDemoMode) {
+      setUserData((prev) => (prev ? { ...prev, ...data } : null));
+      return;
+    }
     // Optimistic UI update to ensure instantaneous rendering before API responds
     setUserData((prev) => (prev ? { ...prev, ...data } : null));
     await apiClient.patch("/me/profile", data);
@@ -205,6 +265,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    if (isDemoMode) {
+      exitDemoMode();
+      return;
+    }
     clearCachedUser();
     CompanyService.invalidateCache();
     await signOut(auth);
@@ -231,6 +295,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveDisplayName,
     updateProfile,
     hasRole,
+    isDemoMode,
+    enterDemoMode,
+    exitDemoMode,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

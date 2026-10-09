@@ -16,6 +16,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { PanelMap, ZoneLayout } from "../types";
 import imageCompression from "browser-image-compression";
 import { migrateZone } from "../utils/polygonGeom";
+import { DEMO_PANEL_MAP } from "../mock/demoData";
 
 interface UsePanelMapReturn {
   panelMap: PanelMap | null;
@@ -33,12 +34,18 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
   const [mapLoading, setMapLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const { currentUser } = useAuth();
+  const { currentUser, isDemoMode } = useAuth();
 
   // ── Real-time listener on panelMaps/{panelId} ──────────────────────────────
   useEffect(() => {
     if (!panelId) {
       setPanelMap(null);
+      setMapLoading(false);
+      return;
+    }
+
+    if (panelId.startsWith("DEMO-") || isDemoMode) {
+      setPanelMap({ ...DEMO_PANEL_MAP, panelId });
       setMapLoading(false);
       return;
     }
@@ -184,11 +191,19 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     }
   };
 
-  // ── Save zone layout positions ─────────────────────────────────────────────
   const saveLayout = async (
     panelId: string,
     zones: ZoneLayout[]
   ): Promise<void> => {
+    if (panelId.startsWith("DEMO-") || isDemoMode) {
+      setSaving(true);
+      const cleanZones = zones.map(({ zoneId, label, points }) => ({ zoneId, label, points }));
+      setTimeout(() => {
+        setPanelMap((prev) => (prev ? { ...prev, zones: cleanZones } : null));
+        setSaving(false);
+      }, 200);
+      return;
+    }
     if (!currentUser) throw new Error("Not authenticated");
     setSaving(true);
     try {
