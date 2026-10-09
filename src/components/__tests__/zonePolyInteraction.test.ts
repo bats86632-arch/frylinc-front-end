@@ -53,4 +53,19 @@ describe("ZonePoly Mobile Interaction Logic", () => {
     expect(withNew).toHaveLength(5);
     expect(withNew[1]).toEqual({ x: 20, y: 10 });
   });
+
+  it("translates polygon continuously across long swipe distances and clamps to viewport bounds", () => {
+    // Large swipe across 50% of the screen
+    const movedFar = translatePolygon(zonePts, 50, 40);
+    expect(movedFar[0]).toEqual({ x: 60, y: 50 });
+    expect(movedFar[2]).toEqual({ x: 80, y: 65 });
+
+    // Extreme swipe attempting to go out of bounds (e.g. +100 in X)
+    // Should clamp the bounding box to the container edge (100)
+    const clampedFar = translatePolygon(zonePts, 100, 100);
+    const maxX = Math.max(...clampedFar.map(p => p.x));
+    const maxY = Math.max(...clampedFar.map(p => p.y));
+    expect(maxX).toBeLessThanOrEqual(100);
+    expect(maxY).toBeLessThanOrEqual(100);
+  });
 });

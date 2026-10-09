@@ -230,9 +230,9 @@ function ZonePolyInner({
     }
   }, [svgRef, tryCommit]);
 
-  /** rAF-throttled pointer move — processes only the latest event per frame. */
-  const handleGlobalPointerMove = useCallback((e: PointerEvent) => {
-    pendingMoveRef.current = { clientX: e.clientX, clientY: e.clientY };
+  /** rAF-throttled move dispatcher — processes latest coordinates per animation frame. */
+  const scheduleMove = useCallback((pos: { clientX: number; clientY: number }) => {
+    pendingMoveRef.current = pos;
     if (rafRef.current !== null) return; // already scheduled
     rafRef.current = requestAnimationFrame(() => {
       rafRef.current = null;
@@ -243,10 +243,36 @@ function ZonePolyInner({
     });
   }, [processPointerMove]);
 
+  const handleGlobalPointerMove = useCallback((e: PointerEvent) => {
+    scheduleMove({ clientX: e.clientX, clientY: e.clientY });
+  }, [scheduleMove]);
+
+  const handleGlobalTouchMove = useCallback((e: TouchEvent) => {
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+    if (e.touches && e.touches.length === 1) {
+      const t = e.touches[0];
+      scheduleMove({ clientX: t.clientX, clientY: t.clientY });
+    } else if (e.touches && e.touches.length > 1) {
+      handleGlobalPointerUpRef.current();
+    }
+  }, [scheduleMove]);
+
+  const handleGlobalPointerCancel = useCallback((e: PointerEvent) => {
+    // On touch devices, mobile WebViews can fire spurious pointercancel on SVG elements.
+    // If it's a touch event, do not cancel while touchmove is still tracking!
+    if (e.pointerType === "touch") return;
+    handleGlobalPointerUpRef.current();
+  }, []);
+
   const handleGlobalPointerUp = useCallback(() => {
-    window.removeEventListener("pointermove", handleGlobalPointerMove);
-    window.removeEventListener("pointerup", handleGlobalPointerUp);
-    window.removeEventListener("pointercancel", handleGlobalPointerUp);
+    window.removeEventListener("pointermove", handleGlobalPointerMoveRef.current);
+    window.removeEventListener("pointerup", handleGlobalPointerUpRef.current);
+    window.removeEventListener("pointercancel", handleGlobalPointerCancelRef.current);
+    window.removeEventListener("touchmove", handleGlobalTouchMoveRef.current);
+    window.removeEventListener("touchend", handleGlobalPointerUpRef.current);
+    window.removeEventListener("touchcancel", handleGlobalPointerUpRef.current);
 
     dragRef.current = null;
     dragStartPts.current = [];
@@ -254,22 +280,46 @@ function ZonePolyInner({
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     }
-  }, [handleGlobalPointerMove]);
+  }, []);
 
   const handleGlobalPointerMoveRef = useRef(handleGlobalPointerMove);
   handleGlobalPointerMoveRef.current = handleGlobalPointerMove;
+  const handleGlobalTouchMoveRef = useRef(handleGlobalTouchMove);
+  handleGlobalTouchMoveRef.current = handleGlobalTouchMove;
+  const handleGlobalPointerCancelRef = useRef(handleGlobalPointerCancel);
+  handleGlobalPointerCancelRef.current = handleGlobalPointerCancel;
   const handleGlobalPointerUpRef = useRef(handleGlobalPointerUp);
   handleGlobalPointerUpRef.current = handleGlobalPointerUp;
+
+  const attachDragListeners = useCallback(() => {
+    window.addEventListener("pointermove", handleGlobalPointerMoveRef.current);
+    window.addEventListener("pointerup", handleGlobalPointerUpRef.current);
+    window.addEventListener("pointercancel", handleGlobalPointerCancelRef.current);
+    window.addEventListener("touchmove", handleGlobalTouchMoveRef.current, { passive: false });
+    window.addEventListener("touchend", handleGlobalPointerUpRef.current);
+    window.addEventListener("touchcancel", handleGlobalPointerUpRef.current);
+  }, []);
 
   // Clean up global listeners ONLY on true unmount
   useEffect(() => {
     return () => {
       window.removeEventListener("pointermove", handleGlobalPointerMoveRef.current);
       window.removeEventListener("pointerup", handleGlobalPointerUpRef.current);
-      window.removeEventListener("pointercancel", handleGlobalPointerUpRef.current);
+      window.removeEventListener("pointercancel", handleGlobalPointerCancelRef.current);
+      window.removeEventListener("touchmove", handleGlobalTouchMoveRef.current);
+      window.removeEventListener("touchend", handleGlobalPointerUpRef.current);
+      window.removeEventListener("touchcancel", handleGlobalPointerUpRef.current);
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       if (invalidTimerRef.current) clearTimeout(invalidTimerRef.current);
     };
+  }, []);
+
+  /** Prevent native mobile scroll gestures on touch targets so dragging never gets cancelled. */
+  const stopTouchDefault = useCallback((e: React.TouchEvent) => {
+    e.stopPropagation();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
   }, []);
 
   // ── Polygon body pointer handler ──────────────────────────────────────────
@@ -295,10 +345,8 @@ function ZonePolyInner({
     } catch {
       // Ignore
     }
-    window.addEventListener("pointermove", handleGlobalPointerMove);
-    window.addEventListener("pointerup", handleGlobalPointerUp);
-    window.addEventListener("pointercancel", handleGlobalPointerUp);
-  }, [toSvgPct, handleGlobalPointerMove, handleGlobalPointerUp]);
+    attachDragListeners();
+  }, [toSvgPct, attachDragListeners]);
 
   // ── Edge translation pointer handler (normal edit mode) ────────────────────
   const handleEdgePointerDown = useCallback((e: React.PointerEvent, edgeIdx: number) => {
@@ -330,10 +378,8 @@ function ZonePolyInner({
     } catch {
       // Ignore
     }
-    window.addEventListener("pointermove", handleGlobalPointerMove);
-    window.addEventListener("pointerup", handleGlobalPointerUp);
-    window.addEventListener("pointercancel", handleGlobalPointerUp);
-  }, [toSvgPct, handleBodyPointerDown, handleGlobalPointerMove, handleGlobalPointerUp]);
+    attachDragListeners();
+  }, [toSvgPct, handleBodyPointerDown, attachDragListeners]);
 
   // ── Explicit Add-Vertex click handlers (active only when addVertexMode is true) ──
   const handleInsertVertexAtEdge = useCallback((e: React.PointerEvent, edgeIdx: number) => {
@@ -428,10 +474,8 @@ function ZonePolyInner({
     } catch {
       // Ignore
     }
-    window.addEventListener("pointermove", handleGlobalPointerMove);
-    window.addEventListener("pointerup", handleGlobalPointerUp);
-    window.addEventListener("pointercancel", handleGlobalPointerUp);
-  }, [toSvgPct, handleGlobalPointerMove, handleGlobalPointerUp]);
+    attachDragListeners();
+  }, [toSvgPct, attachDragListeners]);
 
   const handleVertexDblClick = useCallback((e: React.MouseEvent, vertexIdx: number) => {
     if (isReadOnlyRef.current || addVertexModeRef.current) return;
@@ -485,6 +529,7 @@ function ZonePolyInner({
           transition: isAlarm ? "none" : "fill 200ms ease, stroke 200ms ease",
         }}
         onPointerDown={addVertexMode ? handleBodyClickInAddVertexMode : handleBodyPointerDown}
+        onTouchStart={isReadOnly || addVertexMode ? undefined : stopTouchDefault}
         onClick={(e) => { e.stopPropagation(); if (!isReadOnly) onSelect(); }}
       />
 
@@ -534,11 +579,13 @@ function ZonePolyInner({
                       strokeOpacity={0.85}
                       style={{ cursor: "crosshair", pointerEvents: "all", touchAction: "none" }}
                       onPointerDown={(e) => handleInsertVertexAtEdge(e, i)}
+                      onTouchStart={stopTouchDefault}
                     />
                     {/* Prominent (+) badge at edge midpoint */}
                     <g
                       style={{ cursor: "crosshair", pointerEvents: "all", touchAction: "none" }}
                       onPointerDown={(e) => handleInsertVertexAtEdge(e, i)}
+                      onTouchStart={stopTouchDefault}
                     >
                       <circle cx={midX} cy={midY} r={EDGE_MID_HIT_R * 1.4} fill="transparent" />
                       <circle
@@ -589,6 +636,7 @@ function ZonePolyInner({
                     strokeLinecap="round"
                     style={{ cursor: "move", pointerEvents: "all", touchAction: "none" }}
                     onPointerDown={(e) => handleEdgePointerDown(e, i)}
+                    onTouchStart={stopTouchDefault}
                   />
                 );
               })}
@@ -599,6 +647,7 @@ function ZonePolyInner({
                   key={`vertex-${i}`}
                   style={{ cursor: "grab", pointerEvents: "all", touchAction: "none" }}
                   onPointerDown={(e) => handleVertexPointerDown(e, i)}
+                  onTouchStart={stopTouchDefault}
                   onDoubleClick={(e) => handleVertexDblClick(e, i)}
                 >
                   {/* Invisible large touch hit area */}

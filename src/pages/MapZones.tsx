@@ -967,7 +967,7 @@ export function MapZones() {
             ? "map-border-alarm"
             : "border-[var(--border-default)]"
         }`}
-        style={{ background: "var(--surface-overlay)", touchAction: "none" }}
+        style={{ background: "var(--surface-overlay)", touchAction: "none", overscrollBehavior: "none" }}
         onClick={handleCanvasClick}
         onWheel={handleCanvasWheel}
         onPointerDown={handleCanvasPointerDown}
