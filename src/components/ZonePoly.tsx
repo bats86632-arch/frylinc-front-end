@@ -158,14 +158,33 @@ function ZonePolyInner({
   const invalidTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** rAF guard for throttled pointer move processing. */
   const rafRef = useRef<number | null>(null);
-  const pendingMoveRef = useRef<PointerEvent | null>(null);
+  const pendingMoveRef = useRef<{ clientX: number; clientY: number } | null>(null);
   /** Track the last pointer type for hybrid device handling. */
   const lastPointerTypeRef = useRef<string>("mouse");
 
+  // Keep latest callbacks and props in refs so drag listeners NEVER change identity or get cleaned up mid-drag
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+
+  const ptsRef = useRef(pts);
+  ptsRef.current = pts;
+
+  const addVertexModeRef = useRef(addVertexMode);
+  addVertexModeRef.current = addVertexMode;
+
+  const isReadOnlyRef = useRef(isReadOnly);
+  isReadOnlyRef.current = isReadOnly;
+
+  const onVertexInsertedRef = useRef(onVertexInserted);
+  onVertexInsertedRef.current = onVertexInserted;
+
   // ── Coordinate conversion ─────────────────────────────────────────────────
-  const toSvgPct = useCallback((e: React.PointerEvent | PointerEvent): PolyPoint => {
+  const toSvgPct = useCallback((clientX: number, clientY: number): PolyPoint => {
     if (!svgRef.current) return { x: 0, y: 0 };
-    return clientToSvgPct(svgRef.current, e.clientX, e.clientY);
+    return clientToSvgPct(svgRef.current, clientX, clientY);
   }, [svgRef]);
 
   /** Flash red border briefly on invalid polygon state. */
@@ -180,33 +199,25 @@ function ZonePolyInner({
     if (candidate.length < MIN_VERTICES) { flashInvalid(); return false; }
     if (polygonIsSelfIntersecting(candidate)) { flashInvalid(); return false; }
     if (polygonIsDegenerate(candidate)) { flashInvalid(); return false; }
-    onChange({ points: candidate });
+    onChangeRef.current({ points: candidate });
     return true;
-  }, [onChange, flashInvalid]);
+  }, [flashInvalid]);
 
   // ── Global pointer events ─────────────────────────────────────────────────
   /** Process the actual pointer move logic (called inside rAF). */
-  const processPointerMove = useCallback((e: PointerEvent) => {
+  const processPointerMove = useCallback((pos: { clientX: number; clientY: number }) => {
     const ds = dragRef.current;
     if (!ds || !svgRef.current) return;
-    const cur = clientToSvgPct(svgRef.current, e.clientX, e.clientY);
+    const cur = clientToSvgPct(svgRef.current, pos.clientX, pos.clientY);
 
     if (ds.type === "move") {
       const dx = cur.x - ds.startX;
       const dy = cur.y - ds.startY;
       const candidate = translatePolygon(ds.startPts, dx, dy);
-      onChange({ points: candidate });
+      onChangeRef.current({ points: candidate });
     } else if (ds.type === "vertex") {
-      let clamped = clampPoint(cur);
-
-      // Subtle dynamic snapping for straight lines (only when near orthogonal alignment)
-      const prev = ds.startPts[(ds.vertexIdx - 1 + ds.startPts.length) % ds.startPts.length];
-      const next = ds.startPts[(ds.vertexIdx + 1) % ds.startPts.length];
-      if (Math.abs(clamped.x - prev.x) < SNAP_T) clamped.x = prev.x;
-      if (Math.abs(clamped.y - prev.y) < SNAP_T) clamped.y = prev.y;
-      if (Math.abs(clamped.x - next.x) < SNAP_T) clamped.x = next.x;
-      if (Math.abs(clamped.y - next.y) < SNAP_T) clamped.y = next.y;
-
+      // Free, continuous 1:1 vertex movement without sticky axis locks
+      const clamped = clampPoint(cur);
       const candidate = ds.startPts.map((p, i) =>
         i === ds.vertexIdx ? clamped : p
       );
@@ -217,11 +228,11 @@ function ZonePolyInner({
       const candidate = translateEdge(ds.startPts, ds.edgeIdx, dx, dy);
       tryCommit(candidate);
     }
-  }, [svgRef, tryCommit, onChange]);
+  }, [svgRef, tryCommit]);
 
   /** rAF-throttled pointer move — processes only the latest event per frame. */
   const handleGlobalPointerMove = useCallback((e: PointerEvent) => {
-    pendingMoveRef.current = e;
+    pendingMoveRef.current = { clientX: e.clientX, clientY: e.clientY };
     if (rafRef.current !== null) return; // already scheduled
     rafRef.current = requestAnimationFrame(() => {
       rafRef.current = null;
@@ -239,128 +250,152 @@ function ZonePolyInner({
 
     dragRef.current = null;
     dragStartPts.current = [];
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
   }, [handleGlobalPointerMove]);
 
-  // Clean up global listeners and animation frames on unmount
+  const handleGlobalPointerMoveRef = useRef(handleGlobalPointerMove);
+  handleGlobalPointerMoveRef.current = handleGlobalPointerMove;
+  const handleGlobalPointerUpRef = useRef(handleGlobalPointerUp);
+  handleGlobalPointerUpRef.current = handleGlobalPointerUp;
+
+  // Clean up global listeners ONLY on true unmount
   useEffect(() => {
     return () => {
-      window.removeEventListener("pointermove", handleGlobalPointerMove);
-      window.removeEventListener("pointerup", handleGlobalPointerUp);
-      window.removeEventListener("pointercancel", handleGlobalPointerUp);
+      window.removeEventListener("pointermove", handleGlobalPointerMoveRef.current);
+      window.removeEventListener("pointerup", handleGlobalPointerUpRef.current);
+      window.removeEventListener("pointercancel", handleGlobalPointerUpRef.current);
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       if (invalidTimerRef.current) clearTimeout(invalidTimerRef.current);
     };
-  }, [handleGlobalPointerMove, handleGlobalPointerUp]);
+  }, []);
 
   // ── Polygon body pointer handler ──────────────────────────────────────────
   const handleBodyPointerDown = useCallback((e: React.PointerEvent) => {
-    if (isReadOnly || addVertexMode) return;
+    if (isReadOnlyRef.current || addVertexModeRef.current) return;
     e.stopPropagation();
     e.preventDefault();
     lastPointerTypeRef.current = e.pointerType;
-    onSelect();
-    const cur = toSvgPct(e);
+    onSelectRef.current();
+    const cur = toSvgPct(e.clientX, e.clientY);
 
     // Reliable whole-body move drag (clean swipe on desktop & mobile)
-    dragStartPts.current = [...pts];
+    const currentPts = ptsRef.current;
+    dragStartPts.current = [...currentPts];
     dragRef.current = {
       type: "move",
-      startPts: [...pts],
+      startPts: [...currentPts],
       startX: cur.x,
       startY: cur.y,
     };
+    try {
+      (e.target as Element)?.setPointerCapture?.(e.pointerId);
+    } catch {
+      // Ignore
+    }
     window.addEventListener("pointermove", handleGlobalPointerMove);
     window.addEventListener("pointerup", handleGlobalPointerUp);
     window.addEventListener("pointercancel", handleGlobalPointerUp);
-  }, [isReadOnly, addVertexMode, pts, toSvgPct, onSelect, handleGlobalPointerMove, handleGlobalPointerUp]);
+  }, [toSvgPct, handleGlobalPointerMove, handleGlobalPointerUp]);
 
   // ── Edge translation pointer handler (normal edit mode) ────────────────────
   const handleEdgePointerDown = useCallback((e: React.PointerEvent, edgeIdx: number) => {
-    if (isReadOnly || addVertexMode) return;
+    if (isReadOnlyRef.current || addVertexModeRef.current) return;
     e.stopPropagation();
     e.preventDefault();
     lastPointerTypeRef.current = e.pointerType;
-    onSelect();
-    const cur = toSvgPct(e);
+    onSelectRef.current();
+    const cur = toSvgPct(e.clientX, e.clientY);
+    const currentPts = ptsRef.current;
 
     // If the touch is inside the polygon (away from the boundary line), prioritize body movement
-    if (pointInPolygon(cur, pts) && distToPolygonBoundary(cur, pts) > 1.0) {
+    if (pointInPolygon(cur, currentPts) && distToPolygonBoundary(cur, currentPts) > 1.0) {
       handleBodyPointerDown(e);
       return;
     }
 
     // Translate the edge (shifts wall without adding vertices)
-    dragStartPts.current = [...pts];
+    dragStartPts.current = [...currentPts];
     dragRef.current = {
       type: "edge",
       edgeIdx,
-      startPts: [...pts],
+      startPts: [...currentPts],
       startX: cur.x,
       startY: cur.y,
     };
+    try {
+      (e.target as Element)?.setPointerCapture?.(e.pointerId);
+    } catch {
+      // Ignore
+    }
     window.addEventListener("pointermove", handleGlobalPointerMove);
     window.addEventListener("pointerup", handleGlobalPointerUp);
     window.addEventListener("pointercancel", handleGlobalPointerUp);
-  }, [isReadOnly, addVertexMode, pts, toSvgPct, onSelect, handleBodyPointerDown, handleGlobalPointerMove, handleGlobalPointerUp]);
+  }, [toSvgPct, handleBodyPointerDown, handleGlobalPointerMove, handleGlobalPointerUp]);
 
   // ── Explicit Add-Vertex click handlers (active only when addVertexMode is true) ──
   const handleInsertVertexAtEdge = useCallback((e: React.PointerEvent, edgeIdx: number) => {
-    if (isReadOnly || !addVertexMode) return;
+    if (isReadOnlyRef.current || !addVertexModeRef.current) return;
     e.stopPropagation();
     e.preventDefault();
-    const cur = toSvgPct(e);
-    const n = pts.length;
-    const a = pts[edgeIdx];
-    const b = pts[(edgeIdx + 1) % n];
+    const cur = toSvgPct(e.clientX, e.clientY);
+    const currentPts = ptsRef.current;
+    const n = currentPts.length;
+    const a = currentPts[edgeIdx];
+    const b = currentPts[(edgeIdx + 1) % n];
 
     // Project click position onto this edge segment
     let t = projectPointOnSegment(cur, a, b);
     // Clamp t to [0.08, 0.92] so vertex is not co-located with existing corners
     t = Math.max(0.08, Math.min(0.92, t));
 
-    const newPts = splitEdge(pts, edgeIdx, t);
+    const newPts = splitEdge(currentPts, edgeIdx, t);
     if (tryCommit(newPts)) {
-      onVertexInserted?.();
+      onVertexInsertedRef.current?.();
     }
-  }, [isReadOnly, addVertexMode, pts, toSvgPct, tryCommit, onVertexInserted]);
+  }, [toSvgPct, tryCommit]);
 
   const handleBodyClickInAddVertexMode = useCallback((e: React.PointerEvent) => {
-    if (!addVertexMode || isReadOnly) return;
+    if (!addVertexModeRef.current || isReadOnlyRef.current) return;
     e.stopPropagation();
     e.preventDefault();
-    const cur = toSvgPct(e);
+    const cur = toSvgPct(e.clientX, e.clientY);
+    const currentPts = ptsRef.current;
 
     // Find closest edge to the click
     let closestEdge = 0;
     let minDist = Infinity;
-    const n = pts.length;
+    const n = currentPts.length;
     for (let i = 0; i < n; i++) {
-      const a = pts[i];
-      const b = pts[(i + 1) % n];
+      const a = currentPts[i];
+      const b = currentPts[(i + 1) % n];
       const d = distToSegment(cur, a, b);
       if (d < minDist) {
         minDist = d;
         closestEdge = i;
       }
     }
-    const a = pts[closestEdge];
-    const b = pts[(closestEdge + 1) % n];
+    const a = currentPts[closestEdge];
+    const b = currentPts[(closestEdge + 1) % n];
     let t = projectPointOnSegment(cur, a, b);
     t = Math.max(0.08, Math.min(0.92, t));
-    const newPts = splitEdge(pts, closestEdge, t);
+    const newPts = splitEdge(currentPts, closestEdge, t);
     if (tryCommit(newPts)) {
-      onVertexInserted?.();
+      onVertexInsertedRef.current?.();
     }
-  }, [addVertexMode, isReadOnly, pts, toSvgPct, tryCommit, onVertexInserted]);
+  }, [toSvgPct, tryCommit]);
 
   // ── Vertex handle pointer handlers ────────────────────────────────────────
   const handleVertexPointerDown = useCallback((e: React.PointerEvent, vertexIdx: number) => {
-    if (isReadOnly || addVertexMode) return;
+    if (isReadOnlyRef.current || addVertexModeRef.current) return;
     e.stopPropagation();
     e.preventDefault();
-    onSelect();
+    onSelectRef.current();
     lastPointerTypeRef.current = e.pointerType;
 
+    const currentPts = ptsRef.current;
     // Software double-tap detection ONLY for touch (prevents double-delete on hybrid devices)
     if (e.pointerType === "touch") {
       const now = Date.now();
@@ -370,38 +405,44 @@ function ZonePolyInner({
         now - lastVertexTapRef.current.time < 350
       ) {
         lastVertexTapRef.current = null;
-        if (pts.length > MIN_VERTICES) {
-          const next = pts.filter((_, idx) => idx !== vertexIdx);
-          onChange({ points: next });
+        if (currentPts.length > MIN_VERTICES) {
+          const next = currentPts.filter((_, idx) => idx !== vertexIdx);
+          onChangeRef.current({ points: next });
           return;
         }
       }
       lastVertexTapRef.current = { index: vertexIdx, time: now };
     }
 
-    const cur = toSvgPct(e);
-    dragStartPts.current = [...pts];
+    const cur = toSvgPct(e.clientX, e.clientY);
+    dragStartPts.current = [...currentPts];
     dragRef.current = {
       type: "vertex",
       vertexIdx,
-      startPts: [...pts],
+      startPts: [...currentPts],
       startX: cur.x,
       startY: cur.y,
     };
+    try {
+      (e.target as Element)?.setPointerCapture?.(e.pointerId);
+    } catch {
+      // Ignore
+    }
     window.addEventListener("pointermove", handleGlobalPointerMove);
     window.addEventListener("pointerup", handleGlobalPointerUp);
     window.addEventListener("pointercancel", handleGlobalPointerUp);
-  }, [isReadOnly, addVertexMode, pts, toSvgPct, onSelect, onChange, handleGlobalPointerMove, handleGlobalPointerUp]);
+  }, [toSvgPct, handleGlobalPointerMove, handleGlobalPointerUp]);
 
   const handleVertexDblClick = useCallback((e: React.MouseEvent, vertexIdx: number) => {
-    if (isReadOnly || addVertexMode) return;
+    if (isReadOnlyRef.current || addVertexModeRef.current) return;
     e.stopPropagation();
     // Only handle double-click for mouse/pen — touch uses software double-tap above
     if (lastPointerTypeRef.current === "touch") return;
-    if (pts.length <= MIN_VERTICES) return;
-    const next = pts.filter((_, i) => i !== vertexIdx);
-    onChange({ points: next });
-  }, [isReadOnly, addVertexMode, pts, onChange]);
+    const currentPts = ptsRef.current;
+    if (currentPts.length <= MIN_VERTICES) return;
+    const next = currentPts.filter((_, i) => i !== vertexIdx);
+    onChangeRef.current({ points: next });
+  }, []);
 
   // ── Visual state ──────────────────────────────────────────────────────────
   const baseFill = getFill(isAlarm, isEvacuatePulse, isIsolated, isOrphan, isSelected);
@@ -429,7 +470,7 @@ function ZonePolyInner({
   return (
     <g
       className={animClass}
-      style={{ cursor: isReadOnly ? "default" : addVertexMode ? "crosshair" : "move" }}
+      style={{ cursor: isReadOnly ? "default" : addVertexMode ? "crosshair" : "move", touchAction: "none" }}
     >
       {/* ── Polygon fill & body ── */}
       <polygon
