@@ -122,6 +122,7 @@ export const DEMO_PANELS: Panel[] = [
   {
     serial: "DEMO-PNL-01",
     name: "Main Fire Control Unit - Tower 1",
+    panelType: "Fire Alarm",
     enabled: true,
     alarm: false,
     companyId: "demo-comp-apex",
@@ -144,6 +145,7 @@ export const DEMO_PANELS: Panel[] = [
   {
     serial: "DEMO-PNL-02",
     name: "Critical Systems Panel - Tower 2",
+    panelType: "Fire Alarm",
     enabled: true,
     alarm: true,
     companyId: "demo-comp-apex",
@@ -166,6 +168,7 @@ export const DEMO_PANELS: Panel[] = [
   {
     serial: "DEMO-PNL-03",
     name: "Industrial Bay Master Panel",
+    panelType: "Fire Alarm",
     enabled: true,
     alarm: false,
     companyId: "demo-comp-metro",

@@ -45,12 +45,20 @@ export function Reports() {
   const [error, setError] = useState<string | null>(null);
 
   // Filters
-  const [companyId, setCompanyId] = useState<string>(userData?.companyId || "");
+  const [companyId, setCompanyId] = useState<string>(isDemoMode ? "" : (userData?.companyId || ""));
   const [branchId, setBranchId] = useState<string>("");
   const [action, setAction] = useState<string>("");
   const [dateRange, setDateRange] = useState<"24h" | "7d" | "30d" | "all">("7d");
-  const [viewMode, setViewMode] = useState<"list" | "matrix">("matrix");
+  const [viewMode, setViewMode] = useState<"list" | "matrix">(isDemoMode ? "list" : "matrix");
   const [matrixFilter, setMatrixFilter] = useState<"All" | "Fire Alarm" | "Security" | "Dialer" | "Health">("Fire Alarm");
+
+  useEffect(() => {
+    if (isDemoMode) {
+      setViewMode("list");
+      setCompanyId("");
+      setBranchId("");
+    }
+  }, [isDemoMode]);
   const [secretMode, setSecretMode] = useState<boolean>(false);
   const [listClickCount, setListClickCount] = useState<number>(0);
   // Pagination
@@ -117,7 +125,7 @@ export function Reports() {
 
   useEffect(() => {
     fetchLogs(true);
-  }, [companyId, branchId, dateRange, secretMode]);
+  }, [companyId, branchId, dateRange, secretMode, isDemoMode]);
 
   const fetchLogs = async (resetPagination: boolean = false, token?: string) => {
     try {
@@ -211,9 +219,10 @@ export function Reports() {
   const searchFilteredLogs = logs.filter(log => {
     if (secretMode) return true; // Don't filter secret logs by search bar for now
 
-    if (matrixFilter !== "All") {
+    if (viewMode === "matrix" && matrixFilter !== "All") {
       const panel = panels.find(p => p.serial === log.panelSerial);
-      if (panel && panel.panelType !== matrixFilter) {
+      const pType = panel?.panelType || "Fire Alarm";
+      if (pType !== matrixFilter) {
         return false;
       }
     }
@@ -230,7 +239,7 @@ export function Reports() {
   });
 
   const filteredLogs = searchFilteredLogs.filter((log, index, self) => {
-    if (secretMode) return true; // Don't deduplicate in secret mode
+    if (secretMode || isDemoMode) return true; // Don't deduplicate in secret mode or demo mode
     
     const isDuplicate = self.slice(0, index).some(newerLog => {
       let cmd1 = log.command || '';
