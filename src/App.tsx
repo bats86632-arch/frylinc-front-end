@@ -8,6 +8,7 @@ import { MainDashboardLayout } from "./layouts/MainDashboardLayout";
 import { PageLoader } from "./components/PageLoader";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { hideSplashScreen } from "./platform";
 
 const Login = lazy(() =>
   import("./pages/Login").then((m) => ({ default: m.Login })),
@@ -48,6 +49,7 @@ function App() {
   useEffect(() => {
     void import("./pages/Dashboard");
     void import("./pages/Login");
+    void hideSplashScreen();
   }, []);
 
   return (

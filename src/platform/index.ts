@@ -43,3 +43,6 @@ export { saveFile, type SaveFileOptions, type SaveResult } from './filesystem';
 
 // Over-The-Air (OTA) Live Updates
 export { initLiveUpdates, getLiveUpdateInfo, applyLiveUpdate, type LiveUpdateStatus } from './updater';
+
+// Splash Screen
+export { hideSplashScreen } from './splash';
