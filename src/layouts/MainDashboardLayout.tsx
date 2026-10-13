@@ -577,27 +577,22 @@ export function MainDashboardLayout() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {isDemoMode && (
-              <div className="flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold text-amber-500 shadow-sm animate-fade-in">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500" />
-                </span>
-                <span className="hidden sm:inline">DEMO MODE · Sample Data</span>
-                <span className="sm:hidden">DEMO</span>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await exitDemoMode();
-                    navigate("/login", { replace: true });
-                  }}
-                  className="ml-1 rounded px-1.5 py-0.5 text-[10px] uppercase font-bold text-amber-500 hover:bg-amber-500/20 transition-colors"
-                  title="Exit demo sandbox and return to login"
-                >
-                  Exit
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  await exitDemoMode();
+                  navigate("/login", { replace: true });
+                }}
+                className="flex h-10 items-center gap-1.5 rounded-[6px] border border-[var(--border-default)] bg-[var(--surface-raised)] px-2.5 sm:px-3 text-[12px] font-medium text-[var(--text-secondary)] transition-all duration-150 hover:border-[var(--status-danger-border)] hover:bg-[var(--status-danger-bg)] hover:text-[var(--color-error)] shadow-sm shrink-0"
+                title="Exit Demo Account"
+                aria-label="Exit Demo Account"
+              >
+                <LogOut className="h-4 w-4 text-[var(--color-error)]" />
+                <span className="hidden sm:inline">Exit Demo</span>
+                <span className="sm:hidden">Exit</span>
+              </button>
             )}
             <ThemeToggle />
             {/* Notification bell */}

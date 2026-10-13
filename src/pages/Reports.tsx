@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import * as xlsx from "xlsx";
 import { saveFile } from "../platform/filesystem";
+import { DEMO_REPORT_LOGS } from "../mock/demoData";
 
 
 const formatTimestamp = (ts: any) => {
@@ -34,7 +35,7 @@ const getPanelTypeBadge = (type?: string) => {
 };
 
 export function Reports() {
-  const { hasRole, userData, role } = useAuth();
+  const { hasRole, userData, role, isDemoMode } = useAuth();
   const { companies } = useCompanies();
   const { branches } = useBranches();
   const { panels, loading: panelsLoading } = usePanels();
@@ -120,6 +121,23 @@ export function Reports() {
 
   const fetchLogs = async (resetPagination: boolean = false, token?: string) => {
     try {
+      if (isDemoMode) {
+        setLoading(true);
+        setError(null);
+        let demoFiltered = [...DEMO_REPORT_LOGS];
+        if (companyId) {
+          demoFiltered = demoFiltered.filter((l) => l.companyId === companyId);
+        }
+        if (branchId) {
+          demoFiltered = demoFiltered.filter((l) => l.branchId === branchId);
+        }
+        setLogs(demoFiltered);
+        setPageToken(null);
+        setPageHistory([]);
+        setLoading(false);
+        return;
+      }
+
       const cacheKey = JSON.stringify({ companyId, branchId, dateRange, token });
       const cached = reportsCache.get(cacheKey);
       
@@ -370,6 +388,16 @@ export function Reports() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--surface-base)] relative">
+
+      {/* Demo Mode Notice */}
+      {isDemoMode && (
+        <div className="mx-4 mt-4 sm:mx-6 flex items-center gap-2 rounded-[8px] border border-blue-500/20 bg-blue-500/10 px-3.5 py-2.5 text-[12px] text-blue-400">
+          <FileText className="h-4 w-4 shrink-0 text-blue-400" />
+          <span>
+            <strong>Demo Sandbox:</strong> Displaying 5 sample fire life-safety audit logs. You can filter by organization, search, switch between Matrix and List views, or export to Excel.
+          </span>
+        </div>
+      )}
 
       {/* ── Stats Row ──────────────────────────────────────────────────── */}
       <div className="px-4 pt-4 pb-3 sm:px-6 sm:pt-6 sm:pb-5 border-b border-[var(--border-subtle)]">

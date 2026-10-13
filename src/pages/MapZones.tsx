@@ -123,7 +123,7 @@ function PanelListItem({
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export function MapZones() {
-  const { role } = useAuth();
+  const { role, isDemoMode } = useAuth();
   const { panels, loading: panelsLoading } = usePanels();
 
   const canEdit = EDIT_ROLES.includes(role as (typeof EDIT_ROLES)[number]);
@@ -203,26 +203,26 @@ export function MapZones() {
   const applyFitZoom = useCallback(() => {
     const canvas = canvasScrollRef.current;
     const img = mapImageRef.current;
-    if (!canvas || !img || !img.naturalWidth || !img.naturalHeight) return;
-    
-    const availW = canvas.clientWidth - 4;  // subtract border
-    const availH = canvas.clientHeight - 4;
-    if (availW <= 0 || availH <= 0) return;
+    if (!canvas || !img) return;
 
-    const scaleW = availW / img.naturalWidth;
-    const scaleH = availH / img.naturalHeight;
+    const naturalW = img.naturalWidth || 1000;
+    const naturalH = img.naturalHeight || 700;
+
+    const availW = Math.max(canvas.clientWidth - 4, 320);
+    const availH = Math.max(canvas.clientHeight - 4, 300);
+
+    const scaleW = availW / naturalW;
+    const scaleH = availH / naturalH;
     const isMobile = window.innerWidth < 768;
 
     let fit: number;
     if (isMobile) {
       const containZoom = Math.min(scaleW, scaleH);
       const coverZoom = Math.max(scaleW, scaleH);
-      const renderedHeightRatio = (img.naturalHeight * containZoom) / availH;
-      
+      const renderedHeightRatio = (naturalH * containZoom) / availH;
+
       if (renderedHeightRatio < 0.4) {
-        // If it's a wide image taking < 40% of phone height, boost zoom to fill ~65% of screen height
-        // This ensures it's readable and doesn't look like a tiny strip at the top
-        const boostZoom = (availH * 0.65) / img.naturalHeight;
+        const boostZoom = (availH * 0.65) / naturalH;
         fit = Math.min(boostZoom, coverZoom, 1.5);
       } else {
         fit = containZoom;
@@ -230,11 +230,11 @@ export function MapZones() {
     } else {
       fit = Math.min(scaleW, scaleH, 1); // never upscale beyond 100% on desktop
     }
-    
+
     // Clamp zoom to reasonable bounds
     fit = Math.min(3, Math.max(0.1, fit));
     fit = Math.round(fit * 100) / 100;
-    
+
     setFitZoom(fit);
     setZoom(fit);
     setTimeout(() => setIsAnimating(true), 50);
@@ -256,6 +256,28 @@ export function MapZones() {
     setZoom(null); // reset while loading
     setIsAnimating(false);
   }, [selectedPanelId, panelMap?.imagePath]);
+
+  // Ensure zoom calculates even if image loads instantly (data URL / cache) or onLoad fails
+  useEffect(() => {
+    if (!panelMap?.imageUrl) return;
+
+    const img = mapImageRef.current;
+    if (img && (img.complete || img.naturalWidth > 0)) {
+      applyFitZoom();
+    }
+
+    const timer = setTimeout(() => {
+      setZoom((cur) => {
+        if (cur === null) {
+          applyFitZoom();
+          return 0.8;
+        }
+        return cur;
+      });
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [selectedPanelId, panelMap?.imageUrl, applyFitZoom]);
 
   // Keyboard Delete to remove selected zone
   useEffect(() => {
@@ -656,10 +678,12 @@ export function MapZones() {
         </div>
         <div>
           <p className="text-[15px] font-semibold text-[var(--text-primary)]">
-            No map configured
+            {isDemoMode ? "Upload Local Demo Map" : "No map configured"}
           </p>
           <p className="mt-1.5 text-[12px] text-[var(--text-secondary)]">
-            Upload a floor plan or site layout image. Supported: JPG, PNG, SVG, WebP &mdash; max {MAX_FILE_MB} MB.
+            {isDemoMode
+              ? "Upload any floor plan or site layout image (JPG, PNG, SVG). In demo mode, your floor plan is saved strictly on this device without linking to Firebase."
+              : `Upload a floor plan or site layout image. Supported: JPG, PNG, SVG, WebP \u2014 max ${MAX_FILE_MB} MB.`}
           </p>
         </div>
 
@@ -986,8 +1010,8 @@ export function MapZones() {
         <div
           className={`relative origin-top-left mx-auto ${isAnimating ? "transition-all duration-100 ease-out" : ""}`}
           style={{ 
-            width: mapImageRef.current?.naturalWidth && zoom !== null ? mapImageRef.current.naturalWidth * zoom : 0,
-            height: mapImageRef.current?.naturalHeight && zoom !== null ? mapImageRef.current.naturalHeight * zoom : 0,
+            width: (mapImageRef.current?.naturalWidth || 1000) * (zoom ?? 1),
+            height: (mapImageRef.current?.naturalHeight || 700) * (zoom ?? 1),
             opacity: zoom === null ? 0 : 1,
             overflow: zoom === null ? "hidden" : "visible",
             willChange: "transform",
@@ -1001,6 +1025,11 @@ export function MapZones() {
             alt="Floor plan"
             draggable={false}
             onLoad={applyFitZoom}
+            onError={() => {
+              console.warn("Failed to load map image, applying fallback zoom");
+              setFitZoom(1);
+              setZoom(1);
+            }}
             className="block select-none"
             style={{ width: "100%", height: "100%", display: "block", userSelect: "none" }}
           />
@@ -1380,6 +1409,16 @@ export function MapZones() {
 
         {/* Alarm banner */}
         {renderAlarmBanner()}
+
+        {/* Demo mode local storage info banner */}
+        {isDemoMode && (
+          <div className="mx-4 mt-3 flex items-center gap-2 rounded-[6px] border border-blue-500/25 bg-blue-500/10 px-3.5 py-2 text-[12px] text-blue-400">
+            <Info className="h-4 w-4 shrink-0 text-blue-400" />
+            <span>
+              <strong>Demo Mode:</strong> You can upload your own floor plan and draw zone boundaries. All maps and shapes are stored locally on your device without linking to Firebase.
+            </span>
+          </div>
+        )}
 
         {/* Canvas content */}
         <div className="flex flex-col flex-1 min-h-0 overflow-auto">

@@ -18,6 +18,30 @@ import imageCompression from "browser-image-compression";
 import { migrateZone } from "../utils/polygonGeom";
 import { DEMO_PANEL_MAP } from "../mock/demoData";
 
+const DEMO_STORAGE_KEY_PREFIX = "fyrlinc_demo_map_";
+
+function getLocalDemoMap(panelId: string): PanelMap | null {
+  try {
+    const raw = localStorage.getItem(`${DEMO_STORAGE_KEY_PREFIX}${panelId}`);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.warn("[usePanelMap] Error reading local demo map:", e);
+  }
+  return null;
+}
+
+function saveLocalDemoMap(panelId: string, map: PanelMap | null): void {
+  try {
+    if (map) {
+      localStorage.setItem(`${DEMO_STORAGE_KEY_PREFIX}${panelId}`, JSON.stringify(map));
+    } else {
+      localStorage.removeItem(`${DEMO_STORAGE_KEY_PREFIX}${panelId}`);
+    }
+  } catch (e) {
+    console.warn("[usePanelMap] Error saving local demo map:", e);
+  }
+}
+
 interface UsePanelMapReturn {
   panelMap: PanelMap | null;
   mapLoading: boolean;
@@ -45,7 +69,12 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     }
 
     if (panelId.startsWith("DEMO-") || isDemoMode) {
-      setPanelMap({ ...DEMO_PANEL_MAP, panelId });
+      const local = getLocalDemoMap(panelId);
+      if (local) {
+        setPanelMap(local);
+      } else {
+        setPanelMap({ ...DEMO_PANEL_MAP, panelId });
+      }
       setMapLoading(false);
       return;
     }
@@ -78,6 +107,37 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
 
   // ── Upload a brand-new map image ───────────────────────────────────────────
   const uploadMap = async (file: File, panelId: string): Promise<void> => {
+    if (panelId.startsWith("DEMO-") || isDemoMode) {
+      setUploading(true);
+      try {
+        const options = {
+          maxSizeMB: 0.8,
+          maxWidthOrHeight: 1600,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(compressedFile);
+        });
+
+        const newMap: PanelMap = {
+          imageUrl: dataUrl,
+          imagePath: `local://demo_${panelId}`,
+          zones: [],
+          updatedAt: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 } as any,
+          updatedBy: "demo_local_user",
+        };
+        saveLocalDemoMap(panelId, newMap);
+        setPanelMap(newMap);
+      } finally {
+        setUploading(false);
+      }
+      return;
+    }
+
     if (!currentUser) throw new Error("Not authenticated");
     setUploading(true);
     try {
@@ -116,6 +176,11 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     panelId: string,
     oldImagePath: string
   ): Promise<void> => {
+    if (panelId.startsWith("DEMO-") || isDemoMode) {
+      await uploadMap(file, panelId);
+      return;
+    }
+
     if (!currentUser) throw new Error("Not authenticated");
     setUploading(true);
     try {
@@ -168,6 +233,17 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
 
   // ── Remove entire map (delete image + Firestore doc) ───────────────────────
   const removeMap = async (panelId: string, imagePath: string): Promise<void> => {
+    if (panelId.startsWith("DEMO-") || isDemoMode) {
+      setUploading(true);
+      try {
+        saveLocalDemoMap(panelId, null);
+        setPanelMap(null);
+      } finally {
+        setUploading(false);
+      }
+      return;
+    }
+
     if (!currentUser) throw new Error("Not authenticated");
     setUploading(true);
     try {
@@ -198,10 +274,20 @@ export function usePanelMap(panelId: string | null): UsePanelMapReturn {
     if (panelId.startsWith("DEMO-") || isDemoMode) {
       setSaving(true);
       const cleanZones = zones.map(({ zoneId, label, points }) => ({ zoneId, label, points }));
-      setTimeout(() => {
-        setPanelMap((prev) => (prev ? { ...prev, zones: cleanZones } : null));
-        setSaving(false);
-      }, 200);
+      setPanelMap((prev) => {
+        const updated: PanelMap = prev
+          ? { ...prev, zones: cleanZones }
+          : {
+              imageUrl: "",
+              imagePath: "",
+              zones: cleanZones,
+              updatedAt: { seconds: Math.floor(Date.now() / 1000), nanoseconds: 0 } as any,
+              updatedBy: "demo_local_user",
+            };
+        saveLocalDemoMap(panelId, updated);
+        return updated;
+      });
+      setSaving(false);
       return;
     }
     if (!currentUser) throw new Error("Not authenticated");

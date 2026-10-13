@@ -1,4 +1,4 @@
-import { User, Panel, Branch, PanelMap } from "../types";
+import { User, Panel, Branch, PanelMap, AuditLog } from "../types";
 import { Company } from "../api/CompanyService";
 
 const DEMO_STORAGE_KEY = "fyrlinc_demo_mode_active";
@@ -260,3 +260,112 @@ export const DEMO_PANEL_MAP: PanelMap = {
     },
   ],
 };
+
+/** 5 Sample Fire Safety Event Logs for Reports Demo Sandbox */
+export const DEMO_REPORT_LOGS: AuditLog[] = [
+  {
+    id: "demo-log-001",
+    type: "panel_event",
+    action: "ALARM",
+    result: "SUCCESS",
+    panelSerial: "DEMO-PNL-02",
+    panelId: "DEMO-PNL-02",
+    companyId: "demo-comp-apex",
+    branchId: "demo-branch-tower2",
+    zone: 3,
+    command: "ALARM_ZONE_03",
+    actorEmail: "telemetry.gateway@fyrlinc.io",
+    actorRole: "system",
+    user: "System Telemetry",
+    role: "system",
+    timestamp: {
+      seconds: Math.floor(Date.now() / 1000) - 900, // 15 mins ago
+      nanoseconds: 0,
+    } as any,
+    details: "Smoke detector triggered in Zone 3 (Floor 32 Electrical Riser)",
+  },
+  {
+    id: "demo-log-002",
+    type: "command",
+    action: "SEND_COMMAND",
+    result: "SUCCESS",
+    panelSerial: "DEMO-PNL-02",
+    panelId: "DEMO-PNL-02",
+    companyId: "demo-comp-apex",
+    branchId: "demo-branch-tower2",
+    zone: 3,
+    command: "SILENCE",
+    actorEmail: "demo@fyrlinc.com",
+    actorRole: "super_admin",
+    user: "Reviewer Sandbox User",
+    role: "super_admin",
+    timestamp: {
+      seconds: Math.floor(Date.now() / 1000) - 720, // 12 mins ago
+      nanoseconds: 0,
+    } as any,
+    details: "Acoustic fire siren silenced by duty operator",
+  },
+  {
+    id: "demo-log-003",
+    type: "command",
+    action: "SEND_COMMAND",
+    result: "SUCCESS",
+    panelSerial: "DEMO-PNL-01",
+    panelId: "DEMO-PNL-01",
+    companyId: "demo-comp-apex",
+    branchId: "demo-branch-tower1",
+    zone: 4,
+    command: "ISO04",
+    actorEmail: "marcus.vance@apextowers.demo",
+    actorRole: "head_office",
+    user: "Marcus Vance",
+    role: "head_office",
+    timestamp: {
+      seconds: Math.floor(Date.now() / 1000) - 7200, // 2 hours ago
+      nanoseconds: 0,
+    } as any,
+    details: "Zone 4 (Floor 4 Conference Wing) isolated for scheduled HVAC duct maintenance",
+  },
+  {
+    id: "demo-log-004",
+    type: "panel_event",
+    action: "CLEAR",
+    result: "SUCCESS",
+    panelSerial: "DEMO-PNL-03",
+    panelId: "DEMO-PNL-03",
+    companyId: "demo-comp-metro",
+    branchId: "demo-branch-logistics",
+    zone: null,
+    command: "HEALTH_CHECK_PASS",
+    actorEmail: "diagnostic.daemon@fyrlinc.io",
+    actorRole: "system",
+    user: "Diagnostic Daemon",
+    role: "system",
+    timestamp: {
+      seconds: Math.floor(Date.now() / 1000) - 14400, // 4 hours ago
+      nanoseconds: 0,
+    } as any,
+    details: "Automated standby battery impedance test passed (27.4V normal float)",
+  },
+  {
+    id: "demo-log-005",
+    type: "command",
+    action: "SEND_COMMAND",
+    result: "SUCCESS",
+    panelSerial: "DEMO-PNL-01",
+    panelId: "DEMO-PNL-01",
+    companyId: "demo-comp-apex",
+    branchId: "demo-branch-tower1",
+    zone: 1,
+    command: "RESET",
+    actorEmail: "demo@fyrlinc.com",
+    actorRole: "super_admin",
+    user: "Reviewer Sandbox User",
+    role: "super_admin",
+    timestamp: {
+      seconds: Math.floor(Date.now() / 1000) - 21600, // 6 hours ago
+      nanoseconds: 0,
+    } as any,
+    details: "Master fire control panel reset executed after routine test cycle",
+  },
+];
